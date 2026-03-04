@@ -303,14 +303,18 @@ if ($Target -eq 'cursor') {
         $hooksJsonDest = Join-Path $DEST_DIR "hooks.json"
         if ($hooksJson -ne (Resolve-Path $hooksJsonDest -ErrorAction SilentlyContinue).Path) {
             Write-Host "Installing hooks config -> $hooksJsonDest"
+            $hooksContent = Get-Content $hooksJson -Raw
             if ($Global) {
-                $hooksContent = Get-Content $hooksJson -Raw
                 $absoluteHooksDir = (Join-Path $DEST_DIR "hooks").Replace('\', '/')
                 $hooksContent = $hooksContent -replace 'node \.cursor/hooks/', "node $absoluteHooksDir/"
-                $hooksContent | Set-Content $hooksJsonDest -Encoding UTF8
-            } else {
-                Copy-Item -Path $hooksJson -Destination $DEST_DIR -Force
             }
+            # Ensure Cursor's required version field is present
+            $hooksParsed = $hooksContent | ConvertFrom-Json
+            if ($null -eq $hooksParsed.version) {
+                $hooksParsed | Add-Member -NotePropertyName 'version' -NotePropertyValue 1 -Force
+                $hooksContent = $hooksParsed | ConvertTo-Json -Depth 20
+            }
+            $hooksContent | Set-Content $hooksJsonDest -Encoding UTF8
         }
     }
 
