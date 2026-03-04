@@ -17,8 +17,9 @@
 #                       Use -Global to install to ~/.cursor/ instead
 #   codex             — Install Codex CLI config to ~/.codex/
 
+[CmdletBinding(PositionalBinding = $false)]
 param(
-    [Parameter(Position = 0, Mandatory = $false)]
+    [Parameter(Mandatory = $false)]
     [ValidateSet('claude', 'cursor', 'codex')]
     [string]$Target = 'claude',
 
