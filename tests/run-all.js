@@ -23,7 +23,8 @@ const testFiles = [
   'ci/validators.test.js',
   'scripts/claw.test.js',
   'scripts/setup-package-manager.test.js',
-  'scripts/skill-create-output.test.js'
+  'scripts/skill-create-output.test.js',
+  'scripts/powershell-scripts.test.js'
 ];
 
 const BOX_W = 58; // inner width between ║ delimiters

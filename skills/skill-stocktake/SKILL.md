@@ -45,6 +45,8 @@ Re-evaluate only skills that have changed since the last run (5–10 min).
 1. Read `~/.claude/skills/skill-stocktake/results.json`
 2. Run: `bash ~/.claude/skills/skill-stocktake/scripts/quick-diff.sh \
          ~/.claude/skills/skill-stocktake/results.json`
+   Windows: `pwsh -File ~/.claude/skills/skill-stocktake/scripts/quick-diff.ps1 \
+            ~/.claude/skills/skill-stocktake/results.json`
    (Project dir is auto-detected from `$PWD/.claude/skills`; pass it explicitly only if needed)
 3. If output is `[]`: report "No changes since last run." and stop
 4. Re-evaluate only those changed files using the same Phase 2 criteria
@@ -52,12 +54,15 @@ Re-evaluate only skills that have changed since the last run (5–10 min).
 6. Output only the diff
 7. Run: `bash ~/.claude/skills/skill-stocktake/scripts/save-results.sh \
          ~/.claude/skills/skill-stocktake/results.json <<< "$EVAL_RESULTS"`
+   Windows: `$EVAL_RESULTS | pwsh -File ~/.claude/skills/skill-stocktake/scripts/save-results.ps1 \
+            ~/.claude/skills/skill-stocktake/results.json`
 
 ## Full Stocktake Flow
 
 ### Phase 1 — Inventory
 
 Run: `bash ~/.claude/skills/skill-stocktake/scripts/scan.sh`
+Windows: `pwsh -File ~/.claude/skills/skill-stocktake/scripts/scan.ps1`
 
 The script enumerates skill files, extracts frontmatter, and collects UTC mtimes.
 Project dir is auto-detected from `$PWD/.claude/skills`; pass it explicitly only if needed.

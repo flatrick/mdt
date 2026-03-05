@@ -77,6 +77,9 @@ Add to your `~/.claude/settings.json`:
 }
 ```
 
+On Windows, run the PowerShell version instead:
+`powershell -NonInteractive -NoProfile -ExecutionPolicy Bypass -File ~/.claude/skills/continuous-learning/evaluate-session.ps1`
+
 ## Why Stop Hook?
 
 - **Lightweight**: Runs once at session end

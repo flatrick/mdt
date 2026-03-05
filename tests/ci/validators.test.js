@@ -2139,6 +2139,40 @@ function runTests() {
     cleanupTestDir(testDir);
   })) passed++; else failed++;
 
+  // ── Round 95: validate-windows-parity.js ──
+  console.log('\nRound 95: validate-windows-parity.js:');
+
+  if (test('passes on real project windows parity', () => {
+    const result = runValidator('validate-windows-parity');
+    assert.strictEqual(result.code, 0, `Should pass, got stderr: ${result.stderr}`);
+    assert.ok(result.stdout.includes('Validated Windows parity'), 'Should output validation count');
+  })) passed++; else failed++;
+
+  if (test('fails when runtime .sh script has no .ps1 counterpart', () => {
+    const testDir = createTestDir();
+    const runtimeDir = path.join(testDir, 'my-skill', 'scripts');
+    fs.mkdirSync(runtimeDir, { recursive: true });
+    fs.writeFileSync(path.join(runtimeDir, 'missing.ps1.example'), 'placeholder');
+    fs.writeFileSync(path.join(runtimeDir, 'run-me.sh'), '#!/usr/bin/env bash\necho hi\n');
+
+    const result = runValidatorWithDir('validate-windows-parity', 'SKILLS_DIR', testDir);
+    assert.strictEqual(result.code, 1, 'Should fail when .ps1 counterpart is missing');
+    assert.ok(result.stderr.includes('Missing Windows counterpart'), 'Should report missing counterpart');
+    cleanupTestDir(testDir);
+  })) passed++; else failed++;
+
+  if (test('passes when runtime .sh script has matching .ps1 counterpart', () => {
+    const testDir = createTestDir();
+    const runtimeDir = path.join(testDir, 'my-skill', 'hooks');
+    fs.mkdirSync(runtimeDir, { recursive: true });
+    fs.writeFileSync(path.join(runtimeDir, 'observe.sh'), '#!/usr/bin/env bash\necho hi\n');
+    fs.writeFileSync(path.join(runtimeDir, 'observe.ps1'), 'Write-Output "hi"');
+
+    const result = runValidatorWithDir('validate-windows-parity', 'SKILLS_DIR', testDir);
+    assert.strictEqual(result.code, 0, `Should pass with matching pairs, got: ${result.stderr}`);
+    cleanupTestDir(testDir);
+  })) passed++; else failed++;
+
   // Summary
   console.log(`\nResults: Passed: ${passed}, Failed: ${failed}`);
   process.exit(failed > 0 ? 1 : 0);
