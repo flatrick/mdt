@@ -5,6 +5,7 @@
  * then delegates to existing scripts/hooks/*.js
  */
 
+const fs = require('fs');
 const { execFileSync } = require('child_process');
 const path = require('path');
 
@@ -21,8 +22,32 @@ function readStdin() {
   });
 }
 
+function getCursorRoot() {
+  return path.resolve(__dirname, '..');
+}
+
 function getPluginRoot() {
+  // Legacy fallback used when running from repo checkout.
   return path.resolve(__dirname, '..', '..');
+}
+
+function resolveDelegatedHook(scriptName) {
+  const candidates = [
+    // Installed layout: ~/.cursor/scripts/hooks/*.js
+    path.join(getCursorRoot(), 'scripts', 'hooks', scriptName),
+    // Repo layout: <repo>/scripts/hooks/*.js
+    path.join(getPluginRoot(), 'scripts', 'hooks', scriptName),
+    // Last-resort runtime cwd
+    path.join(process.cwd(), 'scripts', 'hooks', scriptName),
+  ];
+
+  for (const candidate of candidates) {
+    if (fs.existsSync(candidate)) {
+      return candidate;
+    }
+  }
+
+  return candidates[0];
 }
 
 function transformToClaude(cursorInput, overrides = {}) {
@@ -46,7 +71,13 @@ function transformToClaude(cursorInput, overrides = {}) {
 }
 
 function runExistingHook(scriptName, stdinData) {
-  const scriptPath = path.join(getPluginRoot(), 'scripts', 'hooks', scriptName);
+  const scriptPath = resolveDelegatedHook(scriptName);
+  if (!fs.existsSync(scriptPath)) {
+    console.error(`[ECC] Delegated hook missing: ${scriptName}`);
+    console.error(`[ECC] Expected script path: ${scriptPath}`);
+    return;
+  }
+
   try {
     execFileSync('node', [scriptPath], {
       input: typeof stdinData === 'string' ? stdinData : JSON.stringify(stdinData),
@@ -55,8 +86,15 @@ function runExistingHook(scriptName, stdinData) {
       cwd: process.cwd(),
     });
   } catch (e) {
+    const detail = String((e.stderr || e.message || '')).trim();
+    console.error(`[ECC] Delegated hook failed: ${scriptName}`);
+    console.error(`[ECC] Script path: ${scriptPath}`);
+    if (detail) {
+      const lastLine = detail.split(/\r?\n/).slice(-1)[0];
+      console.error(`[ECC] ${lastLine}`);
+    }
     if (e.status === 2) process.exit(2); // Forward blocking exit code
   }
 }
 
-module.exports = { readStdin, getPluginRoot, transformToClaude, runExistingHook };
+module.exports = { readStdin, getCursorRoot, getPluginRoot, resolveDelegatedHook, transformToClaude, runExistingHook };

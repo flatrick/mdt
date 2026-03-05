@@ -149,14 +149,14 @@ Add to your `~/.claude/settings.json`.
       "matcher": "*",
       "hooks": [{
         "type": "command",
-        "command": "${CLAUDE_PLUGIN_ROOT}/skills/continuous-learning-v2/hooks/observe.sh"
+        "command": "${CLAUDE_PLUGIN_ROOT}/skills/continuous-learning-v2/hooks/observe.sh pre"
       }]
     }],
     "PostToolUse": [{
       "matcher": "*",
       "hooks": [{
         "type": "command",
-        "command": "${CLAUDE_PLUGIN_ROOT}/skills/continuous-learning-v2/hooks/observe.sh"
+        "command": "${CLAUDE_PLUGIN_ROOT}/skills/continuous-learning-v2/hooks/observe.sh post"
       }]
     }]
   }
@@ -172,14 +172,14 @@ Add to your `~/.claude/settings.json`.
       "matcher": "*",
       "hooks": [{
         "type": "command",
-        "command": "~/.claude/skills/continuous-learning-v2/hooks/observe.sh"
+        "command": "~/.claude/skills/continuous-learning-v2/hooks/observe.sh pre"
       }]
     }],
     "PostToolUse": [{
       "matcher": "*",
       "hooks": [{
         "type": "command",
-        "command": "~/.claude/skills/continuous-learning-v2/hooks/observe.sh"
+        "command": "~/.claude/skills/continuous-learning-v2/hooks/observe.sh post"
       }]
     }]
   }
@@ -240,7 +240,9 @@ Edit `config.json` to control the background observer:
 | `observer.run_interval_minutes` | `5` | How often the observer analyzes observations |
 | `observer.min_observations_to_analyze` | `20` | Minimum observations before analysis runs |
 
-Other behavior (observation capture, instinct thresholds, project scoping, promotion criteria) is configured via code defaults in `instinct-cli.py` and `observe.sh`.
+On Windows, `install.ps1` automatically switches hook commands from `.sh` to `.ps1` when a matching PowerShell script exists (for example, `hooks/observe.ps1`).
+
+Other behavior (observation capture, instinct thresholds, project scoping, promotion criteria) is configured via code defaults in `instinct-cli.py` and the observe hook scripts.
 
 ## File Structure
 

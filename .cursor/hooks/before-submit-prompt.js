@@ -5,10 +5,11 @@ readStdin().then(raw => {
     const input = JSON.parse(raw);
     const prompt = input.prompt || input.content || input.message || '';
     const secretPatterns = [
-      /sk-[a-zA-Z0-9]{20,}/,       // OpenAI API keys
-      /ghp_[a-zA-Z0-9]{36,}/,      // GitHub personal access tokens
-      /AKIA[A-Z0-9]{16}/,          // AWS access keys
-      /xox[bpsa]-[a-zA-Z0-9-]+/,   // Slack tokens
+      /\bsk-[a-zA-Z0-9_-]{20,}\b/, // OpenAI-style API keys (includes sk-proj-*)
+      /\b(?:ghp|gho|ghu|ghs|ghr)_[a-zA-Z0-9]{36,}\b/, // GitHub classic/fine-grained token families
+      /\bgithub_pat_[a-zA-Z0-9_]{20,}\b/, // GitHub fine-grained PAT prefix
+      /\b(?:AKIA|ASIA)[A-Z0-9]{16}\b/, // AWS access keys (long-term + temp)
+      /\bxox[bpsa]-[a-zA-Z0-9-]{10,}\b/, // Slack tokens
       /-----BEGIN (RSA |EC )?PRIVATE KEY-----/, // Private keys
     ];
     for (const pattern of secretPatterns) {

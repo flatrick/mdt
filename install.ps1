@@ -42,6 +42,35 @@ $RULES_DIR = Join-Path $SCRIPT_DIR "rules"
 # Detect if running on Windows
 $IsWindowsPlatform = $IsWindows -or ($env:OS -eq 'Windows_NT')
 
+function Convert-ShellHookCommandForWindows {
+    param(
+        [Parameter(Mandatory = $true)]
+        [string]$Command
+    )
+
+    # Convert raw shell script commands (with optional args) to PowerShell equivalents
+    # when a same-path .ps1 exists.
+    $match = [regex]::Match($Command, '^(?:"([^"]+\.sh)"|''([^'']+\.sh)''|(\S+\.sh))(.*)$')
+    if (-not $match.Success) {
+        return $Command
+    }
+
+    $shellPath = @($match.Groups[1].Value, $match.Groups[2].Value, $match.Groups[3].Value) |
+        Where-Object { $_ } |
+        Select-Object -First 1
+    if (-not $shellPath) {
+        return $Command
+    }
+
+    $arguments = $match.Groups[4].Value
+    $powershellPath = [regex]::Replace($shellPath, '\.sh$', '.ps1')
+    if (-not (Test-Path $powershellPath)) {
+        return $Command
+    }
+
+    return "powershell -NonInteractive -NoProfile -ExecutionPolicy Bypass -File `"$powershellPath`"$arguments"
+}
+
 # --- Usage (only required for claude/cursor) ---
 if ($Target -ne 'codex' -and (-not $Languages -or $Languages.Count -eq 0)) {
     Write-Host "Usage: .\install.ps1 [-Target <claude|cursor|codex>] [-Global] [<language> ...]"
@@ -160,6 +189,20 @@ if ($Target -eq 'claude') {
         $absoluteBase = $CLAUDE_BASE_DIR.Replace('\', '/')
         $hooksJson = ($hooksSource | ConvertTo-Json -Depth 20) -replace [regex]::Escape('${CLAUDE_PLUGIN_ROOT}'), $absoluteBase
         $hooksBlock = ($hooksJson | ConvertFrom-Json).hooks
+        if ($IsWindowsPlatform) {
+            foreach ($eventProperty in $hooksBlock.PSObject.Properties) {
+                foreach ($matcher in $eventProperty.Value) {
+                    if ($null -eq $matcher.hooks) {
+                        continue
+                    }
+                    foreach ($hook in $matcher.hooks) {
+                        if ($hook.type -eq 'command' -and $hook.command -is [string]) {
+                            $hook.command = Convert-ShellHookCommandForWindows -Command $hook.command
+                        }
+                    }
+                }
+            }
+        }
 
         if (Test-Path $settingsJsonPath) {
             $backupPath = "$settingsJsonPath.bkp"
@@ -325,6 +368,17 @@ if ($Target -eq 'cursor') {
         if ($hooksSrc -ne (Resolve-Path $hooksDest -ErrorAction SilentlyContinue).Path) {
             $null = New-Item -ItemType Directory -Path $hooksDest -Force
             Copy-Item -Path (Join-Path $hooksSrc "*") -Destination $hooksDest -Recurse -Force
+        }
+    }
+
+    # --- Shared Scripts (required by .cursor hook adapter delegation) ---
+    $scriptsSrc = Join-Path $SCRIPT_DIR "scripts"
+    if (Test-Path $scriptsSrc) {
+        $scriptsDest = Join-Path $DEST_DIR "scripts"
+        Write-Host "Installing shared scripts -> $scriptsDest/"
+        if ($scriptsSrc -ne (Resolve-Path $scriptsDest -ErrorAction SilentlyContinue).Path) {
+            $null = New-Item -ItemType Directory -Path $scriptsDest -Force
+            Copy-Item -Path (Join-Path $scriptsSrc "*") -Destination $scriptsDest -Recurse -Force
         }
     }
 
