@@ -21,6 +21,10 @@ listed in the **Dropped / Disputed** section at the end.
 
 ## Status Snapshot (Already Completed)
 
+- Added installer UX enhancements in `scripts/install-ecc.js`: `--list` (discover targets/languages) and `--dry-run` (no-write install preview), with new unit coverage in `tests/scripts/install-ecc-unit.test.js` and runner wiring in `tests/run-all.js`.
+- Performed docs/metadata refresh for current fork shape: updated `AGENTS.md` inventory/counts and `README.md` installer usage/examples to include `--list`/`--dry-run` and explicit fork v1 direction.
+- Normalized remaining agent frontmatter tool ordering in `agents/chief-of-staff.md` to match repository conventions.
+- Re-verified strict subprocess behavior using `ECC_REQUIRE_SUBPROCESS_TESTS=1` on `tests/run-all.js` (expected hard-fail in restricted environments without nested subprocess capability).
 - Removed the missing CI parity step (`validate-windows-parity.js`) from `.github/workflows/ci.yml`.
 - Removed missing `llms.txt` from `package.json` packaging `files`.
 - Updated `/configure-ecc` source in `skills/configure-ecc/SKILL.md` to this fork.

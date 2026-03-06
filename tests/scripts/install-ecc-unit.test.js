@@ -5,7 +5,6 @@
  */
 
 const assert = require('assert');
-const path = require('path');
 const { test } = require('../helpers/test-runner');
 const {
   parseArgsFrom,
