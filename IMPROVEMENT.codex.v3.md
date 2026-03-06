@@ -37,6 +37,7 @@ execution slices with acceptance criteria.
 - Refactored `readStdinJson` to remove only owned listeners; added `parseJsonObject` and updated tests.
 - Converted key hook/CI scripts to importable/testable modules and updated tests to reduce subprocess dependence.
 - Added subprocess capability guard + strict mode (`ECC_REQUIRE_SUBPROCESS_TESTS=1`) and enabled strict mode in CI test step.
+- Replaced inline `node -e` command hooks in `hooks/hooks.json` with script-backed Node commands via `scripts/hooks/command-hooks.js`, and updated integration hook command execution tests to support both inline and script forms.
 
 ## P0 - Breakage and Install/CI Integrity
 

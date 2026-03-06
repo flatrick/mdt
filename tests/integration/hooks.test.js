@@ -90,22 +90,30 @@ function runHookWithInput(scriptPath, input = {}, env = {}, timeoutMs = 10000) {
   });
 }
 
-/**
- * Run an inline hook command (like those in hooks.json)
- * @param {string} command - The node -e "..." command
- * @param {object} input - Hook input object
- * @param {object} env - Environment variables
- */
-function _runInlineHook(command, input = {}, env = {}, timeoutMs = 10000) {
-  return new Promise((resolve, reject) => {
-    // Extract the code from node -e "..."
-    const match = command.match(/^node -e "(.+)"$/s);
-    if (!match) {
-      reject(new Error('Invalid inline hook command format'));
-      return;
-    }
+function parseHookCommand(command, pluginRoot) {
+  const inlineMatch = command.match(/^node -e "(.+)"$/s);
+  if (inlineMatch) {
+    return { cmd: 'node', args: ['-e', inlineMatch[1]] };
+  }
 
-    const proc = spawn('node', ['-e', match[1]], {
+  const scriptMatch = command.match(/^node "([^"]+)"(?: (.+))?$/s);
+  if (scriptMatch) {
+    const scriptPath = scriptMatch[1].replace('${CLAUDE_PLUGIN_ROOT}', pluginRoot);
+    const extraArgs = scriptMatch[2] ? scriptMatch[2].trim().split(/\s+/).filter(Boolean) : [];
+    return { cmd: 'node', args: [scriptPath, ...extraArgs] };
+  }
+
+  throw new Error(`Unsupported hook command format: ${command}`);
+}
+
+/**
+ * Run a hook command string from hooks.json (`node -e ...` or `node "...js"`).
+ */
+function runHookCommand(command, input = {}, env = {}, timeoutMs = 10000, pluginRoot = path.join(__dirname, '..', '..')) {
+  return new Promise((resolve, reject) => {
+    const parsed = parseHookCommand(command, pluginRoot);
+
+    const proc = spawn(parsed.cmd, parsed.args, {
       env: { ...process.env, ...env },
       stdio: ['pipe', 'pipe', 'pipe']
     });
@@ -132,7 +140,7 @@ function _runInlineHook(command, input = {}, env = {}, timeoutMs = 10000) {
 
     timer = setTimeout(() => {
       proc.kill('SIGKILL');
-      reject(new Error(`Inline hook timed out after ${timeoutMs}ms`));
+      reject(new Error(`Hook command timed out after ${timeoutMs}ms`));
     }, timeoutMs);
 
     proc.on('close', code => {
@@ -165,6 +173,7 @@ async function runTests() {
   let failed = 0;
 
   const scriptsDir = path.join(__dirname, '..', '..', 'scripts', 'hooks');
+  const repoRoot = path.join(__dirname, '..', '..');
   const hooksJsonPath = path.join(__dirname, '..', '..', 'hooks', 'hooks.json');
   const hooks = JSON.parse(fs.readFileSync(hooksJsonPath, 'utf8'));
 
@@ -240,35 +249,16 @@ async function runTests() {
   if (await asyncTest('blocking hooks output BLOCKED message', async () => {
     // Test the dev server blocking hook — must send a matching command
     const blockingCommand = hooks.hooks.PreToolUse[0].hooks[0].command;
-    const match = blockingCommand.match(/^node -e "(.+)"$/s);
-
-    const proc = spawn('node', ['-e', match[1]], {
-      stdio: ['pipe', 'pipe', 'pipe']
-    });
-
-    let stderr = '';
-    let code = null;
-    proc.stderr.on('data', data => stderr += data);
-
-    // Send a dev server command so the hook triggers the block
-    proc.stdin.write(JSON.stringify({
+    const result = await runHookCommand(blockingCommand, {
       tool_input: { command: 'npm run dev' }
-    }));
-    proc.stdin.end();
-
-    await new Promise(resolve => {
-      proc.on('close', (c) => {
-        code = c;
-        resolve();
-      });
-    });
+    }, { CLAUDE_PLUGIN_ROOT: repoRoot });
 
     // Hook only blocks on non-Windows platforms (tmux is Unix-only)
     if (process.platform === 'win32') {
-      assert.strictEqual(code, 0, 'On Windows, hook should not block (exit 0)');
+      assert.strictEqual(result.code, 0, 'On Windows, hook should not block (exit 0)');
     } else {
-      assert.ok(stderr.includes('BLOCKED'), 'Blocking hook should output BLOCKED');
-      assert.strictEqual(code, 2, 'Blocking hook should exit with code 2');
+      assert.ok(result.stderr.includes('BLOCKED'), 'Blocking hook should output BLOCKED');
+      assert.strictEqual(result.code, 2, 'Blocking hook should exit with code 2');
     }
   })) passed++; else failed++;
 
@@ -285,30 +275,15 @@ async function runTests() {
   if (await asyncTest('blocking hooks exit with code 2', async () => {
     // The dev server blocker blocks when a dev server command is detected
     const blockingCommand = hooks.hooks.PreToolUse[0].hooks[0].command;
-    const match = blockingCommand.match(/^node -e "(.+)"$/s);
-
-    const proc = spawn('node', ['-e', match[1]], {
-      stdio: ['pipe', 'pipe', 'pipe']
-    });
-
-    let code = null;
-    proc.stdin.write(JSON.stringify({
+    const result = await runHookCommand(blockingCommand, {
       tool_input: { command: 'yarn dev' }
-    }));
-    proc.stdin.end();
-
-    await new Promise(resolve => {
-      proc.on('close', (c) => {
-        code = c;
-        resolve();
-      });
-    });
+    }, { CLAUDE_PLUGIN_ROOT: repoRoot });
 
     // Hook only blocks on non-Windows platforms (tmux is Unix-only)
     if (process.platform === 'win32') {
-      assert.strictEqual(code, 0, 'On Windows, hook should not block (exit 0)');
+      assert.strictEqual(result.code, 0, 'On Windows, hook should not block (exit 0)');
     } else {
-      assert.strictEqual(code, 2, 'Blocking hook should exit 2');
+      assert.strictEqual(result.code, 2, 'Blocking hook should exit 2');
     }
   })) passed++; else failed++;
 
@@ -392,26 +367,13 @@ async function runTests() {
 
     assert.ok(prHook, 'PR hook should exist');
 
-    const match = prHook.hooks[0].command.match(/^node -e "(.+)"$/s);
-
-    const proc = spawn('node', ['-e', match[1]], {
-      stdio: ['pipe', 'pipe', 'pipe']
-    });
-
-    let stderr = '';
-    proc.stderr.on('data', data => stderr += data);
-
-    // Simulate gh pr create output
-    proc.stdin.write(JSON.stringify({
+    const result = await runHookCommand(prHook.hooks[0].command, {
       tool_input: { command: 'gh pr create --title "Test"' },
       tool_output: { output: 'Creating pull request...\nhttps://github.com/owner/repo/pull/123' }
-    }));
-    proc.stdin.end();
-
-    await new Promise(resolve => proc.on('close', resolve));
+    }, { CLAUDE_PLUGIN_ROOT: repoRoot });
 
     assert.ok(
-      stderr.includes('PR created') || stderr.includes('github.com'),
+      result.stderr.includes('PR created') || result.stderr.includes('github.com'),
       'Should extract and log PR URL'
     );
   })) passed++; else failed++;
@@ -679,8 +641,9 @@ async function runTests() {
     assert.strictEqual(typeof asyncHook.hooks[0].timeout, 'number', 'Timeout should be a number');
     assert.ok(asyncHook.hooks[0].timeout > 0, 'Timeout should be positive');
 
-    const match = asyncHook.hooks[0].command.match(/^node -e "(.+)"$/s);
-    assert.ok(match, 'Async hook command should be node -e format');
+    const isInline = asyncHook.hooks[0].command.startsWith('node -e');
+    const isNodeScript = asyncHook.hooks[0].command.startsWith('node "') && /\.js[\s"]/.test(asyncHook.hooks[0].command);
+    assert.ok(isInline || isNodeScript, 'Async hook command should be node -e or node "script.js" format');
   })) passed++; else failed++;
 
   if (await asyncTest('all hook commands in hooks.json are valid format', async () => {

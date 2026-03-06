@@ -30,6 +30,7 @@ listed in the **Dropped / Disputed** section at the end.
 - Refactored `readStdinJson` to remove only local listeners; exported `parseJsonObject` and updated tests.
 - Converted key hook/CI scripts to callable modules and rewrote related tests to avoid unnecessary nested subprocesses.
 - Added subprocess capability guard with strict mode, and enabled strict mode in CI via `ECC_REQUIRE_SUBPROCESS_TESTS=1`.
+- Replaced inline `node -e` command hooks in `hooks/hooks.json` with script-backed Node commands via `scripts/hooks/command-hooks.js`, and updated integration tests to run both inline and script-form hook commands.
 
 ---
 

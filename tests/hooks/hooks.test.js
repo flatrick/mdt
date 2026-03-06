@@ -1215,7 +1215,7 @@ async function runTests() {
     assert.ok(hooks.hooks.PreCompact, 'Should have PreCompact hooks');
   })) passed++; else failed++;
 
-  if (test('all hook commands use node or are skill shell scripts', () => {
+  if (test('all hook commands are Node.js commands', () => {
     const hooksPath = path.join(__dirname, '..', '..', 'hooks', 'hooks.json');
     const hooks = JSON.parse(fs.readFileSync(hooksPath, 'utf8'));
 
@@ -1224,13 +1224,9 @@ async function runTests() {
         for (const hook of entry.hooks) {
           if (hook.type === 'command') {
             const isNode = hook.command.startsWith('node');
-            const isSkillScript = hook.command.includes('/skills/') && (
-              /^(bash|sh)\s/.test(hook.command) ||
-              hook.command.startsWith('${CLAUDE_PLUGIN_ROOT}/skills/')
-            );
             assert.ok(
-              isNode || isSkillScript,
-              `Hook command should start with 'node' or be a skill shell script: ${hook.command.substring(0, 80)}...`
+              isNode,
+              `Hook command should start with 'node': ${hook.command.substring(0, 80)}...`
             );
           }
         }
