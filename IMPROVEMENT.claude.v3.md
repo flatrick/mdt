@@ -43,6 +43,7 @@ listed in the **Dropped / Disputed** section at the end.
 - Normalized user-facing guide/repo links in `README.md`, `the-longform-guide.md`, `the-security-guide.md`, and `commands/skill-create.md` to point to this fork where applicable.
 - Added dedicated `tests/hooks/command-hooks.test.js` coverage and wired it into `tests/run-all.js` to verify command-hook mode behavior, passthrough, and exit-code paths.
 - Migrated `tests/hooks/evaluate-session.test.js` to shared `tests/helpers/test-runner.js` utilities to reduce duplicated local test harness code.
+- Migrated `tests/hooks/suggest-compact.test.js` to shared `tests/helpers/test-runner.js` test utilities (removing duplicated local `test()` implementation).
 - Restricted installer payload to runtime scripts only (`scripts/hooks` and `scripts/lib`) for Claude/Cursor installs and added dedicated installer tests (`tests/scripts/install-ecc.test.js`) to guard copy-scope and settings-merge behavior.
 - CI security checks are now blocking by configuration (`npm audit` in `.github/workflows/ci.yml`), and `.github/workflows/release.yml` now uses a dynamic heredoc delimiter for changelog output safety.
 - Added shared markdown normalization utilities for CI validators and strengthened structural checks: skills require heading + "When to Use/Activate"; rules require heading + non-empty body content. Validator tests and affected skill docs were updated to match.
