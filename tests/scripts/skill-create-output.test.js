@@ -9,24 +9,12 @@
 const assert = require('assert');
 // Import the module
 const { SkillCreateOutput } = require('../../scripts/skill-create-output');
+const { test } = require('../helpers/test-runner');
 
 // We also need to test the un-exported helpers by requiring the source
 // and extracting them from the module scope. Since they're not exported,
 // we test them indirectly through the class methods, plus test the
 // exported class directly.
-
-// Test helper
-function test(name, fn) {
-  try {
-    fn();
-    console.log(`  \u2713 ${name}`);
-    return true;
-  } catch (err) {
-    console.log(`  \u2717 ${name}`);
-    console.log(`    Error: ${err.message}`);
-    return false;
-  }
-}
 
 // Strip ANSI escape sequences for assertions
 function stripAnsi(str) {
