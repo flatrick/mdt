@@ -38,6 +38,7 @@ listed in the **Dropped / Disputed** section at the end.
 - Removed unreferenced reusable workflow files and standardized on inline workflow definitions (`ci.yml`, `release.yml`) to eliminate configuration drift.
 - Added shared test runner helpers (`tests/helpers/test-runner.js`) and migrated script-oriented test files to use the shared `test`/temp-dir utilities.
 - Split the oversized validator test file into two suites (`tests/ci/validators.test.js` and `tests/ci/validators-rounds.test.js`) and wired both into the aggregate runner.
+- Split `tests/lib/session-manager.test.js` into core + rounds suites (`tests/lib/session-manager.test.js`, `tests/lib/session-manager-rounds.test.js`) and wired both suites into `tests/run-all.js` with explicit seeded-session fixture setup in the rounds suite.
 
 ---
 
