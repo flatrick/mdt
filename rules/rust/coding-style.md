@@ -10,7 +10,7 @@ paths:
 
 ## Standards
 
-- Follow **Rust API Guidelines** (https://rust-lang.github.io/api-guidelines/)
+- Follow **Rust API Guidelines** (<https://rust-lang.github.io/api-guidelines/>)
 - Run **rustfmt** before every commit: `cargo fmt`
 - Run **Clippy** for linting: `cargo clippy -- -D warnings`
 

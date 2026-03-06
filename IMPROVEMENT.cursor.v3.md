@@ -67,6 +67,7 @@ Source chain: `IMPROVEMENT.codex.md` + `IMPROVEMENT.claude.md` + `IMPROVEMENT.cu
 - Expanded `withEnv(...)` adoption in `tests/lib/session-manager.test.js` for shared session fixture and `getAllSessions`/`getSessionById` coverage to eliminate remaining manual HOME/USERPROFILE mutation.
 - Refactored `tests/helpers/session-aliases-test-env.js` to wrap `session-aliases` operations in `withEnv(...)` via a proxy, removing global HOME/USERPROFILE mutation while preserving existing test call sites.
 - Reduced JavaScript lint baseline by removing unused test scaffolding imports/vars and low-risk script hygiene issues (unused vars, strict equality checks, and explicit no-op catch comments) across installer/claw and continuous-learning helper scripts.
+- Hardened the `lint` npm script for Windows shell compatibility by switching markdownlint glob quoting, and fixed repository markdownlint findings (MD034/MD038) in active docs so lint now fails only on real issues.
 - Restricted installer script payload to runtime-only directories (`scripts/hooks`, `scripts/lib`) for Claude/Cursor targets and added installer regression coverage in `tests/scripts/install-ecc.test.js` (included in `tests/run-all.js`).
 - Made CI security scanning blocking (`npm audit` no longer uses advisory `continue-on-error`) and hardened release changelog output to use a unique heredoc delimiter in `.github/workflows/release.yml`.
 - Introduced shared markdown read normalization (`scripts/ci/markdown-utils.js`) and deepened validator rules: skills now require heading + "When to Use/Activate", and rules now require heading + body content; tests and legacy skills were aligned.
@@ -511,7 +512,7 @@ Appends to `compaction-log.txt` indefinitely with no rotation or size limit.
 **File:** `hooks/hooks.json:20`
 **Confirmed by:** Cursor v2
 
-`yarn (install|test)?` — the `?` makes the group optional, matching bare `yarn ` commands that aren't install or test.
+`yarn (install|test)?` — the `?` makes the group optional, matching bare `yarn` commands that aren't install or test.
 
 **Fix:** Remove the `?`: `yarn (install|test)`.
 

@@ -261,7 +261,7 @@ Some agents use `--`, others use `—`.
 
 ### 7.6 Hooks.json tmux regex false positive
 
-Line 20: `yarn (install|test)?` — the `?` makes the group optional, matching bare `yarn ` commands.
+Line 20: `yarn (install|test)?` — the `?` makes the group optional, matching bare `yarn` commands.
 
 **Fix:** Remove the `?` or restructure: `yarn (install|test)`.
 

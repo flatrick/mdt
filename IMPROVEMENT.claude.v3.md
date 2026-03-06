@@ -68,6 +68,7 @@ listed in the **Dropped / Disputed** section at the end.
 - Expanded `withEnv(...)` adoption in `tests/lib/session-manager.test.js` for shared session fixture and `getAllSessions`/`getSessionById` coverage to eliminate remaining manual HOME/USERPROFILE mutation.
 - Refactored `tests/helpers/session-aliases-test-env.js` to wrap `session-aliases` operations in `withEnv(...)` via a proxy, removing global HOME/USERPROFILE mutation while preserving existing test call sites.
 - Reduced JavaScript lint baseline by removing unused test scaffolding imports/vars and low-risk script hygiene issues (unused vars, strict equality checks, and explicit no-op catch comments) across installer/claw and continuous-learning helper scripts.
+- Hardened the `lint` npm script for Windows shell compatibility by switching markdownlint glob quoting, and fixed repository markdownlint findings (MD034/MD038) in active docs so lint now fails only on real issues.
 - Restricted installer payload to runtime scripts only (`scripts/hooks` and `scripts/lib`) for Claude/Cursor installs and added dedicated installer tests (`tests/scripts/install-ecc.test.js`) to guard copy-scope and settings-merge behavior.
 - CI security checks are now blocking by configuration (`npm audit` in `.github/workflows/ci.yml`), and `.github/workflows/release.yml` now uses a dynamic heredoc delimiter for changelog output safety.
 - Added shared markdown normalization utilities for CI validators and strengthened structural checks: skills require heading + "When to Use/Activate"; rules require heading + non-empty body content. Validator tests and affected skill docs were updated to match.
@@ -616,7 +617,7 @@ Appends to `compaction-log.txt` indefinitely with no rotation or size limit.
 **File:** `hooks/hooks.json:20`
 **Confirmed by:** Cursor **[single-agent]**
 
-`yarn (install|test)?` — the `?` makes the group optional, so bare `yarn `
+`yarn (install|test)?` — the `?` makes the group optional, so bare `yarn`
 commands (not install or test) match.
 
 **Fix:** Remove the `?`: `yarn (install|test)`.

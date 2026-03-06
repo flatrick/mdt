@@ -336,7 +336,7 @@ Appends to `compaction-log.txt` indefinitely with no rotation or size limit.
 
 **File:** `hooks/hooks.json:20`
 
-`yarn (install|test)?` — the `?` makes the group optional, matching bare `yarn ` commands that aren't install or test.
+`yarn (install|test)?` — the `?` makes the group optional, matching bare `yarn` commands that aren't install or test.
 
 **Fix:** Remove the `?`: `yarn (install|test)`.
 
