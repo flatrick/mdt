@@ -178,65 +178,58 @@ function runTests() {
 
   // Use HOME override approach (consistent with existing getAllSessions tests)
   const r33Home = path.join(os.tmpdir(), `ecc-r33-birthtime-${Date.now()}`);
-  const r33OrigHome = process.env.HOME;
-  const r33OrigProfile = process.env.USERPROFILE;
-  process.env.HOME = r33Home;
-  process.env.USERPROFILE = r33Home;
-  clearSessionManagerCache();
-  const r33Utils = require('../../scripts/lib/utils');
-  const r33SessionsDir = r33Utils.getSessionsDir();
-  fs.mkdirSync(r33SessionsDir, { recursive: true });
-  const r33Filename = '2026-02-13-r33birth-session.tmp';
-  const r33FilePath = path.join(r33SessionsDir, r33Filename);
-  fs.writeFileSync(r33FilePath, '{"type":"test"}');
-  const r33SM = require('../../scripts/lib/session-manager');
+  try {
+    withEnv({ HOME: r33Home, USERPROFILE: r33Home }, () => {
+      clearSessionManagerCache();
+      const r33Utils = require('../../scripts/lib/utils');
+      const r33SessionsDir = r33Utils.getSessionsDir();
+      fs.mkdirSync(r33SessionsDir, { recursive: true });
+      const r33Filename = '2026-02-13-r33birth-session.tmp';
+      const r33FilePath = path.join(r33SessionsDir, r33Filename);
+      fs.writeFileSync(r33FilePath, '{"type":"test"}');
+      const r33SM = require('../../scripts/lib/session-manager');
 
-  if (test('getAllSessions returns createdTime from birthtime when available', () => {
-    const result = r33SM.getAllSessions({ limit: 100 });
-    assert.ok(result.sessions.length > 0, 'Should find the test session');
-    const session = result.sessions[0];
-    assert.ok(session.createdTime instanceof Date, 'createdTime should be a Date');
-    // birthtime should be populated on macOS/Windows ï¿½ createdTime should match it
-    const stats = fs.statSync(r33FilePath);
-    if (stats.birthtime && stats.birthtime.getTime() > 0) {
-      assert.strictEqual(
-        session.createdTime.getTime(),
-        stats.birthtime.getTime(),
-        'createdTime should match birthtime when available'
-      );
-    }
-  })) passed++; else failed++;
+      if (test('getAllSessions returns createdTime from birthtime when available', () => {
+        const result = r33SM.getAllSessions({ limit: 100 });
+        assert.ok(result.sessions.length > 0, 'Should find the test session');
+        const session = result.sessions[0];
+        assert.ok(session.createdTime instanceof Date, 'createdTime should be a Date');
+        // birthtime should be populated on macOS/Windows ï¿½ createdTime should match it
+        const stats = fs.statSync(r33FilePath);
+        if (stats.birthtime && stats.birthtime.getTime() > 0) {
+          assert.strictEqual(
+            session.createdTime.getTime(),
+            stats.birthtime.getTime(),
+            'createdTime should match birthtime when available'
+          );
+        }
+      })) passed++; else failed++;
 
-  if (test('getSessionById returns createdTime field', () => {
-    const session = r33SM.getSessionById('r33birth');
-    assert.ok(session, 'Should find the session');
-    assert.ok(session.createdTime instanceof Date, 'createdTime should be a Date');
-    assert.ok(session.createdTime.getTime() > 0, 'createdTime should be non-zero');
-  })) passed++; else failed++;
+      if (test('getSessionById returns createdTime field', () => {
+        const session = r33SM.getSessionById('r33birth');
+        assert.ok(session, 'Should find the session');
+        assert.ok(session.createdTime instanceof Date, 'createdTime should be a Date');
+        assert.ok(session.createdTime.getTime() > 0, 'createdTime should be non-zero');
+      })) passed++; else failed++;
 
-  if (test('createdTime falls back to ctime when birthtime is epoch-zero', () => {
-    // This tests the || fallback logic: stats.birthtime || stats.ctime
-    // On some FS, birthtime may be epoch 0 (falsy as a Date number comparison
-    // but truthy as a Date object). The fallback is defensive.
-    const stats = fs.statSync(r33FilePath);
-    // Both birthtime and ctime should be valid Dates on any modern OS
-    assert.ok(stats.ctime instanceof Date, 'ctime should exist');
-    // The fallback expression `birthtime || ctime` should always produce a valid Date
-    const fallbackResult = stats.birthtime || stats.ctime;
-    assert.ok(fallbackResult instanceof Date, 'Fallback should produce a Date');
-    assert.ok(fallbackResult.getTime() > 0, 'Fallback date should be non-zero');
-  })) passed++; else failed++;
-
-  // Cleanup Round 33 HOME override
-  process.env.HOME = r33OrigHome;
-  if (r33OrigProfile !== undefined) {
-    process.env.USERPROFILE = r33OrigProfile;
-  } else {
-    delete process.env.USERPROFILE;
+      if (test('createdTime falls back to ctime when birthtime is epoch-zero', () => {
+        // This tests the || fallback logic: stats.birthtime || stats.ctime
+        // On some FS, birthtime may be epoch 0 (falsy as a Date number comparison
+        // but truthy as a Date object). The fallback is defensive.
+        const stats = fs.statSync(r33FilePath);
+        // Both birthtime and ctime should be valid Dates on any modern OS
+        assert.ok(stats.ctime instanceof Date, 'ctime should exist');
+        // The fallback expression `birthtime || ctime` should always produce a valid Date
+        const fallbackResult = stats.birthtime || stats.ctime;
+        assert.ok(fallbackResult instanceof Date, 'Fallback should produce a Date');
+        assert.ok(fallbackResult.getTime() > 0, 'Fallback date should be non-zero');
+      })) passed++; else failed++;
+    });
+  } finally {
+    clearSessionManagerCache();
+    sessionManager = require('../../scripts/lib/session-manager');
+    try { fs.rmSync(r33Home, { recursive: true, force: true }); } catch (_e) { /* ignore cleanup errors */ }
   }
-  clearSessionManagerCache();
-  sessionManager = require('../../scripts/lib/session-manager');
-  try { fs.rmSync(r33Home, { recursive: true, force: true }); } catch (_e) { /* ignore cleanup errors */ }
 
   // -- Round 46: path heuristic and checklist edge cases --
   console.log('\ngetSessionStats Windows path heuristic (Round 46):');
@@ -567,127 +560,121 @@ function runTests() {
 
   // Re-establish test environment for Rounds 95-98 (these tests need sessions to exist)
   const tmpHome2 = path.join(os.tmpdir(), `ecc-session-mgr-test-2-${Date.now()}`);
-  const origHome2 = process.env.HOME;
-  const origUserProfile2 = process.env.USERPROFILE;
-  process.env.HOME = tmpHome2;
-  process.env.USERPROFILE = tmpHome2;
-  clearSessionManagerCache();
-  const tmpSessionsDir2 = require('../../scripts/lib/utils').getSessionsDir();
-  fs.mkdirSync(tmpSessionsDir2, { recursive: true });
-  const testSessions2 = [
-    { name: '2026-01-15-aaaa1111-session.tmp', content: '# Test Session 1' },
-    { name: '2026-02-01-bbbb2222-session.tmp', content: '# Test Session 2' },
-    { name: '2026-02-10-cccc3333-session.tmp', content: '# Test Session 3' },
-  ];
-  for (const session of testSessions2) {
-    const filePath = path.join(tmpSessionsDir2, session.name);
-    fs.writeFileSync(filePath, session.content);
-  }
-  sessionManager = require('../../scripts/lib/session-manager');
-
-  // -- Round 95: getAllSessions with both negative offset AND negative limit --
-  console.log('\nRound 95: getAllSessions (both negative offset and negative limit):');
-
-  if (test('getAllSessions clamps both negative offset (to 0) and negative limit (to 1) simultaneously', () => {
-    const result = sessionManager.getAllSessions({ offset: -5, limit: -10 });
-    // offset clamped: Math.max(0, Math.floor(-5)) ? 0
-    // limit clamped: Math.max(1, Math.floor(-10)) ? 1
-    // slice(0, 0+1) ? first session only
-    assert.strictEqual(result.offset, 0,
-      'Negative offset should be clamped to 0');
-    assert.strictEqual(result.limit, 1,
-      'Negative limit should be clamped to 1');
-    assert.ok(result.sessions.length <= 1,
-      'Should return at most 1 session (slice(0, 1))');
-  })) passed++; else failed++;
-
-  // -- Round 96: parseSessionFilename with Feb 30 (impossible date) --
-  console.log('\nRound 96: parseSessionFilename (Feb 30 ï¿½ impossible date):');
-
-  if (test('parseSessionFilename rejects Feb 30 (passes day<=31 but fails Date rollover)', () => {
-    // Feb 30 passes the bounds check (month 1-12, day 1-31) at line 37
-    // but new Date(2026, 1, 30) ? March 2 (rollover), so getMonth() !== 1 ? returns null
-    const result = sessionManager.parseSessionFilename('2026-02-30-abcd1234-session.tmp');
-    assert.strictEqual(result, null,
-      'Feb 30 should be rejected by Date constructor rollover check (line 41)');
-  })) passed++; else failed++;
-
-  // -- Round 96: getAllSessions with limit: Infinity --
-  console.log('\nRound 96: getAllSessions (limit: Infinity ï¿½ pagination bypass):');
-
-  if (test('getAllSessions with limit: Infinity returns all sessions (no pagination)', () => {
-    // Number(Infinity) = Infinity, Number.isNaN(Infinity) = false
-    // Math.max(1, Math.floor(Infinity)) = Math.max(1, Infinity) = Infinity
-    // slice(0, 0 + Infinity) returns all elements
-    const result = sessionManager.getAllSessions({ limit: Infinity });
-    assert.strictEqual(result.limit, Infinity,
-      'Infinity limit should pass through (not clamped or defaulted)');
-    assert.strictEqual(result.sessions.length, result.total,
-      'All sessions should be returned (no pagination truncation)');
-    assert.strictEqual(result.hasMore, false,
-      'hasMore should be false since all sessions are returned');
-  })) passed++; else failed++;
-
-  // -- Round 96: getAllSessions with limit: null --
-  console.log('\nRound 96: getAllSessions (limit: null ï¿½ destructuring default bypass):');
-
-  if (test('getAllSessions with limit: null clamps to 1 (null bypasses destructuring default)', () => {
-    // Destructuring default only fires for undefined, NOT null
-    // rawLimit = null (not 50), Number(null) = 0, Math.max(1, 0) = 1
-    const result = sessionManager.getAllSessions({ limit: null });
-    assert.strictEqual(result.limit, 1,
-      'null limit should become 1 (Number(null)=0, clamped via Math.max(1,0))');
-    assert.ok(result.sessions.length <= 1,
-      'Should return at most 1 session (clamped limit)');
-  })) passed++; else failed++;
-
-  // -- Round 97: getAllSessions with whitespace search filters out everything --
-  console.log('\nRound 97: getAllSessions (whitespace search ï¿½ truthy but unmatched):');
-
-  if (test('getAllSessions with search: " " returns empty because space is truthy but never matches shortId', () => {
-    // session-manager.js line 233: if (search && !metadata.shortId.includes(search))
-    // ' ' (space) is truthy so the filter is applied, but shortIds are hex strings
-    // that never contain spaces, so ALL sessions are filtered out.
-    // The search filter is inside the loop, so total is also 0.
-    const result = sessionManager.getAllSessions({ search: ' ', limit: 100 });
-    assert.strictEqual(result.sessions.length, 0,
-      'Whitespace search should filter out all sessions (space never appears in hex shortIds)');
-    assert.strictEqual(result.total, 0,
-      'Total should be 0 because search filter is applied inside the loop (line 233)');
-    assert.strictEqual(result.hasMore, false,
-      'hasMore should be false since no sessions matched');
-    // Contrast with null/empty search which returns all sessions:
-    const allResult = sessionManager.getAllSessions({ search: null, limit: 100 });
-    assert.ok(allResult.total > 0,
-      'Null search should return sessions (confirming they exist but space filtered them)');
-  })) passed++; else failed++;
-
-  // -- Round 98: getSessionById with null sessionId throws TypeError --
-  console.log('\nRound 98: getSessionById (null sessionId ï¿½ crashes at line 297):');
-
-  if (test('getSessionById(null) throws TypeError when session files exist', () => {
-    // session-manager.js line 297: `sessionId.length > 0` ï¿½ calling .length on null
-    // throws TypeError because there's no early guard for null/undefined input.
-    // This only surfaces when valid .tmp files exist in the sessions directory.
-    assert.throws(
-      () => sessionManager.getSessionById(null),
-      { name: 'TypeError' },
-      'null.length should throw TypeError (no input guard at function entry)'
-    );
-  })) passed++; else failed++;
-
-  // Cleanup test environment for Rounds 95-98 that needed sessions
-  // (Round 98: parseSessionFilename below doesn't need sessions)
-  process.env.HOME = origHome2;
-  if (origUserProfile2 !== undefined) {
-    process.env.USERPROFILE = origUserProfile2;
-  } else {
-    delete process.env.USERPROFILE;
-  }
   try {
-    fs.rmSync(tmpHome2, { recursive: true, force: true });
-  } catch {
-    // best-effort
+    withEnv({ HOME: tmpHome2, USERPROFILE: tmpHome2 }, () => {
+      clearSessionManagerCache();
+      const tmpSessionsDir2 = require('../../scripts/lib/utils').getSessionsDir();
+      fs.mkdirSync(tmpSessionsDir2, { recursive: true });
+      const testSessions2 = [
+        { name: '2026-01-15-aaaa1111-session.tmp', content: '# Test Session 1' },
+        { name: '2026-02-01-bbbb2222-session.tmp', content: '# Test Session 2' },
+        { name: '2026-02-10-cccc3333-session.tmp', content: '# Test Session 3' },
+      ];
+      for (const session of testSessions2) {
+        const filePath = path.join(tmpSessionsDir2, session.name);
+        fs.writeFileSync(filePath, session.content);
+      }
+      sessionManager = require('../../scripts/lib/session-manager');
+
+      // -- Round 95: getAllSessions with both negative offset AND negative limit --
+      console.log('\nRound 95: getAllSessions (both negative offset and negative limit):');
+
+      if (test('getAllSessions clamps both negative offset (to 0) and negative limit (to 1) simultaneously', () => {
+        const result = sessionManager.getAllSessions({ offset: -5, limit: -10 });
+        // offset clamped: Math.max(0, Math.floor(-5)) ? 0
+        // limit clamped: Math.max(1, Math.floor(-10)) ? 1
+        // slice(0, 0+1) ? first session only
+        assert.strictEqual(result.offset, 0,
+          'Negative offset should be clamped to 0');
+        assert.strictEqual(result.limit, 1,
+          'Negative limit should be clamped to 1');
+        assert.ok(result.sessions.length <= 1,
+          'Should return at most 1 session (slice(0, 1))');
+      })) passed++; else failed++;
+
+      // -- Round 96: parseSessionFilename with Feb 30 (impossible date) --
+      console.log('\nRound 96: parseSessionFilename (Feb 30 ï¿½ impossible date):');
+
+      if (test('parseSessionFilename rejects Feb 30 (passes day<=31 but fails Date rollover)', () => {
+        // Feb 30 passes the bounds check (month 1-12, day 1-31) at line 37
+        // but new Date(2026, 1, 30) ? March 2 (rollover), so getMonth() !== 1 ? returns null
+        const result = sessionManager.parseSessionFilename('2026-02-30-abcd1234-session.tmp');
+        assert.strictEqual(result, null,
+          'Feb 30 should be rejected by Date constructor rollover check (line 41)');
+      })) passed++; else failed++;
+
+      // -- Round 96: getAllSessions with limit: Infinity --
+      console.log('\nRound 96: getAllSessions (limit: Infinity ï¿½ pagination bypass):');
+
+      if (test('getAllSessions with limit: Infinity returns all sessions (no pagination)', () => {
+        // Number(Infinity) = Infinity, Number.isNaN(Infinity) = false
+        // Math.max(1, Math.floor(Infinity)) = Math.max(1, Infinity) = Infinity
+        // slice(0, 0 + Infinity) returns all elements
+        const result = sessionManager.getAllSessions({ limit: Infinity });
+        assert.strictEqual(result.limit, Infinity,
+          'Infinity limit should pass through (not clamped or defaulted)');
+        assert.strictEqual(result.sessions.length, result.total,
+          'All sessions should be returned (no pagination truncation)');
+        assert.strictEqual(result.hasMore, false,
+          'hasMore should be false since all sessions are returned');
+      })) passed++; else failed++;
+
+      // -- Round 96: getAllSessions with limit: null --
+      console.log('\nRound 96: getAllSessions (limit: null ï¿½ destructuring default bypass):');
+
+      if (test('getAllSessions with limit: null clamps to 1 (null bypasses destructuring default)', () => {
+        // Destructuring default only fires for undefined, NOT null
+        // rawLimit = null (not 50), Number(null) = 0, Math.max(1, 0) = 1
+        const result = sessionManager.getAllSessions({ limit: null });
+        assert.strictEqual(result.limit, 1,
+          'null limit should become 1 (Number(null)=0, clamped via Math.max(1,0))');
+        assert.ok(result.sessions.length <= 1,
+          'Should return at most 1 session (clamped limit)');
+      })) passed++; else failed++;
+
+      // -- Round 97: getAllSessions with whitespace search filters out everything --
+      console.log('\nRound 97: getAllSessions (whitespace search ï¿½ truthy but unmatched):');
+
+      if (test('getAllSessions with search: " " returns empty because space is truthy but never matches shortId', () => {
+        // session-manager.js line 233: if (search && !metadata.shortId.includes(search))
+        // ' ' (space) is truthy so the filter is applied, but shortIds are hex strings
+        // that never contain spaces, so ALL sessions are filtered out.
+        // The search filter is inside the loop, so total is also 0.
+        const result = sessionManager.getAllSessions({ search: ' ', limit: 100 });
+        assert.strictEqual(result.sessions.length, 0,
+          'Whitespace search should filter out all sessions (space never appears in hex shortIds)');
+        assert.strictEqual(result.total, 0,
+          'Total should be 0 because search filter is applied inside the loop (line 233)');
+        assert.strictEqual(result.hasMore, false,
+          'hasMore should be false since no sessions matched');
+        // Contrast with null/empty search which returns all sessions:
+        const allResult = sessionManager.getAllSessions({ search: null, limit: 100 });
+        assert.ok(allResult.total > 0,
+          'Null search should return sessions (confirming they exist but space filtered them)');
+      })) passed++; else failed++;
+
+      // -- Round 98: getSessionById with null sessionId throws TypeError --
+      console.log('\nRound 98: getSessionById (null sessionId ï¿½ crashes at line 297):');
+
+      if (test('getSessionById(null) throws TypeError when session files exist', () => {
+        // session-manager.js line 297: `sessionId.length > 0` ï¿½ calling .length on null
+        // throws TypeError because there's no early guard for null/undefined input.
+        // This only surfaces when valid .tmp files exist in the sessions directory.
+        assert.throws(
+          () => sessionManager.getSessionById(null),
+          { name: 'TypeError' },
+          'null.length should throw TypeError (no input guard at function entry)'
+        );
+      })) passed++; else failed++;
+    });
+  } finally {
+    clearSessionManagerCache();
+    sessionManager = require('../../scripts/lib/session-manager');
+    try {
+      fs.rmSync(tmpHome2, { recursive: true, force: true });
+    } catch {
+      // best-effort
+    }
   }
 
   // -- Round 98: parseSessionFilename with null input throws TypeError --
