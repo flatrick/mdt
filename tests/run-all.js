@@ -33,6 +33,7 @@ const testFiles = [
   'hooks/hooks-post-edit.test.js',
   'hooks/hooks-rounds.test.js',
   'hooks/hooks-rounds-3.test.js',
+  'hooks/hooks-rounds-4.test.js',
   'hooks/hooks-rounds-2.test.js',
   'hooks/evaluate-session.test.js',
   'hooks/suggest-compact.test.js',
