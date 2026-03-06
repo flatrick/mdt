@@ -39,6 +39,7 @@ listed in the **Dropped / Disputed** section at the end.
 - Corrected tmux reminder command matching in `scripts/hooks/command-hooks.js` by requiring explicit `yarn install|test` (no optional group false-positive on bare `yarn`).
 - Added bounded log rotation in `scripts/hooks/pre-compact.js` for `compaction-log.txt` (size threshold + tail retention) to prevent unbounded growth.
 - Updated stale repository metadata URLs in `package.json`, `.claude-plugin/plugin.json`, and `.claude-plugin/marketplace.json` to this fork (`flatrick/everything-claude-code`).
+- Updated `CONTRIBUTING.md` quick-start and issue references for this fork-first workflow, while explicitly noting upstream PRs as a separate path.
 - Restricted installer payload to runtime scripts only (`scripts/hooks` and `scripts/lib`) for Claude/Cursor installs and added dedicated installer tests (`tests/scripts/install-ecc.test.js`) to guard copy-scope and settings-merge behavior.
 - CI security checks are now blocking by configuration (`npm audit` in `.github/workflows/ci.yml`), and `.github/workflows/release.yml` now uses a dynamic heredoc delimiter for changelog output safety.
 - Added shared markdown normalization utilities for CI validators and strengthened structural checks: skills require heading + "When to Use/Activate"; rules require heading + non-empty body content. Validator tests and affected skill docs were updated to match.

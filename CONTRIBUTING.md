@@ -1,6 +1,10 @@
 # Contributing to Everything Claude Code
 
-Thanks for wanting to contribute! This repo is a community resource for Claude Code users.
+Thanks for wanting to contribute.
+
+This repository is a fork-first v1 track (`flatrick/everything-claude-code`).
+Submit issues/PRs here for this fork. If your change is intended for upstream,
+open a separate PR against `affaan-m/everything-claude-code`.
 
 ## Table of Contents
 
@@ -48,8 +52,8 @@ Slash commands that invoke useful workflows:
 ## Quick Start
 
 ```bash
-# 1. Fork and clone
-gh repo fork affaan-m/everything-claude-code --clone
+# 1. Fork and clone this repo
+gh repo fork flatrick/everything-claude-code --clone
 cd everything-claude-code
 
 # 2. Create a branch
@@ -417,7 +421,7 @@ How you tested this.
 
 ## Questions?
 
-- **Issues:** [github.com/affaan-m/everything-claude-code/issues](https://github.com/affaan-m/everything-claude-code/issues)
+- **Issues:** [github.com/flatrick/everything-claude-code/issues](https://github.com/flatrick/everything-claude-code/issues)
 - **X/Twitter:** [@affaanmustafa](https://x.com/affaanmustafa)
 
 ---
