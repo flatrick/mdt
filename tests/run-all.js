@@ -19,6 +19,7 @@ const testFiles = [
   'lib/detect-env.test.js',
   'lib/utils.test.js',
   'lib/utils-rounds.test.js',
+  'lib/utils-rounds-2.test.js',
   'lib/package-manager.test.js',
   'lib/package-manager-rounds.test.js',
   'lib/session-manager.test.js',
