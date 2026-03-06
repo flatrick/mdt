@@ -117,8 +117,8 @@ async function runTests() {
 
   let passed = 0;
   let failed = 0;
-
-  console.log('\\n=== Testing Hook Scripts (Round Cases 1c) ===\\n');
+  const scriptsDir = path.join(__dirname, '..', '..', 'scripts', 'hooks');
+  const evaluateSessionScript = path.join(scriptsDir, 'evaluate-session.js');
   // ── Round 29: post-edit-format.js cwd fix and process.exit(0) consistency ──
   console.log('\nRound 29: post-edit-format.js (cwd and exit):');
 

@@ -117,8 +117,7 @@ async function runTests() {
 
   let passed = 0;
   let failed = 0;
-
-  console.log('\n=== Testing Hook Scripts (Round Cases 2) ===\n');
+  const scriptsDir = path.join(__dirname, '..', '..', 'scripts', 'hooks');
   console.log('\nRound 60: session-end.js (replaceInFile returns false — timestamp update warning):');
 
   if (await asyncTest('logs warning when existing session file lacks Last Updated field', async () => {

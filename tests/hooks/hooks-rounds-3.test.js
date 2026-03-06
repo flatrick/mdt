@@ -117,6 +117,7 @@ async function runTests() {
 
   let passed = 0;
   let failed = 0;
+  const scriptsDir = path.join(__dirname, '..', '..', 'scripts', 'hooks');
 
   // Round 41: pre-compact.js (multiple session files)
   console.log('\nRound 41: pre-compact.js (multiple session files):');

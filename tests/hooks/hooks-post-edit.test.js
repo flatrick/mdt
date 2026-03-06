@@ -117,8 +117,8 @@ async function runTests() {
 
   let passed = 0;
   let failed = 0;
+  const scriptsDir = path.join(__dirname, '..', '..', 'scripts', 'hooks');
 
-  console.log('\\n=== Testing Hook Scripts (Post-Edit) ===\\n');
   // post-edit-console-warn.js tests
   console.log('\npost-edit-console-warn.js:');
 
