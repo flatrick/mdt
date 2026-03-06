@@ -7,35 +7,9 @@
 const assert = require('assert');
 const path = require('path');
 const fs = require('fs');
-const os = require('os');
 const { spawn } = require('child_process');
 const { ensureSubprocessCapability } = require('../helpers/subprocess-capability');
-
-// Test helper
-function test(name, fn) {
-  try {
-    fn();
-    console.log(`  ✓ ${name}`);
-    return true;
-  } catch (err) {
-    console.log(`  ✗ ${name}`);
-    console.log(`    Error: ${err.message}`);
-    return false;
-  }
-}
-
-// Async test helper
-async function asyncTest(name, fn) {
-  try {
-    await fn();
-    console.log(`  ✓ ${name}`);
-    return true;
-  } catch (err) {
-    console.log(`  ✗ ${name}`);
-    console.log(`    Error: ${err.message}`);
-    return false;
-  }
-}
+const { test, asyncTest, createTestDir, cleanupTestDir } = require('../helpers/test-runner');
 
 // Run a script and capture output
 function runScript(scriptPath, input = '', env = {}) {
@@ -62,18 +36,6 @@ function runScript(scriptPath, input = '', env = {}) {
 
     proc.on('error', reject);
   });
-}
-
-// Create a temporary test directory
-function createTestDir() {
-  const testDir = path.join(os.tmpdir(), `hooks-test-${Date.now()}`);
-  fs.mkdirSync(testDir, { recursive: true });
-  return testDir;
-}
-
-// Clean up test directory
-function cleanupTestDir(testDir) {
-  fs.rmSync(testDir, { recursive: true, force: true });
 }
 
 // Return the sessions dir that hook scripts use when run with HOME=homeDir (tool-agnostic: .cursor, .claude, or .codex)

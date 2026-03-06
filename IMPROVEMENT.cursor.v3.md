@@ -47,6 +47,7 @@ Source chain: `IMPROVEMENT.codex.md` + `IMPROVEMENT.claude.md` + `IMPROVEMENT.cu
 - Migrated `tests/scripts/skill-create-output.test.js` to shared `tests/helpers/test-runner.js` utilities (removing duplicated local test harness code).
 - Migrated `tests/lib/project-detect.test.js` to shared `tests/helpers/test-runner.js` utilities (removing duplicated local test harness code).
 - Migrated `tests/hooks/hooks-post-edit.test.js` and `tests/hooks/hooks-rounds-4.test.js` to shared `tests/helpers/test-runner.js` utilities (removing duplicated local `test()/asyncTest()` and temp-dir helpers).
+- Migrated `tests/hooks/hooks-rounds.test.js`, `tests/hooks/hooks-rounds-2.test.js`, and `tests/hooks/hooks-rounds-3.test.js` to shared `tests/helpers/test-runner.js` utilities (removing duplicated local `test()/asyncTest()` and temp-dir helpers).
 - Restricted installer script payload to runtime-only directories (`scripts/hooks`, `scripts/lib`) for Claude/Cursor targets and added installer regression coverage in `tests/scripts/install-ecc.test.js` (included in `tests/run-all.js`).
 - Made CI security scanning blocking (`npm audit` no longer uses advisory `continue-on-error`) and hardened release changelog output to use a unique heredoc delimiter in `.github/workflows/release.yml`.
 - Introduced shared markdown read normalization (`scripts/ci/markdown-utils.js`) and deepened validator rules: skills now require heading + "When to Use/Activate", and rules now require heading + body content; tests and legacy skills were aligned.
