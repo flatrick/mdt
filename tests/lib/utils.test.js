@@ -123,14 +123,19 @@ function runTests() {
   // Session ID tests
   console.log('\nSession ID Functions:');
 
-  if (test('getSessionIdShort falls back to project name', () => {
+  if (test('getSessionIdShort falls back to project name when no session signals are set', () => {
     const original = process.env.CLAUDE_SESSION_ID;
+    const originalCursorTraceId = process.env.CURSOR_TRACE_ID;
     delete process.env.CLAUDE_SESSION_ID;
+    delete process.env.CURSOR_TRACE_ID;
     try {
       const shortId = utils.getSessionIdShort();
       assert.strictEqual(shortId, utils.getProjectName());
     } finally {
       if (original) process.env.CLAUDE_SESSION_ID = original;
+      else delete process.env.CLAUDE_SESSION_ID;
+      if (originalCursorTraceId) process.env.CURSOR_TRACE_ID = originalCursorTraceId;
+      else delete process.env.CURSOR_TRACE_ID;
     }
   })) passed++; else failed++;
 
@@ -385,6 +390,21 @@ function runTests() {
     }
     const exists = utils.commandExists('node');
     assert.strictEqual(exists, true);
+  })) passed++; else failed++;
+
+  if (test('getSessionIdShort uses CURSOR_TRACE_ID when CLAUDE_SESSION_ID is not set', () => {
+    const original = process.env.CLAUDE_SESSION_ID;
+    const originalCursorTraceId = process.env.CURSOR_TRACE_ID;
+    delete process.env.CLAUDE_SESSION_ID;
+    process.env.CURSOR_TRACE_ID = 'cursor-trace-xyz98765';
+    try {
+      assert.strictEqual(utils.getSessionIdShort(), 'xyz98765');
+    } finally {
+      if (original !== undefined) process.env.CLAUDE_SESSION_ID = original;
+      else delete process.env.CLAUDE_SESSION_ID;
+      if (originalCursorTraceId !== undefined) process.env.CURSOR_TRACE_ID = originalCursorTraceId;
+      else delete process.env.CURSOR_TRACE_ID;
+    }
   })) passed++; else failed++;
 
   if (test('commandExists returns false for fake command', () => {

@@ -1330,15 +1330,9 @@ function runTests() {
       'Persisted title should be null after round-trip through saveAliases/loadAliases');
   })) passed++; else failed++;
 
-  // ── Round 103: loadAliases with array aliases in JSON (typeof [] === 'object' bypass) ──
-  console.log('\nRound 103: loadAliases (array aliases — typeof bypass):');
-  if (test('loadAliases accepts array aliases because typeof [] === "object" passes validation', () => {
-    // session-aliases.js line 58: `typeof data.aliases !== 'object'` is the guard.
-    // Arrays are typeof 'object' in JavaScript, so {"aliases": [1,2,3]} passes
-    // validation.  The returned data.aliases is an array, not a plain object.
-    // Downstream code (Object.keys, Object.entries, bracket access) behaves
-    // differently on arrays vs objects but doesn't crash — it just produces
-    // unexpected results like numeric string keys "0", "1", "2".
+  // ── Round 103: loadAliases with array aliases in JSON should reset to default ──
+  console.log('\nRound 103: loadAliases (array aliases are rejected and reset):');
+  if (test('loadAliases rejects array aliases and resets to default empty object map', () => {
     resetAliases();
     const aliasesPath = aliases.getAliasesPath();
     fs.writeFileSync(aliasesPath, JSON.stringify({
@@ -1347,15 +1341,8 @@ function runTests() {
       metadata: { totalCount: 3, lastUpdated: new Date().toISOString() }
     }));
     const data = aliases.loadAliases();
-    // The array passes the typeof 'object' check and is returned as-is
-    assert.ok(Array.isArray(data.aliases),
-      'data.aliases should be an array (typeof [] === "object" bypasses guard)');
-    assert.strictEqual(data.aliases.length, 3,
-      'Array should have 3 elements');
-    // Object.keys on an array returns ["0", "1", "2"] — numeric index strings
-    const keys = Object.keys(data.aliases);
-    assert.deepStrictEqual(keys, ['0', '1', '2'],
-      'Object.keys of array returns numeric string indices, not named alias keys');
+    assert.ok(!Array.isArray(data.aliases), 'aliases should be reset to object map');
+    assert.deepStrictEqual(data.aliases, {}, 'aliases map should be reset to empty object');
   })) passed++; else failed++;
 
   // ── Round 104: resolveSessionAlias with path-traversal input (now returns null instead of passthrough) ──
@@ -1453,9 +1440,9 @@ function runTests() {
       'Cyrillic homoglyph "е" (U+0435) should be rejected even though it looks like "e"');
   })) passed++; else failed++;
 
-  // ── Round 114: listAliases with non-string search (number) — TypeError on toLowerCase ──
-  console.log('\nRound 114: listAliases (non-string search — number triggers TypeError):');
-  if (test('listAliases throws TypeError when search option is a number (no toLowerCase method)', () => {
+  // ── Round 114: listAliases with non-string search should not throw ──
+  console.log('\nRound 114: listAliases (non-string search — ignored without TypeError):');
+  if (test('listAliases ignores non-string search values and does not throw', () => {
     resetAliases();
 
     // Set up some aliases to search through
@@ -1467,26 +1454,16 @@ function runTests() {
     assert.strictEqual(stringResult.length, 1, 'String search should find 1 match');
     assert.strictEqual(stringResult[0].name, 'alpha-session');
 
-    // Numeric search — search.toLowerCase() at line 261 of session-aliases.js
-    // throws TypeError because Number.prototype has no toLowerCase method.
-    // The code does NOT guard against non-string search values.
-    assert.throws(
-      () => aliases.listAliases({ search: 123 }),
-      (err) => err instanceof TypeError && /toLowerCase/.test(err.message),
-      'Numeric search value should throw TypeError from toLowerCase call'
-    );
+    const numericResult = aliases.listAliases({ search: 123 });
+    assert.strictEqual(numericResult.length, 2, 'Numeric search should be ignored (no filtering)');
 
-    // Boolean search — also lacks toLowerCase
-    assert.throws(
-      () => aliases.listAliases({ search: true }),
-      (err) => err instanceof TypeError && /toLowerCase/.test(err.message),
-      'Boolean search value should also throw TypeError'
-    );
+    const booleanResult = aliases.listAliases({ search: true });
+    assert.strictEqual(booleanResult.length, 2, 'Boolean search should be ignored (no filtering)');
   })) passed++; else failed++;
 
-  // ── Round 115: updateAliasTitle with empty string — stored as null via || but returned as "" ──
-  console.log('\nRound 115: updateAliasTitle (empty string title — stored null, returned ""):');
-  if (test('updateAliasTitle with empty string stores null but returns empty string (|| coercion mismatch)', () => {
+  // ── Round 115: updateAliasTitle with empty string — stored and returned as null ──
+  console.log('\nRound 115: updateAliasTitle (empty string title — stored null, returned null):');
+  if (test('updateAliasTitle with empty string stores null and returns normalized null', () => {
     resetAliases();
 
     // Create alias with a title
@@ -1495,12 +1472,9 @@ function runTests() {
     assert.strictEqual(before.title, 'Original Title', 'Baseline: title should be set');
 
     // Update title with empty string
-    // Line 383: typeof "" === 'string' → passes validation
-    // Line 393: "" || null → null (empty string is falsy in JS)
-    // Line 400: returns { title: "" } (original parameter, not stored value)
     const result = aliases.updateAliasTitle('r115-alias', '');
     assert.strictEqual(result.success, true, 'Should succeed (empty string passes validation)');
-    assert.strictEqual(result.title, '', 'Return value reflects the input parameter (empty string)');
+    assert.strictEqual(result.title, null, 'Return value should be normalized to stored null');
 
     // But what's actually stored?
     const after = aliases.resolveAlias('r115-alias');

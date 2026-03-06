@@ -7,7 +7,7 @@ const fs = require('fs');
 const path = require('path');
 const os = require('os');
 const { execSync, spawnSync } = require('child_process');
-const { detectEnv } = require('./detect-env');
+const { detectEnv, createDetectEnv } = require('./detect-env');
 
 // Platform detection (delegated to detect-env for cross-environment consistency)
 const isWindows = detectEnv.isWindows;
@@ -145,9 +145,14 @@ function getProjectName() {
  * Returns last 8 characters, falls back to project name then 'default'
  */
 function getSessionIdShort(fallback = 'default') {
-  const sessionId = process.env.CLAUDE_SESSION_ID;
-  if (sessionId && sessionId.length > 0) {
-    return sessionId.slice(-8);
+  const hasClaudeSessionId = typeof process.env.CLAUDE_SESSION_ID === 'string' && process.env.CLAUDE_SESSION_ID.length > 0;
+  const hasCursorTraceId = typeof process.env.CURSOR_TRACE_ID === 'string' && process.env.CURSOR_TRACE_ID.length > 0;
+
+  if (hasClaudeSessionId || hasCursorTraceId) {
+    // Use detect-env's shared signal precedence (CLAUDE_SESSION_ID, then CURSOR_TRACE_ID)
+    // while avoiding stale singleton cache in tests by creating a fresh resolver.
+    const resolvedSessionId = createDetectEnv({ env: process.env }).getSessionId();
+    return resolvedSessionId.slice(-8);
   }
   return getProjectName() || fallback;
 }

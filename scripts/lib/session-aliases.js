@@ -55,7 +55,7 @@ function loadAliases() {
     const data = JSON.parse(content);
 
     // Validate structure
-    if (!data.aliases || typeof data.aliases !== 'object') {
+    if (!data.aliases || typeof data.aliases !== 'object' || Array.isArray(data.aliases)) {
       log('[Aliases] Invalid aliases file structure, resetting');
       return getDefaultAliases();
     }
@@ -257,7 +257,7 @@ function listAliases(options = {}) {
   aliases.sort((a, b) => (new Date(b.updatedAt || b.createdAt || 0).getTime() || 0) - (new Date(a.updatedAt || a.createdAt || 0).getTime() || 0));
 
   // Apply search filter
-  if (search) {
+  if (typeof search === 'string' && search.length > 0) {
     const searchLower = search.toLowerCase();
     aliases = aliases.filter(a =>
       a.name.toLowerCase().includes(searchLower) ||
@@ -400,7 +400,7 @@ function updateAliasTitle(alias, title) {
     return {
       success: true,
       alias,
-      title
+      title: data.aliases[alias].title
     };
   }
 
