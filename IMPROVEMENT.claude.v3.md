@@ -42,6 +42,7 @@ listed in the **Dropped / Disputed** section at the end.
 - Split `tests/hooks/hooks.test.js` into core + rounds suites (`tests/hooks/hooks.test.js`, `tests/hooks/hooks-rounds.test.js`) and wired both suites into `tests/run-all.js`.
 - Split `tests/lib/session-aliases.test.js` into core + rounds suites (`tests/lib/session-aliases.test.js`, `tests/lib/session-aliases-rounds.test.js`) and wired both suites into `tests/run-all.js`.
 - Split `tests/lib/utils.test.js` into core + rounds suites (`tests/lib/utils.test.js`, `tests/lib/utils-rounds.test.js`) and wired both suites into `tests/run-all.js`.
+- Split `tests/lib/package-manager.test.js` into core + rounds suites (`tests/lib/package-manager.test.js`, `tests/lib/package-manager-rounds.test.js`) and wired both suites into `tests/run-all.js`.
 
 ---
 

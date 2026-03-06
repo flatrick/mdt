@@ -49,6 +49,7 @@ execution slices with acceptance criteria.
 - Split `tests/hooks/hooks.test.js` into core + rounds suites (`hooks.test.js`, `hooks-rounds.test.js`) and wired both into `tests/run-all.js`.
 - Split `tests/lib/session-aliases.test.js` into core + rounds suites (`session-aliases.test.js`, `session-aliases-rounds.test.js`) and wired both into `tests/run-all.js`.
 - Split `tests/lib/utils.test.js` into core + rounds suites (`utils.test.js`, `utils-rounds.test.js`) and wired both into `tests/run-all.js`.
+- Split `tests/lib/package-manager.test.js` into core + rounds suites (`package-manager.test.js`, `package-manager-rounds.test.js`) and wired both into `tests/run-all.js`.
 
 ## P0 - Breakage and Install/CI Integrity
 

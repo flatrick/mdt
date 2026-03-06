@@ -20,6 +20,7 @@ const testFiles = [
   'lib/utils.test.js',
   'lib/utils-rounds.test.js',
   'lib/package-manager.test.js',
+  'lib/package-manager-rounds.test.js',
   'lib/session-manager.test.js',
   'lib/session-manager-rounds.test.js',
   'lib/session-aliases.test.js',
