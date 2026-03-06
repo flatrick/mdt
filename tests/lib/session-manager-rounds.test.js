@@ -412,32 +412,28 @@ function runTests() {
     // getAllSessions at line 241-246: statSync throws for broken symlinks,
     // the catch causes `continue`, skipping that entry entirely.
     const isoHome = path.join(os.tmpdir(), `ecc-r83-toctou-${Date.now()}`);
-    const origHome = process.env.HOME;
-    const origUserProfile = process.env.USERPROFILE;
-    process.env.HOME = isoHome;
-    process.env.USERPROFILE = isoHome;
     try {
-      clearSessionManagerCache();
-      const freshUtils = require('../../scripts/lib/utils');
-      const sessionsDir = freshUtils.getSessionsDir();
-      fs.mkdirSync(sessionsDir, { recursive: true });
+      withEnv({ HOME: isoHome, USERPROFILE: isoHome }, () => {
+        clearSessionManagerCache();
+        const freshUtils = require('../../scripts/lib/utils');
+        const sessionsDir = freshUtils.getSessionsDir();
+        fs.mkdirSync(sessionsDir, { recursive: true });
 
-      const realFile = '2026-02-10-abcd1234-session.tmp';
-      fs.writeFileSync(path.join(sessionsDir, realFile), '# Real session\n');
+        const realFile = '2026-02-10-abcd1234-session.tmp';
+        fs.writeFileSync(path.join(sessionsDir, realFile), '# Real session\n');
 
-      const brokenSymlink = '2026-02-10-deadbeef-session.tmp';
-      fs.symlinkSync('/nonexistent/path/that/does/not/exist', path.join(sessionsDir, brokenSymlink));
+        const brokenSymlink = '2026-02-10-deadbeef-session.tmp';
+        fs.symlinkSync('/nonexistent/path/that/does/not/exist', path.join(sessionsDir, brokenSymlink));
 
-      const freshManager = require('../../scripts/lib/session-manager');
-      const result = freshManager.getAllSessions({ limit: 100 });
+        const freshManager = require('../../scripts/lib/session-manager');
+        const result = freshManager.getAllSessions({ limit: 100 });
 
-      // Should have only the real session, not the broken symlink
-      assert.strictEqual(result.total, 1, 'Should find only the real session, not the broken symlink');
-      assert.ok(result.sessions[0].filename === realFile,
-        `Should return the real file, got: ${result.sessions[0].filename}`);
+        // Should have only the real session, not the broken symlink
+        assert.strictEqual(result.total, 1, 'Should find only the real session, not the broken symlink');
+        assert.ok(result.sessions[0].filename === realFile,
+          `Should return the real file, got: ${result.sessions[0].filename}`);
+      });
     } finally {
-      process.env.HOME = origHome;
-      process.env.USERPROFILE = origUserProfile;
       clearSessionManagerCache();
       sessionManager = require('../../scripts/lib/session-manager');
       fs.rmSync(isoHome, { recursive: true, force: true });
@@ -451,28 +447,24 @@ function runTests() {
     // getSessionById at line 307-310: statSync throws for broken symlinks,
     // the catch returns null (file deleted between readdir and stat).
     const isoHome = path.join(os.tmpdir(), `ecc-r84-getbyid-toctou-${Date.now()}`);
-    const origHome = process.env.HOME;
-    const origUserProfile = process.env.USERPROFILE;
     try {
-      process.env.HOME = isoHome;
-      process.env.USERPROFILE = isoHome;
-      clearSessionManagerCache();
-      const freshUtils = require('../../scripts/lib/utils');
-      const sessionsDir = freshUtils.getSessionsDir();
-      fs.mkdirSync(sessionsDir, { recursive: true });
+      withEnv({ HOME: isoHome, USERPROFILE: isoHome }, () => {
+        clearSessionManagerCache();
+        const freshUtils = require('../../scripts/lib/utils');
+        const sessionsDir = freshUtils.getSessionsDir();
+        fs.mkdirSync(sessionsDir, { recursive: true });
 
-      const brokenFile = '2026-02-11-deadbeef-session.tmp';
-      fs.symlinkSync('/nonexistent/target/that/does/not/exist', path.join(sessionsDir, brokenFile));
+        const brokenFile = '2026-02-11-deadbeef-session.tmp';
+        fs.symlinkSync('/nonexistent/target/that/does/not/exist', path.join(sessionsDir, brokenFile));
 
-      const freshSM = require('../../scripts/lib/session-manager');
+        const freshSM = require('../../scripts/lib/session-manager');
 
-      // Search by the short ID "deadbeef" ï¿½ should match the broken symlink
-      const result = freshSM.getSessionById('deadbeef');
-      assert.strictEqual(result, null,
-        'Should return null when matching session file is a broken symlink');
+        // Search by the short ID "deadbeef" ï¿½ should match the broken symlink
+        const result = freshSM.getSessionById('deadbeef');
+        assert.strictEqual(result, null,
+          'Should return null when matching session file is a broken symlink');
+      });
     } finally {
-      process.env.HOME = origHome;
-      process.env.USERPROFILE = origUserProfile;
       clearSessionManagerCache();
       sessionManager = require('../../scripts/lib/session-manager');
       fs.rmSync(isoHome, { recursive: true, force: true });
@@ -501,36 +493,32 @@ function runTests() {
   if (test('getAllSessions skips subdirectories inside sessions dir', () => {
     // session-manager.js line 220: if (!entry.isFile() || ...) continue;
     const isoHome = path.join(os.tmpdir(), `ecc-r89-subdir-skip-${Date.now()}`);
-    const origHome = process.env.HOME;
-    const origUserProfile = process.env.USERPROFILE;
-    process.env.HOME = isoHome;
-    process.env.USERPROFILE = isoHome;
     try {
-      clearSessionManagerCache();
-      const freshUtils = require('../../scripts/lib/utils');
-      const sessionsDir = freshUtils.getSessionsDir();
-      fs.mkdirSync(sessionsDir, { recursive: true });
+      withEnv({ HOME: isoHome, USERPROFILE: isoHome }, () => {
+        clearSessionManagerCache();
+        const freshUtils = require('../../scripts/lib/utils');
+        const sessionsDir = freshUtils.getSessionsDir();
+        fs.mkdirSync(sessionsDir, { recursive: true });
 
-      const realFile = '2026-02-11-abcd1234-session.tmp';
-      fs.writeFileSync(path.join(sessionsDir, realFile), '# Test session');
+        const realFile = '2026-02-11-abcd1234-session.tmp';
+        fs.writeFileSync(path.join(sessionsDir, realFile), '# Test session');
 
-      const subdir = path.join(sessionsDir, 'some-nested-dir');
-      fs.mkdirSync(subdir);
+        const subdir = path.join(sessionsDir, 'some-nested-dir');
+        fs.mkdirSync(subdir);
 
-      const tmpSubdir = path.join(sessionsDir, '2026-02-11-fakeid00-session.tmp');
-      fs.mkdirSync(tmpSubdir);
+        const tmpSubdir = path.join(sessionsDir, '2026-02-11-fakeid00-session.tmp');
+        fs.mkdirSync(tmpSubdir);
 
-      const freshManager = require('../../scripts/lib/session-manager');
-      const result = freshManager.getAllSessions({ limit: 100 });
+        const freshManager = require('../../scripts/lib/session-manager');
+        const result = freshManager.getAllSessions({ limit: 100 });
 
-      // Should find only the real file, not either subdirectory
-      assert.strictEqual(result.total, 1,
-        `Should find 1 session (the file), not subdirectories. Got ${result.total}`);
-      assert.strictEqual(result.sessions[0].filename, realFile,
-        `Should return the real file. Got: ${result.sessions[0].filename}`);
+        // Should find only the real file, not either subdirectory
+        assert.strictEqual(result.total, 1,
+          `Should find 1 session (the file), not subdirectories. Got ${result.total}`);
+        assert.strictEqual(result.sessions[0].filename, realFile,
+          `Should return the real file. Got: ${result.sessions[0].filename}`);
+      });
     } finally {
-      process.env.HOME = origHome;
-      process.env.USERPROFILE = origUserProfile;
       clearSessionManagerCache();
       sessionManager = require('../../scripts/lib/session-manager');
       fs.rmSync(isoHome, { recursive: true, force: true });
@@ -866,41 +854,37 @@ file.ts
   console.log('\nRound 106: getAllSessions (array/object limit coercion ï¿½ Number([5])?5, Number({})?NaN?50):');
   if (test('getAllSessions coerces array/object limit via Number() with NaN fallback to 50', () => {
     const isoHome = path.join(os.tmpdir(), `ecc-r106-limit-coerce-${Date.now()}`);
-    const origHome = process.env.HOME;
-    const origUserProfile = process.env.USERPROFILE;
-    process.env.HOME = isoHome;
-    process.env.USERPROFILE = isoHome;
     try {
-      clearSessionManagerCache();
-      const freshUtils = require('../../scripts/lib/utils');
-      const isoSessionsDir = freshUtils.getSessionsDir();
-      fs.mkdirSync(isoSessionsDir, { recursive: true });
-      for (let i = 0; i < 3; i++) {
-        const name = `2026-03-0${i + 1}-aaaa${i}${i}${i}${i}-session.tmp`;
-        const filePath = path.join(isoSessionsDir, name);
-        fs.writeFileSync(filePath, `# Session ${i}`);
-        const mtime = new Date(Date.now() - (3 - i) * 60000);
-        fs.utimesSync(filePath, mtime, mtime);
-      }
-      const freshManager = require('../../scripts/lib/session-manager');
-      // Object limit: Number({}) ? NaN ? fallback to 50
-      const objResult = freshManager.getAllSessions({ limit: {} });
-      assert.strictEqual(objResult.limit, 50,
-        'Object limit should coerce to NaN ? fallback to default 50');
-      assert.strictEqual(objResult.total, 3, 'Should still find all 3 sessions');
-      // Single-element array: Number([2]) ? 2
-      const arrResult = freshManager.getAllSessions({ limit: [2] });
-      assert.strictEqual(arrResult.limit, 2,
-        'Single-element array [2] coerces to Number 2 via Number([2])');
-      assert.strictEqual(arrResult.sessions.length, 2, 'Should return only 2 sessions');
-      assert.strictEqual(arrResult.hasMore, true, 'hasMore should be true with limit 2 of 3');
-      // Multi-element array: Number([1,2]) ? NaN ? fallback to 50
-      const multiArrResult = freshManager.getAllSessions({ limit: [1, 2] });
-      assert.strictEqual(multiArrResult.limit, 50,
-        'Multi-element array [1,2] coerces to NaN ? fallback to 50');
+      withEnv({ HOME: isoHome, USERPROFILE: isoHome }, () => {
+        clearSessionManagerCache();
+        const freshUtils = require('../../scripts/lib/utils');
+        const isoSessionsDir = freshUtils.getSessionsDir();
+        fs.mkdirSync(isoSessionsDir, { recursive: true });
+        for (let i = 0; i < 3; i++) {
+          const name = `2026-03-0${i + 1}-aaaa${i}${i}${i}${i}-session.tmp`;
+          const filePath = path.join(isoSessionsDir, name);
+          fs.writeFileSync(filePath, `# Session ${i}`);
+          const mtime = new Date(Date.now() - (3 - i) * 60000);
+          fs.utimesSync(filePath, mtime, mtime);
+        }
+        const freshManager = require('../../scripts/lib/session-manager');
+        // Object limit: Number({}) ? NaN ? fallback to 50
+        const objResult = freshManager.getAllSessions({ limit: {} });
+        assert.strictEqual(objResult.limit, 50,
+          'Object limit should coerce to NaN ? fallback to default 50');
+        assert.strictEqual(objResult.total, 3, 'Should still find all 3 sessions');
+        // Single-element array: Number([2]) ? 2
+        const arrResult = freshManager.getAllSessions({ limit: [2] });
+        assert.strictEqual(arrResult.limit, 2,
+          'Single-element array [2] coerces to Number 2 via Number([2])');
+        assert.strictEqual(arrResult.sessions.length, 2, 'Should return only 2 sessions');
+        assert.strictEqual(arrResult.hasMore, true, 'hasMore should be true with limit 2 of 3');
+        // Multi-element array: Number([1,2]) ? NaN ? fallback to 50
+        const multiArrResult = freshManager.getAllSessions({ limit: [1, 2] });
+        assert.strictEqual(multiArrResult.limit, 50,
+          'Multi-element array [1,2] coerces to NaN ? fallback to 50');
+      });
     } finally {
-      process.env.HOME = origHome;
-      process.env.USERPROFILE = origUserProfile;
       clearSessionManagerCache();
       sessionManager = require('../../scripts/lib/session-manager');
       fs.rmSync(isoHome, { recursive: true, force: true });
