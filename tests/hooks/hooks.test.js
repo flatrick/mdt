@@ -9,6 +9,7 @@ const path = require('path');
 const fs = require('fs');
 const os = require('os');
 const { spawn } = require('child_process');
+const { ensureSubprocessCapability } = require('../helpers/subprocess-capability');
 
 // Test helper
 function test(name, fn) {
@@ -76,11 +77,20 @@ function cleanupTestDir(testDir) {
 }
 
 // Return the sessions dir that hook scripts use when run with HOME=homeDir (tool-agnostic: .cursor, .claude, or .codex)
-function getSessionsDirForHome(homeDir) {
+function getSessionsDirForHome(homeDir, envOverrides = {}) {
   const origHome = process.env.HOME;
   const origProfile = process.env.USERPROFILE;
+  const previousEnv = {};
   process.env.HOME = homeDir;
   process.env.USERPROFILE = homeDir;
+  for (const [key, value] of Object.entries(envOverrides)) {
+    previousEnv[key] = process.env[key];
+    if (value === undefined || value === null) {
+      delete process.env[key];
+    } else {
+      process.env[key] = String(value);
+    }
+  }
   const detectEnvPath = path.resolve(__dirname, '..', '..', 'scripts', 'lib', 'detect-env.js');
   const utilsPath = path.resolve(__dirname, '..', '..', 'scripts', 'lib', 'utils.js');
   delete require.cache[detectEnvPath];
@@ -89,6 +99,13 @@ function getSessionsDirForHome(homeDir) {
   const dir = u.getSessionsDir();
   process.env.HOME = origHome;
   process.env.USERPROFILE = origProfile;
+  for (const [key, value] of Object.entries(previousEnv)) {
+    if (value === undefined) {
+      delete process.env[key];
+    } else {
+      process.env[key] = value;
+    }
+  }
   delete require.cache[detectEnvPath];
   delete require.cache[utilsPath];
   return dir;
@@ -1542,25 +1559,7 @@ async function runTests() {
 
   // ─── Round 23: Bug fixes & high-priority gap coverage ───
 
-  // Helper: create a patched evaluate-session.js wrapper that resolves
-  // require('../lib/utils') to the real utils.js and uses a custom config path
-  const realUtilsPath = path.resolve(__dirname, '..', '..', 'scripts', 'lib', 'utils.js');
-  function createEvalWrapper(testDir, configPath) {
-    const wrapperScript = path.join(testDir, 'eval-wrapper.js');
-    let src = fs.readFileSync(path.join(scriptsDir, 'evaluate-session.js'), 'utf8');
-    // Patch require to use absolute path (the temp dir doesn't have ../lib/utils)
-    src = src.replace(
-      /require\('\.\.\/lib\/utils'\)/,
-      `require(${JSON.stringify(realUtilsPath)})`
-    );
-    // Patch config file path to point to our test config
-    src = src.replace(
-      /const configFile = path\.join\(scriptDir.*?config\.json'\);/,
-      `const configFile = ${JSON.stringify(configPath)};`
-    );
-    fs.writeFileSync(wrapperScript, src);
-    return wrapperScript;
-  }
+  const evaluateSessionScript = path.join(scriptsDir, 'evaluate-session.js');
 
   console.log('\nRound 23: evaluate-session.js (config & nullish coalescing):');
 
@@ -1584,11 +1583,10 @@ async function runTests() {
       learned_skills_path: path.join(testDir, 'learned')
     }));
 
-    const wrapperScript = createEvalWrapper(testDir, configPath);
-
     const stdinJson = JSON.stringify({ transcript_path: transcriptPath });
-    const result = await runScript(wrapperScript, stdinJson, {
-      HOME: testDir, USERPROFILE: testDir
+    const result = await runScript(evaluateSessionScript, stdinJson, {
+      HOME: testDir, USERPROFILE: testDir,
+      ECC_CONTINUOUS_LEARNING_CONFIG: configPath
     });
     assert.strictEqual(result.code, 0);
     // With min_session_length=0, even 2 messages should trigger evaluation
@@ -1615,11 +1613,10 @@ async function runTests() {
       learned_skills_path: path.join(testDir, 'learned')
     }));
 
-    const wrapperScript = createEvalWrapper(testDir, configPath);
-
     const stdinJson = JSON.stringify({ transcript_path: transcriptPath });
-    const result = await runScript(wrapperScript, stdinJson, {
-      HOME: testDir, USERPROFILE: testDir
+    const result = await runScript(evaluateSessionScript, stdinJson, {
+      HOME: testDir, USERPROFILE: testDir,
+      ECC_CONTINUOUS_LEARNING_CONFIG: configPath
     });
     assert.strictEqual(result.code, 0);
     // null ?? 10 === 10, so 5 messages should be "too short"
@@ -1640,11 +1637,10 @@ async function runTests() {
       learned_skills_path: customLearnedDir
     }));
 
-    const wrapperScript = createEvalWrapper(testDir, configPath);
-
     const stdinJson = JSON.stringify({ transcript_path: transcriptPath });
-    await runScript(wrapperScript, stdinJson, {
-      HOME: testDir, USERPROFILE: testDir
+    await runScript(evaluateSessionScript, stdinJson, {
+      HOME: testDir, USERPROFILE: testDir,
+      ECC_CONTINUOUS_LEARNING_CONFIG: configPath
     });
     assert.ok(fs.existsSync(customLearnedDir), 'Should create custom learned skills directory');
     cleanupTestDir(testDir);
@@ -1662,11 +1658,10 @@ async function runTests() {
     const configPath = path.join(skillsDir, 'config.json');
     fs.writeFileSync(configPath, 'not valid json!!!');
 
-    const wrapperScript = createEvalWrapper(testDir, configPath);
-
     const stdinJson = JSON.stringify({ transcript_path: transcriptPath });
-    const result = await runScript(wrapperScript, stdinJson, {
-      HOME: testDir, USERPROFILE: testDir
+    const result = await runScript(evaluateSessionScript, stdinJson, {
+      HOME: testDir, USERPROFILE: testDir,
+      ECC_CONTINUOUS_LEARNING_CONFIG: configPath
     });
     assert.strictEqual(result.code, 0);
     // Should log parse failure and fall back to default 10 → 5 msgs too short
@@ -1678,19 +1673,19 @@ async function runTests() {
 
   if (await asyncTest('updates Last Updated timestamp in existing session file', async () => {
     const testDir = createTestDir();
-    const sessionsDir = getSessionsDirForHome(testDir);
-    fs.mkdirSync(sessionsDir, { recursive: true });
-
     const utils = require('../../scripts/lib/utils');
     const today = utils.getDateString();
     const shortId = 'update01';
+    const sessionId = `session-${shortId}`;
+    const sessionsDir = getSessionsDirForHome(testDir, { CLAUDE_SESSION_ID: sessionId });
+    fs.mkdirSync(sessionsDir, { recursive: true });
     const sessionFile = path.join(sessionsDir, `${today}-${shortId}-session.tmp`);
     const originalContent = `# Session: ${today}\n**Date:** ${today}\n**Started:** 09:00\n**Last Updated:** 09:00\n\n---\n\n## Current State\n\n[Session context goes here]\n\n### Completed\n- [ ]\n\n### In Progress\n- [ ]\n\n### Notes for Next Session\n-\n\n### Context to Load\n\`\`\`\n[relevant files]\n\`\`\`\n`;
     fs.writeFileSync(sessionFile, originalContent);
 
     const result = await runScript(path.join(scriptsDir, 'session-end.js'), '', {
       HOME: testDir, USERPROFILE: testDir,
-      CLAUDE_SESSION_ID: `session-${shortId}`
+      CLAUDE_SESSION_ID: sessionId
     });
     assert.strictEqual(result.code, 0);
 
@@ -1702,12 +1697,12 @@ async function runTests() {
 
   if (await asyncTest('replaces blank template with summary when updating existing file', async () => {
     const testDir = createTestDir();
-    const sessionsDir = getSessionsDirForHome(testDir);
-    fs.mkdirSync(sessionsDir, { recursive: true });
-
     const utils = require('../../scripts/lib/utils');
     const today = utils.getDateString();
     const shortId = 'update02';
+    const sessionId = `session-${shortId}`;
+    const sessionsDir = getSessionsDirForHome(testDir, { CLAUDE_SESSION_ID: sessionId });
+    fs.mkdirSync(sessionsDir, { recursive: true });
     const sessionFile = path.join(sessionsDir, `${today}-${shortId}-session.tmp`);
     // Pre-existing file with blank template
     const originalContent = `# Session: ${today}\n**Date:** ${today}\n**Started:** 09:00\n**Last Updated:** 09:00\n\n---\n\n## Current State\n\n[Session context goes here]\n\n### Completed\n- [ ]\n\n### In Progress\n- [ ]\n\n### Notes for Next Session\n-\n\n### Context to Load\n\`\`\`\n[relevant files]\n\`\`\`\n`;
@@ -1724,7 +1719,7 @@ async function runTests() {
     const stdinJson = JSON.stringify({ transcript_path: transcriptPath });
     const result = await runScript(path.join(scriptsDir, 'session-end.js'), stdinJson, {
       HOME: testDir, USERPROFILE: testDir,
-      CLAUDE_SESSION_ID: `session-${shortId}`
+      CLAUDE_SESSION_ID: sessionId
     });
     assert.strictEqual(result.code, 0);
 
@@ -1737,12 +1732,12 @@ async function runTests() {
 
   if (await asyncTest('always updates session summary content on session end', async () => {
     const testDir = createTestDir();
-    const sessionsDir = getSessionsDirForHome(testDir);
-    fs.mkdirSync(sessionsDir, { recursive: true });
-
     const utils = require('../../scripts/lib/utils');
     const today = utils.getDateString();
     const shortId = 'update03';
+    const sessionId = `session-${shortId}`;
+    const sessionsDir = getSessionsDirForHome(testDir, { CLAUDE_SESSION_ID: sessionId });
+    fs.mkdirSync(sessionsDir, { recursive: true });
     const sessionFile = path.join(sessionsDir, `${today}-${shortId}-session.tmp`);
     // Pre-existing file with already-filled summary
     const existingContent = `# Session: ${today}\n**Date:** ${today}\n**Started:** 08:00\n**Last Updated:** 08:30\n\n---\n\n## Session Summary\n\n### Tasks\n- Previous task from earlier\n`;
@@ -1754,7 +1749,7 @@ async function runTests() {
     const stdinJson = JSON.stringify({ transcript_path: transcriptPath });
     const result = await runScript(path.join(scriptsDir, 'session-end.js'), stdinJson, {
       HOME: testDir, USERPROFILE: testDir,
-      CLAUDE_SESSION_ID: `session-${shortId}`
+      CLAUDE_SESSION_ID: sessionId
     });
     assert.strictEqual(result.code, 0);
 
@@ -2371,11 +2366,10 @@ async function runTests() {
       learned_skills_path: '~/test-tilde-skills'
     }));
 
-    const wrapperScript = createEvalWrapper(testDir, configPath);
-
     const stdinJson = JSON.stringify({ transcript_path: transcriptPath });
-    const result = await runScript(wrapperScript, stdinJson, {
-      HOME: testDir, USERPROFILE: testDir
+    const result = await runScript(evaluateSessionScript, stdinJson, {
+      HOME: testDir, USERPROFILE: testDir,
+      ECC_CONTINUOUS_LEARNING_CONFIG: configPath
     });
     assert.strictEqual(result.code, 0);
     // ~ should expand to os.homedir() which during the script run is the real home
@@ -2403,11 +2397,10 @@ async function runTests() {
       learned_skills_path: midTildeDir
     }));
 
-    const wrapperScript = createEvalWrapper(testDir, configPath);
-
     const stdinJson = JSON.stringify({ transcript_path: transcriptPath });
-    const result = await runScript(wrapperScript, stdinJson, {
-      HOME: testDir, USERPROFILE: testDir
+    const result = await runScript(evaluateSessionScript, stdinJson, {
+      HOME: testDir, USERPROFILE: testDir,
+      ECC_CONTINUOUS_LEARNING_CONFIG: configPath
     });
     assert.strictEqual(result.code, 0);
     // The directory with ~ in the middle should be created as-is
@@ -2428,11 +2421,10 @@ async function runTests() {
 
     // Point config to a non-existent file
     const configPath = path.join(testDir, 'nonexistent', 'config.json');
-    const wrapperScript = createEvalWrapper(testDir, configPath);
-
     const stdinJson = JSON.stringify({ transcript_path: transcriptPath });
-    const result = await runScript(wrapperScript, stdinJson, {
-      HOME: testDir, USERPROFILE: testDir
+    const result = await runScript(evaluateSessionScript, stdinJson, {
+      HOME: testDir, USERPROFILE: testDir,
+      ECC_CONTINUOUS_LEARNING_CONFIG: configPath
     });
     assert.strictEqual(result.code, 0);
     // With no config file, default min_session_length=10 applies
@@ -3689,4 +3681,5 @@ Some random content without the expected ### Context to Load section
   process.exit(failed > 0 ? 1 : 0);
 }
 
+ensureSubprocessCapability('tests/hooks/hooks.test.js');
 runTests();

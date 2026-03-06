@@ -8,6 +8,9 @@
 const { spawnSync } = require('child_process');
 const path = require('path');
 const fs = require('fs');
+const { ensureSubprocessCapability } = require('./helpers/subprocess-capability');
+
+ensureSubprocessCapability('tests/run-all.js');
 
 const testsDir = __dirname;
 const testFiles = [
@@ -23,6 +26,7 @@ const testFiles = [
   'integration/hooks.test.js',
   'ci/validators.test.js',
   'scripts/claw.test.js',
+  'scripts/check-dependencies.test.js',
   'scripts/setup-package-manager.test.js',
   'scripts/skill-create-output.test.js',
   'scripts/powershell-scripts.test.js'

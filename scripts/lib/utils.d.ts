@@ -136,6 +136,8 @@ export interface ReadStdinJsonOptions {
    * Default: 1048576 (1MB)
    */
   maxSize?: number;
+  /** Optional input stream for testing. Defaults to process.stdin */
+  inputStream?: NodeJS.ReadStream;
 }
 
 /**
@@ -144,6 +146,9 @@ export interface ReadStdinJsonOptions {
  * Never rejects — safe to use without try-catch in hooks.
  */
 export function readStdinJson(options?: ReadStdinJsonOptions): Promise<Record<string, unknown>>;
+
+/** Parse text as a JSON object safely. Returns {} on invalid/empty input. */
+export function parseJsonObject(input: string): Record<string, unknown>;
 
 /** Log a message to stderr (visible to user in Claude Code terminal) */
 export function log(message: string): void;

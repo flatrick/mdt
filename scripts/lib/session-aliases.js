@@ -363,14 +363,17 @@ function renameAlias(oldAlias, newAlias) {
  * @returns {string|null} Session path or null if not found
  */
 function resolveSessionAlias(aliasOrId) {
+  if (!aliasOrId) {
+    return null;
+  }
   // First try to resolve as alias
   const resolved = resolveAlias(aliasOrId);
   if (resolved) {
     return resolved.sessionPath;
   }
 
-  // If not an alias, return as-is (might be a session path)
-  return aliasOrId;
+  // If not an alias, do not blindly trust arbitrary input as a path
+  return null;
 }
 
 /**

@@ -350,9 +350,9 @@ function runTests() {
     assert.strictEqual(result, '/sessions/my-session');
   })) passed++; else failed++;
 
-  if (test('returns input as-is when not an alias', () => {
+  if (test('returns null when input is not a known alias', () => {
     const result = aliases.resolveSessionAlias('/some/direct/path');
-    assert.strictEqual(result, '/some/direct/path');
+    assert.strictEqual(result, null);
   })) passed++; else failed++;
 
   // getAliasesForSession tests
@@ -1358,24 +1358,22 @@ function runTests() {
       'Object.keys of array returns numeric string indices, not named alias keys');
   })) passed++; else failed++;
 
-  // ── Round 104: resolveSessionAlias with path-traversal input (passthrough without validation) ──
-  console.log('\nRound 104: resolveSessionAlias (path-traversal input — returned unchanged):');
-  if (test('resolveSessionAlias returns path-traversal input as-is when alias lookup fails', () => {
-    // session-aliases.js lines 365-374: resolveSessionAlias first tries resolveAlias(),
-    // which rejects '../etc/passwd' because the regex /^[a-zA-Z0-9_-]+$/ fails on dots
-    // and slashes (returns null). Then the function falls through to line 373:
-    // `return aliasOrId` — returning the potentially dangerous input unchanged.
-    // Callers that blindly use this return value could be at risk.
+  // ── Round 104: resolveSessionAlias with path-traversal input (now returns null instead of passthrough) ──
+  console.log('\nRound 104: resolveSessionAlias (path-traversal input — now rejected with null):');
+  if (test('resolveSessionAlias returns null for path-traversal input when alias lookup fails', () => {
+    // session-aliases.js lines 365-374 previously returned aliasOrId unchanged.
+    // After hardening, path-traversal-looking inputs that are not aliases should
+    // not be passed through; they should result in null so callers can handle safely.
     resetAliases();
     const traversal = '../etc/passwd';
     const result = aliases.resolveSessionAlias(traversal);
-    assert.strictEqual(result, traversal,
-      'Path-traversal input should be returned as-is (resolveAlias rejects it, fallback returns input)');
+    assert.strictEqual(result, null,
+      'Path-traversal input should now return null instead of being passed through');
     // Also test with another invalid alias pattern
     const dotSlash = './../../secrets';
     const result2 = aliases.resolveSessionAlias(dotSlash);
-    assert.strictEqual(result2, dotSlash,
-      'Another path-traversal pattern also returned unchanged');
+    assert.strictEqual(result2, null,
+      'Another path-traversal pattern should also return null');
   })) passed++; else failed++;
 
   // ── Round 107: setAlias with whitespace-only title (not trimmed unlike sessionPath) ──

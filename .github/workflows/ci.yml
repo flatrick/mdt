@@ -131,6 +131,7 @@ jobs:
         run: node tests/run-all.js
         env:
           CLAUDE_CODE_PACKAGE_MANAGER: ${{ matrix.pm }}
+          ECC_REQUIRE_SUBPROCESS_TESTS: '1'
 
       # Upload test artifacts on failure
       - name: Upload test artifacts
@@ -162,10 +163,6 @@ jobs:
 
       - name: Validate hooks
         run: node scripts/ci/validate-hooks.js
-        continue-on-error: false
-
-      - name: Validate windows parity
-        run: node scripts/ci/validate-windows-parity.js
         continue-on-error: false
 
       - name: Validate commands

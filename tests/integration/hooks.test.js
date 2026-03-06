@@ -11,6 +11,7 @@ const path = require('path');
 const fs = require('fs');
 const os = require('os');
 const { spawn } = require('child_process');
+const { ensureSubprocessCapability } = require('../helpers/subprocess-capability');
 
 // Test helper
 function _test(name, fn) {
@@ -712,4 +713,5 @@ async function runTests() {
   process.exit(failed > 0 ? 1 : 0);
 }
 
+ensureSubprocessCapability('tests/integration/hooks.test.js');
 runTests();

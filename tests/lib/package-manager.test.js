@@ -198,8 +198,11 @@ function runTests() {
   if (test('returns array of available managers', () => {
     const available = pm.getAvailablePackageManagers();
     assert.ok(Array.isArray(available), 'Should return array');
-    // npm should always be available with Node.js
-    assert.ok(available.includes('npm'), 'npm should be available');
+    const known = ['npm', 'pnpm', 'yarn', 'bun'];
+    assert.ok(
+      available.every(pmName => known.includes(pmName)),
+      'Available package managers should only include known names'
+    );
   })) passed++;
   else failed++;
 
@@ -739,29 +742,34 @@ function runTests() {
   // setPreferredPackageManager success
   console.log('\nsetPreferredPackageManager (success):');
 
-  if (test('successfully saves preferred package manager', () => {
-    // This writes to ~/.claude/package-manager.json — read original to restore
-    const utils = require('../../scripts/lib/utils');
-    const configPath = path.join(utils.getClaudeDir(), 'package-manager.json');
-    const original = utils.readFile(configPath);
+  if (test('successfully saves preferred package manager in isolated temp config dir', () => {
+    const tmpHome = createTestDir();
+    const savedHome = process.env.HOME;
+    const savedProfile = process.env.USERPROFILE;
     try {
-      const config = pm.setPreferredPackageManager('bun');
+      process.env.HOME = tmpHome;
+      process.env.USERPROFILE = tmpHome;
+      delete require.cache[require.resolve('../../scripts/lib/detect-env')];
+      delete require.cache[require.resolve('../../scripts/lib/utils')];
+      delete require.cache[require.resolve('../../scripts/lib/package-manager')];
+      const isolatedPm = require('../../scripts/lib/package-manager');
+      const isolatedUtils = require('../../scripts/lib/utils');
+      const configDir = isolatedUtils.getConfigDir();
+      const configPath = path.join(configDir, 'package-manager.json');
+
+      const config = isolatedPm.setPreferredPackageManager('bun');
       assert.strictEqual(config.packageManager, 'bun');
       assert.ok(config.setAt, 'Should have setAt timestamp');
-      // Verify it was persisted
+
       const saved = JSON.parse(fs.readFileSync(configPath, 'utf8'));
       assert.strictEqual(saved.packageManager, 'bun');
     } finally {
-      // Restore original config
-      if (original) {
-        fs.writeFileSync(configPath, original, 'utf8');
-      } else {
-        try {
-          fs.unlinkSync(configPath);
-        } catch (_err) {
-          // ignore
-        }
-      }
+      process.env.HOME = savedHome;
+      process.env.USERPROFILE = savedProfile;
+      delete require.cache[require.resolve('../../scripts/lib/detect-env')];
+      delete require.cache[require.resolve('../../scripts/lib/utils')];
+      delete require.cache[require.resolve('../../scripts/lib/package-manager')];
+      cleanupTestDir(tmpHome);
     }
   })) passed++;
   else failed++;
@@ -1437,16 +1445,15 @@ function runTests() {
   // ── Round 80: getExecCommand with truthy non-string args ──
   console.log('\nRound 80: getExecCommand (truthy non-string args):');
 
-  if (test('getExecCommand with args=42 (truthy number) appends stringified value', () => {
+  if (test('getExecCommand rejects truthy non-string args like number 42', () => {
     const originalEnv = process.env.CLAUDE_PACKAGE_MANAGER;
     try {
       process.env.CLAUDE_PACKAGE_MANAGER = 'npm';
-      // args=42: truthy, so typeof check at line 334 short-circuits
-      // (typeof 42 !== 'string'), skipping validation. Line 339:
-      // 42 ? ' ' + 42 -> ' 42' -> appended.
-      const cmd = pm.getExecCommand('prettier', 42);
-      assert.ok(cmd.includes('prettier'), 'Should include binary name');
-      assert.ok(cmd.includes('42'), 'Truthy number should be stringified and appended');
+      assert.throws(
+        () => pm.getExecCommand('prettier', 42),
+        /args must be a string/,
+        'Truthy non-string args should be rejected'
+      );
     } finally {
       if (originalEnv !== undefined) process.env.CLAUDE_PACKAGE_MANAGER = originalEnv;
       else delete process.env.CLAUDE_PACKAGE_MANAGER;
@@ -1582,40 +1589,41 @@ function runTests() {
   })) passed++;
   else failed++;
 
-  // ── Round 105: getExecCommand with object args (bypasses SAFE_ARGS_REGEX, coerced to [object Object]) ──
-  console.log('\nRound 105: getExecCommand (object args — typeof bypass coerces to [object Object]):');
+  // ── Round 105: getExecCommand with object args (now rejected) ──
+  console.log('\nRound 105: getExecCommand (object args are rejected):');
 
-  if (test('getExecCommand with args={} bypasses SAFE_ARGS validation and coerces to "[object Object]"', () => {
-    // package-manager.js line 334: `if (args && typeof args === 'string' && !SAFE_ARGS_REGEX.test(args))`
-    // When args is an object: typeof {} === 'object' (not 'string'), so the
-    // SAFE_ARGS_REGEX check is entirely SKIPPED.\
-    // Line 339: `args ? ' ' + args : ''` — object is truthy, so it reaches\
-    // string concatenation which calls {}.toString() -> \"[object Object]\"\
-    // Final command: "npx prettier [object Object]" — brackets bypass validation.
-    const cmd = pm.getExecCommand('prettier', {});
-    assert.ok(cmd.includes('[object Object]'), 'Object args should be coerced to "[object Object]" via implicit toString()');
-    // Verify the SAFE_ARGS regex WOULD reject this string if it were a string arg
+  if (test('getExecCommand rejects object args and still rejects unsafe string "[object Object]"', () => {
+    assert.throws(
+      () => pm.getExecCommand('prettier', {}),
+      /args must be a string/,
+      'Object args should be rejected with a clear error'
+    );
+    // SAFE_ARGS_REGEX should still reject the explicit unsafe string variant
     assert.throws(
       () => pm.getExecCommand('prettier', '[object Object]'),
       /unsafe characters/,
-      'Same string as explicit string arg is correctly rejected by SAFE_ARGS_REGEX'
+      'Explicit "[object Object]" string should be rejected by SAFE_ARGS_REGEX'
     );
   })) passed++;
   else failed++;
 
-  // ── Round 109: getExecCommand with ../ path traversal in binary — SAFE_NAME_REGEX allows it ──
-  console.log('\nRound 109: getExecCommand (path traversal in binary — SAFE_NAME_REGEX permits ../ in binary name):');
+  // ── Round 109: getExecCommand with ../ path traversal in binary (now rejected) ──
+  console.log('\nRound 109: getExecCommand (path traversal in binary is rejected):');
 
-  if (test('getExecCommand accepts ../../../etc/passwd as binary because SAFE_NAME_REGEX allows ../', () => {
+  if (test('getExecCommand rejects ../../../etc/passwd and @scope/../../evil as unsafe binary names', () => {
     const originalEnv = process.env.CLAUDE_PACKAGE_MANAGER;
     try {
       process.env.CLAUDE_PACKAGE_MANAGER = 'npm';
-      // SAFE_NAME_REGEX = /^[@a-zA-Z0-9_.\\/-\\\\]+$/ individually allows . and /\
-      const cmd = pm.getExecCommand('../../../etc/passwd');
-      assert.strictEqual(cmd, 'npx ../../../etc/passwd', 'Path traversal in binary passes SAFE_NAME_REGEX because . and / are individually allowed');
-      // Also verify scoped path traversal
-      const cmd2 = pm.getExecCommand('@scope/../../evil');
-      assert.strictEqual(cmd2, 'npx @scope/../../evil', 'Scoped path traversal also passes the regex');
+      assert.throws(
+        () => pm.getExecCommand('../../../etc/passwd'),
+        /unsafe characters/,
+        'Path traversal in binary name should be rejected'
+      );
+      assert.throws(
+        () => pm.getExecCommand('@scope/../../evil'),
+        /unsafe characters/,
+        'Scoped path traversal in binary name should be rejected'
+      );
     } finally {
       if (originalEnv !== undefined) {
         process.env.CLAUDE_PACKAGE_MANAGER = originalEnv;
@@ -1626,20 +1634,23 @@ function runTests() {
   })) passed++;
   else failed++;
 
-  // ── Round 108: getRunCommand with path traversal — SAFE_NAME_REGEX allows ../ sequences ──
-  console.log('\nRound 108: getRunCommand (path traversal — SAFE_NAME_REGEX permits ../ via allowed / and . chars):');
+  // ── Round 108: getRunCommand with path traversal (now rejected) ──
+  console.log('\nRound 108: getRunCommand (path traversal in script name is rejected):');
 
-  if (test('getRunCommand accepts @scope/../../evil because SAFE_NAME_REGEX allows ../', () => {
+  if (test('getRunCommand rejects @scope/../../evil and ../../../etc/passwd as unsafe script names', () => {
     const originalEnv = process.env.CLAUDE_PACKAGE_MANAGER;
     try {
       process.env.CLAUDE_PACKAGE_MANAGER = 'npm';
-      // SAFE_NAME_REGEX = /^[@a-zA-Z0-9_.\\/-\\\\]+$/ allows each char individually,\
-      // so '../' passes despite being a path traversal sequence
-      const cmd = pm.getRunCommand('@scope/../../evil');
-      assert.strictEqual(cmd, 'npm run @scope/../../evil', 'Path traversal passes SAFE_NAME_REGEX because / and . are individually allowed');
-      // Also verify plain ../ passes
-      const cmd2 = pm.getRunCommand('../../../etc/passwd');
-      assert.strictEqual(cmd2, 'npm run ../../../etc/passwd', 'Bare ../ traversal also passes the regex');
+      assert.throws(
+        () => pm.getRunCommand('@scope/../../evil'),
+        /unsafe characters/,
+        'Path traversal in scoped script name should be rejected'
+      );
+      assert.throws(
+        () => pm.getRunCommand('../../../etc/passwd'),
+        /unsafe characters/,
+        'Bare path traversal script name should be rejected'
+      );
     } finally {
       if (originalEnv !== undefined) {
         process.env.CLAUDE_PACKAGE_MANAGER = originalEnv;
@@ -1650,24 +1661,28 @@ function runTests() {
   })) passed++;
   else failed++;
 
-  // Round 111: getExecCommand with newline in args
-  console.log('\n' + String.raw`Round 111: getExecCommand (newline in args — SAFE_ARGS_REGEX \s matches \n):`);
+  // Round 111: getExecCommand with newline in args (now rejected; only space/tab allowed)
+  console.log('\n' + String.raw`Round 111: getExecCommand (newline in args is rejected; only space/tab allowed):`);
 
-  if (test('getExecCommand accepts newline in args because SAFE_ARGS_REGEX includes newline', () => {
-    // SAFE_ARGS_REGEX = /^[@a-zA-Z0-9\\s_.\\/:=,'\"*+-\\]+$/
-    // \\s matches whitespace including newline
+  if (test('getExecCommand rejects newline and carriage return in args but still allows tabs', () => {
     const originalEnv = process.env.CLAUDE_PACKAGE_MANAGER;
     try {
       process.env.CLAUDE_PACKAGE_MANAGER = 'npm';
-      // Newline in args should pass SAFE_ARGS_REGEX because \\s matches newline
-      const cmd = pm.getExecCommand('prettier', 'file.js\necho injected');
-      assert.strictEqual(cmd, 'npx prettier file.js\necho injected', 'Newline passes SAFE_ARGS_REGEX');
-      // Tab also passes
+      // Newline in args should now be rejected
+      assert.throws(
+        () => pm.getExecCommand('prettier', 'file.js\necho injected'),
+        /unsafe characters/,
+        'Newline in args should be rejected'
+      );
+      // Tab remains allowed
       const cmd2 = pm.getExecCommand('eslint', 'file.js\t--fix');
-      assert.strictEqual(cmd2, 'npx eslint file.js\t--fix', 'Tab also passes SAFE_ARGS_REGEX via \\s');
-      // Carriage return also passes
-      const cmd3 = pm.getExecCommand('tsc', 'src\r--strict');
-      assert.strictEqual(cmd3, 'npx tsc src\r--strict', 'Carriage return passes via \\s');
+      assert.strictEqual(cmd2, 'npx eslint file.js\t--fix', 'Tab should still be allowed in args');
+      // Carriage return should be rejected
+      assert.throws(
+        () => pm.getExecCommand('tsc', 'src\r--strict'),
+        /unsafe characters/,
+        'Carriage return in args should be rejected'
+      );
     } finally {
       if (originalEnv !== undefined) process.env.CLAUDE_PACKAGE_MANAGER = originalEnv;
       else delete process.env.CLAUDE_PACKAGE_MANAGER;

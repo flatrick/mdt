@@ -239,57 +239,77 @@ function findFiles(dir, pattern, options = {}) {
  * @returns {Promise<object>} Parsed JSON object, or empty object if stdin is empty
  */
 async function readStdinJson(options = {}) {
-  const { timeoutMs = 5000, maxSize = 1024 * 1024 } = options;
+  const { timeoutMs = 5000, maxSize = 1024 * 1024, inputStream = process.stdin } = options;
 
   return new Promise((resolve) => {
     let data = '';
     let settled = false;
 
+    const cleanup = () => {
+      inputStream.removeListener('data', onData);
+      inputStream.removeListener('end', onEnd);
+      inputStream.removeListener('error', onError);
+    };
+
+    const settleWithParsedData = () => {
+      if (settled) return;
+      settled = true;
+      clearTimeout(timer);
+      cleanup();
+      resolve(parseJsonObject(data));
+    };
+
     const timer = setTimeout(() => {
-      if (!settled) {
-        settled = true;
-        // Clean up stdin listeners so the event loop can exit
-        process.stdin.removeAllListeners('data');
-        process.stdin.removeAllListeners('end');
-        process.stdin.removeAllListeners('error');
-        if (process.stdin.unref) process.stdin.unref();
-        // Resolve with whatever we have so far rather than hanging
-        try {
-          resolve(data.trim() ? JSON.parse(data) : {});
-        } catch {
-          resolve({});
-        }
-      }
+      settleWithParsedData();
+      if (inputStream.unref) inputStream.unref();
     }, timeoutMs);
 
-    process.stdin.setEncoding('utf8');
-    process.stdin.on('data', chunk => {
+    inputStream.setEncoding('utf8');
+    const onData = chunk => {
       if (data.length < maxSize) {
         data += chunk;
       }
-    });
+    };
 
-    process.stdin.on('end', () => {
+    const onEnd = () => {
+      settleWithParsedData();
+    };
+
+    const onError = () => {
       if (settled) return;
       settled = true;
       clearTimeout(timer);
-      try {
-        resolve(data.trim() ? JSON.parse(data) : {});
-      } catch {
-        // Consistent with timeout path: resolve with empty object
-        // so hooks don't crash on malformed input
-        resolve({});
-      }
-    });
-
-    process.stdin.on('error', () => {
-      if (settled) return;
-      settled = true;
-      clearTimeout(timer);
+      cleanup();
       // Resolve with empty object so hooks don't crash on stdin errors
       resolve({});
-    });
+    };
+
+    inputStream.on('data', onData);
+    inputStream.on('end', onEnd);
+    inputStream.on('error', onError);
   });
+}
+
+/**
+ * Parse a JSON object payload from text safely.
+ * Returns {} for empty/invalid/non-object input.
+ * @param {string} input
+ * @returns {object}
+ */
+function parseJsonObject(input) {
+  if (typeof input !== 'string') {
+    return {};
+  }
+  const trimmed = input.trim();
+  if (!trimmed) {
+    return {};
+  }
+  try {
+    const parsed = JSON.parse(trimmed);
+    return parsed && typeof parsed === 'object' ? parsed : {};
+  } catch {
+    return {};
+  }
 }
 
 /**
@@ -553,6 +573,7 @@ module.exports = {
 
   // Hook I/O
   readStdinJson,
+  parseJsonObject,
   log,
   output,
 

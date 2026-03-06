@@ -6,7 +6,7 @@
 const fs = require('fs');
 const path = require('path');
 
-const AGENTS_DIR = path.join(__dirname, '../../agents');
+const DEFAULT_AGENTS_DIR = path.join(__dirname, '../../agents');
 const REQUIRED_FIELDS = ['model', 'tools'];
 const VALID_MODELS = ['haiku', 'sonnet', 'opus'];
 
@@ -30,52 +30,63 @@ function extractFrontmatter(content) {
   return frontmatter;
 }
 
-function validateAgents() {
-  if (!fs.existsSync(AGENTS_DIR)) {
-    console.log('No agents directory found, skipping validation');
-    process.exit(0);
+function validateAgents(options = {}) {
+  const agentsDir = options.agentsDir || DEFAULT_AGENTS_DIR;
+  const io = options.io || { log: console.log, error: console.error };
+  if (!fs.existsSync(agentsDir)) {
+    io.log('No agents directory found, skipping validation');
+    return { exitCode: 0, validatedCount: 0, hasErrors: false };
   }
 
-  const files = fs.readdirSync(AGENTS_DIR).filter(f => f.endsWith('.md'));
+  const files = fs.readdirSync(agentsDir).filter(f => f.endsWith('.md'));
   let hasErrors = false;
 
   for (const file of files) {
-    const filePath = path.join(AGENTS_DIR, file);
+    const filePath = path.join(agentsDir, file);
     let content;
     try {
       content = fs.readFileSync(filePath, 'utf-8');
     } catch (err) {
-      console.error(`ERROR: ${file} - ${err.message}`);
+      io.error(`ERROR: ${file} - ${err.message}`);
       hasErrors = true;
       continue;
     }
     const frontmatter = extractFrontmatter(content);
 
     if (!frontmatter) {
-      console.error(`ERROR: ${file} - Missing frontmatter`);
+      io.error(`ERROR: ${file} - Missing frontmatter`);
       hasErrors = true;
       continue;
     }
 
     for (const field of REQUIRED_FIELDS) {
       if (!frontmatter[field] || (typeof frontmatter[field] === 'string' && !frontmatter[field].trim())) {
-        console.error(`ERROR: ${file} - Missing required field: ${field}`);
+        io.error(`ERROR: ${file} - Missing required field: ${field}`);
         hasErrors = true;
       }
     }
 
     // Validate model is a known value
     if (frontmatter.model && !VALID_MODELS.includes(frontmatter.model)) {
-      console.error(`ERROR: ${file} - Invalid model '${frontmatter.model}'. Must be one of: ${VALID_MODELS.join(', ')}`);
+      io.error(`ERROR: ${file} - Invalid model '${frontmatter.model}'. Must be one of: ${VALID_MODELS.join(', ')}`);
       hasErrors = true;
     }
   }
 
   if (hasErrors) {
-    process.exit(1);
+    return { exitCode: 1, validatedCount: files.length, hasErrors: true };
   }
 
-  console.log(`Validated ${files.length} agent files`);
+  io.log(`Validated ${files.length} agent files`);
+  return { exitCode: 0, validatedCount: files.length, hasErrors: false };
 }
 
-validateAgents();
+if (require.main === module) {
+  const result = validateAgents();
+  process.exit(result.exitCode);
+}
+
+module.exports = {
+  extractFrontmatter,
+  validateAgents
+};

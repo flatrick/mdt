@@ -10,6 +10,7 @@ const assert = require('assert');
 const path = require('path');
 const fs = require('fs');
 const os = require('os');
+const detectEnv = require(path.join(__dirname, '..', '..', 'scripts', 'lib', 'detect-env.js')).detectEnv;
 
 const {
   getClawDir,
@@ -52,16 +53,16 @@ function runTests() {
 
   console.log('Storage:');
 
-  if (test('getClawDir() returns path ending in .claude/claw', () => {
+  if (test('getClawDir() returns data-dir-relative claw path', () => {
     const dir = getClawDir();
-    assert.ok(dir.endsWith(path.join('.claude', 'claw')),
-      `Expected path ending in .claude/claw, got: ${dir}`);
+    const expected = path.join(detectEnv.getDataDir(), 'claw');
+    assert.strictEqual(dir, expected, `Expected ${expected}, got: ${dir}`);
   })) passed++; else failed++;
 
-  if (test('getSessionPath("foo") returns correct .md path', () => {
+  if (test('getSessionPath("foo") returns data-dir-relative .md path', () => {
     const p = getSessionPath('foo');
-    assert.ok(p.endsWith(path.join('.claude', 'claw', 'foo.md')),
-      `Expected path ending in .claude/claw/foo.md, got: ${p}`);
+    const expected = path.join(detectEnv.getDataDir(), 'claw', 'foo.md');
+    assert.strictEqual(p, expected, `Expected ${expected}, got: ${p}`);
   })) passed++; else failed++;
 
   if (test('listSessions() returns empty array for empty dir', () => {

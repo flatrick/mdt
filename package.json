@@ -73,8 +73,7 @@
     "AGENTS.md",
     ".claude-plugin/plugin.json",
     ".claude-plugin/README.md",
-    "scripts/install-ecc.js",
-    "llms.txt"
+    "scripts/install-ecc.js"
   ],
   "bin": {
     "ecc-install": "scripts/install-ecc.js"
@@ -83,9 +82,9 @@
     "postinstall": "echo '\\n  ecc-universal installed!\\n  Run: npx ecc-install typescript\\n  Docs: https://github.com/affaan-m/everything-claude-code\\n'",
     "install-ecc": "node scripts/install-ecc.js",
     "release": "node scripts/release.js",
-    "lint": "eslint . && markdownlint '**/*.md' --ignore node_modules",
+    "lint": "node scripts/ci/check-dependencies.js eslint markdownlint-cli && eslint . && markdownlint '**/*.md' --ignore node_modules",
     "claw": "node scripts/claw.js",
-    "test": "node scripts/ci/validate-agents.js && node scripts/ci/validate-commands.js && node scripts/ci/validate-rules.js && node scripts/ci/validate-skills.js && node scripts/ci/validate-hooks.js && node scripts/ci/validate-no-hardcoded-paths.js && node tests/run-all.js"
+    "test": "node scripts/ci/check-dependencies.js eslint markdownlint-cli && node scripts/ci/validate-agents.js && node scripts/ci/validate-commands.js && node scripts/ci/validate-rules.js && node scripts/ci/validate-skills.js && node scripts/ci/validate-hooks.js && node scripts/ci/validate-no-hardcoded-paths.js && node tests/run-all.js"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.2",

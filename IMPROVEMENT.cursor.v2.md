@@ -7,6 +7,15 @@ This document consolidates findings from three independent audits (Codex, Cursor
 
 ---
 
+## V1 Direction (Intentional Contract)
+
+- Backward compatibility with legacy passthrough behavior is not a goal for this fork's v1.
+- Security-first API contract: `resolveSessionAlias(...)` must return a resolved path or `null`, never raw input passthrough.
+- Any caller that wants alias-or-path behavior must implement explicit fallback at the call site.
+- In general, helpers that process user-provided identifiers should prefer explicit `null`/error over implicit trust.
+
+---
+
 ## Priority 1 — Security & Input Validation
 
 ### 1.1 `SAFE_NAME_REGEX` allows path traversal

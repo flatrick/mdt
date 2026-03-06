@@ -8,7 +8,6 @@ const fs = require('fs');
 const path = require('path');
 
 const REPO_ROOT = path.join(__dirname, '../..');
-const SKILLS_DIR = path.join(REPO_ROOT, 'skills');
 
 // Flag only hardcoded *home* .claude paths (not detect-env.js, not path.join(projectDir, '.claude'))
 const HARDCODED_HOME_CLAUDE = /path\.join\s*\(\s*(?:homeDir|os\.homedir\(\)|process\.env\.HOME)[^)]*['"]\.claude/;
@@ -27,15 +26,15 @@ function isExcluded(line) {
     t.startsWith("message +=");
 }
 
-function checkNoHardcodedPaths() {
+function checkNoHardcodedPaths(repoRoot = REPO_ROOT) {
   const errors = [];
   const jsDirs = [
-    path.join(REPO_ROOT, 'scripts'),
-    path.join(REPO_ROOT, 'skills')
+    path.join(repoRoot, 'scripts'),
+    path.join(repoRoot, 'skills')
   ];
-  const selfRel = path.relative(REPO_ROOT, path.join(__dirname, 'validate-no-hardcoded-paths.js'));
-  const detectEnvRel = path.relative(REPO_ROOT, path.join(REPO_ROOT, 'scripts', 'lib', 'detect-env.js'));
-  const installEccRel = path.relative(REPO_ROOT, path.join(REPO_ROOT, 'scripts', 'install-ecc.js'));
+  const selfRel = path.relative(repoRoot, path.join(__dirname, 'validate-no-hardcoded-paths.js'));
+  const detectEnvRel = path.relative(repoRoot, path.join(repoRoot, 'scripts', 'lib', 'detect-env.js'));
+  const installEccRel = path.relative(repoRoot, path.join(repoRoot, 'scripts', 'install-ecc.js'));
   const excluded = new Set([selfRel, detectEnvRel, installEccRel]);
   for (const dir of jsDirs) {
     if (!fs.existsSync(dir)) continue;
@@ -43,7 +42,7 @@ function checkNoHardcodedPaths() {
       const entries = fs.readdirSync(d, { withFileTypes: true });
       for (const e of entries) {
         const full = path.join(d, e.name);
-        const rel = path.relative(REPO_ROOT, full);
+        const rel = path.relative(repoRoot, full);
         if (e.isDirectory() && e.name !== 'node_modules') walk(full);
         else if (e.isFile() && e.name.endsWith('.js') && !excluded.has(rel)) {
           const content = fs.readFileSync(full, 'utf8');
@@ -63,9 +62,9 @@ function checkNoHardcodedPaths() {
   return errors;
 }
 
-function checkNoShellScriptsInRepo() {
+function checkNoShellScriptsInRepo(repoRoot = REPO_ROOT) {
   const errors = [];
-  const dirsToWalk = [REPO_ROOT, path.join(REPO_ROOT, 'scripts')];
+  const dirsToWalk = [repoRoot, path.join(repoRoot, 'scripts')];
   const seen = new Set();
   function walk(dir) {
     if (!fs.existsSync(dir)) return;
@@ -73,7 +72,7 @@ function checkNoShellScriptsInRepo() {
     for (const e of entries) {
       if (e.name === 'node_modules') continue;
       const full = path.join(dir, e.name);
-      const rel = path.relative(REPO_ROOT, full);
+      const rel = path.relative(repoRoot, full);
       if (e.isDirectory()) walk(full);
       else if (e.isFile() && (e.name.endsWith('.sh') || e.name.endsWith('.ps1'))) {
         if (!seen.has(rel)) {
@@ -87,16 +86,27 @@ function checkNoShellScriptsInRepo() {
   return errors;
 }
 
-function main() {
-  const noShell = checkNoShellScriptsInRepo();
-  const hardcoded = checkNoHardcodedPaths();
+function validateNoHardcodedPaths(options = {}) {
+  const repoRoot = options.repoRoot || REPO_ROOT;
+  const io = options.io || { log: console.log, error: console.error };
+  const noShell = checkNoShellScriptsInRepo(repoRoot);
+  const hardcoded = checkNoHardcodedPaths(repoRoot);
   const all = [...noShell, ...hardcoded];
   if (all.length > 0) {
-    all.forEach(e => console.error(e));
-    process.exit(1);
+    all.forEach(e => io.error(e));
+    return { exitCode: 1, errors: all };
   }
-  console.log('Validated Node-only runtime (no .sh/.ps1 in repo, no hardcoded ~/.claude/)');
-  process.exit(0);
+  io.log('Validated Node-only runtime (no .sh/.ps1 in repo, no hardcoded ~/.claude/)');
+  return { exitCode: 0, errors: [] };
 }
 
-main();
+if (require.main === module) {
+  const result = validateNoHardcodedPaths();
+  process.exit(result.exitCode);
+}
+
+module.exports = {
+  checkNoHardcodedPaths,
+  checkNoShellScriptsInRepo,
+  validateNoHardcodedPaths
+};

@@ -11,9 +11,44 @@ const assert = require('assert');
 const path = require('path');
 const fs = require('fs');
 const os = require('os');
-const { execFileSync } = require('child_process');
 
 const validatorsDir = path.join(__dirname, '..', '..', 'scripts', 'ci');
+
+function getValidatorFunction(validatorName) {
+  const mod = require(path.join(validatorsDir, `${validatorName}.js`));
+  const map = {
+    'validate-agents': mod.validateAgents,
+    'validate-hooks': mod.validateHooks,
+    'validate-commands': mod.validateCommands,
+    'validate-skills': mod.validateSkills,
+    'validate-rules': mod.validateRules,
+    'validate-no-hardcoded-paths': mod.validateNoHardcodedPaths
+  };
+  if (!map[validatorName]) {
+    throw new Error(`Unsupported validator: ${validatorName}`);
+  }
+  return map[validatorName];
+}
+
+function runValidatorFunction(validatorName, options = {}) {
+  const logs = [];
+  const errors = [];
+  const warns = [];
+  const fn = getValidatorFunction(validatorName);
+  const result = fn({
+    ...options,
+    io: {
+      log: msg => logs.push(String(msg)),
+      error: msg => errors.push(String(msg)),
+      warn: msg => warns.push(String(msg))
+    }
+  });
+  return {
+    code: result.exitCode,
+    stdout: logs.join('\n') + (warns.length ? `\n${warns.join('\n')}` : ''),
+    stderr: errors.join('\n')
+  };
+}
 
 // Test helpers
 function test(name, fn) {
@@ -46,32 +81,16 @@ function cleanupTestDir(testDir) {
  * @returns {{code: number, stdout: string, stderr: string}}
  */
 function runValidatorWithDir(validatorName, dirConstant, overridePath) {
-  const validatorPath = path.join(validatorsDir, `${validatorName}.js`);
-
-  // Read the validator source, replace the directory constant, and run as a wrapper
-  let source = fs.readFileSync(validatorPath, 'utf8');
-
-  // Remove the shebang line
-  source = source.replace(/^#!.*\n/, '');
-
-  // Replace the directory constant with our override path
-  const dirRegex = new RegExp(`const ${dirConstant} = .*?;`);
-  source = source.replace(dirRegex, `const ${dirConstant} = ${JSON.stringify(overridePath)};`);
-
-  try {
-    const stdout = execFileSync('node', ['-e', source], {
-      encoding: 'utf8',
-      stdio: ['pipe', 'pipe', 'pipe'],
-      timeout: 10000,
-    });
-    return { code: 0, stdout, stderr: '' };
-  } catch (err) {
-    return {
-      code: err.status || 1,
-      stdout: err.stdout || '',
-      stderr: err.stderr || '',
-    };
-  }
+  const optionMap = {
+    AGENTS_DIR: 'agentsDir',
+    HOOKS_FILE: 'hooksFile',
+    COMMANDS_DIR: 'commandsDir',
+    SKILLS_DIR: 'skillsDir',
+    RULES_DIR: 'rulesDir'
+  };
+  const key = optionMap[dirConstant];
+  if (!key) throw new Error(`Unsupported dir constant: ${dirConstant}`);
+  return runValidatorFunction(validatorName, { [key]: overridePath });
 }
 
 /**
@@ -80,48 +99,27 @@ function runValidatorWithDir(validatorName, dirConstant, overridePath) {
  * @param {Record<string, string>} overrides - map of constant name to path
  */
 function runValidatorWithDirs(validatorName, overrides) {
-  const validatorPath = path.join(validatorsDir, `${validatorName}.js`);
-  let source = fs.readFileSync(validatorPath, 'utf8');
-  source = source.replace(/^#!.*\n/, '');
+  const optionMap = {
+    AGENTS_DIR: 'agentsDir',
+    HOOKS_FILE: 'hooksFile',
+    COMMANDS_DIR: 'commandsDir',
+    SKILLS_DIR: 'skillsDir',
+    RULES_DIR: 'rulesDir'
+  };
+  const options = {};
   for (const [constant, overridePath] of Object.entries(overrides)) {
-    const dirRegex = new RegExp(`const ${constant} = .*?;`);
-    source = source.replace(dirRegex, `const ${constant} = ${JSON.stringify(overridePath)};`);
+    const key = optionMap[constant];
+    if (!key) throw new Error(`Unsupported dir constant: ${constant}`);
+    options[key] = overridePath;
   }
-  try {
-    const stdout = execFileSync('node', ['-e', source], {
-      encoding: 'utf8',
-      stdio: ['pipe', 'pipe', 'pipe'],
-      timeout: 10000,
-    });
-    return { code: 0, stdout, stderr: '' };
-  } catch (err) {
-    return {
-      code: err.status || 1,
-      stdout: err.stdout || '',
-      stderr: err.stderr || '',
-    };
-  }
+  return runValidatorFunction(validatorName, options);
 }
 
 /**
  * Run a validator script directly (tests real project)
  */
 function runValidator(validatorName) {
-  const validatorPath = path.join(validatorsDir, `${validatorName}.js`);
-  try {
-    const stdout = execFileSync('node', [validatorPath], {
-      encoding: 'utf8',
-      stdio: ['pipe', 'pipe', 'pipe'],
-      timeout: 15000,
-    });
-    return { code: 0, stdout, stderr: '' };
-  } catch (err) {
-    return {
-      code: err.status || 1,
-      stdout: err.stdout || '',
-      stderr: err.stderr || '',
-    };
-  }
+  return runValidatorFunction(validatorName);
 }
 
 function runTests() {

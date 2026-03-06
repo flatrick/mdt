@@ -284,6 +284,16 @@ function setProjectPackageManager(pmName, projectDir = process.cwd()) {
 // This prevents shell metacharacter injection while allowing scoped packages (e.g., @scope/pkg)
 const SAFE_NAME_REGEX = /^[@a-zA-Z0-9_./-]+$/;
 
+function isSafeName(name) {
+  if (!SAFE_NAME_REGEX.test(name)) {
+    return false;
+  }
+  if (/\.\./.test(name) || name.startsWith('/')) {
+    return false;
+  }
+  return true;
+}
+
 /**
  * Get the command to run a script
  * @param {string} script - Script name (e.g., "dev", "build", "test")
@@ -294,7 +304,7 @@ function getRunCommand(script, options = {}) {
   if (!script || typeof script !== 'string') {
     throw new Error('Script name must be a non-empty string');
   }
-  if (!SAFE_NAME_REGEX.test(script)) {
+  if (!isSafeName(script)) {
     throw new Error(`Script name contains unsafe characters: ${script}`);
   }
 
@@ -314,9 +324,9 @@ function getRunCommand(script, options = {}) {
   }
 }
 
-// Allowed characters in arguments: alphanumeric, whitespace, dashes, dots, slashes,
+// Allowed characters in arguments: alphanumeric, space/tab, dashes, dots, slashes,
 // equals, colons, commas, quotes, @. Rejects shell metacharacters like ; | & ` $ ( ) { } < > !
-const SAFE_ARGS_REGEX = /^[@a-zA-Z0-9\s_./:=,'"*+-]+$/;
+const SAFE_ARGS_REGEX = /^[@a-zA-Z0-9 \t_./:=,'"*+-]+$/;
 
 /**
  * Get the command to execute a package binary
@@ -328,10 +338,13 @@ function getExecCommand(binary, args = '', options = {}) {
   if (!binary || typeof binary !== 'string') {
     throw new Error('Binary name must be a non-empty string');
   }
-  if (!SAFE_NAME_REGEX.test(binary)) {
+  if (!isSafeName(binary)) {
     throw new Error(`Binary name contains unsafe characters: ${binary}`);
   }
-  if (args && typeof args === 'string' && !SAFE_ARGS_REGEX.test(args)) {
+  if (args && typeof args !== 'string') {
+    throw new Error('args must be a string');
+  }
+  if (args && !SAFE_ARGS_REGEX.test(args)) {
     throw new Error(`Arguments contain unsafe characters: ${args}`);
   }
 

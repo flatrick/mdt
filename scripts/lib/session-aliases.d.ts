@@ -118,10 +118,10 @@ export function deleteAlias(alias: string): DeleteAliasResult;
 export function renameAlias(oldAlias: string, newAlias: string): RenameAliasResult;
 
 /**
- * Resolve an alias or pass through a session path.
- * First tries to resolve as alias; if not found, returns the input as-is.
+ * Resolve an alias to a session path.
+ * Returns null when the input is not a valid alias.
  */
-export function resolveSessionAlias(aliasOrId: string): string;
+export function resolveSessionAlias(aliasOrId: string): string | null;
 
 /** Update the title of an existing alias. Pass null to clear. */
 export function updateAliasTitle(alias: string, title: string | null): AliasResult;
