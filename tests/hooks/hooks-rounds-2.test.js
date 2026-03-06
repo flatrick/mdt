@@ -526,9 +526,12 @@ async function runTests() {
       // The real string message should appear
       assert.ok(content.includes('Real user message'),
         'Should include the string content user message');
-      // Numeric/boolean/object content should NOT appear as text
-      assert.ok(!content.includes('42'),
+      // Numeric/boolean/object content should NOT appear as task bullet lines.
+      // Avoid raw substring checks because timestamps can legitimately contain "42".
+      assert.ok(!/\n-\s*42\b/.test(content),
         'Numeric content should be skipped (else branch → empty string → filtered)');
+      assert.ok(!/\n-\s*true\b/.test(content),
+        'Boolean content should be skipped (else branch → empty string → filtered)');
     } finally {
       fs.rmSync(isoHome, { recursive: true, force: true });
     }
