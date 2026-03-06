@@ -25,6 +25,9 @@ making CI trustworthy. That work is done. The next phase should be intentional.
 Write down a one-sentence answer. If you can't, that's the first problem to
 solve.
 
+Answer: Primarily for myself, both at work and for my personal projects.
+But I'm also hoping to share it with some friends and coworkers who could benefit from it.
+
 ## 2. What is your relationship with upstream?
 
 `affaan-m/everything-claude-code` will keep shipping new agents, skills, and
@@ -42,6 +45,9 @@ commands. You need a policy:
 
 Pick one. The answer affects whether you invest in sync tooling or delete the
 upstream remote entirely.
+
+Answer: upstream is going to be ignored going forward. 
+I may choose to download newer versions from the original author to compare and test, but that's about it.
 
 ## 3. What should be removed?
 
@@ -65,6 +71,8 @@ Candidates to evaluate:
 Removing things is harder than adding them. Do it now while the codebase is
 clean and you remember what everything does.
 
+Answer: I have already removed some of the things I don't need and added some I do.
+
 ## 4. What is missing for YOUR workflows?
 
 Forget what the upstream project thinks is important. Think about your last
@@ -77,6 +85,10 @@ Forget what the upstream project thinks is important. Think about your last
 
 These are your v2 features. They should come from lived experience, not from
 scanning for theoretical improvements.
+
+Answer: I'm still learning about what _can_ be done with these agents;
+I forked the original repository to make use of someone else's
+hard earned experience to learn and build upon myself.
 
 ## 5. How do you want to maintain this going forward?
 
@@ -95,11 +107,17 @@ For ongoing work, decide:
   code? Must every change have tests, or only changes to security-sensitive
   paths?
 
+Answer: I have found that there is still a lot that needs to be fixed;
+some skills referring to python-scripts that I've removed and replaced with javascript.
+
 ## 6. When is v2 done?
 
 v1 had a clear finish line: "all planned items implemented and verified."
 Define the same for v2 before starting. A project without a finish line
 becomes a project that never ships.
+
+Answer: I'm at this point feeling like v1 is still underway; 
+it is time to iron out any and all bugs from the move away from python/shell-scripts.
 
 ---
 
