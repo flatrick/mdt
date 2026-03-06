@@ -605,24 +605,19 @@ function runTests() {
     // 2. copyFileSync(backupPath, aliasesPath) â EACCES (can't create target) â inner catch (line 135)
     fs.chmodSync(claudeDir, 0o555);
 
-    const origH = process.env.HOME;
-    const origP = process.env.USERPROFILE;
-    process.env.HOME = isoHome;
-    process.env.USERPROFILE = isoHome;
-
     try {
-      delete require.cache[require.resolve('../../scripts/lib/session-aliases')];
-      delete require.cache[require.resolve('../../scripts/lib/utils')];
-      const freshAliases = require('../../scripts/lib/session-aliases');
+      withEnv({ HOME: isoHome, USERPROFILE: isoHome }, () => {
+        delete require.cache[require.resolve('../../scripts/lib/session-aliases')];
+        delete require.cache[require.resolve('../../scripts/lib/utils')];
+        const freshAliases = require('../../scripts/lib/session-aliases');
 
-      const result = freshAliases.saveAliases({ aliases: { x: 1 }, version: '1.0' });
-      assert.strictEqual(result, false, 'Should return false when save fails');
+        const result = freshAliases.saveAliases({ aliases: { x: 1 }, version: '1.0' });
+        assert.strictEqual(result, false, 'Should return false when save fails');
 
-      // Backup should still exist (restore also failed, so backup was not consumed)
-      assert.ok(fs.existsSync(backupPath), 'Backup should still exist after double failure');
+        // Backup should still exist (restore also failed, so backup was not consumed)
+        assert.ok(fs.existsSync(backupPath), 'Backup should still exist after double failure');
+      });
     } finally {
-      process.env.HOME = origH;
-      process.env.USERPROFILE = origP;
       delete require.cache[require.resolve('../../scripts/lib/session-aliases')];
       delete require.cache[require.resolve('../../scripts/lib/utils')];
       try { fs.chmodSync(claudeDir, 0o755); } catch { /* best-effort */ }

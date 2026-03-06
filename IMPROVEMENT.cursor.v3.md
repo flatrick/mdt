@@ -60,6 +60,7 @@ Source chain: `IMPROVEMENT.codex.md` + `IMPROVEMENT.claude.md` + `IMPROVEMENT.cu
 - Expanded `withEnv(...)` adoption in `tests/lib/session-manager-rounds.test.js` for additional TOCTOU/subdirectory/limit-coercion round cases to reduce repeated manual environment save/restore scaffolding.
 - Further expanded `withEnv(...)` adoption in `tests/lib/session-manager-rounds.test.js` by migrating additional grouped fixture phases (birthtime fallback and rounds 95-98 setup) to reduce manual environment lifecycle code.
 - Expanded `withEnv(...)` adoption in `tests/lib/session-aliases-rounds.test.js` for read-only/save-failure round cases to reduce repeated HOME/USERPROFILE save/restore scaffolding.
+- Further expanded `withEnv(...)` adoption in `tests/lib/session-aliases-rounds.test.js` by migrating the Round 90 backup-restore failure path to shared environment lifecycle handling.
 - Restricted installer script payload to runtime-only directories (`scripts/hooks`, `scripts/lib`) for Claude/Cursor targets and added installer regression coverage in `tests/scripts/install-ecc.test.js` (included in `tests/run-all.js`).
 - Made CI security scanning blocking (`npm audit` no longer uses advisory `continue-on-error`) and hardened release changelog output to use a unique heredoc delimiter in `.github/workflows/release.yml`.
 - Introduced shared markdown read normalization (`scripts/ci/markdown-utils.js`) and deepened validator rules: skills now require heading + "When to Use/Activate", and rules now require heading + body content; tests and legacy skills were aligned.
