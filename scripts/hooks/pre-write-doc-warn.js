@@ -12,50 +12,42 @@
  */
 
 const path = require('path');
+const { readStdinText, parseJsonObject } = require('../lib/utils');
 
 const MAX_STDIN = 1024 * 1024; // 1MB limit
-let data = '';
-process.stdin.setEncoding('utf8');
+async function runCli() {
+  const data = await readStdinText({ timeoutMs: 5000, maxSize: MAX_STDIN });
+  const input = parseJsonObject(data);
+  const filePath = input.tool_input?.file_path || '';
 
-process.stdin.on('data', chunk => {
-  if (data.length < MAX_STDIN) {
-    const remaining = MAX_STDIN - data.length;
-    data += chunk.length > remaining ? chunk.slice(0, remaining) : chunk;
+  // Only check .md and .txt files
+  if (!/\.(md|txt)$/.test(filePath)) {
+    process.stdout.write(data);
+    return;
   }
-});
 
-process.stdin.on('end', () => {
-  try {
-    const input = JSON.parse(data);
-    const filePath = input.tool_input?.file_path || '';
-
-    // Only check .md and .txt files
-    if (!/\.(md|txt)$/.test(filePath)) {
-      process.stdout.write(data);
-      return;
-    }
-
-    // Allow standard documentation files
-    const basename = path.basename(filePath);
-    if (/^(README|CLAUDE|AGENTS|CONTRIBUTING|CHANGELOG|LICENSE|SKILL)\.md$/i.test(basename)) {
-      process.stdout.write(data);
-      return;
-    }
-
-    // Allow files in .claude/plans/, docs/, and skills/ directories
-    const normalized = filePath.replace(/\\/g, '/');
-    if (/\.claude\/plans\//.test(normalized) || /(^|\/)(docs|skills)\//.test(normalized)) {
-      process.stdout.write(data);
-      return;
-    }
-
-    // Warn about non-standard documentation files
-    console.error('[Hook] WARNING: Non-standard documentation file detected');
-    console.error('[Hook] File: ' + filePath);
-    console.error('[Hook] Consider consolidating into README.md or docs/ directory');
-  } catch {
-    // Parse error — pass through
+  // Allow standard documentation files
+  const basename = path.basename(filePath);
+  if (/^(README|CLAUDE|AGENTS|CONTRIBUTING|CHANGELOG|LICENSE|SKILL)\.md$/i.test(basename)) {
+    process.stdout.write(data);
+    return;
   }
+
+  // Allow files in .claude/plans/, docs/, and skills/ directories
+  const normalized = filePath.replace(/\\/g, '/');
+  if (/\.claude\/plans\//.test(normalized) || /(^|\/)(docs|skills)\//.test(normalized)) {
+    process.stdout.write(data);
+    return;
+  }
+
+  // Warn about non-standard documentation files
+  console.error('[Hook] WARNING: Non-standard documentation file detected');
+  console.error('[Hook] File: ' + filePath);
+  console.error('[Hook] Consider consolidating into README.md or docs/ directory');
 
   process.stdout.write(data);
+}
+
+runCli().catch(() => {
+  process.exit(0);
 });

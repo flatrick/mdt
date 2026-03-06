@@ -31,6 +31,7 @@ Source chain: `IMPROVEMENT.codex.md` + `IMPROVEMENT.claude.md` + `IMPROVEMENT.cu
 - Added subprocess capability gating + strict mode and enabled strict mode in CI (`ECC_REQUIRE_SUBPROCESS_TESTS=1`).
 - Replaced inline `node -e` command hooks in `hooks/hooks.json` with script-backed Node commands using `scripts/hooks/command-hooks.js`, and updated integration tests to execute both inline and script-form hook commands.
 - Consolidated `suggest-compact` implementation into shared `scripts/hooks/suggest-compact.js`; `skills/strategic-compact/suggest-compact.js` now delegates to shared logic.
+- Consolidated duplicated hook stdin buffering into shared utilities by adding `readStdinText(...)` in `scripts/lib/utils.js` and migrating hook scripts to shared stdin/JSON parsing helpers.
 - Restricted installer script payload to runtime-only directories (`scripts/hooks`, `scripts/lib`) for Claude/Cursor targets and added installer regression coverage in `tests/scripts/install-ecc.test.js` (included in `tests/run-all.js`).
 - Made CI security scanning blocking (`npm audit` no longer uses advisory `continue-on-error`) and hardened release changelog output to use a unique heredoc delimiter in `.github/workflows/release.yml`.
 - Introduced shared markdown read normalization (`scripts/ci/markdown-utils.js`) and deepened validator rules: skills now require heading + "When to Use/Activate", and rules now require heading + body content; tests and legacy skills were aligned.

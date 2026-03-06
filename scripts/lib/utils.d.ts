@@ -141,6 +141,12 @@ export interface ReadStdinJsonOptions {
 }
 
 /**
+ * Read raw text from stdin with timeout and max-size guard.
+ * Returns collected text (possibly truncated) and never rejects.
+ */
+export function readStdinText(options?: ReadStdinJsonOptions): Promise<string>;
+
+/**
  * Read JSON from stdin (for hook input).
  * Returns an empty object if stdin is empty, times out, or contains invalid JSON.
  * Never rejects — safe to use without try-catch in hooks.

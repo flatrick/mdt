@@ -237,6 +237,64 @@ function findFiles(dir, pattern, options = {}) {
 }
 
 /**
+ * Read text from stdin with timeout and max-size guard.
+ * @param {object} options - Options
+ * @param {number} options.timeoutMs - Timeout in milliseconds (default: 5000)
+ * @param {number} options.maxSize - Maximum number of characters to buffer (default: 1MB)
+ * @param {NodeJS.ReadStream} options.inputStream - Stream to read from (default: process.stdin)
+ * @returns {Promise<string>} Raw stdin text (possibly truncated to maxSize)
+ */
+async function readStdinText(options = {}) {
+  const { timeoutMs = 5000, maxSize = 1024 * 1024, inputStream = process.stdin } = options;
+
+  return new Promise((resolve) => {
+    let data = '';
+    let settled = false;
+
+    const cleanup = () => {
+      inputStream.removeListener('data', onData);
+      inputStream.removeListener('end', onEnd);
+      inputStream.removeListener('error', onError);
+    };
+
+    const settleWithData = () => {
+      if (settled) return;
+      settled = true;
+      clearTimeout(timer);
+      cleanup();
+      resolve(data);
+    };
+
+    const timer = setTimeout(() => {
+      settleWithData();
+      if (inputStream.unref) inputStream.unref();
+    }, timeoutMs);
+
+    inputStream.setEncoding('utf8');
+
+    const onData = chunk => {
+      if (data.length >= maxSize) {
+        return;
+      }
+      const remaining = maxSize - data.length;
+      data += chunk.length > remaining ? chunk.slice(0, remaining) : chunk;
+    };
+
+    const onEnd = () => {
+      settleWithData();
+    };
+
+    const onError = () => {
+      settleWithData();
+    };
+
+    inputStream.on('data', onData);
+    inputStream.on('end', onEnd);
+    inputStream.on('error', onError);
+  });
+}
+
+/**
  * Read JSON from stdin (for hook input)
  * @param {object} options - Options
  * @param {number} options.timeoutMs - Timeout in milliseconds (default: 5000).
@@ -577,6 +635,7 @@ module.exports = {
   grepFile,
 
   // Hook I/O
+  readStdinText,
   readStdinJson,
   parseJsonObject,
   log,

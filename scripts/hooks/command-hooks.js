@@ -4,16 +4,9 @@
  * Replaces inline `node -e` hooks with file-backed Node.js logic.
  */
 
-const MAX_STDIN = 1024 * 1024; // 1MB
-let data = '';
-process.stdin.setEncoding('utf8');
+const { readStdinText, parseJsonObject } = require('../lib/utils');
 
-process.stdin.on('data', (chunk) => {
-  if (data.length < MAX_STDIN) {
-    const remaining = MAX_STDIN - data.length;
-    data += chunk.substring(0, remaining);
-  }
-});
+const MAX_STDIN = 1024 * 1024; // 1MB
 
 function extractCommand(input) {
   return input && input.tool_input && typeof input.tool_input.command === 'string'
@@ -85,16 +78,15 @@ function handleMode(mode, input) {
   return 0;
 }
 
-process.stdin.on('end', () => {
-  let input = {};
-  try {
-    input = data ? JSON.parse(data) : {};
-  } catch {
-    input = {};
-  }
-
+async function runCli() {
+  const data = await readStdinText({ timeoutMs: 5000, maxSize: MAX_STDIN });
+  const input = parseJsonObject(data);
   const mode = process.argv[2] || '';
   const code = handleMode(mode, input);
   process.stdout.write(data);
   process.exit(code);
+}
+
+runCli().catch(() => {
+  process.exit(0);
 });

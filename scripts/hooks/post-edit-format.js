@@ -13,17 +13,9 @@
 const { execFileSync } = require('child_process');
 const fs = require('fs');
 const path = require('path');
+const { readStdinText, parseJsonObject } = require('../lib/utils');
 
 const MAX_STDIN = 1024 * 1024; // 1MB limit
-let data = '';
-process.stdin.setEncoding('utf8');
-
-process.stdin.on('data', chunk => {
-  if (data.length < MAX_STDIN) {
-    const remaining = MAX_STDIN - data.length;
-    data += chunk.substring(0, remaining);
-  }
-});
 
 function findProjectRoot(startDir) {
   let dir = startDir;
@@ -71,32 +63,33 @@ function getFormatterCommand(formatter, filePath) {
   return null;
 }
 
-process.stdin.on('end', () => {
-  try {
-    const input = JSON.parse(data);
-    const filePath = input.tool_input?.file_path;
+async function runCli() {
+  const data = await readStdinText({ timeoutMs: 5000, maxSize: MAX_STDIN });
+  const input = parseJsonObject(data);
+  const filePath = input.tool_input?.file_path;
 
-    if (filePath && /\.(ts|tsx|js|jsx)$/.test(filePath)) {
-      try {
-        const projectRoot = findProjectRoot(path.dirname(path.resolve(filePath)));
-        const formatter = detectFormatter(projectRoot);
-        const cmd = getFormatterCommand(formatter, filePath);
+  if (filePath && /\.(ts|tsx|js|jsx)$/.test(filePath)) {
+    try {
+      const projectRoot = findProjectRoot(path.dirname(path.resolve(filePath)));
+      const formatter = detectFormatter(projectRoot);
+      const cmd = getFormatterCommand(formatter, filePath);
 
-        if (cmd) {
-          execFileSync(cmd.bin, cmd.args, {
-            cwd: projectRoot,
-            stdio: ['pipe', 'pipe', 'pipe'],
-            timeout: 15000
-          });
-        }
-      } catch {
-        // Formatter not installed, file missing, or failed — non-blocking
+      if (cmd) {
+        execFileSync(cmd.bin, cmd.args, {
+          cwd: projectRoot,
+          stdio: ['pipe', 'pipe', 'pipe'],
+          timeout: 15000
+        });
       }
+    } catch {
+      // Formatter not installed, file missing, or failed — non-blocking
     }
-  } catch {
-    // Invalid input — pass through
   }
 
   process.stdout.write(data);
+  process.exit(0);
+}
+
+runCli().catch(() => {
   process.exit(0);
 });

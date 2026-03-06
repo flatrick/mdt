@@ -14,7 +14,7 @@
  */
 
 const fs = require('fs');
-const { isGitRepo, getGitModifiedFiles, readFile, log } = require('../lib/utils');
+const { isGitRepo, getGitModifiedFiles, readFile, readStdinText, log } = require('../lib/utils');
 
 // Files where console.log is expected and should not trigger warnings
 const EXCLUDED_PATTERNS = [
@@ -27,17 +27,8 @@ const EXCLUDED_PATTERNS = [
 ];
 
 const MAX_STDIN = 1024 * 1024; // 1MB limit
-let data = '';
-process.stdin.setEncoding('utf8');
-
-process.stdin.on('data', chunk => {
-  if (data.length < MAX_STDIN) {
-    const remaining = MAX_STDIN - data.length;
-    data += chunk.substring(0, remaining);
-  }
-});
-
-process.stdin.on('end', () => {
+async function runCli() {
+  const data = await readStdinText({ timeoutMs: 5000, maxSize: MAX_STDIN });
   try {
     if (!isGitRepo()) {
       process.stdout.write(data);
@@ -67,5 +58,9 @@ process.stdin.on('end', () => {
 
   // Always output the original data
   process.stdout.write(data);
+  process.exit(0);
+}
+
+runCli().catch(() => {
   process.exit(0);
 });
