@@ -13,7 +13,7 @@ The v1 work was defensive: fixing what was broken, hardening what was fragile,
 making CI trustworthy. That work is done. The next phase should be intentional.
 
 - Is this a personal toolkit you use daily? If so, what workflows does it
-  actually serve, and which of its 18 agents / 60+ skills / 30+ commands do
+  actually serve, and which of its 16 agents / 60+ skills / 30+ commands do
   you never touch?
 - Is this a reference implementation you want others to adopt? If so, the
   installer UX, onboarding docs, and first-run experience matter more than
@@ -56,8 +56,7 @@ Candidates to evaluate:
 - **Skills**: The skills directory has broad coverage. Which ones have you
   actually invoked? Skills you never use are not free — they add context
   noise when Claude scans for relevant skills.
-- **Commands**: Same question. `/e2e`, `/go-build`, `/go-test`,
-  `/python-review` — do these match your actual stack?
+- **Commands**: Same question. `/e2e`, `/python-review` — do these match your actual stack?
 - **MCP configs**: Are you using all configured MCP servers? Unused configs
   are dead weight.
 - **Hooks**: The hook system now has significant complexity. Which hooks

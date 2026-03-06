@@ -310,7 +310,6 @@ export const ECCHooksPlugin = async ({
       // Detect languages
       const langDetectors: Record<string, string> = {
         "tsconfig.json": "typescript",
-        "go.mod": "go",
         "pyproject.toml": "python",
         "Cargo.toml": "rust",
         "Package.swift": "swift",
@@ -346,7 +345,7 @@ export const ECCHooksPlugin = async ({
         "## Active Plugin: Everything Claude Code v1.6.0",
         "- Hooks: file.edited, tool.execute.before/after, session.created/idle/deleted, shell.env, compacting, permission.ask",
         "- Tools: run-tests, check-coverage, security-audit, format-code, lint-check, git-summary",
-        "- Agents: 13 specialized (planner, architect, tdd-guide, code-reviewer, security-reviewer, build-error-resolver, e2e-runner, refactor-cleaner, doc-updater, go-reviewer, go-build-resolver, database-reviewer, python-reviewer)",
+        "- Agents: 11 specialized (planner, architect, tdd-guide, code-reviewer, security-reviewer, build-error-resolver, e2e-runner, refactor-cleaner, doc-updater, database-reviewer, python-reviewer)",
         "",
         "## Key Principles",
         "- TDD: write tests first, 80%+ coverage",
@@ -388,7 +387,7 @@ export const ECCHooksPlugin = async ({
       }
 
       // Auto-approve: formatters
-      if (event.tool === "bash" && /^(npx )?(prettier|biome|black|gofmt|rustfmt|swift-format)/.test(cmd)) {
+      if (event.tool === "bash" && /^(npx )?(prettier|biome|black|rustfmt|swift-format)/.test(cmd)) {
         return { approved: true, reason: "Formatter execution" }
       }
 

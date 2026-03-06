@@ -87,7 +87,7 @@ There are 27 skills organized into 4 categories. Use `AskUserQuestion` with `mul
 ```
 Question: "Which skill categories do you want to install?"
 Options:
-  - "Framework & Language" — "Django, Spring Boot, Go, Python, Java, Frontend, Backend patterns"
+  - "Framework & Language" — "Django, Spring Boot, Python, Java, Frontend, Backend patterns"
   - "Database" — "PostgreSQL, ClickHouse, JPA/Hibernate patterns"
   - "Workflow & Quality" — "TDD, verification, learning, security review, compaction"
   - "All skills" — "Install every available skill"
@@ -109,8 +109,6 @@ For each selected category, print the full list of skills below and ask the user
 | `django-verification` | Django verification loop: migrations, linting, tests, security scans |
 | `frontend-patterns` | React, Next.js, state management, performance, UI patterns |
 | `frontend-slides` | Zero-dependency HTML presentations, style previews, and PPTX-to-web conversion |
-| `golang-patterns` | Idiomatic Go patterns, conventions for robust Go applications |
-| `golang-testing` | Go testing: table-driven tests, subtests, benchmarks, fuzzing |
 | `java-coding-standards` | Java coding standards for Spring Boot: naming, immutability, Optional, streams |
 | `python-patterns` | Pythonic idioms, PEP 8, type hints, best practices |
 | `python-testing` | Python testing with pytest, TDD, fixtures, mocking, parametrization |
@@ -177,7 +175,6 @@ Options:
   - "Common rules (Recommended)" — "Language-agnostic principles: coding style, git workflow, testing, security, etc. (8 files)"
   - "TypeScript/JavaScript" — "TS/JS patterns, hooks, testing with Playwright (5 files)"
   - "Python" — "Python patterns, pytest, black/ruff formatting (5 files)"
-  - "Go" — "Go patterns, table-driven tests, gofmt/staticcheck (5 files)"
 ```
 
 Execute installation:
@@ -188,7 +185,6 @@ cp -r $ECC_ROOT/rules/common/* $TARGET/rules/
 # Language-specific rules (flat copy into rules/)
 cp -r $ECC_ROOT/rules/typescript/* $TARGET/rules/   # if selected
 cp -r $ECC_ROOT/rules/python/* $TARGET/rules/        # if selected
-cp -r $ECC_ROOT/rules/golang/* $TARGET/rules/        # if selected
 ```
 
 **Important**: If the user selects any language-specific rules but NOT common rules, warn them:
@@ -229,7 +225,6 @@ Some skills reference others. Verify these dependencies:
 - `springboot-tdd` may reference `springboot-patterns`
 - `continuous-learning-v2` references `~/.claude/homunculus/` directory
 - `python-testing` may reference `python-patterns`
-- `golang-testing` may reference `golang-patterns`
 - Language-specific rules reference `common/` counterparts
 
 ### 4d: Report Issues

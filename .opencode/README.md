@@ -63,8 +63,6 @@ opencode
 | e2e-runner | E2E testing |
 | doc-updater | Documentation |
 | refactor-cleaner | Dead code cleanup |
-| go-reviewer | Go code review |
-| go-build-resolver | Go build errors |
 | database-reviewer | Database optimization |
 
 ### Commands (24)
@@ -87,9 +85,6 @@ opencode
 | `/update-codemaps` | Update codemaps |
 | `/test-coverage` | Coverage analysis |
 | `/setup-pm` | Package manager |
-| `/go-review` | Go code review |
-| `/go-test` | Go TDD |
-| `/go-build` | Go build fix |
 | `/skill-create` | Generate skills |
 | `/instinct-status` | View instincts |
 | `/instinct-import` | Import instincts |

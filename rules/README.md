@@ -16,7 +16,6 @@ rules/
 │   └── security.md
 ├── typescript/      # TypeScript/JavaScript specific
 ├── python/          # Python specific
-├── golang/          # Go specific
 └── swift/           # Swift specific
 ```
 
@@ -31,7 +30,6 @@ rules/
 # Install common + one or more language-specific rule sets
 node scripts/install-ecc.js typescript
 node scripts/install-ecc.js python
-node scripts/install-ecc.js golang
 node scripts/install-ecc.js swift
 
 # Install multiple languages at once
@@ -53,7 +51,6 @@ cp -r rules/common ~/.claude/rules/common
 # Install language-specific rules based on your project's tech stack
 cp -r rules/typescript ~/.claude/rules/typescript
 cp -r rules/python ~/.claude/rules/python
-cp -r rules/golang ~/.claude/rules/golang
 cp -r rules/swift ~/.claude/rules/swift
 
 # Attention ! ! ! Configure according to your actual project requirements; the configuration here is for reference only.
@@ -62,7 +59,7 @@ cp -r rules/swift ~/.claude/rules/swift
 ## Rules vs Skills
 
 - **Rules** define standards, conventions, and checklists that apply broadly (e.g., "80% test coverage", "no hardcoded secrets").
-- **Skills** (`skills/` directory) provide deep, actionable reference material for specific tasks (e.g., `python-patterns`, `golang-testing`).
+- **Skills** (`skills/` directory) provide deep, actionable reference material for specific tasks (e.g., `python-patterns`, `tdd-workflow`).
 
 Language-specific rule files reference relevant skills where appropriate. Rules tell you *what* to do; skills tell you *how* to do it.
 
@@ -88,13 +85,13 @@ To add support for a new language (e.g., `rust/`):
 When language-specific rules and common rules conflict, **language-specific rules take precedence** (specific overrides general). This follows the standard layered configuration pattern (similar to CSS specificity or `.gitignore` precedence).
 
 - `rules/common/` defines universal defaults applicable to all projects.
-- `rules/golang/`, `rules/python/`, `rules/typescript/`, etc. override those defaults where language idioms differ.
+- `rules/python/`, `rules/typescript/`, etc. override those defaults where language idioms differ.
 
 ### Example
 
-`common/coding-style.md` recommends immutability as a default principle. A language-specific `golang/coding-style.md` can override this:
+`common/coding-style.md` recommends immutability as a default principle. A language-specific `python/coding-style.md` can override this:
 
-> Idiomatic Go uses pointer receivers for struct mutation — see [common/coding-style.md](../common/coding-style.md) for the general principle, but Go-idiomatic mutation is preferred here.
+> Python dataclasses with `frozen=True` enforce immutability — see [common/coding-style.md](../common/coding-style.md) for the general principle.
 
 ### Common rules with override notes
 

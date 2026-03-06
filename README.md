@@ -103,7 +103,7 @@ node scripts/install-ecc.js --target claude --dry-run typescript
 - `agents/` — Subagents (planner, code-reviewer, tdd-guide, security-reviewer, etc.)
 - `skills/` — Workflow definitions (TDD, security-review, continuous-learning, etc.)
 - `commands/` — Slash commands (/plan, /tdd, /e2e, /code-review, …)
-- `rules/` — Common + language-specific rules (TypeScript, Python, Go, …)
+- `rules/` — Common + language-specific rules (TypeScript, Python, …)
 - `hooks/` — Hook config (hooks.json); implementations in `scripts/`
 - `scripts/` — Node.js only (install-ecc.js, hooks, lib, detect-env)
 - `.cursor/` — Cursor-ready config (rules, hooks, commands, mcp.json)
@@ -143,7 +143,6 @@ Full layout and details: [CLAUDE.md](CLAUDE.md), [AGENTS.md](AGENTS.md).
 | Security audit | `/security-scan` | security-reviewer |
 | Dead code | `/refactor-clean` | refactor-cleaner |
 | Docs | `/update-docs` | doc-updater |
-| Go review | `/go-review` | go-reviewer |
 | Python review | `/python-review` | python-reviewer |
 | DB queries | *(auto-delegated)* | database-reviewer |
 

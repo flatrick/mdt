@@ -142,30 +142,6 @@
         "bash": true
       }
     },
-    "go-reviewer": {
-      "description": "Expert Go code reviewer specializing in idiomatic Go, concurrency patterns, error handling, and performance.",
-      "mode": "subagent",
-      "model": "anthropic/claude-opus-4-5",
-      "prompt": "{file:.opencode/prompts/agents/go-reviewer.txt}",
-      "tools": {
-        "read": true,
-        "bash": true,
-        "write": false,
-        "edit": false
-      }
-    },
-    "go-build-resolver": {
-      "description": "Go build, vet, and compilation error resolution specialist. Fixes Go build errors with minimal changes.",
-      "mode": "subagent",
-      "model": "anthropic/claude-opus-4-5",
-      "prompt": "{file:.opencode/prompts/agents/go-build-resolver.txt}",
-      "tools": {
-        "read": true,
-        "write": true,
-        "edit": true,
-        "bash": true
-      }
-    },
     "database-reviewer": {
       "description": "PostgreSQL database specialist for query optimization, schema design, security, and performance. Incorporates Supabase best practices.",
       "mode": "subagent",
@@ -265,24 +241,6 @@
     "setup-pm": {
       "description": "Configure package manager",
       "template": "{file:.opencode/commands/setup-pm.md}\n\n$ARGUMENTS"
-    },
-    "go-review": {
-      "description": "Go code review",
-      "template": "{file:.opencode/commands/go-review.md}\n\n$ARGUMENTS",
-      "agent": "go-reviewer",
-      "subtask": true
-    },
-    "go-test": {
-      "description": "Go TDD workflow",
-      "template": "{file:.opencode/commands/go-test.md}\n\n$ARGUMENTS",
-      "agent": "tdd-guide",
-      "subtask": true
-    },
-    "go-build": {
-      "description": "Fix Go build errors",
-      "template": "{file:.opencode/commands/go-build.md}\n\n$ARGUMENTS",
-      "agent": "go-build-resolver",
-      "subtask": true
     },
     "skill-create": {
       "description": "Generate skills from git history",

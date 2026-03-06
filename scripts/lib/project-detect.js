@@ -31,11 +31,6 @@ const LANGUAGE_RULES = [
     extensions: ['.js', '.jsx', '.mjs']
   },
   {
-    type: 'golang',
-    markers: ['go.mod', 'go.sum'],
-    extensions: ['.go']
-  },
-  {
     type: 'rust',
     markers: ['Cargo.toml', 'Cargo.lock'],
     extensions: ['.rs']
@@ -102,10 +97,6 @@ const FRAMEWORK_RULES = [
 
   // Ruby frameworks
   { framework: 'rails', language: 'ruby', markers: ['config/routes.rb', 'bin/rails'], packageKeys: [] },
-
-  // Go frameworks
-  { framework: 'gin', language: 'golang', markers: [], packageKeys: ['github.com/gin-gonic/gin'] },
-  { framework: 'echo', language: 'golang', markers: [], packageKeys: ['github.com/labstack/echo'] },
 
   // Rust frameworks
   { framework: 'actix', language: 'rust', markers: [], packageKeys: ['actix-web'] },
@@ -225,33 +216,6 @@ function getPythonDeps(projectDir) {
 }
 
 /**
- * Read go.mod for Go module dependencies
- * @param {string} projectDir - Project root directory
- * @returns {string[]} Array of module paths
- */
-function getGoDeps(projectDir) {
-  try {
-    const modPath = path.join(projectDir, 'go.mod');
-    if (!fs.existsSync(modPath)) return [];
-    const content = fs.readFileSync(modPath, 'utf8');
-    const deps = [];
-    const requireBlock = content.match(/require\s*\(([\s\S]*?)\)/);
-    if (requireBlock) {
-      requireBlock[1].split('\n').forEach(line => {
-        const trimmed = line.trim();
-        if (trimmed && !trimmed.startsWith('//')) {
-          const parts = trimmed.split(/\s+/);
-          if (parts[0]) deps.push(parts[0]);
-        }
-      });
-    }
-    return deps;
-  } catch {
-    return [];
-  }
-}
-
-/**
  * Read Cargo.toml for Rust crate dependencies
  * @param {string} projectDir - Project root directory
  * @returns {string[]} Array of crate names
@@ -346,7 +310,6 @@ function detectProjectType(projectDir) {
   // Step 2: Detect frameworks based on markers and dependencies
   const npmDeps = getPackageJsonDeps(projectDir);
   const pyDeps = getPythonDeps(projectDir);
-  const goDeps = getGoDeps(projectDir);
   const rustDeps = getRustDeps(projectDir);
   const composerDeps = getComposerDeps(projectDir);
   const elixirDeps = getElixirDeps(projectDir);
@@ -366,9 +329,6 @@ function detectProjectType(projectDir) {
         case 'typescript':
         case 'javascript':
           depList = npmDeps;
-          break;
-        case 'golang':
-          depList = goDeps;
           break;
         case 'rust':
           depList = rustDeps;
@@ -421,7 +381,6 @@ module.exports = {
   // Exported for testing
   getPackageJsonDeps,
   getPythonDeps,
-  getGoDeps,
   getRustDeps,
   getComposerDeps,
   getElixirDeps
