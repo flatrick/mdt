@@ -45,6 +45,7 @@ execution slices with acceptance criteria.
 - Renamed `tests/scripts/powershell-scripts.test.js` to `tests/scripts/node-runtime-scripts.test.js` and updated test runner wiring to match Node-only runtime coverage scope.
 - Corrected tmux reminder command matching in `scripts/hooks/command-hooks.js` by requiring explicit `yarn install|test` (no optional group false-positive on bare `yarn`).
 - Added bounded log rotation in `scripts/hooks/pre-compact.js` for `compaction-log.txt` (size threshold + tail retention) to prevent unbounded growth.
+- Updated stale repository metadata URLs in `package.json`, `.claude-plugin/plugin.json`, and `.claude-plugin/marketplace.json` to this fork (`flatrick/everything-claude-code`).
 - Installer now copies runtime scripts only (`scripts/hooks` + `scripts/lib`) for Claude/Cursor installs, and dedicated installer regression tests were added in `tests/scripts/install-ecc.test.js` (wired into `tests/run-all.js`).
 - CI security scan is now intentionally blocking (`continue-on-error: false` for `npm audit --audit-level=high`), and release changelog output uses a dynamic heredoc delimiter to avoid truncation collisions.
 - Added shared markdown normalization helper (`scripts/ci/markdown-utils.js`) and upgraded validator depth: `validate-skills.js` now enforces heading + "When to Use/Activate", and `validate-rules.js` now enforces heading + body content; validator tests and affected skills were updated accordingly.

@@ -31,11 +31,11 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/affaan-m/everything-claude-code.git"
+    "url": "git+https://github.com/flatrick/everything-claude-code.git"
   },
-  "homepage": "https://github.com/affaan-m/everything-claude-code#readme",
+  "homepage": "https://github.com/flatrick/everything-claude-code#readme",
   "bugs": {
-    "url": "https://github.com/affaan-m/everything-claude-code/issues"
+    "url": "https://github.com/flatrick/everything-claude-code/issues"
   },
   "files": [
     ".agents/",
@@ -79,7 +79,7 @@
     "ecc-install": "scripts/install-ecc.js"
   },
   "scripts": {
-    "postinstall": "echo '\\n  ecc-universal installed!\\n  Run: npx ecc-install typescript\\n  Docs: https://github.com/affaan-m/everything-claude-code\\n'",
+    "postinstall": "echo '\\n  ecc-universal installed!\\n  Run: npx ecc-install typescript\\n  Docs: https://github.com/flatrick/everything-claude-code\\n'",
     "install-ecc": "node scripts/install-ecc.js",
     "release": "node scripts/release.js",
     "lint": "node scripts/ci/check-dependencies.js eslint markdownlint-cli && eslint . && markdownlint '**/*.md' --ignore node_modules",
