@@ -36,6 +36,7 @@ const testFiles = [
   'integration/hooks.test.js',
   'ci/validators.test.js',
   'ci/validators-rounds.test.js',
+  'ci/validators-rounds-2.test.js',
   'scripts/claw.test.js',
   'scripts/check-dependencies.test.js',
   'scripts/install-ecc.test.js',
