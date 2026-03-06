@@ -33,6 +33,7 @@ listed in the **Dropped / Disputed** section at the end.
 - Replaced inline `node -e` command hooks in `hooks/hooks.json` with script-backed Node commands via `scripts/hooks/command-hooks.js`, and updated integration tests to run both inline and script-form hook commands.
 - Consolidated `suggest-compact` behavior into shared `scripts/hooks/suggest-compact.js`; `skills/strategic-compact/suggest-compact.js` now serves as a wrapper entrypoint.
 - Consolidated duplicated hook stdin buffering into shared utilities by adding `readStdinText(...)` in `scripts/lib/utils.js` and migrating hook scripts to shared stdin/JSON parsing helpers.
+- Added missing `Glob` tool to `agents/tdd-guide.md` to align write-capable agent tooling with repository conventions.
 - Restricted installer payload to runtime scripts only (`scripts/hooks` and `scripts/lib`) for Claude/Cursor installs and added dedicated installer tests (`tests/scripts/install-ecc.test.js`) to guard copy-scope and settings-merge behavior.
 - CI security checks are now blocking by configuration (`npm audit` in `.github/workflows/ci.yml`), and `.github/workflows/release.yml` now uses a dynamic heredoc delimiter for changelog output safety.
 - Added shared markdown normalization utilities for CI validators and strengthened structural checks: skills require heading + "When to Use/Activate"; rules require heading + non-empty body content. Validator tests and affected skill docs were updated to match.
