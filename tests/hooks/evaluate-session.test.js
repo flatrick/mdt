@@ -9,26 +9,7 @@ const path = require('path');
 const fs = require('fs');
 const os = require('os');
 const { evaluateSession } = require('../../scripts/hooks/evaluate-session');
-
-function test(name, fn) {
-  try {
-    fn();
-    console.log(`  ✓ ${name}`);
-    return true;
-  } catch (err) {
-    console.log(`  ✗ ${name}`);
-    console.log(`    Error: ${err.message}`);
-    return false;
-  }
-}
-
-function createTestDir() {
-  return fs.mkdtempSync(path.join(os.tmpdir(), 'eval-session-test-'));
-}
-
-function cleanupTestDir(testDir) {
-  fs.rmSync(testDir, { recursive: true, force: true });
-}
+const { test, createTestDir, cleanupTestDir } = require('../helpers/test-runner');
 
 function createTranscript(dir, messageCount) {
   const filePath = path.join(dir, 'transcript.jsonl');
@@ -48,7 +29,7 @@ function runTests() {
   let failed = 0;
 
   if (test('returns too-short for 9 user messages with default threshold', () => {
-    const testDir = createTestDir();
+    const testDir = createTestDir('eval-session-test-');
     const transcript = createTranscript(testDir, 9);
     const logs = [];
     try {
@@ -66,7 +47,7 @@ function runTests() {
   })) passed++; else failed++;
 
   if (test('returns evaluate for 10 user messages with default threshold', () => {
-    const testDir = createTestDir();
+    const testDir = createTestDir('eval-session-test-');
     const transcript = createTranscript(testDir, 10);
     const logs = [];
     try {
@@ -90,7 +71,7 @@ function runTests() {
   })) passed++; else failed++;
 
   if (test('falls back to CLAUDE_TRANSCRIPT_PATH env var', () => {
-    const testDir = createTestDir();
+    const testDir = createTestDir('eval-session-test-');
     const transcript = createTranscript(testDir, 15);
     try {
       const result = evaluateSession({
@@ -105,7 +86,7 @@ function runTests() {
   })) passed++; else failed++;
 
   if (test('counts user messages when JSON has spaces around colon', () => {
-    const testDir = createTestDir();
+    const testDir = createTestDir('eval-session-test-');
     const filePath = path.join(testDir, 'spaced.jsonl');
     const lines = [];
     for (let i = 0; i < 12; i++) {
@@ -123,7 +104,7 @@ function runTests() {
   })) passed++; else failed++;
 
   if (test('falls back to defaults when config JSON is invalid', () => {
-    const testDir = createTestDir();
+    const testDir = createTestDir('eval-session-test-');
     const configPath = path.join(testDir, 'config.json');
     const transcript = createTranscript(testDir, 12);
     const logs = [];
@@ -142,7 +123,7 @@ function runTests() {
   })) passed++; else failed++;
 
   if (test('expands ~ in learned_skills_path config', () => {
-    const testDir = createTestDir();
+    const testDir = createTestDir('eval-session-test-');
     const configPath = path.join(testDir, 'config.json');
     const transcript = createTranscript(testDir, 12);
     fs.writeFileSync(configPath, JSON.stringify({

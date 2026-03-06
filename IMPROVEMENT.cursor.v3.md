@@ -41,6 +41,7 @@ Source chain: `IMPROVEMENT.codex.md` + `IMPROVEMENT.claude.md` + `IMPROVEMENT.cu
 - Updated `CONTRIBUTING.md` quick-start and issue references for this fork-first workflow, while explicitly noting upstream PRs as a separate path.
 - Normalized user-facing guide/repo links in `README.md`, `the-longform-guide.md`, `the-security-guide.md`, and `commands/skill-create.md` to point to this fork where applicable.
 - Added dedicated `tests/hooks/command-hooks.test.js` coverage and wired it into `tests/run-all.js` to verify command-hook mode behavior, passthrough, and exit-code paths.
+- Migrated `tests/hooks/evaluate-session.test.js` to shared `tests/helpers/test-runner.js` utilities to reduce duplicated local test harness code.
 - Restricted installer script payload to runtime-only directories (`scripts/hooks`, `scripts/lib`) for Claude/Cursor targets and added installer regression coverage in `tests/scripts/install-ecc.test.js` (included in `tests/run-all.js`).
 - Made CI security scanning blocking (`npm audit` no longer uses advisory `continue-on-error`) and hardened release changelog output to use a unique heredoc delimiter in `.github/workflows/release.yml`.
 - Introduced shared markdown read normalization (`scripts/ci/markdown-utils.js`) and deepened validator rules: skills now require heading + "When to Use/Activate", and rules now require heading + body content; tests and legacy skills were aligned.

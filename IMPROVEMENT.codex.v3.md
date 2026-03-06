@@ -49,6 +49,7 @@ execution slices with acceptance criteria.
 - Updated `CONTRIBUTING.md` quick-start and issue references for this fork-first workflow, while explicitly noting upstream PRs as a separate path.
 - Normalized user-facing guide/repo links in `README.md`, `the-longform-guide.md`, `the-security-guide.md`, and `commands/skill-create.md` to point to this fork where applicable.
 - Added dedicated `tests/hooks/command-hooks.test.js` coverage and wired it into `tests/run-all.js` to verify command-hook mode behavior, passthrough, and exit-code paths.
+- Migrated `tests/hooks/evaluate-session.test.js` to shared `tests/helpers/test-runner.js` utilities to reduce duplicated local test harness code.
 - Installer now copies runtime scripts only (`scripts/hooks` + `scripts/lib`) for Claude/Cursor installs, and dedicated installer regression tests were added in `tests/scripts/install-ecc.test.js` (wired into `tests/run-all.js`).
 - CI security scan is now intentionally blocking (`continue-on-error: false` for `npm audit --audit-level=high`), and release changelog output uses a dynamic heredoc delimiter to avoid truncation collisions.
 - Added shared markdown normalization helper (`scripts/ci/markdown-utils.js`) and upgraded validator depth: `validate-skills.js` now enforces heading + "When to Use/Activate", and `validate-rules.js` now enforces heading + body content; validator tests and affected skills were updated accordingly.
