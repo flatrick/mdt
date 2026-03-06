@@ -40,6 +40,7 @@ execution slices with acceptance criteria.
 - Replaced inline `node -e` command hooks in `hooks/hooks.json` with script-backed Node commands via `scripts/hooks/command-hooks.js`, and updated integration hook command execution tests to support both inline and script forms.
 - Consolidated `suggest-compact` behavior to shared `scripts/hooks/suggest-compact.js`; `skills/strategic-compact/suggest-compact.js` is now a thin wrapper entrypoint using shared logic.
 - Installer now copies runtime scripts only (`scripts/hooks` + `scripts/lib`) for Claude/Cursor installs, and dedicated installer regression tests were added in `tests/scripts/install-ecc.test.js` (wired into `tests/run-all.js`).
+- CI security scan is now intentionally blocking (`continue-on-error: false` for `npm audit --audit-level=high`), and release changelog output uses a dynamic heredoc delimiter to avoid truncation collisions.
 
 ## P0 - Breakage and Install/CI Integrity
 

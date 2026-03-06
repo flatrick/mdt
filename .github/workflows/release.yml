@@ -46,9 +46,10 @@ jobs:
           else
             COMMITS=$(git log --pretty=format:"- %s" ${PREV_TAG}..HEAD)
           fi
-          echo "commits<<EOF" >> $GITHUB_OUTPUT
+          DELIMITER="COMMITS_END_$(date +%s%N)"
+          echo "commits<<${DELIMITER}" >> $GITHUB_OUTPUT
           echo "$COMMITS" >> $GITHUB_OUTPUT
-          echo "EOF" >> $GITHUB_OUTPUT
+          echo "${DELIMITER}" >> $GITHUB_OUTPUT
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
