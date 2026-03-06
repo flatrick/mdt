@@ -1,1 +1,42 @@
+# Auto-detect text files and normalize line endings to LF
 * text=auto eol=lf
+
+# Explicit text files
+*.js text eol=lf
+*.json text eol=lf
+*.md text eol=lf
+*.yml text eol=lf
+*.yaml text eol=lf
+*.html text eol=lf
+*.css text eol=lf
+*.sh text eol=lf
+
+# Binary files - don't diff or merge
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.webp binary
+*.woff binary
+*.woff2 binary
+*.ttf binary
+*.eot binary
+*.tgz binary
+*.zip binary
+*.tar.gz binary
+*.pdf binary
+
+# Lock files - use union merge to reduce conflicts
+package-lock.json merge=ours
+pnpm-lock.yaml merge=ours
+yarn.lock merge=ours
+
+# Diff drivers
+*.md diff=markdown
+*.js diff=javascript
+*.json diff=json
+
+# Linguist overrides for GitHub language detection
+*.md linguist-documentation
+tests/** linguist-detectable

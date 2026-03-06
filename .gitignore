@@ -38,5 +38,16 @@ private/
 # Session templates (not committed)
 examples/sessions/*.tmp
 
+# Coverage reports
+coverage/
+.nyc_output/
+
+# Log files
+*.log
+npm-debug.log*
+
+# Pack artifacts
+*.tgz
+
 # Local drafts
 marketing/
