@@ -16,8 +16,27 @@ const {
   findFiles,
   ensureDir,
   appendFile,
+  readFile,
+  writeFile,
   log
 } = require('../lib/utils');
+
+const MAX_COMPACTION_LOG_BYTES = 100 * 1024;
+const MAX_COMPACTION_LOG_LINES = 1000;
+
+function rotateCompactionLog(logFile) {
+  const content = readFile(logFile);
+  if (content === null) {
+    return;
+  }
+  if (Buffer.byteLength(content, 'utf8') <= MAX_COMPACTION_LOG_BYTES) {
+    return;
+  }
+
+  const lines = content.split('\n').filter(Boolean);
+  const trimmed = lines.slice(-MAX_COMPACTION_LOG_LINES).join('\n');
+  writeFile(logFile, trimmed ? `${trimmed}\n` : '');
+}
 
 async function main() {
   const sessionsDir = getSessionsDir();
@@ -28,6 +47,7 @@ async function main() {
   // Log compaction event with timestamp
   const timestamp = getDateTimeString();
   appendFile(compactionLog, `[${timestamp}] Context compaction triggered\n`);
+  rotateCompactionLog(compactionLog);
 
   // If there's an active session file, note the compaction
   const sessions = findFiles(sessionsDir, '*-session.tmp');
