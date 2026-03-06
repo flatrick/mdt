@@ -8,6 +8,7 @@ const assert = require('assert');
 const path = require('path');
 const fs = require('fs');
 const os = require('os');
+const { test } = require('../helpers/test-runner');
 
 const {
   detectProjectType,
@@ -20,19 +21,6 @@ const {
   getComposerDeps,
   getElixirDeps
 } = require('../../scripts/lib/project-detect');
-
-// Test helper
-function test(name, fn) {
-  try {
-    fn();
-    console.log(`  \u2713 ${name}`);
-    return true;
-  } catch (err) {
-    console.log(`  \u2717 ${name}`);
-    console.log(`    Error: ${err.message}`);
-    return false;
-  }
-}
 
 // Create a temporary directory for testing
 function createTempDir() {
