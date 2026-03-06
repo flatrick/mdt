@@ -47,6 +47,7 @@ Source chain: `IMPROVEMENT.codex.md` + `IMPROVEMENT.claude.md` + `IMPROVEMENT.cu
 - Further split oversized session-manager rounds coverage by adding `tests/lib/session-manager-rounds-2.test.js`, and updated `tests/run-all.js` to execute both session-manager round suites.
 - Further split oversized validator rounds coverage by adding `tests/ci/validators-rounds-2.test.js`, and updated `tests/run-all.js` to execute both validator round suites.
 - Further split oversized utils rounds coverage by adding `tests/lib/utils-rounds-2.test.js`, and updated `tests/run-all.js` to execute both utils round suites.
+- Further split oversized hooks rounds coverage by adding `tests/hooks/hooks-rounds-3.test.js`, and updated `tests/run-all.js` to execute all hooks round suites.
 
 ---
 

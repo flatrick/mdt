@@ -48,6 +48,7 @@ listed in the **Dropped / Disputed** section at the end.
 - Further split oversized session-manager round coverage by adding `tests/lib/session-manager-rounds-2.test.js` and wiring both session-manager round suites into `tests/run-all.js`.
 - Further split oversized validator round coverage by adding `tests/ci/validators-rounds-2.test.js` and wiring both validator round suites into `tests/run-all.js`.
 - Further split oversized utils round coverage by adding `tests/lib/utils-rounds-2.test.js` and wiring both utils round suites into `tests/run-all.js`.
+- Further split oversized hooks round coverage by adding `tests/hooks/hooks-rounds-3.test.js` and wiring all hooks round suites into `tests/run-all.js`.
 
 ---
 

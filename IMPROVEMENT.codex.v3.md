@@ -55,6 +55,7 @@ execution slices with acceptance criteria.
 - Further split oversized session-manager rounds coverage by adding `tests/lib/session-manager-rounds-2.test.js`, and wired both session-manager rounds suites into `tests/run-all.js`.
 - Further split oversized validator rounds coverage by adding `tests/ci/validators-rounds-2.test.js`, and wired both validator rounds suites into `tests/run-all.js`.
 - Further split oversized utils rounds coverage by adding `tests/lib/utils-rounds-2.test.js`, and wired both utils rounds suites into `tests/run-all.js`.
+- Further split oversized hooks rounds coverage by adding `tests/hooks/hooks-rounds-3.test.js`, and wired all hooks rounds suites into `tests/run-all.js`.
 
 ## P0 - Breakage and Install/CI Integrity
 
