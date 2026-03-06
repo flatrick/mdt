@@ -9,30 +9,10 @@ const path = require('path');
 const fs = require('fs');
 const os = require('os');
 const { test } = require('../helpers/test-runner');
+const { clearSessionManagerCache, createTempSessionDir, cleanup } = require('../helpers/session-manager-test-utils');
 
 let sessionManager = require('../../scripts/lib/session-manager');
 const utils = require('../../scripts/lib/utils');
-
-function clearSessionManagerCache() {
-  delete require.cache[require.resolve('../../scripts/lib/detect-env')];
-  delete require.cache[require.resolve('../../scripts/lib/utils')];
-  delete require.cache[require.resolve('../../scripts/lib/session-manager')];
-}
-
-// Create a temp directory for session tests
-function createTempSessionDir() {
-  const dir = path.join(os.tmpdir(), `ecc-test-sessions-${Date.now()}`);
-  fs.mkdirSync(dir, { recursive: true });
-  return dir;
-}
-
-function cleanup(dir) {
-  try {
-    fs.rmSync(dir, { recursive: true, force: true });
-  } catch {
-    // best-effort cleanup
-  }
-}
 
 function runTests() {
   console.log('\n=== Testing session-manager.js ===\n');
