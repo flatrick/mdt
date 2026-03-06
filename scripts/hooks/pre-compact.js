@@ -34,7 +34,13 @@ function rotateCompactionLog(logFile) {
   }
 
   const lines = content.split('\n').filter(Boolean);
-  const trimmed = lines.slice(-MAX_COMPACTION_LOG_LINES).join('\n');
+  let kept = lines.slice(-MAX_COMPACTION_LOG_LINES);
+
+  while (kept.length > 0 && Buffer.byteLength(`${kept.join('\n')}\n`, 'utf8') > MAX_COMPACTION_LOG_BYTES) {
+    kept = kept.slice(1);
+  }
+
+  const trimmed = kept.join('\n');
   writeFile(logFile, trimmed ? `${trimmed}\n` : '');
 }
 
