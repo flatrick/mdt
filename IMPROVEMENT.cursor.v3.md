@@ -36,6 +36,7 @@ Source chain: `IMPROVEMENT.codex.md` + `IMPROVEMENT.claude.md` + `IMPROVEMENT.cu
 - Introduced shared markdown read normalization (`scripts/ci/markdown-utils.js`) and deepened validator rules: skills now require heading + "When to Use/Activate", and rules now require heading + body content; tests and legacy skills were aligned.
 - Removed dead reusable workflow variants (`reusable-test.yml`, `reusable-validate.yml`, `reusable-release.yml`) so inline workflows are the single source of truth.
 - Added shared test helper utilities (`tests/helpers/test-runner.js`) and migrated several script suites to the common harness to reduce duplicated local test/cleanup scaffolding.
+- Split `tests/ci/validators.test.js` into core + rounds suites (`validators.test.js`, `validators-rounds.test.js`) and updated `tests/run-all.js` so both execute in CI/test orchestration.
 
 ---
 

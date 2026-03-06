@@ -27,6 +27,7 @@ const testFiles = [
   'hooks/suggest-compact.test.js',
   'integration/hooks.test.js',
   'ci/validators.test.js',
+  'ci/validators-rounds.test.js',
   'scripts/claw.test.js',
   'scripts/check-dependencies.test.js',
   'scripts/install-ecc.test.js',

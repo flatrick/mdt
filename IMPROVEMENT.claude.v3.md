@@ -37,6 +37,7 @@ listed in the **Dropped / Disputed** section at the end.
 - Added shared markdown normalization utilities for CI validators and strengthened structural checks: skills require heading + "When to Use/Activate"; rules require heading + non-empty body content. Validator tests and affected skill docs were updated to match.
 - Removed unreferenced reusable workflow files and standardized on inline workflow definitions (`ci.yml`, `release.yml`) to eliminate configuration drift.
 - Added shared test runner helpers (`tests/helpers/test-runner.js`) and migrated script-oriented test files to use the shared `test`/temp-dir utilities.
+- Split the oversized validator test file into two suites (`tests/ci/validators.test.js` and `tests/ci/validators-rounds.test.js`) and wired both into the aggregate runner.
 
 ---
 
