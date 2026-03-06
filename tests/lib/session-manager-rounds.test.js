@@ -24,95 +24,92 @@ function runTests() {
   // Isolated fixture for rounds that depend on seeded sessions via HOME/USERPROFILE.
   // Matches the source data used in the original monolithic suite.
   const tmpHome = path.join(os.tmpdir(), `ecc-session-mgr-test-${Date.now()}`);
-  const origHome = process.env.HOME;
-  const origUserProfile = process.env.USERPROFILE;
-  process.env.HOME = tmpHome;
-  process.env.USERPROFILE = tmpHome;
-  const tmpSessionsDir = utils.getSessionsDir();
-  fs.mkdirSync(tmpSessionsDir, { recursive: true });
-
-  const testSessions = [
-    { name: '2026-01-15-abcd1234-session.tmp', content: '# Session 1' },
-    { name: '2026-01-20-efgh5678-session.tmp', content: '# Session 2' },
-    { name: '2026-02-01-ijkl9012-session.tmp', content: '# Session 3' },
-    { name: '2026-02-01-mnop3456-session.tmp', content: '# Session 4' },
-    { name: '2026-02-10-session.tmp', content: '# Old format session' },
-  ];
-  for (let i = 0; i < testSessions.length; i++) {
-    const filePath = path.join(tmpSessionsDir, testSessions[i].name);
-    fs.writeFileSync(filePath, testSessions[i].content);
-    const mtime = new Date(Date.now() - (testSessions.length - i) * 60000);
-    fs.utimesSync(filePath, mtime, mtime);
-  }
-
-  // -- Round 43: getSessionById default excludes content --
-  console.log('\nRound 43: getSessionById (default excludes content):');
-
-  if (test('getSessionById without includeContent omits content, metadata, and stats', () => {
-    // Default call (includeContent=false) should NOT load file content
-    const result = sessionManager.getSessionById('abcd1234');
-    assert.ok(result, 'Should find the session');
-    assert.strictEqual(result.shortId, 'abcd1234');
-    // These fields should be absent when includeContent is false
-    assert.strictEqual(result.content, undefined, 'content should be undefined');
-    assert.strictEqual(result.metadata, undefined, 'metadata should be undefined');
-    assert.strictEqual(result.stats, undefined, 'stats should be undefined');
-    // Basic fields should still be present
-    assert.ok(result.sessionPath, 'sessionPath should be present');
-    assert.ok(result.size !== undefined, 'size should be present');
-    assert.ok(result.modifiedTime, 'modifiedTime should be present');
-  })) passed++; else failed++;
-
-  // -- Round 54: search filter scope and getSessionPath utility --
-  console.log('\nRound 54: search filter scope and path utility:');
-
-  if (test('getAllSessions search filter matches only short ID, not title or content', () => {
-    // "Session" appears in file CONTENT (e.g. "# Session 1") but not in any shortId
-    const result = sessionManager.getAllSessions({ search: 'Session', limit: 100 });
-    assert.strictEqual(result.total, 0, 'Search should not match title/content, only shortId');
-    // Verify that searching by actual shortId substring still works
-    const result2 = sessionManager.getAllSessions({ search: 'abcd', limit: 100 });
-    assert.strictEqual(result2.total, 1, 'Search by shortId should still work');
-  })) passed++; else failed++;
-
-  if (test('getSessionPath returns absolute path for session filename', () => {
-    const filename = '2026-02-01-testpath-session.tmp';
-    const result = sessionManager.getSessionPath(filename);
-    assert.ok(path.isAbsolute(result), 'Should return an absolute path');
-    assert.ok(result.endsWith(filename), `Path should end with filename, got: ${result}`);
-    // Sessions dir is under tool config (.cursor, .claude, or .codex) ï¿½ be tool-agnostic
-    const configDir = utils.getConfigDir();
-    assert.ok(result.includes(configDir), `Path should include config dir, got: ${result}`);
-    assert.ok(result.includes('sessions'), 'Path should include sessions directory');
-  })) passed++; else failed++;
-
-  // -- Round 66: getSessionById noIdMatch path (date-only string for old format) --
-  console.log('\nRound 66: getSessionById (noIdMatch ï¿½ date-only match for old format):');
-
-  if (test('getSessionById finds old-format session by date-only string (noIdMatch)', () => {
-    // File is 2026-02-10-session.tmp (old format, shortId = 'no-id')
-    // Calling with '2026-02-10' ? filenameMatch fails (filename !== '2026-02-10' and !== '2026-02-10.tmp')
-    // shortIdMatch fails (shortId === 'no-id', not !== 'no-id')
-    // noIdMatch succeeds: shortId === 'no-id' && filename === '2026-02-10-session.tmp'
-    const result = sessionManager.getSessionById('2026-02-10');
-    assert.ok(result, 'Should find old-format session by date-only string');
-    assert.strictEqual(result.shortId, 'no-id', 'Should have no-id shortId');
-    assert.ok(result.filename.includes('2026-02-10-session.tmp'), 'Should match old-format file');
-    assert.ok(result.sessionPath, 'Should have sessionPath');
-    assert.ok(result.date === '2026-02-10', 'Should have correct date');
-  })) passed++; else failed++;
-
-  // Cleanup ï¿½ restore both HOME and USERPROFILE (Windows)
-  process.env.HOME = origHome;
-  if (origUserProfile !== undefined) {
-    process.env.USERPROFILE = origUserProfile;
-  } else {
-    delete process.env.USERPROFILE;
-  }
   try {
-    fs.rmSync(tmpHome, { recursive: true, force: true });
-  } catch {
-    // best-effort
+    withEnv({ HOME: tmpHome, USERPROFILE: tmpHome }, () => {
+      clearSessionManagerCache();
+      const tmpSessionsDir = require('../../scripts/lib/utils').getSessionsDir();
+      fs.mkdirSync(tmpSessionsDir, { recursive: true });
+
+      const testSessions = [
+        { name: '2026-01-15-abcd1234-session.tmp', content: '# Session 1' },
+        { name: '2026-01-20-efgh5678-session.tmp', content: '# Session 2' },
+        { name: '2026-02-01-ijkl9012-session.tmp', content: '# Session 3' },
+        { name: '2026-02-01-mnop3456-session.tmp', content: '# Session 4' },
+        { name: '2026-02-10-session.tmp', content: '# Old format session' },
+      ];
+      for (let i = 0; i < testSessions.length; i++) {
+        const filePath = path.join(tmpSessionsDir, testSessions[i].name);
+        fs.writeFileSync(filePath, testSessions[i].content);
+        const mtime = new Date(Date.now() - (testSessions.length - i) * 60000);
+        fs.utimesSync(filePath, mtime, mtime);
+      }
+      sessionManager = require('../../scripts/lib/session-manager');
+
+      // -- Round 43: getSessionById default excludes content --
+      console.log('\nRound 43: getSessionById (default excludes content):');
+
+      if (test('getSessionById without includeContent omits content, metadata, and stats', () => {
+        // Default call (includeContent=false) should NOT load file content
+        const result = sessionManager.getSessionById('abcd1234');
+        assert.ok(result, 'Should find the session');
+        assert.strictEqual(result.shortId, 'abcd1234');
+        // These fields should be absent when includeContent is false
+        assert.strictEqual(result.content, undefined, 'content should be undefined');
+        assert.strictEqual(result.metadata, undefined, 'metadata should be undefined');
+        assert.strictEqual(result.stats, undefined, 'stats should be undefined');
+        // Basic fields should still be present
+        assert.ok(result.sessionPath, 'sessionPath should be present');
+        assert.ok(result.size !== undefined, 'size should be present');
+        assert.ok(result.modifiedTime, 'modifiedTime should be present');
+      })) passed++; else failed++;
+
+      // -- Round 54: search filter scope and getSessionPath utility --
+      console.log('\nRound 54: search filter scope and path utility:');
+
+      if (test('getAllSessions search filter matches only short ID, not title or content', () => {
+        // "Session" appears in file CONTENT (e.g. "# Session 1") but not in any shortId
+        const result = sessionManager.getAllSessions({ search: 'Session', limit: 100 });
+        assert.strictEqual(result.total, 0, 'Search should not match title/content, only shortId');
+        // Verify that searching by actual shortId substring still works
+        const result2 = sessionManager.getAllSessions({ search: 'abcd', limit: 100 });
+        assert.strictEqual(result2.total, 1, 'Search by shortId should still work');
+      })) passed++; else failed++;
+
+      if (test('getSessionPath returns absolute path for session filename', () => {
+        const filename = '2026-02-01-testpath-session.tmp';
+        const result = sessionManager.getSessionPath(filename);
+        assert.ok(path.isAbsolute(result), 'Should return an absolute path');
+        assert.ok(result.endsWith(filename), `Path should end with filename, got: ${result}`);
+        // Sessions dir is under tool config (.cursor, .claude, or .codex) ï¿½ be tool-agnostic
+        const configDir = utils.getConfigDir();
+        assert.ok(result.includes(configDir), `Path should include config dir, got: ${result}`);
+        assert.ok(result.includes('sessions'), 'Path should include sessions directory');
+      })) passed++; else failed++;
+
+      // -- Round 66: getSessionById noIdMatch path (date-only string for old format) --
+      console.log('\nRound 66: getSessionById (noIdMatch ï¿½ date-only match for old format):');
+
+      if (test('getSessionById finds old-format session by date-only string (noIdMatch)', () => {
+        // File is 2026-02-10-session.tmp (old format, shortId = 'no-id')
+        // Calling with '2026-02-10' ? filenameMatch fails (filename !== '2026-02-10' and !== '2026-02-10.tmp')
+        // shortIdMatch fails (shortId === 'no-id', not !== 'no-id')
+        // noIdMatch succeeds: shortId === 'no-id' && filename === '2026-02-10-session.tmp'
+        const result = sessionManager.getSessionById('2026-02-10');
+        assert.ok(result, 'Should find old-format session by date-only string');
+        assert.strictEqual(result.shortId, 'no-id', 'Should have no-id shortId');
+        assert.ok(result.filename.includes('2026-02-10-session.tmp'), 'Should match old-format file');
+        assert.ok(result.sessionPath, 'Should have sessionPath');
+        assert.ok(result.date === '2026-02-10', 'Should have correct date');
+      })) passed++; else failed++;
+    });
+  } finally {
+    clearSessionManagerCache();
+    sessionManager = require('../../scripts/lib/session-manager');
+    try {
+      fs.rmSync(tmpHome, { recursive: true, force: true });
+    } catch {
+      // best-effort
+    }
   }
 
   // -- Round 30: datetime local-time fix and parseSessionFilename edge cases --

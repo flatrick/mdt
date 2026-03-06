@@ -60,6 +60,7 @@ listed in the **Dropped / Disputed** section at the end.
 - Added shared environment override helper in `tests/helpers/env-test-utils.js` and migrated targeted `tests/lib/session-manager-rounds*.test.js` cases to use `withEnv(...)` for consistent HOME/USERPROFILE/CLAUDE_DIR save/restore handling.
 - Expanded `withEnv(...)` adoption in `tests/lib/session-manager-rounds.test.js` for additional TOCTOU/subdirectory/limit-coercion round cases to reduce repeated manual environment save/restore scaffolding.
 - Further expanded `withEnv(...)` adoption in `tests/lib/session-manager-rounds.test.js` by migrating additional grouped fixture phases (birthtime fallback and rounds 95-98 setup) to reduce manual environment lifecycle code.
+- Further expanded `withEnv(...)` adoption in `tests/lib/session-manager-rounds.test.js` by migrating the initial seeded-session fixture phase (rounds 43/54/66) to shared environment lifecycle handling.
 - Expanded `withEnv(...)` adoption in `tests/lib/session-aliases-rounds.test.js` for read-only/save-failure round cases to reduce repeated HOME/USERPROFILE save/restore scaffolding.
 - Further expanded `withEnv(...)` adoption in `tests/lib/session-aliases-rounds.test.js` by migrating the Round 90 backup-restore failure path to shared environment lifecycle handling.
 - Restricted installer payload to runtime scripts only (`scripts/hooks` and `scripts/lib`) for Claude/Cursor installs and added dedicated installer tests (`tests/scripts/install-ecc.test.js`) to guard copy-scope and settings-merge behavior.
