@@ -12,6 +12,7 @@ Not just configs. A complete system: skills, agents, hooks, rules, and MCP confi
 - **Single installer:** `node scripts/install-ecc.js` installs to Claude Code, Cursor, or Codex (see Installation).
 - **Per-tool installs:** Each tool gets its own directory — Claude → `~/.claude/`, Codex → `~/.codex/`, Cursor → project `.cursor/` or `~/.cursor/` with `--global`. Nothing points Cursor or Codex at `~/.claude/`.
 - **Cursor:** Default is project-local (full rules, agents, skills, commands, hooks, MCP). Use `--global` to install to `~/.cursor/` (rules skipped there; Cursor does not support file-based rules globally).
+- **Fork v1 direction:** Backwards compatibility with legacy passthrough behavior is not a goal; this fork prioritizes explicit, security-first defaults.
 
 Reset or reinstall: [docs/MIGRATION.md](docs/MIGRATION.md).
 
@@ -53,6 +54,12 @@ Guides refer to the upstream project; this fork may differ. For this fork, prefe
 
    # Codex — installs to ~/.codex/
    node scripts/install-ecc.js --target codex
+
+   # Discover available targets/languages
+   node scripts/install-ecc.js --list
+
+   # Preview install without writing files
+   node scripts/install-ecc.js --target cursor --global --dry-run typescript
    ```
 
 3. **Use** commands and agents in your tool (e.g. `/plan`, `/tdd`, `/code-review`). Full layout: [CLAUDE.md](CLAUDE.md), [AGENTS.md](AGENTS.md).
@@ -66,7 +73,7 @@ For the official Claude Code plugin (marketplace install), use the [original rep
 One installer for all targets:
 
 ```bash
-node scripts/install-ecc.js [--target claude|cursor|codex] [--global] [language ...]
+node scripts/install-ecc.js [--target claude|cursor|codex] [--global] [--list] [--dry-run] [language ...]
 ```
 
 | Target | Destination | Notes |
@@ -82,6 +89,8 @@ node scripts/install-ecc.js typescript
 node scripts/install-ecc.js --target cursor typescript python
 node scripts/install-ecc.js --target cursor --global typescript
 node scripts/install-ecc.js --target codex
+node scripts/install-ecc.js --list
+node scripts/install-ecc.js --target claude --dry-run typescript
 ```
 
 - **Reset/reinstall:** [docs/MIGRATION.md](docs/MIGRATION.md)

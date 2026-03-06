@@ -1,6 +1,6 @@
 # Everything Claude Code (ECC) — Agent Instructions
 
-This is a **production-ready AI coding plugin** providing 13 specialized agents, 50+ skills, 33 commands, and automated hook workflows for software development.
+This is a **production-ready AI coding plugin** providing 18 specialized agents, 60+ skills, 35 commands, and automated hook workflows for software development.
 
 ## Core Principles
 
@@ -27,6 +27,11 @@ This is a **production-ready AI coding plugin** providing 13 specialized agents,
 | go-build-resolver | Go build errors | Go build failures |
 | database-reviewer | PostgreSQL/Supabase specialist | Schema design, query optimization |
 | python-reviewer | Python code review | Python projects |
+| bash-reviewer | Bash/shell script review | Shell script changes and portability checks |
+| powershell-reviewer | PowerShell code review | PowerShell scripts and cross-platform PS |
+| dotnet-reviewer | .NET code review | C#/VB.NET reviews and architecture checks |
+| rust-reviewer | Rust code review | Rust ownership, async, and unsafe audits |
+| chief-of-staff | Communication triage and response drafting | Email/chat triage and follow-up workflows |
 
 ## Agent Orchestration
 
@@ -117,13 +122,13 @@ Troubleshoot failures: check test isolation → verify mocks → fix implementat
 ## Project Structure
 
 ```
-agents/          — 13 specialized subagents
-skills/          — 50+ workflow skills and domain knowledge
-commands/        — 33 slash commands
+agents/          — 18 specialized subagents
+skills/          — 60+ workflow skills and domain knowledge
+commands/        — 35 slash commands
 hooks/           — Trigger-based automations
 rules/           — Always-follow guidelines (common + per-language)
 scripts/         — Cross-platform Node.js utilities
-mcp-configs/     — 14 MCP server configurations
+mcp-configs/     — MCP server registry configuration
 tests/           — Test suite
 ```
 
