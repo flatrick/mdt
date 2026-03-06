@@ -10,6 +10,7 @@ const fs = require('fs');
 const os = require('os');
 const { test } = require('../helpers/test-runner');
 const { clearSessionManagerCache, createTempSessionDir, cleanup } = require('../helpers/session-manager-test-utils');
+const { withEnv } = require('../helpers/env-test-utils');
 
 let sessionManager = require('../../scripts/lib/session-manager');
 const utils = require('../../scripts/lib/utils');
@@ -24,29 +25,25 @@ function runTests() {
   console.log('\nRound 109: getAllSessions (non-session .tmp files ï¿½ parseSessionFilename returns null ? skip):');
   if (test('getAllSessions ignores .tmp files with non-matching filenames', () => {
     const isoHome = path.join(os.tmpdir(), `ecc-r109-nonsession-${Date.now()}`);
-    const origHome = process.env.HOME;
-    const origUserProfile = process.env.USERPROFILE;
-    process.env.HOME = isoHome;
-    process.env.USERPROFILE = isoHome;
     try {
-      clearSessionManagerCache();
-      const freshUtils = require('../../scripts/lib/utils');
-      const isoSessionsDir = freshUtils.getSessionsDir();
-      fs.mkdirSync(isoSessionsDir, { recursive: true });
-      const validName = '2026-03-01-abcd1234-session.tmp';
-      fs.writeFileSync(path.join(isoSessionsDir, validName), '# Valid Session');
-      fs.writeFileSync(path.join(isoSessionsDir, 'notes.tmp'), 'personal notes');
-      fs.writeFileSync(path.join(isoSessionsDir, 'scratch.tmp'), 'scratch data');
-      fs.writeFileSync(path.join(isoSessionsDir, 'backup-2026.tmp'), 'backup');
-      const freshManager = require('../../scripts/lib/session-manager');
-      const result = freshManager.getAllSessions({ limit: 100 });
-      assert.strictEqual(result.total, 1,
-        'Should find only 1 valid session (non-matching .tmp files skipped via !metadata continue)');
-      assert.strictEqual(result.sessions[0].shortId, 'abcd1234',
-        'The one valid session should have correct shortId');
+      withEnv({ HOME: isoHome, USERPROFILE: isoHome }, () => {
+        clearSessionManagerCache();
+        const freshUtils = require('../../scripts/lib/utils');
+        const isoSessionsDir = freshUtils.getSessionsDir();
+        fs.mkdirSync(isoSessionsDir, { recursive: true });
+        const validName = '2026-03-01-abcd1234-session.tmp';
+        fs.writeFileSync(path.join(isoSessionsDir, validName), '# Valid Session');
+        fs.writeFileSync(path.join(isoSessionsDir, 'notes.tmp'), 'personal notes');
+        fs.writeFileSync(path.join(isoSessionsDir, 'scratch.tmp'), 'scratch data');
+        fs.writeFileSync(path.join(isoSessionsDir, 'backup-2026.tmp'), 'backup');
+        const freshManager = require('../../scripts/lib/session-manager');
+        const result = freshManager.getAllSessions({ limit: 100 });
+        assert.strictEqual(result.total, 1,
+          'Should find only 1 valid session (non-matching .tmp files skipped via !metadata continue)');
+        assert.strictEqual(result.sessions[0].shortId, 'abcd1234',
+          'The one valid session should have correct shortId');
+      });
     } finally {
-      process.env.HOME = origHome;
-      process.env.USERPROFILE = origUserProfile;
       clearSessionManagerCache();
       sessionManager = require('../../scripts/lib/session-manager');
       fs.rmSync(isoHome, { recursive: true, force: true });
@@ -561,41 +558,32 @@ function runTests() {
   console.log('\nRound 122: getSessionById (old format no-id ï¿½ date-only filename match):');
   if (test('getSessionById matches old format YYYY-MM-DD-session.tmp via noIdMatch path', () => {
     const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'r122-old-format-'));
-    const origHome = process.env.HOME;
-    const origUserProfile = process.env.USERPROFILE;
-    const origDir = process.env.CLAUDE_DIR;
     try {
-      process.env.HOME = tmpDir;
-      process.env.USERPROFILE = tmpDir;
-      delete process.env.CLAUDE_DIR;
+      withEnv({ HOME: tmpDir, USERPROFILE: tmpDir, CLAUDE_DIR: undefined }, () => {
+        clearSessionManagerCache();
+        const freshUtils = require('../../scripts/lib/utils');
+        const sessionsDir = freshUtils.getSessionsDir();
+        fs.mkdirSync(sessionsDir, { recursive: true });
 
-      clearSessionManagerCache();
-      const freshUtils = require('../../scripts/lib/utils');
-      const sessionsDir = freshUtils.getSessionsDir();
-      fs.mkdirSync(sessionsDir, { recursive: true });
+        const oldFile = path.join(sessionsDir, '2026-01-15-session.tmp');
+        fs.writeFileSync(oldFile, '# Old Format Session\n\n**Date:** 2026-01-15\n');
 
-      const oldFile = path.join(sessionsDir, '2026-01-15-session.tmp');
-      fs.writeFileSync(oldFile, '# Old Format Session\n\n**Date:** 2026-01-15\n');
+        const freshSM = require('../../scripts/lib/session-manager');
 
-      const freshSM = require('../../scripts/lib/session-manager');
+        // Search by date ï¿½ triggers noIdMatch path
+        const result = freshSM.getSessionById('2026-01-15');
+        assert.ok(result, 'Should find old-format session by date string');
+        assert.strictEqual(result.shortId, 'no-id',
+          'Old format should have shortId "no-id"');
+        assert.strictEqual(result.date, '2026-01-15');
+        assert.strictEqual(result.filename, '2026-01-15-session.tmp');
 
-      // Search by date ï¿½ triggers noIdMatch path
-      const result = freshSM.getSessionById('2026-01-15');
-      assert.ok(result, 'Should find old-format session by date string');
-      assert.strictEqual(result.shortId, 'no-id',
-        'Old format should have shortId "no-id"');
-      assert.strictEqual(result.date, '2026-01-15');
-      assert.strictEqual(result.filename, '2026-01-15-session.tmp');
-
-      // Search by non-matching date ï¿½ should not find
-      const noResult = freshSM.getSessionById('2026-01-16');
-      assert.strictEqual(noResult, null,
-        'Non-matching date should return null');
+        // Search by non-matching date ï¿½ should not find
+        const noResult = freshSM.getSessionById('2026-01-16');
+        assert.strictEqual(noResult, null,
+          'Non-matching date should return null');
+      });
     } finally {
-      process.env.HOME = origHome;
-      if (origUserProfile !== undefined) process.env.USERPROFILE = origUserProfile;
-      else delete process.env.USERPROFILE;
-      if (origDir) process.env.CLAUDE_DIR = origDir;
       clearSessionManagerCache();
       sessionManager = require('../../scripts/lib/session-manager');
       fs.rmSync(tmpDir, { recursive: true, force: true });
@@ -680,55 +668,47 @@ function runTests() {
   console.log('\nRound 124: getAllSessions (invalid date format ï¿½ strict !== comparison):');
   if (test('getAllSessions date filter uses strict equality so wrong format returns empty', () => {
     // session-manager.js line 228: `if (date && metadata.date !== date)` ï¿½ strict inequality.
-    const origHome = process.env.HOME;
-    const origUserProfile = process.env.USERPROFILE;
-    const origDir = process.env.CLAUDE_DIR;
     const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'r124-date-format-'));
     const homeDir = path.join(tmpDir, 'home');
 
     try {
-      process.env.HOME = homeDir;
-      process.env.USERPROFILE = homeDir;
-      delete process.env.CLAUDE_DIR;
-      clearSessionManagerCache();
-      const freshUtils = require('../../scripts/lib/utils');
-      const sessionsDir = freshUtils.getSessionsDir();
-      fs.mkdirSync(sessionsDir, { recursive: true });
-      fs.writeFileSync(
-        path.join(sessionsDir, '2026-01-15-abcd1234-session.tmp'),
-        '# Test Session'
-      );
-      const freshSM = require('../../scripts/lib/session-manager');
+      withEnv({ HOME: homeDir, USERPROFILE: homeDir, CLAUDE_DIR: undefined }, () => {
+        clearSessionManagerCache();
+        const freshUtils = require('../../scripts/lib/utils');
+        const sessionsDir = freshUtils.getSessionsDir();
+        fs.mkdirSync(sessionsDir, { recursive: true });
+        fs.writeFileSync(
+          path.join(sessionsDir, '2026-01-15-abcd1234-session.tmp'),
+          '# Test Session'
+        );
+        const freshSM = require('../../scripts/lib/session-manager');
 
-      // Correct format ï¿½ should find 1 session
-      const correct = freshSM.getAllSessions({ date: '2026-01-15' });
-      assert.strictEqual(correct.sessions.length, 1,
-        'Correct YYYY-MM-DD format should match');
+        // Correct format ï¿½ should find 1 session
+        const correct = freshSM.getAllSessions({ date: '2026-01-15' });
+        assert.strictEqual(correct.sessions.length, 1,
+          'Correct YYYY-MM-DD format should match');
 
-      // Wrong separator ï¿½ strict !== means no match
-      const wrongSep = freshSM.getAllSessions({ date: '2026/01/15' });
-      assert.strictEqual(wrongSep.sessions.length, 0,
-        'Slash-separated date does not match (strict string equality)');
+        // Wrong separator ï¿½ strict !== means no match
+        const wrongSep = freshSM.getAllSessions({ date: '2026/01/15' });
+        assert.strictEqual(wrongSep.sessions.length, 0,
+          'Slash-separated date does not match (strict string equality)');
 
-      // US format ï¿½ no match
-      const usFormat = freshSM.getAllSessions({ date: '01-15-2026' });
-      assert.strictEqual(usFormat.sessions.length, 0,
-        'MM-DD-YYYY format does not match YYYY-MM-DD');
+        // US format ï¿½ no match
+        const usFormat = freshSM.getAllSessions({ date: '01-15-2026' });
+        assert.strictEqual(usFormat.sessions.length, 0,
+          'MM-DD-YYYY format does not match YYYY-MM-DD');
 
-      // Partial date ï¿½ no match
-      const partial = freshSM.getAllSessions({ date: '2026-01' });
-      assert.strictEqual(partial.sessions.length, 0,
-        'Partial YYYY-MM does not match full YYYY-MM-DD');
+        // Partial date ï¿½ no match
+        const partial = freshSM.getAllSessions({ date: '2026-01' });
+        assert.strictEqual(partial.sessions.length, 0,
+          'Partial YYYY-MM does not match full YYYY-MM-DD');
 
-      // null date ï¿½ skips filter, returns all
-      const nullDate = freshSM.getAllSessions({ date: null });
-      assert.strictEqual(nullDate.sessions.length, 1,
-        'null date skips filter and returns all sessions');
+        // null date ï¿½ skips filter, returns all
+        const nullDate = freshSM.getAllSessions({ date: null });
+        assert.strictEqual(nullDate.sessions.length, 1,
+          'null date skips filter and returns all sessions');
+      });
     } finally {
-      process.env.HOME = origHome;
-      if (origUserProfile !== undefined) process.env.USERPROFILE = origUserProfile;
-      else delete process.env.USERPROFILE;
-      if (origDir) process.env.CLAUDE_DIR = origDir;
       clearSessionManagerCache();
       sessionManager = require('../../scripts/lib/session-manager');
       fs.rmSync(tmpDir, { recursive: true, force: true });
