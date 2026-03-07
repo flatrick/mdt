@@ -43,6 +43,7 @@ try {
   process.exit(1);
 }
 const testFiles = [
+  'helpers/test-env-profiles.test.js',
   'lib/detect-env.test.js',
   'lib/utils.test.js',
   'lib/utils-rounds.test.js',

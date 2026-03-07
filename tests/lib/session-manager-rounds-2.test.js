@@ -188,34 +188,21 @@ function runTests() {
 
   // -- Round 112: appendSessionContent with read-only file ï¿½ returns false --
   console.log('\nRound 112: appendSessionContent (read-only file):');
-  if (test('appendSessionContent returns false when file is read-only (EACCES)', () => {
-    if (process.platform === 'win32') {
-      // chmod doesn't work reliably on Windows ï¿½ skip
-      assert.ok(true, 'Skipped on Windows');
-      return;
-    }
-    const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'r112-readonly-'));
-    const readOnlyFile = path.join(tmpDir, '2026-01-15-session.tmp');
+  if (test('appendSessionContent returns false when fs.appendFileSync throws EACCES', () => {
+    const originalAppendFileSync = fs.appendFileSync;
+
     try {
-      fs.writeFileSync(readOnlyFile, '# Session\n\nInitial content\n');
-      // Make file read-only
-      fs.chmodSync(readOnlyFile, 0o444);
-      // Verify it exists and is readable
-      const content = fs.readFileSync(readOnlyFile, 'utf8');
-      assert.ok(content.includes('Initial content'), 'File should be readable');
+      fs.appendFileSync = () => {
+        const error = new Error('permission denied');
+        error.code = 'EACCES';
+        throw error;
+      };
 
-      // appendSessionContent should catch EACCES and return false
-      const result = sessionManager.appendSessionContent(readOnlyFile, '\nAppended data');
+      const result = sessionManager.appendSessionContent('/tmp/mock-session.tmp', '\\nAppended data');
       assert.strictEqual(result, false,
-        'Should return false when file is read-only (fs.appendFileSync throws EACCES)');
-
-      // Verify original content unchanged
-      const afterContent = fs.readFileSync(readOnlyFile, 'utf8');
-      assert.ok(!afterContent.includes('Appended data'),
-        'Original content should be unchanged');
+        'Should return false when fs.appendFileSync throws EACCES');
     } finally {
-      try { fs.chmodSync(readOnlyFile, 0o644); } catch (_e) { /* ignore permission errors */ }
-      fs.rmSync(tmpDir, { recursive: true, force: true });
+      fs.appendFileSync = originalAppendFileSync;
     }
   })) passed++; else failed++;
 

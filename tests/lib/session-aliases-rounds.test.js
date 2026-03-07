@@ -585,42 +585,51 @@ function runTests() {
   console.log('\nRound 90: saveAliases (backup restore double failure):');
 
   if (test('saveAliases triggers inner restoreErr catch when both save and restore fail', () => {
-    // session-aliases.js lines 131-137: When saveAliases fails (outer catch),
-    // it tries to restore from backup. If the restore ALSO fails, the inner
-    // catch at line 135 logs restoreErr. No existing test creates this double-fault.
-    if (process.platform === 'win32') {
-      console.log('    (skipped â chmod not reliable on Windows)');
-      return;
-    }
     const isoHome = path.join(os.tmpdir(), `ecc-r90-restore-fail-${Date.now()}`);
     const claudeDir = path.join(isoHome, '.claude');
     fs.mkdirSync(claudeDir, { recursive: true });
 
-    // Pre-create a backup file while directory is still writable
     const backupPath = path.join(claudeDir, 'session-aliases.json.bak');
     fs.writeFileSync(backupPath, JSON.stringify({ aliases: {}, version: '1.0' }));
 
-    // Make .claude directory read-only (0o555):
-    // 1. writeFileSync(tempPath) â EACCES (can't create file in read-only dir) â outer catch
-    // 2. copyFileSync(backupPath, aliasesPath) â EACCES (can't create target) â inner catch (line 135)
-    fs.chmodSync(claudeDir, 0o555);
+    const originalWriteFileSync = fs.writeFileSync;
+    const originalCopyFileSync = fs.copyFileSync;
 
     try {
       withEnv({ HOME: isoHome, USERPROFILE: isoHome }, () => {
         delete require.cache[require.resolve('../../scripts/lib/session-aliases')];
         delete require.cache[require.resolve('../../scripts/lib/utils')];
         const freshAliases = require('../../scripts/lib/session-aliases');
+        const aliasesPath = freshAliases.getAliasesPath();
+        const tempPath = aliasesPath + '.tmp';
+
+        fs.writeFileSync = (...args) => {
+          if (args[0] === tempPath) {
+            const error = new Error('permission denied');
+            error.code = 'EACCES';
+            throw error;
+          }
+          return originalWriteFileSync(...args);
+        };
+
+        fs.copyFileSync = (...args) => {
+          if (args[0] === backupPath && args[1] === aliasesPath) {
+            const error = new Error('permission denied');
+            error.code = 'EACCES';
+            throw error;
+          }
+          return originalCopyFileSync(...args);
+        };
 
         const result = freshAliases.saveAliases({ aliases: { x: 1 }, version: '1.0' });
         assert.strictEqual(result, false, 'Should return false when save fails');
-
-        // Backup should still exist (restore also failed, so backup was not consumed)
         assert.ok(fs.existsSync(backupPath), 'Backup should still exist after double failure');
       });
     } finally {
+      fs.writeFileSync = originalWriteFileSync;
+      fs.copyFileSync = originalCopyFileSync;
       delete require.cache[require.resolve('../../scripts/lib/session-aliases')];
       delete require.cache[require.resolve('../../scripts/lib/utils')];
-      try { fs.chmodSync(claudeDir, 0o755); } catch { /* best-effort */ }
       fs.rmSync(isoHome, { recursive: true, force: true });
     }
   })) passed++; else failed++;
