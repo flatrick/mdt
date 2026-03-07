@@ -186,29 +186,8 @@ function resolveAlias(alias) {
  * @returns {object} Result with success status and message
  */
 function setAlias(alias, sessionPath, title = null) {
-  // Validate alias name
-  if (!alias || alias.length === 0) {
-    return { success: false, error: 'Alias name cannot be empty' };
-  }
-
-  // Validate session path
-  if (!sessionPath || typeof sessionPath !== 'string' || sessionPath.trim().length === 0) {
-    return { success: false, error: 'Session path cannot be empty' };
-  }
-
-  if (alias.length > 128) {
-    return { success: false, error: 'Alias name cannot exceed 128 characters' };
-  }
-
-  if (!/^[a-zA-Z0-9_-]+$/.test(alias)) {
-    return { success: false, error: 'Alias name must contain only letters, numbers, dashes, and underscores' };
-  }
-
-  // Reserved alias names
-  const reserved = ['list', 'help', 'remove', 'delete', 'create', 'set'];
-  if (reserved.includes(alias.toLowerCase())) {
-    return { success: false, error: `'${alias}' is a reserved alias name` };
-  }
+  const validation = validateAliasInput(alias, sessionPath);
+  if (!validation.success) return validation;
 
   const data = loadAliases();
   const existing = data.aliases[alias];
@@ -232,6 +211,28 @@ function setAlias(alias, sessionPath, title = null) {
   }
 
   return { success: false, error: 'Failed to save alias' };
+}
+
+function validateAliasInput(alias, sessionPath) {
+  if (!alias || alias.length === 0) {
+    return { success: false, error: 'Alias name cannot be empty' };
+  }
+  if (!sessionPath || typeof sessionPath !== 'string' || sessionPath.trim().length === 0) {
+    return { success: false, error: 'Session path cannot be empty' };
+  }
+  if (alias.length > 128) {
+    return { success: false, error: 'Alias name cannot exceed 128 characters' };
+  }
+  if (!/^[a-zA-Z0-9_-]+$/.test(alias)) {
+    return { success: false, error: 'Alias name must contain only letters, numbers, dashes, and underscores' };
+  }
+
+  const reservedNames = ['list', 'help', 'remove', 'delete', 'create', 'set'];
+  if (reservedNames.includes(alias.toLowerCase())) {
+    return { success: false, error: `'${alias}' is a reserved alias name` };
+  }
+
+  return { success: true };
 }
 
 /**

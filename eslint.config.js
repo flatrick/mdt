@@ -24,5 +24,14 @@ module.exports = [
             'no-undef': 'error',
             'eqeqeq': 'warn'
         }
+    },
+    {
+        files: ['scripts/**/*.js'],
+        rules: {
+            'complexity': ['error', 12],
+            'max-lines-per-function': ['error', 80],
+            'max-depth': ['error', 4],
+            'no-param-reassign': 'error'
+        }
     }
 ];

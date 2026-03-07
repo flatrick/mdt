@@ -46,7 +46,7 @@ commands. You need a policy:
 Pick one. The answer affects whether you invest in sync tooling or delete the
 upstream remote entirely.
 
-Answer: upstream is going to be ignored going forward. 
+Answer: upstream is going to be ignored going forward.
 I may choose to download newer versions from the original author to compare and test, but that's about it.
 
 ## 3. What should be removed?
@@ -116,7 +116,7 @@ v1 had a clear finish line: "all planned items implemented and verified."
 Define the same for v2 before starting. A project without a finish line
 becomes a project that never ships.
 
-Answer: I'm at this point feeling like v1 is still underway; 
+Answer: I'm at this point feeling like v1 is still underway;
 it is time to iron out any and all bugs from the move away from python/shell-scripts.
 
 ---

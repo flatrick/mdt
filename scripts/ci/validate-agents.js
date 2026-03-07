@@ -10,6 +10,7 @@ const { readMarkdownFile } = require('./markdown-utils');
 const DEFAULT_AGENTS_DIR = path.join(__dirname, '../../agents');
 const REQUIRED_FIELDS = ['model', 'tools'];
 const VALID_MODELS = ['haiku', 'sonnet', 'opus'];
+const DEFAULT_IO = { log: console.log, error: console.error };
 
 function extractFrontmatter(content) {
   // Strip BOM if present (UTF-8 BOM: \uFEFF)
@@ -33,7 +34,7 @@ function extractFrontmatter(content) {
 
 function validateAgents(options = {}) {
   const agentsDir = options.agentsDir || DEFAULT_AGENTS_DIR;
-  const io = options.io || { log: console.log, error: console.error };
+  const io = options.io || DEFAULT_IO;
   if (!fs.existsSync(agentsDir)) {
     io.log('No agents directory found, skipping validation');
     return { exitCode: 0, validatedCount: 0, hasErrors: false };
@@ -43,33 +44,7 @@ function validateAgents(options = {}) {
   let hasErrors = false;
 
   for (const file of files) {
-    const filePath = path.join(agentsDir, file);
-    let content;
-    try {
-      content = readMarkdownFile(filePath);
-    } catch (err) {
-      io.error(`ERROR: ${file} - ${err.message}`);
-      hasErrors = true;
-      continue;
-    }
-    const frontmatter = extractFrontmatter(content);
-
-    if (!frontmatter) {
-      io.error(`ERROR: ${file} - Missing frontmatter`);
-      hasErrors = true;
-      continue;
-    }
-
-    for (const field of REQUIRED_FIELDS) {
-      if (!frontmatter[field] || (typeof frontmatter[field] === 'string' && !frontmatter[field].trim())) {
-        io.error(`ERROR: ${file} - Missing required field: ${field}`);
-        hasErrors = true;
-      }
-    }
-
-    // Validate model is a known value
-    if (frontmatter.model && !VALID_MODELS.includes(frontmatter.model)) {
-      io.error(`ERROR: ${file} - Invalid model '${frontmatter.model}'. Must be one of: ${VALID_MODELS.join(', ')}`);
+    if (validateAgentFile(agentsDir, file, io)) {
       hasErrors = true;
     }
   }
@@ -80,6 +55,54 @@ function validateAgents(options = {}) {
 
   io.log(`Validated ${files.length} agent files`);
   return { exitCode: 0, validatedCount: files.length, hasErrors: false };
+}
+
+function validateAgentFile(agentsDir, fileName, io) {
+  const loaded = loadFrontmatterFromFile(agentsDir, fileName, io);
+  if (!loaded.ok) {
+    return true;
+  }
+
+  const frontmatter = loaded.frontmatter;
+  let hasErrors = false;
+
+  for (const field of REQUIRED_FIELDS) {
+    if (isMissingField(frontmatter, field)) {
+      io.error(`ERROR: ${fileName} - Missing required field: ${field}`);
+      hasErrors = true;
+    }
+  }
+
+  if (frontmatter.model && !VALID_MODELS.includes(frontmatter.model)) {
+    io.error(`ERROR: ${fileName} - Invalid model '${frontmatter.model}'. Must be one of: ${VALID_MODELS.join(', ')}`);
+    hasErrors = true;
+  }
+
+  return hasErrors;
+}
+
+function loadFrontmatterFromFile(agentsDir, fileName, io) {
+  const filePath = path.join(agentsDir, fileName);
+
+  let content;
+  try {
+    content = readMarkdownFile(filePath);
+  } catch (readError) {
+    io.error(`ERROR: ${fileName} - ${readError.message}`);
+    return { ok: false, frontmatter: null };
+  }
+
+  const frontmatter = extractFrontmatter(content);
+  if (!frontmatter) {
+    io.error(`ERROR: ${fileName} - Missing frontmatter`);
+    return { ok: false, frontmatter: null };
+  }
+
+  return { ok: true, frontmatter };
+}
+
+function isMissingField(frontmatter, field) {
+  return !frontmatter[field] || (typeof frontmatter[field] === 'string' && !frontmatter[field].trim());
 }
 
 if (require.main === module) {

@@ -24,4 +24,3 @@ When pulling a change from upstream that touches renamed surfaces:
    - `scripts/install-mdt.js`
    - `tests/run-all.js` and `tests/scripts/install-mdt*.test.js`
 4. Run targeted tests for installer and script wiring after porting.
-

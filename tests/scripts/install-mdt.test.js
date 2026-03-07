@@ -32,128 +32,148 @@ function assertSuccess(result, context) {
   );
 }
 
+function runCase(testCase, counters) {
+  if (test(testCase.name, testCase.run)) {
+    counters.passed++;
+  } else {
+    counters.failed++;
+  }
+}
+
 function runTests() {
   console.log('\n=== Testing install-mdt.js ===\n');
 
-  let passed = 0;
-  let failed = 0;
+  const counters = { passed: 0, failed: 0 };
+  const testCases = [
+    {
+      name: 'claude install copies runtime scripts only (hooks + lib)',
+      run: () => {
+        const tmpHome = createTestDir('mdt-install-claude-');
+        const claudeBase = path.join(tmpHome, '.claude');
 
-  if (test('claude install copies runtime scripts only (hooks + lib)', () => {
-    const tmpHome = createTestDir('mdt-install-claude-');
-    const claudeBase = path.join(tmpHome, '.claude');
+        try {
+          const result = runInstaller(['--global', 'typescript'], {
+            env: {
+              HOME: tmpHome,
+              USERPROFILE: tmpHome,
+              CLAUDE_BASE_DIR: claudeBase
+            }
+          });
+          assertSuccess(result, 'claude install');
 
-    try {
-      const result = runInstaller(['--global', 'typescript'], {
-        env: {
-          HOME: tmpHome,
-          USERPROFILE: tmpHome,
-          CLAUDE_BASE_DIR: claudeBase
+          assert.ok(fs.existsSync(path.join(claudeBase, 'scripts', 'hooks', 'session-start.js')));
+          assert.ok(fs.existsSync(path.join(claudeBase, 'scripts', 'lib', 'utils.js')));
+          assert.ok(!fs.existsSync(path.join(claudeBase, 'scripts', 'ci')), 'scripts/ci must not be installed');
+          assert.ok(!fs.existsSync(path.join(claudeBase, 'scripts', 'install-mdt.js')), 'top-level installer must not be installed');
+        } finally {
+          cleanupTestDir(tmpHome);
         }
-      });
-      assertSuccess(result, 'claude install');
+      }
+    },
+    {
+      name: 'cursor install copies runtime scripts only (hooks + lib)',
+      run: () => {
+        const tmpHome = createTestDir('mdt-install-cursor-home-');
+        const tmpProject = createTestDir('mdt-install-cursor-proj-');
 
-      assert.ok(fs.existsSync(path.join(claudeBase, 'scripts', 'hooks', 'session-start.js')));
-      assert.ok(fs.existsSync(path.join(claudeBase, 'scripts', 'lib', 'utils.js')));
-      assert.ok(!fs.existsSync(path.join(claudeBase, 'scripts', 'ci')), 'scripts/ci must not be installed');
-      assert.ok(!fs.existsSync(path.join(claudeBase, 'scripts', 'install-mdt.js')), 'top-level installer must not be installed');
-    } finally {
-      cleanupTestDir(tmpHome);
-    }
-  })) passed++; else failed++;
+        try {
+          const result = runInstaller(['--target', 'cursor', 'typescript'], {
+            cwd: tmpProject,
+            env: {
+              HOME: tmpHome,
+              USERPROFILE: tmpHome
+            }
+          });
+          assertSuccess(result, 'cursor install');
 
-  if (test('cursor install copies runtime scripts only (hooks + lib)', () => {
-    const tmpHome = createTestDir('mdt-install-cursor-home-');
-    const tmpProject = createTestDir('mdt-install-cursor-proj-');
-
-    try {
-      const result = runInstaller(['--target', 'cursor', 'typescript'], {
-        cwd: tmpProject,
-        env: {
-          HOME: tmpHome,
-          USERPROFILE: tmpHome
+          const cursorRoot = path.join(tmpProject, '.cursor');
+          assert.ok(fs.existsSync(path.join(cursorRoot, 'scripts', 'hooks', 'session-start.js')));
+          assert.ok(fs.existsSync(path.join(cursorRoot, 'scripts', 'lib', 'utils.js')));
+          assert.ok(!fs.existsSync(path.join(cursorRoot, 'scripts', 'ci')), 'scripts/ci must not be installed');
+          assert.ok(!fs.existsSync(path.join(cursorRoot, 'scripts', 'install-mdt.js')), 'top-level installer must not be installed');
+        } finally {
+          cleanupTestDir(tmpHome);
+          cleanupTestDir(tmpProject);
         }
-      });
-      assertSuccess(result, 'cursor install');
+      }
+    },
+    {
+      name: 'claude install merges hooks into existing settings.json and preserves other keys',
+      run: () => {
+        const tmpHome = createTestDir('mdt-install-settings-');
+        const claudeBase = path.join(tmpHome, '.claude');
 
-      const cursorRoot = path.join(tmpProject, '.cursor');
-      assert.ok(fs.existsSync(path.join(cursorRoot, 'scripts', 'hooks', 'session-start.js')));
-      assert.ok(fs.existsSync(path.join(cursorRoot, 'scripts', 'lib', 'utils.js')));
-      assert.ok(!fs.existsSync(path.join(cursorRoot, 'scripts', 'ci')), 'scripts/ci must not be installed');
-      assert.ok(!fs.existsSync(path.join(cursorRoot, 'scripts', 'install-mdt.js')), 'top-level installer must not be installed');
-    } finally {
-      cleanupTestDir(tmpHome);
-      cleanupTestDir(tmpProject);
-    }
-  })) passed++; else failed++;
+        try {
+          fs.mkdirSync(claudeBase, { recursive: true });
+          fs.writeFileSync(
+            path.join(claudeBase, 'settings.json'),
+            JSON.stringify({ theme: 'dark', customFlag: true, hooks: { legacy: [] } }, null, 2),
+            'utf8'
+          );
 
-  if (test('claude install merges hooks into existing settings.json and preserves other keys', () => {
-    const tmpHome = createTestDir('mdt-install-settings-');
-    const claudeBase = path.join(tmpHome, '.claude');
+          const result = runInstaller(['--global', 'typescript'], {
+            env: {
+              HOME: tmpHome,
+              USERPROFILE: tmpHome,
+              CLAUDE_BASE_DIR: claudeBase
+            }
+          });
+          assertSuccess(result, 'claude install with existing settings');
 
-    try {
-      fs.mkdirSync(claudeBase, { recursive: true });
-      fs.writeFileSync(
-        path.join(claudeBase, 'settings.json'),
-        JSON.stringify({ theme: 'dark', customFlag: true, hooks: { legacy: [] } }, null, 2),
-        'utf8'
-      );
+          const settingsPath = path.join(claudeBase, 'settings.json');
+          const settings = JSON.parse(fs.readFileSync(settingsPath, 'utf8'));
+          const settingsRaw = fs.readFileSync(settingsPath, 'utf8');
 
-      const result = runInstaller(['--global', 'typescript'], {
-        env: {
-          HOME: tmpHome,
-          USERPROFILE: tmpHome,
-          CLAUDE_BASE_DIR: claudeBase
+          assert.strictEqual(settings.theme, 'dark', 'existing non-hook keys should be preserved');
+          assert.strictEqual(settings.customFlag, true, 'existing boolean key should be preserved');
+          assert.ok(settings.hooks && settings.hooks.PreToolUse, 'hooks should be replaced with installer hooks block');
+          assert.ok(!settingsRaw.includes('${CLAUDE_PLUGIN_ROOT}'), 'hooks should be materialized to absolute paths');
+          assert.ok(fs.existsSync(path.join(claudeBase, 'settings.json.bkp')), 'installer should create backup file');
+        } finally {
+          cleanupTestDir(tmpHome);
         }
-      });
-      assertSuccess(result, 'claude install with existing settings');
+      }
+    },
+    {
+      name: 'claude project-level install copies to cwd .claude',
+      run: () => {
+        const tmpProject = createTestDir('mdt-install-claude-proj-');
 
-      const settingsPath = path.join(claudeBase, 'settings.json');
-      const settings = JSON.parse(fs.readFileSync(settingsPath, 'utf8'));
-      const settingsRaw = fs.readFileSync(settingsPath, 'utf8');
+        try {
+          const result = runInstaller(['typescript'], {
+            cwd: tmpProject,
+            env: {
+              HOME: tmpProject,
+              USERPROFILE: tmpProject
+            }
+          });
+          assertSuccess(result, 'claude project install');
 
-      assert.strictEqual(settings.theme, 'dark', 'existing non-hook keys should be preserved');
-      assert.strictEqual(settings.customFlag, true, 'existing boolean key should be preserved');
-      assert.ok(settings.hooks && settings.hooks.PreToolUse, 'hooks should be replaced with installer hooks block');
-      assert.ok(!settingsRaw.includes('${CLAUDE_PLUGIN_ROOT}'), 'hooks should be materialized to absolute paths');
-      assert.ok(fs.existsSync(path.join(claudeBase, 'settings.json.bkp')), 'installer should create backup file');
-    } finally {
-      cleanupTestDir(tmpHome);
-    }
-  })) passed++; else failed++;
+          const claudeRoot = path.join(tmpProject, '.claude');
+          assert.ok(fs.existsSync(path.join(claudeRoot, 'rules', 'common')), 'common rules should exist');
+          assert.ok(fs.existsSync(path.join(claudeRoot, 'scripts', 'lib', 'utils.js')), 'runtime scripts should exist');
+          assert.ok(fs.existsSync(path.join(claudeRoot, 'settings.json')), 'settings.json should exist');
 
-  if (test('claude project-level install copies to cwd .claude', () => {
-    const tmpProject = createTestDir('mdt-install-claude-proj-');
-
-    try {
-      const result = runInstaller(['typescript'], {
-        cwd: tmpProject,
-        env: {
-          HOME: tmpProject,
-          USERPROFILE: tmpProject
+          const settingsRaw = fs.readFileSync(path.join(claudeRoot, 'settings.json'), 'utf8');
+          assert.ok(!settingsRaw.includes('${CLAUDE_PLUGIN_ROOT}'), 'plugin root placeholder should be resolved');
+          assert.ok(settingsRaw.includes('.claude'), 'hook paths should use project-relative .claude');
+        } finally {
+          cleanupTestDir(tmpProject);
         }
-      });
-      assertSuccess(result, 'claude project install');
-
-      const claudeRoot = path.join(tmpProject, '.claude');
-      assert.ok(fs.existsSync(path.join(claudeRoot, 'rules', 'common')), 'common rules should exist');
-      assert.ok(fs.existsSync(path.join(claudeRoot, 'scripts', 'lib', 'utils.js')), 'runtime scripts should exist');
-      assert.ok(fs.existsSync(path.join(claudeRoot, 'settings.json')), 'settings.json should exist');
-
-      const settings = JSON.parse(fs.readFileSync(path.join(claudeRoot, 'settings.json'), 'utf8'));
-      const settingsRaw = fs.readFileSync(path.join(claudeRoot, 'settings.json'), 'utf8');
-      assert.ok(!settingsRaw.includes('${CLAUDE_PLUGIN_ROOT}'), 'plugin root placeholder should be resolved');
-      assert.ok(settingsRaw.includes('.claude'), 'hook paths should use project-relative .claude');
-    } finally {
-      cleanupTestDir(tmpProject);
+      }
     }
-  })) passed++; else failed++;
+  ];
+
+  for (const testCase of testCases) {
+    runCase(testCase, counters);
+  }
 
   console.log('\n=== Test Results ===');
-  console.log(`Passed: ${passed}`);
-  console.log(`Failed: ${failed}`);
-  console.log(`Total:  ${passed + failed}\n`);
+  console.log(`Passed: ${counters.passed}`);
+  console.log(`Failed: ${counters.failed}`);
+  console.log(`Total:  ${counters.passed + counters.failed}\n`);
 
-  process.exit(failed > 0 ? 1 : 0);
+  process.exit(counters.failed > 0 ? 1 : 0);
 }
 
 ensureSubprocessCapability('tests/scripts/install-mdt.test.js');

@@ -159,6 +159,61 @@ function handleHelp() {
   console.log('  exit        Quit the REPL');
 }
 
+function processUserMessage(line, sessionPath, context) {
+  const history = loadHistory(sessionPath);
+  appendTurn(sessionPath, 'User', line);
+  const response = askClaude(context, history, line);
+  console.log('\n' + response + '\n');
+  appendTurn(sessionPath, 'Assistant', response);
+}
+
+function handleReplCommand(line, sessionPath, rl, prompt) {
+  if (line === 'exit') {
+    console.log('Goodbye.');
+    rl.close();
+    return true;
+  }
+  if (line === '/clear') {
+    handleClear(sessionPath);
+    prompt();
+    return true;
+  }
+  if (line === '/history') {
+    handleHistory(sessionPath);
+    prompt();
+    return true;
+  }
+  if (line === '/sessions') {
+    handleSessions();
+    prompt();
+    return true;
+  }
+  if (line === '/help') {
+    handleHelp();
+    prompt();
+    return true;
+  }
+  return false;
+}
+
+function createPromptLoop(rl, sessionPath, context) {
+  const prompt = () => {
+    rl.question('claw> ', (input) => {
+      const line = input.trim();
+      if (!line) {
+        prompt();
+        return;
+      }
+      if (handleReplCommand(line, sessionPath, rl, prompt)) {
+        return;
+      }
+      processUserMessage(line, sessionPath, context);
+      prompt();
+    });
+  };
+  return prompt;
+}
+
 // ─── Main REPL ──────────────────────────────────────────────────────────────
 
 function main() {
@@ -191,56 +246,7 @@ function main() {
     output: process.stdout
   });
 
-  const prompt = () => {
-    rl.question('claw> ', (input) => {
-      const line = input.trim();
-
-      if (!line) {
-        prompt();
-        return;
-      }
-
-      if (line === 'exit') {
-        console.log('Goodbye.');
-        rl.close();
-        return;
-      }
-
-      if (line === '/clear') {
-        handleClear(sessionPath);
-        prompt();
-        return;
-      }
-
-      if (line === '/history') {
-        handleHistory(sessionPath);
-        prompt();
-        return;
-      }
-
-      if (line === '/sessions') {
-        handleSessions();
-        prompt();
-        return;
-      }
-
-      if (line === '/help') {
-        handleHelp();
-        prompt();
-        return;
-      }
-
-      // Regular message — send to Claude
-      const history = loadHistory(sessionPath);
-      appendTurn(sessionPath, 'User', line);
-      const response = askClaude(eccContext, history, line);
-      console.log('\n' + response + '\n');
-      appendTurn(sessionPath, 'Assistant', response);
-
-      prompt();
-    });
-  };
-
+  const prompt = createPromptLoop(rl, sessionPath, eccContext);
   prompt();
 }
 

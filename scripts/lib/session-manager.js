@@ -180,6 +180,54 @@ function getSessionStats(sessionPathOrContent) {
   };
 }
 
+function normalizePagination(rawOffset, rawLimit) {
+  const offsetNum = Number(rawOffset);
+  const offset = Number.isNaN(offsetNum) ? 0 : Math.max(0, Math.floor(offsetNum));
+  const limitNum = Number(rawLimit);
+  const limit = Number.isNaN(limitNum) ? 50 : Math.max(1, Math.floor(limitNum));
+  return { offset, limit };
+}
+
+function listSessionEntries(sessionsDir) {
+  return fs.readdirSync(sessionsDir, { withFileTypes: true })
+    .filter(entry => entry.isFile() && entry.name.endsWith('.tmp'));
+}
+
+function matchesSessionFilters(metadata, date, search) {
+  if (date && metadata.date !== date) return false;
+  if (search && !metadata.shortId.includes(search)) return false;
+  return true;
+}
+
+function buildSessionListItem(sessionsDir, filename, metadata) {
+  const sessionPath = path.join(sessionsDir, filename);
+  let stats;
+  try {
+    stats = fs.statSync(sessionPath);
+  } catch {
+    return null;
+  }
+
+  return {
+    ...metadata,
+    sessionPath,
+    hasContent: stats.size > 0,
+    size: stats.size,
+    modifiedTime: stats.mtime,
+    createdTime: stats.birthtime || stats.ctime
+  };
+}
+
+function toPaginatedResult(sessions, offset, limit) {
+  return {
+    sessions: sessions.slice(offset, offset + limit),
+    total: sessions.length,
+    offset,
+    limit,
+    hasMore: offset + limit < sessions.length
+  };
+}
+
 /**
  * Get all sessions with optional filtering and pagination
  * @param {object} options - Options object
@@ -197,14 +245,7 @@ function getAllSessions(options = {}) {
     search = null
   } = options;
 
-  // Clamp offset and limit to safe non-negative integers.
-  // Without this, negative offset causes slice() to count from the end,
-  // and NaN values cause slice() to return empty or unexpected results.
-  // Note: cannot use `|| default` because 0 is falsy — use isNaN instead.
-  const offsetNum = Number(rawOffset);
-  const offset = Number.isNaN(offsetNum) ? 0 : Math.max(0, Math.floor(offsetNum));
-  const limitNum = Number(rawLimit);
-  const limit = Number.isNaN(limitNum) ? 50 : Math.max(1, Math.floor(limitNum));
+  const { offset, limit } = normalizePagination(rawOffset, rawLimit);
 
   const sessionsDir = getSessionsDir();
 
@@ -212,62 +253,57 @@ function getAllSessions(options = {}) {
     return { sessions: [], total: 0, offset, limit, hasMore: false };
   }
 
-  const entries = fs.readdirSync(sessionsDir, { withFileTypes: true });
+  const entries = listSessionEntries(sessionsDir);
   const sessions = [];
 
   for (const entry of entries) {
-    // Skip non-files (only process .tmp files)
-    if (!entry.isFile() || !entry.name.endsWith('.tmp')) continue;
-
     const filename = entry.name;
     const metadata = parseSessionFilename(filename);
-
     if (!metadata) continue;
+    if (!matchesSessionFilters(metadata, date, search)) continue;
 
-    // Apply date filter
-    if (date && metadata.date !== date) {
-      continue;
+    const sessionItem = buildSessionListItem(sessionsDir, filename, metadata);
+    if (sessionItem) {
+      sessions.push(sessionItem);
     }
-
-    // Apply search filter (search in short ID)
-    if (search && !metadata.shortId.includes(search)) {
-      continue;
-    }
-
-    const sessionPath = path.join(sessionsDir, filename);
-
-    // Get file stats (wrapped in try-catch to handle TOCTOU race where
-    // file is deleted between readdirSync and statSync)
-    let stats;
-    try {
-      stats = fs.statSync(sessionPath);
-    } catch {
-      continue; // File was deleted between readdir and stat
-    }
-
-    sessions.push({
-      ...metadata,
-      sessionPath,
-      hasContent: stats.size > 0,
-      size: stats.size,
-      modifiedTime: stats.mtime,
-      createdTime: stats.birthtime || stats.ctime
-    });
   }
 
-  // Sort by modified time (newest first)
   sessions.sort((a, b) => b.modifiedTime - a.modifiedTime);
+  return toPaginatedResult(sessions, offset, limit);
+}
 
-  // Apply pagination
-  const paginatedSessions = sessions.slice(offset, offset + limit);
+function isSessionIdMatch(filename, metadata, sessionId) {
+  const shortIdMatch = sessionId.length > 0 &&
+    metadata.shortId !== 'no-id' &&
+    metadata.shortId.startsWith(sessionId);
+  const filenameMatch = filename === sessionId || filename === `${sessionId}.tmp`;
+  const noIdMatch = metadata.shortId === 'no-id' && filename === `${sessionId}-session.tmp`;
+  return shortIdMatch || filenameMatch || noIdMatch;
+}
 
-  return {
-    sessions: paginatedSessions,
-    total: sessions.length,
-    offset,
-    limit,
-    hasMore: offset + limit < sessions.length
+function buildSessionByIdResult(sessionsDir, filename, metadata, includeContent) {
+  const sessionPath = path.join(sessionsDir, filename);
+  let stats;
+  try {
+    stats = fs.statSync(sessionPath);
+  } catch {
+    return null;
+  }
+
+  const session = {
+    ...metadata,
+    sessionPath,
+    size: stats.size,
+    modifiedTime: stats.mtime,
+    createdTime: stats.birthtime || stats.ctime
   };
+
+  if (!includeContent) return session;
+
+  session.content = getSessionContent(sessionPath);
+  session.metadata = parseSessionMetadata(session.content);
+  session.stats = getSessionStats(session.content || '');
+  return session;
 }
 
 /**
@@ -283,49 +319,15 @@ function getSessionById(sessionId, includeContent = false) {
     return null;
   }
 
-  const entries = fs.readdirSync(sessionsDir, { withFileTypes: true });
+  const entries = listSessionEntries(sessionsDir);
 
   for (const entry of entries) {
-    if (!entry.isFile() || !entry.name.endsWith('.tmp')) continue;
-
     const filename = entry.name;
     const metadata = parseSessionFilename(filename);
-
     if (!metadata) continue;
+    if (!isSessionIdMatch(filename, metadata, sessionId)) continue;
 
-    // Check if session ID matches (short ID or full filename without .tmp)
-    const shortIdMatch = sessionId.length > 0 && metadata.shortId !== 'no-id' && metadata.shortId.startsWith(sessionId);
-    const filenameMatch = filename === sessionId || filename === `${sessionId}.tmp`;
-    const noIdMatch = metadata.shortId === 'no-id' && filename === `${sessionId}-session.tmp`;
-
-    if (!shortIdMatch && !filenameMatch && !noIdMatch) {
-      continue;
-    }
-
-    const sessionPath = path.join(sessionsDir, filename);
-    let stats;
-    try {
-      stats = fs.statSync(sessionPath);
-    } catch {
-      return null; // File was deleted between readdir and stat
-    }
-
-    const session = {
-      ...metadata,
-      sessionPath,
-      size: stats.size,
-      modifiedTime: stats.mtime,
-      createdTime: stats.birthtime || stats.ctime
-    };
-
-    if (includeContent) {
-      session.content = getSessionContent(sessionPath);
-      session.metadata = parseSessionMetadata(session.content);
-      // Pass pre-read content to avoid a redundant disk read
-      session.stats = getSessionStats(session.content || '');
-    }
-
-    return session;
+    return buildSessionByIdResult(sessionsDir, filename, metadata, includeContent);
   }
 
   return null;

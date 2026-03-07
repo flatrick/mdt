@@ -47,32 +47,52 @@ process.stdin.on('data', chunk => {
   }
 });
 
-process.stdin.on('end', () => {
+function safeParseInput(text) {
+  if (!text.trim()) return {};
   try {
-    const input = raw.trim() ? JSON.parse(raw) : {};
-    const usage = input.usage || input.token_usage || {};
-    const inputTokens = toNumber(usage.input_tokens || usage.prompt_tokens || 0);
-    const outputTokens = toNumber(usage.output_tokens || usage.completion_tokens || 0);
+    return JSON.parse(text);
+  } catch {
+    return {};
+  }
+}
 
-    const model = String(input.model || input._cursor?.model || process.env.CLAUDE_MODEL || 'unknown');
-    const sessionId = String(process.env.CLAUDE_SESSION_ID || process.env.CURSOR_TRACE_ID || 'default');
+function extractUsage(input) {
+  const usage = input.usage || input.token_usage || {};
+  return {
+    inputTokens: toNumber(usage.input_tokens || usage.prompt_tokens || 0),
+    outputTokens: toNumber(usage.output_tokens || usage.completion_tokens || 0),
+  };
+}
 
-    const metricsDir = path.join(getConfigDir(), 'metrics');
-    ensureDir(metricsDir);
+function buildMetricsRow(input) {
+  const { inputTokens, outputTokens } = extractUsage(input);
+  const model = String(input.model || input._cursor?.model || process.env.CLAUDE_MODEL || 'unknown');
+  const sessionId = String(process.env.CLAUDE_SESSION_ID || process.env.CURSOR_TRACE_ID || 'default');
 
-    const row = {
-      timestamp: new Date().toISOString(),
-      session_id: sessionId,
-      model,
-      input_tokens: inputTokens,
-      output_tokens: outputTokens,
-      estimated_cost_usd: estimateCost(model, inputTokens, outputTokens),
-    };
+  return {
+    timestamp: new Date().toISOString(),
+    session_id: sessionId,
+    model,
+    input_tokens: inputTokens,
+    output_tokens: outputTokens,
+    estimated_cost_usd: estimateCost(model, inputTokens, outputTokens),
+  };
+}
 
-    appendFile(path.join(metricsDir, 'costs.jsonl'), `${JSON.stringify(row)}\n`);
+function appendMetricsRow(row) {
+  const metricsDir = path.join(getConfigDir(), 'metrics');
+  ensureDir(metricsDir);
+  appendFile(path.join(metricsDir, 'costs.jsonl'), `${JSON.stringify(row)}\n`);
+}
+
+function handleStreamEnd() {
+  try {
+    const input = safeParseInput(raw);
+    appendMetricsRow(buildMetricsRow(input));
   } catch {
     // Keep hook non-blocking.
   }
-
   process.stdout.write(raw);
-});
+}
+
+process.stdin.on('end', handleStreamEnd);

@@ -80,56 +80,87 @@ function printAvailableOptions(target) {
   }
 }
 
-function buildInstallPlan({ target, globalScope, languages }) {
+function getDryRunHeader(target, globalScope) {
   const targetDisplay = target + (globalScope ? ' (global)' : '');
-  const lines = [
-    `[dry-run] Target: ${targetDisplay}`
+  return [`[dry-run] Target: ${targetDisplay}`];
+}
+
+function buildCodexInstallPlan(lines) {
+  return [
+    ...lines,
+    `[dry-run] Would install from ${CODEX_SRC} to ${path.join(os.homedir(), '.codex')}`
+  ];
+}
+
+function buildGeminiInstallPlan(lines, globalScope, languages) {
+  const agentsDest = globalScope ? path.join(os.homedir(), '.gemini/antigravity/.agents') : path.join(process.cwd(), '.agent');
+  const cmdsDest = globalScope ? path.join(os.homedir(), '.gemini/commands') : path.join(process.cwd(), '.gemini/commands');
+  const nextLines = [
+    ...lines,
+    `[dry-run] Would install agents and skills to ${agentsDest}`,
+    `[dry-run] Would install custom commands to ${cmdsDest}`
   ];
 
-  if (target === 'codex') {
-    lines.push(`[dry-run] Would install from ${CODEX_SRC} to ${path.join(os.homedir(), '.codex')}`);
-    return lines;
+  if (languages.length === 0) {
+    return nextLines;
   }
 
-  if (target === 'gemini') {
-    const agentsDest = globalScope ? path.join(os.homedir(), '.gemini/antigravity/.agents') : path.join(process.cwd(), '.agent');
-    const cmdsDest = globalScope ? path.join(os.homedir(), '.gemini/commands') : path.join(process.cwd(), '.gemini/commands');
-    lines.push(`[dry-run] Would install agents and skills to ${agentsDest}`);
-    lines.push(`[dry-run] Would install custom commands to ${cmdsDest}`);
-    if (languages.length > 0) {
-      if (globalScope) {
-        lines.push(`[dry-run] Would append rules for [${languages.join(', ')}] to ${path.join(os.homedir(), '.gemini/GEMINI.md')}`);
-      } else {
-        lines.push(`[dry-run] Would install rules for [${languages.join(', ')}] to ${path.join(agentsDest, 'rules')}`);
-      }
-    }
-    return lines;
-  }
-
-  const rules = languages.length > 0 ? languages.join(', ') : '(none provided)';
-  lines.push(`[dry-run] Languages: ${rules}`);
-
-  if (target === 'claude') {
-    const claudeBase = globalScope
-      ? (process.env.CLAUDE_BASE_DIR || path.join(os.homedir(), '.claude'))
-      : path.join(process.cwd(), '.claude');
-    lines.push(`[dry-run] Would install into ${claudeBase}`);
-    lines.push('[dry-run] Would copy rules, agents, commands, skills, hooks, and runtime scripts (scripts/hooks + scripts/lib)');
-    if (!globalScope) {
-      lines.push('[dry-run] Hook script paths will use project-relative references');
-    }
-    return lines;
-  }
-
-  const cursorBase = globalScope ? path.join(os.homedir(), '.cursor') : path.join(process.cwd(), '.cursor');
-  lines.push(`[dry-run] Would install into ${cursorBase}`);
-  lines.push('[dry-run] Would copy agents, skills, commands, hook scripts, hooks config, mcp config, and runtime scripts (scripts/hooks + scripts/lib)');
   if (globalScope) {
-    lines.push('[dry-run] Would skip file-based rules (Cursor global mode limitation)');
-  } else {
-    lines.push('[dry-run] Would install matching Cursor rules for provided languages');
+    return [
+      ...nextLines,
+      `[dry-run] Would append rules for [${languages.join(', ')}] to ${path.join(os.homedir(), '.gemini/GEMINI.md')}`
+    ];
   }
-  return lines;
+
+  return [
+    ...nextLines,
+    `[dry-run] Would install rules for [${languages.join(', ')}] to ${path.join(agentsDest, 'rules')}`
+  ];
+}
+
+function buildClaudeInstallPlan(lines, globalScope, languages) {
+  const rules = languages.length > 0 ? languages.join(', ') : '(none provided)';
+  const claudeBase = globalScope
+    ? (process.env.CLAUDE_BASE_DIR || path.join(os.homedir(), '.claude'))
+    : path.join(process.cwd(), '.claude');
+
+  const nextLines = [
+    ...lines,
+    `[dry-run] Languages: ${rules}`,
+    `[dry-run] Would install into ${claudeBase}`,
+    '[dry-run] Would copy rules, agents, commands, skills, hooks, and runtime scripts (scripts/hooks + scripts/lib)'
+  ];
+
+  if (globalScope) {
+    return nextLines;
+  }
+  return [...nextLines, '[dry-run] Hook script paths will use project-relative references'];
+}
+
+function buildCursorInstallPlan(lines, globalScope, languages) {
+  const rules = languages.length > 0 ? languages.join(', ') : '(none provided)';
+  const cursorBase = globalScope ? path.join(os.homedir(), '.cursor') : path.join(process.cwd(), '.cursor');
+  const nextLines = [
+    ...lines,
+    `[dry-run] Languages: ${rules}`,
+    `[dry-run] Would install into ${cursorBase}`,
+    '[dry-run] Would copy agents, skills, commands, hook scripts, hooks config, mcp config, and runtime scripts (scripts/hooks + scripts/lib)'
+  ];
+
+  if (globalScope) {
+    return [...nextLines, '[dry-run] Would skip file-based rules (Cursor global mode limitation)'];
+  }
+  return [...nextLines, '[dry-run] Would install matching Cursor rules for provided languages'];
+}
+
+function buildInstallPlan({ target, globalScope, languages }) {
+  const header = getDryRunHeader(target, globalScope);
+
+  if (target === 'codex') return buildCodexInstallPlan(header);
+  if (target === 'gemini') return buildGeminiInstallPlan(header, globalScope, languages);
+  if (target === 'claude') return buildClaudeInstallPlan(header, globalScope, languages);
+
+  return buildCursorInstallPlan(header, globalScope, languages);
 }
 
 function copyRecursiveSync(srcDir, destDir, filter = () => true) {
@@ -179,235 +210,273 @@ function usage(target) {
   process.exit(1);
 }
 
-function installClaude(languages, globalScope) {
+function isValidLanguageName(language) {
+  return /^[a-zA-Z0-9_-]+$/.test(language);
+}
+
+function copyMarkdownFiles(srcDir, destDir) {
+  if (!fs.existsSync(srcDir)) return;
+  fs.mkdirSync(destDir, { recursive: true });
+  fs.readdirSync(srcDir).forEach(fileName => {
+    if (fileName.endsWith('.md')) {
+      fs.copyFileSync(path.join(srcDir, fileName), path.join(destDir, fileName));
+    }
+  });
+}
+
+function resolveClaudePaths(globalScope) {
   const claudeBase = globalScope
     ? (process.env.CLAUDE_BASE_DIR || path.join(os.homedir(), '.claude'))
     : path.join(process.cwd(), '.claude');
   const rulesDest = globalScope
     ? (process.env.CLAUDE_RULES_DIR || path.join(claudeBase, 'rules'))
     : path.join(claudeBase, 'rules');
+  return { claudeBase, rulesDest };
+}
 
-  if (!languages.length) usage('claude');
+function warnExistingRulesDir(rulesDest) {
+  if (!(fs.existsSync(rulesDest) && fs.readdirSync(rulesDest).length > 0)) return;
+  console.log('Note: ' + rulesDest + '/ already exists. Existing files will be overwritten.');
+  console.log('      Back up any local customizations before proceeding.');
+}
 
-  if (fs.existsSync(rulesDest) && fs.readdirSync(rulesDest).length > 0) {
-    console.log('Note: ' + rulesDest + '/ already exists. Existing files will be overwritten.');
-    console.log('      Back up any local customizations before proceeding.');
-  }
-
-  // Rules: common
+function installClaudeCommonRules(rulesDest) {
   const commonDest = path.join(rulesDest, 'common');
-  console.log('Installing common rules -> ' + commonDest + '/');
   const commonSrc = path.join(RULES_DIR, 'common');
+  console.log('Installing common rules -> ' + commonDest + '/');
   if (fs.existsSync(commonSrc) && path.resolve(REPO_ROOT) !== path.resolve(rulesDest)) {
     copyRecursiveSync(commonSrc, commonDest);
   }
+}
 
-  // Rules: per-language
-  for (const lang of languages) {
-    if (!/^[a-zA-Z0-9_-]+$/.test(lang)) {
-      console.error("Error: invalid language name '" + lang + "'. Only alphanumeric, dash, underscore allowed.");
+function installClaudeLanguageRules(languages, rulesDest) {
+  for (const language of languages) {
+    if (!isValidLanguageName(language)) {
+      console.error("Error: invalid language name '" + language + "'. Only alphanumeric, dash, underscore allowed.");
       continue;
     }
-    const langSrc = path.join(RULES_DIR, lang);
+
+    const langSrc = path.join(RULES_DIR, language);
     if (!fs.existsSync(langSrc)) {
-      console.error("Warning: rules/" + lang + "/ does not exist, skipping.");
+      console.error('Warning: rules/' + language + '/ does not exist, skipping.');
       continue;
     }
-    const langDest = path.join(rulesDest, lang);
-    console.log('Installing ' + lang + ' rules -> ' + langDest + '/');
+
+    const langDest = path.join(rulesDest, language);
+    console.log('Installing ' + language + ' rules -> ' + langDest + '/');
     if (path.resolve(REPO_ROOT) !== path.resolve(rulesDest)) {
       copyRecursiveSync(langSrc, langDest);
     }
   }
+}
 
-  // Agents
+function installClaudeContentDirs(claudeBase) {
   const agentsSrc = path.join(REPO_ROOT, 'agents');
-  if (fs.existsSync(agentsSrc)) {
-    const agentsDest = path.join(claudeBase, 'agents');
+  const agentsDest = path.join(claudeBase, 'agents');
+  if (fs.existsSync(agentsSrc) && path.resolve(agentsSrc) !== path.resolve(agentsDest)) {
     console.log('Installing agents -> ' + agentsDest + '/');
-    if (path.resolve(agentsSrc) !== path.resolve(agentsDest)) {
-      fs.mkdirSync(agentsDest, { recursive: true });
-      fs.readdirSync(agentsSrc).forEach(f => {
-        if (f.endsWith('.md')) fs.copyFileSync(path.join(agentsSrc, f), path.join(agentsDest, f));
-      });
-    }
+    copyMarkdownFiles(agentsSrc, agentsDest);
   }
 
-  // Commands
   const commandsSrc = path.join(REPO_ROOT, 'commands');
-  if (fs.existsSync(commandsSrc)) {
-    const commandsDest = path.join(claudeBase, 'commands');
+  const commandsDest = path.join(claudeBase, 'commands');
+  if (fs.existsSync(commandsSrc) && path.resolve(commandsSrc) !== path.resolve(commandsDest)) {
     console.log('Installing commands -> ' + commandsDest + '/');
-    if (path.resolve(commandsSrc) !== path.resolve(commandsDest)) {
-      fs.mkdirSync(commandsDest, { recursive: true });
-      fs.readdirSync(commandsSrc).forEach(f => {
-        if (f.endsWith('.md')) fs.copyFileSync(path.join(commandsSrc, f), path.join(commandsDest, f));
-      });
-    }
+    copyMarkdownFiles(commandsSrc, commandsDest);
   }
 
-  // Skills
   const skillsSrc = path.join(REPO_ROOT, 'skills');
-  if (fs.existsSync(skillsSrc)) {
-    const skillsDest = path.join(claudeBase, 'skills');
+  const skillsDest = path.join(claudeBase, 'skills');
+  if (fs.existsSync(skillsSrc) && path.resolve(skillsSrc) !== path.resolve(skillsDest)) {
     console.log('Installing skills -> ' + skillsDest + '/');
-    if (path.resolve(skillsSrc) !== path.resolve(skillsDest)) {
-      copyRecursiveSync(skillsSrc, skillsDest);
-    }
+    copyRecursiveSync(skillsSrc, skillsDest);
   }
+}
 
-  // Hooks: merge into settings.json
+function readJsonFile(jsonPath, fallback = {}) {
+  try {
+    return JSON.parse(fs.readFileSync(jsonPath, 'utf8'));
+  } catch {
+    return fallback;
+  }
+}
+
+function installClaudeHooks(claudeBase, globalScope) {
   const hooksJsonSrc = path.join(REPO_ROOT, 'hooks', 'hooks.json');
-  if (fs.existsSync(hooksJsonSrc)) {
-    const settingsPath = path.join(claudeBase, 'settings.json');
-    let hooksData = JSON.parse(fs.readFileSync(hooksJsonSrc, 'utf8'));
-    const pluginRoot = globalScope
-      ? claudeBase.replace(/\\/g, '/')
-      : '.claude';
-    const hooksStr = JSON.stringify(hooksData);
-    const replaced = hooksStr.replace(/\$\{CLAUDE_PLUGIN_ROOT\}/g, pluginRoot);
-    const hooksBlock = JSON.parse(replaced).hooks;
+  if (!fs.existsSync(hooksJsonSrc)) return;
 
-    let settings = {};
-    if (fs.existsSync(settingsPath)) {
-      const backupPath = settingsPath + '.bkp';
-      fs.copyFileSync(settingsPath, backupPath);
-      console.log('Backed up existing settings.json -> ' + backupPath);
-      settings = JSON.parse(fs.readFileSync(settingsPath, 'utf8'));
-    }
-    settings.hooks = hooksBlock;
-    fs.mkdirSync(path.dirname(settingsPath), { recursive: true });
-    fs.writeFileSync(settingsPath, JSON.stringify(settings, null, 2), 'utf8');
-    console.log('Installing hooks -> ' + settingsPath + ' (merged into settings.json)');
+  const settingsPath = path.join(claudeBase, 'settings.json');
+  const hooksData = readJsonFile(hooksJsonSrc, {});
+  const pluginRoot = globalScope ? claudeBase.replace(/\\/g, '/') : '.claude';
+  const hooksJson = JSON.stringify(hooksData).replace(/\$\{CLAUDE_PLUGIN_ROOT\}/g, pluginRoot);
+  const parsedHooks = JSON.parse(hooksJson);
+
+  let settings = {};
+  if (fs.existsSync(settingsPath)) {
+    const backupPath = settingsPath + '.bkp';
+    fs.copyFileSync(settingsPath, backupPath);
+    console.log('Backed up existing settings.json -> ' + backupPath);
+    settings = readJsonFile(settingsPath, {});
   }
+  settings.hooks = parsedHooks.hooks;
+  fs.mkdirSync(path.dirname(settingsPath), { recursive: true });
+  fs.writeFileSync(settingsPath, JSON.stringify(settings, null, 2), 'utf8');
+  console.log('Installing hooks -> ' + settingsPath + ' (merged into settings.json)');
+}
 
-  // Runtime scripts required by hooks
+function installClaudeRuntimeScripts(claudeBase) {
   const scriptsDest = path.join(claudeBase, 'scripts');
   console.log('Installing runtime scripts -> ' + scriptsDest + '/');
   copyRuntimeScripts(scriptsDest);
+}
 
-  if (process.platform === 'win32') {
-    console.log('');
-    console.log('NOTE: Windows — Hook scripts use Node.js; tmux-dependent features are skipped on Windows.');
-    console.log('');
-  }
+function printWindowsHookNote(prefix) {
+  if (process.platform !== 'win32') return;
+  console.log('');
+  console.log(prefix);
+  console.log('');
+}
+
+function installClaude(languages, globalScope) {
+  const { claudeBase, rulesDest } = resolveClaudePaths(globalScope);
+  if (!languages.length) usage('claude');
+
+  warnExistingRulesDir(rulesDest);
+  installClaudeCommonRules(rulesDest);
+  installClaudeLanguageRules(languages, rulesDest);
+  installClaudeContentDirs(claudeBase);
+  installClaudeHooks(claudeBase, globalScope);
+  installClaudeRuntimeScripts(claudeBase);
+  printWindowsHookNote('NOTE: Windows — Hook scripts use Node.js; tmux-dependent features are skipped on Windows.');
   console.log('Done. Claude configs installed to ' + claudeBase + '/');
 }
 
-function installCursor(languages, globalScope) {
-  const destDir = globalScope ? path.join(os.homedir(), '.cursor') : path.join(process.cwd(), '.cursor');
+function resolveCursorDestDir(globalScope) {
+  return globalScope ? path.join(os.homedir(), '.cursor') : path.join(process.cwd(), '.cursor');
+}
 
-  if (!languages.length) usage('cursor');
+function printCursorGlobalRulesNote(globalScope) {
+  if (!globalScope) return;
+  console.log('');
+  console.log('NOTE: Cursor does not support file-based rules in ~/.cursor/rules.');
+  console.log('      Add global rules in Settings > Cursor Settings > General > Rules for AI');
+  console.log('');
+}
 
-  console.log('Installing Cursor configs to ' + destDir + '/');
-
-  if (globalScope) {
-    console.log('');
-    console.log('NOTE: Cursor does not support file-based rules in ~/.cursor/rules.');
-    console.log('      Add global rules in Settings > Cursor Settings > General > Rules for AI');
-    console.log('');
-  }
-
-  // Rules (only for project install)
+function installCursorRules(destDir, languages, globalScope) {
   const cursorRules = path.join(CURSOR_SRC, 'rules');
-  if (!globalScope) {
-    const rulesDest = path.join(destDir, 'rules');
-    fs.mkdirSync(rulesDest, { recursive: true });
-    if (fs.existsSync(cursorRules)) {
-      fs.readdirSync(cursorRules).forEach(f => {
-        if (f.startsWith('common-') && f.endsWith('.md')) {
-          fs.copyFileSync(path.join(cursorRules, f), path.join(rulesDest, f));
-        }
-      });
-      console.log('Installing common rules -> ' + rulesDest + '/');
-    }
-    for (const lang of languages) {
-      if (!/^[a-zA-Z0-9_-]+$/.test(lang)) continue;
-      if (fs.existsSync(cursorRules)) {
-        let found = false;
-        fs.readdirSync(cursorRules).forEach(f => {
-          if (f.startsWith(lang + '-') && f.endsWith('.md')) {
-            fs.copyFileSync(path.join(cursorRules, f), path.join(rulesDest, f));
-            found = true;
-          }
-        });
-        if (found) console.log('Installing ' + lang + ' rules -> ' + rulesDest + '/');
-        else console.error("Warning: no Cursor rules for '" + lang + "' found, skipping.");
-      }
-    }
-  } else {
+  if (globalScope) {
     console.log('Skipping rules (not supported globally by Cursor).');
+    return;
   }
 
-  // Agents (from repo agents/)
-  const agentsSrc = path.join(REPO_ROOT, 'agents');
-  if (fs.existsSync(agentsSrc)) {
-    const agentsDest = path.join(destDir, 'agents');
-    console.log('Installing agents -> ' + agentsDest + '/');
-    fs.mkdirSync(agentsDest, { recursive: true });
-    fs.readdirSync(agentsSrc).forEach(f => {
-      if (f.endsWith('.md')) fs.copyFileSync(path.join(agentsSrc, f), path.join(agentsDest, f));
+  const rulesDest = path.join(destDir, 'rules');
+  fs.mkdirSync(rulesDest, { recursive: true });
+  if (fs.existsSync(cursorRules)) {
+    fs.readdirSync(cursorRules).forEach(fileName => {
+      if (fileName.startsWith('common-') && fileName.endsWith('.md')) {
+        fs.copyFileSync(path.join(cursorRules, fileName), path.join(rulesDest, fileName));
+      }
     });
+    console.log('Installing common rules -> ' + rulesDest + '/');
   }
 
-  // Skills
+  for (const language of languages) {
+    if (!isValidLanguageName(language) || !fs.existsSync(cursorRules)) continue;
+
+    let found = false;
+    fs.readdirSync(cursorRules).forEach(fileName => {
+      if (fileName.startsWith(language + '-') && fileName.endsWith('.md')) {
+        fs.copyFileSync(path.join(cursorRules, fileName), path.join(rulesDest, fileName));
+        found = true;
+      }
+    });
+
+    if (found) console.log('Installing ' + language + ' rules -> ' + rulesDest + '/');
+    else console.error("Warning: no Cursor rules for '" + language + "' found, skipping.");
+  }
+}
+
+function installCursorCoreDirs(destDir) {
+  const agentsSrc = path.join(REPO_ROOT, 'agents');
+  const agentsDest = path.join(destDir, 'agents');
+  if (fs.existsSync(agentsSrc)) {
+    console.log('Installing agents -> ' + agentsDest + '/');
+    copyMarkdownFiles(agentsSrc, agentsDest);
+  }
+
   const skillsSrc = path.join(REPO_ROOT, 'skills');
+  const skillsDest = path.join(destDir, 'skills');
   if (fs.existsSync(skillsSrc)) {
-    const skillsDest = path.join(destDir, 'skills');
     console.log('Installing skills -> ' + skillsDest + '/');
     copyRecursiveSync(skillsSrc, skillsDest);
   }
 
-  // Commands (from .cursor/commands)
   const commandsSrc = path.join(CURSOR_SRC, 'commands');
+  const commandsDest = path.join(destDir, 'commands');
   if (fs.existsSync(commandsSrc)) {
-    const commandsDest = path.join(destDir, 'commands');
     console.log('Installing commands -> ' + commandsDest + '/');
     copyRecursiveSync(commandsSrc, commandsDest);
   }
+}
 
-  // Hooks config
+function installCursorHooksConfig(destDir, globalScope) {
   const hooksJsonSrc = path.join(CURSOR_SRC, 'hooks.json');
-  if (fs.existsSync(hooksJsonSrc)) {
-    const hooksDestPath = path.join(destDir, 'hooks.json');
-    let content = fs.readFileSync(hooksJsonSrc, 'utf8');
-    if (globalScope) {
-      const absoluteHooksDir = path.join(destDir, 'hooks').replace(/\\/g, '/');
-      content = content.replace(/node \.cursor\/hooks\//g, 'node ' + absoluteHooksDir + '/');
-    }
-    let hooksParsed = JSON.parse(content);
-    if (hooksParsed.version === null || hooksParsed.version === undefined) hooksParsed.version = 1;
-    fs.mkdirSync(destDir, { recursive: true });
-    fs.writeFileSync(hooksDestPath, JSON.stringify(hooksParsed, null, 2), 'utf8');
-    console.log('Installing hooks config -> ' + hooksDestPath);
-  }
+  if (!fs.existsSync(hooksJsonSrc)) return;
 
-  // Hook scripts
+  const hooksDestPath = path.join(destDir, 'hooks.json');
+  let content = fs.readFileSync(hooksJsonSrc, 'utf8');
+  if (globalScope) {
+    const absoluteHooksDir = path.join(destDir, 'hooks').replace(/\\/g, '/');
+    content = content.replace(/node \.cursor\/hooks\//g, 'node ' + absoluteHooksDir + '/');
+  }
+  const hooksParsed = JSON.parse(content);
+  if (hooksParsed.version === null || hooksParsed.version === undefined) {
+    hooksParsed.version = 1;
+  }
+  fs.mkdirSync(destDir, { recursive: true });
+  fs.writeFileSync(hooksDestPath, JSON.stringify(hooksParsed, null, 2), 'utf8');
+  console.log('Installing hooks config -> ' + hooksDestPath);
+}
+
+function installCursorHookScripts(destDir) {
   const hooksSrc = path.join(CURSOR_SRC, 'hooks');
-  if (fs.existsSync(hooksSrc)) {
-    const hooksDest = path.join(destDir, 'hooks');
-    console.log('Installing hook scripts -> ' + hooksDest + '/');
-    copyRecursiveSync(hooksSrc, hooksDest);
-  }
+  if (!fs.existsSync(hooksSrc)) return;
 
-  // Runtime scripts required by delegated hooks
+  const hooksDest = path.join(destDir, 'hooks');
+  console.log('Installing hook scripts -> ' + hooksDest + '/');
+  copyRecursiveSync(hooksSrc, hooksDest);
+}
+
+function installCursorRuntimeScripts(destDir) {
   const scriptsDest = path.join(destDir, 'scripts');
   console.log('Installing runtime scripts -> ' + scriptsDest + '/');
   copyRuntimeScripts(scriptsDest);
+}
 
-  // MCP
+function installCursorMcp(destDir) {
   const mcpSrc = path.join(CURSOR_SRC, 'mcp.json');
-  if (fs.existsSync(mcpSrc)) {
-    fs.mkdirSync(destDir, { recursive: true });
-    fs.copyFileSync(mcpSrc, path.join(destDir, 'mcp.json'));
-    console.log('Installing MCP config -> ' + path.join(destDir, 'mcp.json'));
-  }
+  if (!fs.existsSync(mcpSrc)) return;
 
-  if (process.platform === 'win32') {
-    console.log('');
-    console.log('NOTE: Windows — Cursor hooks use Node.js; tmux features are skipped on Windows.');
-    console.log('');
-  }
+  const mcpDest = path.join(destDir, 'mcp.json');
+  fs.mkdirSync(destDir, { recursive: true });
+  fs.copyFileSync(mcpSrc, mcpDest);
+  console.log('Installing MCP config -> ' + mcpDest);
+}
+
+function installCursor(languages, globalScope) {
+  const destDir = resolveCursorDestDir(globalScope);
+  if (!languages.length) usage('cursor');
+
+  console.log('Installing Cursor configs to ' + destDir + '/');
+  printCursorGlobalRulesNote(globalScope);
+  installCursorRules(destDir, languages, globalScope);
+  installCursorCoreDirs(destDir);
+  installCursorHooksConfig(destDir, globalScope);
+  installCursorHookScripts(destDir);
+  installCursorRuntimeScripts(destDir);
+  installCursorMcp(destDir);
+  printWindowsHookNote('NOTE: Windows — Cursor hooks use Node.js; tmux features are skipped on Windows.');
   console.log('Done. Cursor configs installed to ' + destDir + '/');
 }
 
@@ -479,65 +548,90 @@ function convertCommandsToToml(commandsSrc, commandsDest) {
   });
 }
 
-function installGemini(languages, globalScope) {
-  console.log('Installing Gemini CLI / Antigravity configs...');
+function resolveGeminiDestinations(globalScope) {
+  return {
+    destDirAgent: globalScope ? path.join(os.homedir(), '.gemini/antigravity/.agents') : path.join(process.cwd(), '.agent'),
+    destDirGemini: globalScope ? path.join(os.homedir(), '.gemini') : path.join(process.cwd(), '.gemini')
+  };
+}
 
-  const destDirAgent = globalScope ? path.join(os.homedir(), '.gemini/antigravity/.agents') : path.join(process.cwd(), '.agent');
-  const destDirGemini = globalScope ? path.join(os.homedir(), '.gemini') : path.join(process.cwd(), '.gemini');
+function collectGeminiRuleContent(cursorRules, languages) {
+  let combined = '';
+  const ruleFiles = fs.readdirSync(cursorRules);
 
-  // Rules
-  const cursorRules = path.join(CURSOR_SRC, 'rules');
-  if (languages.length > 0 && fs.existsSync(cursorRules)) {
-    if (globalScope) {
-      const geminiMdPath = path.join(destDirGemini, 'GEMINI.md');
-      fs.mkdirSync(destDirGemini, { recursive: true });
-      let rulesCombined = '';
-      fs.readdirSync(cursorRules).forEach(f => {
-        if (f.startsWith('common-') && f.endsWith('.md')) {
-          rulesCombined += '\\n\\n' + fs.readFileSync(path.join(cursorRules, f), 'utf8');
-        }
-      });
-      for (const lang of languages) {
-        if (!/^[a-zA-Z0-9_-]+$/.test(lang)) continue;
-        fs.readdirSync(cursorRules).forEach(f => {
-          if (f.startsWith(lang + '-') && f.endsWith('.md')) {
-            rulesCombined += '\\n\\n' + fs.readFileSync(path.join(cursorRules, f), 'utf8');
-          }
-        });
-      }
-      if (rulesCombined.trim()) {
-        let existing = fs.existsSync(geminiMdPath) ? fs.readFileSync(geminiMdPath, 'utf8') : '';
-        fs.writeFileSync(geminiMdPath, existing + '\\n' + rulesCombined.trim() + '\\n', 'utf8');
-        console.log('Appended rules for ' + languages.join(', ') + ' to ' + geminiMdPath);
-      }
-    } else {
-      const rulesDest = path.join(destDirAgent, 'rules');
-      fs.mkdirSync(rulesDest, { recursive: true });
-      let foundRules = false;
-      fs.readdirSync(cursorRules).forEach(f => {
-        if (f.startsWith('common-') && f.endsWith('.md')) {
-          fs.copyFileSync(path.join(cursorRules, f), path.join(rulesDest, f));
-          foundRules = true;
-        }
-      });
-      for (const lang of languages) {
-        if (!/^[a-zA-Z0-9_-]+$/.test(lang)) continue;
-        fs.readdirSync(cursorRules).forEach(f => {
-          if (f.startsWith(lang + '-') && f.endsWith('.md')) {
-            fs.copyFileSync(path.join(cursorRules, f), path.join(rulesDest, f));
-            foundRules = true;
-          }
-        });
-      }
-      if (foundRules) {
-        console.log('Installing base & ' + languages.join(', ') + ' rules -> ' + rulesDest + '/');
-      }
+  ruleFiles.forEach(fileName => {
+    if (fileName.startsWith('common-') && fileName.endsWith('.md')) {
+      combined += '\n\n' + fs.readFileSync(path.join(cursorRules, fileName), 'utf8');
     }
-  } else if (!languages.length) {
-    console.log('No languages provided, skipping rules...');
+  });
+
+  for (const language of languages) {
+    if (!isValidLanguageName(language)) continue;
+    ruleFiles.forEach(fileName => {
+      if (fileName.startsWith(language + '-') && fileName.endsWith('.md')) {
+        combined += '\n\n' + fs.readFileSync(path.join(cursorRules, fileName), 'utf8');
+      }
+    });
   }
 
-  // Skills
+  return combined;
+}
+
+function appendGeminiGlobalRules(cursorRules, languages, destDirGemini) {
+  const geminiMdPath = path.join(destDirGemini, 'GEMINI.md');
+  fs.mkdirSync(destDirGemini, { recursive: true });
+  const rulesCombined = collectGeminiRuleContent(cursorRules, languages);
+  if (!rulesCombined.trim()) return;
+
+  const existing = fs.existsSync(geminiMdPath) ? fs.readFileSync(geminiMdPath, 'utf8') : '';
+  fs.writeFileSync(geminiMdPath, existing + '\n' + rulesCombined.trim() + '\n', 'utf8');
+  console.log('Appended rules for ' + languages.join(', ') + ' to ' + geminiMdPath);
+}
+
+function copyGeminiLocalRules(cursorRules, languages, destDirAgent) {
+  const rulesDest = path.join(destDirAgent, 'rules');
+  const ruleFiles = fs.readdirSync(cursorRules);
+  let foundRules = false;
+
+  fs.mkdirSync(rulesDest, { recursive: true });
+  ruleFiles.forEach(fileName => {
+    if (fileName.startsWith('common-') && fileName.endsWith('.md')) {
+      fs.copyFileSync(path.join(cursorRules, fileName), path.join(rulesDest, fileName));
+      foundRules = true;
+    }
+  });
+
+  for (const language of languages) {
+    if (!isValidLanguageName(language)) continue;
+    ruleFiles.forEach(fileName => {
+      if (fileName.startsWith(language + '-') && fileName.endsWith('.md')) {
+        fs.copyFileSync(path.join(cursorRules, fileName), path.join(rulesDest, fileName));
+        foundRules = true;
+      }
+    });
+  }
+
+  if (foundRules) {
+    console.log('Installing base & ' + languages.join(', ') + ' rules -> ' + rulesDest + '/');
+  }
+}
+
+function installGeminiRules(languages, globalScope, destDirAgent, destDirGemini) {
+  const cursorRules = path.join(CURSOR_SRC, 'rules');
+  if (languages.length === 0) {
+    console.log('No languages provided, skipping rules...');
+    return;
+  }
+  if (!fs.existsSync(cursorRules)) return;
+
+  if (globalScope) {
+    appendGeminiGlobalRules(cursorRules, languages, destDirGemini);
+    return;
+  }
+  copyGeminiLocalRules(cursorRules, languages, destDirAgent);
+}
+
+function installGeminiContent(destDirAgent, destDirGemini) {
   const skillsSrc = path.join(REPO_ROOT, 'skills');
   if (fs.existsSync(skillsSrc)) {
     const skillsDest = path.join(destDirAgent, 'skills');
@@ -545,25 +639,26 @@ function installGemini(languages, globalScope) {
     copyRecursiveSync(skillsSrc, skillsDest);
   }
 
-  // Workflows (Agents)
   const agentsSrc = path.join(REPO_ROOT, 'agents');
   if (fs.existsSync(agentsSrc)) {
     const workflowsDest = path.join(destDirAgent, 'workflows');
     console.log('Installing agents as workflows -> ' + workflowsDest + '/');
-    fs.mkdirSync(workflowsDest, { recursive: true });
-    fs.readdirSync(agentsSrc).forEach(f => {
-      if (f.endsWith('.md')) fs.copyFileSync(path.join(agentsSrc, f), path.join(workflowsDest, f));
-    });
+    copyMarkdownFiles(agentsSrc, workflowsDest);
   }
 
-  // Commands
   const commandsSrc = path.join(REPO_ROOT, 'commands');
   if (fs.existsSync(commandsSrc)) {
     const commandsDest = path.join(destDirGemini, 'commands');
     console.log('Installing commands -> ' + commandsDest + '/');
     convertCommandsToToml(commandsSrc, commandsDest);
   }
+}
 
+function installGemini(languages, globalScope) {
+  console.log('Installing Gemini CLI / Antigravity configs...');
+  const { destDirAgent, destDirGemini } = resolveGeminiDestinations(globalScope);
+  installGeminiRules(languages, globalScope, destDirAgent, destDirGemini);
+  installGeminiContent(destDirAgent, destDirGemini);
   console.log('Done. Gemini configs installed.');
 }
 

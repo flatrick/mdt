@@ -398,6 +398,23 @@ For environment-dependent tests, follow the shared detection contract in `tests/
 
 ## Guidelines
 
+### JavaScript Script Guardrails
+
+For changes under `scripts/`, lint is intentionally strict and blocking:
+
+- `complexity <= 12`
+- `max-lines-per-function <= 80`
+- `max-depth <= 4`
+- `no-param-reassign`
+- `no-unused-vars`
+
+Design expectations for runtime scripts:
+
+- Prefer small, composable helpers over large branch-heavy functions.
+- Keep behavior deterministic and side effects explicit.
+- Use immutable transforms for data shaping (create new objects/arrays).
+- Keep hook scripts non-blocking unless explicitly intended to block.
+
 ### Do
 - Keep contributions focused and modular
 - Include clear descriptions

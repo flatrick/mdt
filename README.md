@@ -1,7 +1,7 @@
 # ModelDev Toolkit
 
 Generic model toolkit for software development workflows and scaffolding.
-Not just configs. A complete system: skills, agents, hooks, rules, and MCP configurations. 
+Not just configs. A complete system: skills, agents, hooks, rules, and MCP configurations.
 Works with **Claude Code**, **Cursor**, **Codex**, and other AI agent harnesses.
 
 ## READ ME FIRST!
@@ -141,10 +141,10 @@ Full layout and details: [CLAUDE.md](CLAUDE.md), [AGENTS.md](AGENTS.md).
 
 ## Key concepts
 
-- **Agents** are subagents (planner, code-reviewer, tdd-guide, …). 
-- **Skills** are workflow definitions. 
-- **Hooks** are Node scripts that run on tool events. 
-- **Rules** are common + language-specific guidelines. 
+- **Agents** are subagents (planner, code-reviewer, tdd-guide, …).
+- **Skills** are workflow definitions.
+- **Hooks** are Node scripts that run on tool events.
+- **Rules** are common + language-specific guidelines.
 
 See [AGENTS.md](AGENTS.md) and [CLAUDE.md](CLAUDE.md).
 
@@ -166,8 +166,8 @@ See [AGENTS.md](AGENTS.md) and [CLAUDE.md](CLAUDE.md).
 | Python review | `/python-review` | python-reviewer |
 | DB queries | *(auto-delegated)* | database-reviewer |
 
-**Workflows:** 
-- Plan → `/plan`; then `/tdd` for implementation; `/code-review` before merge. 
+**Workflows:**
+- Plan → `/plan`; then `/tdd` for implementation; `/code-review` before merge.
 - For production: `/security-scan`, `/e2e`, `/test-coverage`.
 
 ---
@@ -177,21 +177,21 @@ See [AGENTS.md](AGENTS.md) and [CLAUDE.md](CLAUDE.md).
 ### How do I install?
 
 Use `node scripts/install-mdt.js` with your language(s).
-Default target is Claude (`~/.claude/`). 
-Use `--target cursor` or `--target codex` for the others. 
+Default target is Claude (`~/.claude/`).
+Use `--target cursor` or `--target codex` for the others.
 
 See [Installation](#installation).
 
 ### Does this work with Cursor / Codex?
 
-Yes, use `--target cursor` or `--target codex`. 
+Yes, use `--target cursor` or `--target codex`.
 
 Each tool gets its own install directory; see [Cursor / Codex / OpenCode](#cursor--codex--opencode).
 
 ### Duplicate hooks / plugin.json?
 
-Do not add a `"hooks"` field to `.claude-plugin/plugin.json`. 
-Claude Code loads `hooks/hooks.json` by convention. 
+Do not add a `"hooks"` field to `.claude-plugin/plugin.json`.
+Claude Code loads `hooks/hooks.json` by convention.
 See [upstream repo](https://github.com/affaan-m/modeldev-toolkit) for history (#29, #52, #103).
 
 More: [CLAUDE.md](CLAUDE.md), [AGENTS.md](AGENTS.md), and `docs/`.

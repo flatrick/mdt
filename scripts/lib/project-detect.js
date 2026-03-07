@@ -276,96 +276,104 @@ function getElixirDeps(projectDir) {
   }
 }
 
-/**
- * Detect project languages and frameworks
- * @param {string} [projectDir] - Project directory (defaults to cwd)
- * @returns {{ languages: string[], frameworks: string[], primary: string, projectDir: string }}
- */
-function detectProjectType(projectDir) {
-  projectDir = projectDir || process.cwd();
-  const languages = [];
+function resolveProjectDir(projectDir) {
+  return projectDir || process.cwd();
+}
+
+function detectLanguages(projectDir) {
+  const detected = [];
+
+  for (const rule of LANGUAGE_RULES) {
+    const hasMarker = rule.markers.some(marker => fileExists(projectDir, marker));
+    const hasExtension = rule.extensions.length > 0 && hasFileWithExtension(projectDir, rule.extensions);
+    if (hasMarker || hasExtension) {
+      detected.push(rule.type);
+    }
+  }
+
+  return detected;
+}
+
+function dedupeLanguages(languages) {
+  if (!(languages.includes('typescript') && languages.includes('javascript'))) {
+    return [...languages];
+  }
+  return languages.filter(language => language !== 'javascript');
+}
+
+function getDependencySources(projectDir) {
+  const npmDeps = getPackageJsonDeps(projectDir);
+  return {
+    python: getPythonDeps(projectDir),
+    typescript: npmDeps,
+    javascript: npmDeps,
+    rust: getRustDeps(projectDir),
+    php: getComposerDeps(projectDir),
+    elixir: getElixirDeps(projectDir)
+  };
+}
+
+function hasDependencyMatch(rule, dependencySources) {
+  if (rule.packageKeys.length === 0) return false;
+
+  const dependencies = dependencySources[rule.language] || [];
+  return rule.packageKeys.some(packageKey =>
+    dependencies.some(dep => dep.toLowerCase().includes(packageKey.toLowerCase()))
+  );
+}
+
+function detectFrameworks(projectDir, dependencySources) {
   const frameworks = [];
 
-  // Step 1: Detect languages
-  for (const rule of LANGUAGE_RULES) {
-    const hasMarker = rule.markers.some(m => fileExists(projectDir, m));
-    const hasExt = rule.extensions.length > 0 && hasFileWithExtension(projectDir, rule.extensions);
-
-    if (hasMarker || hasExt) {
-      languages.push(rule.type);
-    }
-  }
-
-  // Deduplicate: if both typescript and javascript detected, keep typescript
-  if (languages.includes('typescript') && languages.includes('javascript')) {
-    const idx = languages.indexOf('javascript');
-    if (idx !== -1) languages.splice(idx, 1);
-  }
-
-  // Step 2: Detect frameworks based on markers and dependencies
-  const npmDeps = getPackageJsonDeps(projectDir);
-  const pyDeps = getPythonDeps(projectDir);
-  const rustDeps = getRustDeps(projectDir);
-  const composerDeps = getComposerDeps(projectDir);
-  const elixirDeps = getElixirDeps(projectDir);
-
   for (const rule of FRAMEWORK_RULES) {
-    // Check marker files
-    const hasMarker = rule.markers.some(m => fileExists(projectDir, m));
-
-    // Check package dependencies
-    let hasDep = false;
-    if (rule.packageKeys.length > 0) {
-      let depList = [];
-      switch (rule.language) {
-        case 'python':
-          depList = pyDeps;
-          break;
-        case 'typescript':
-        case 'javascript':
-          depList = npmDeps;
-          break;
-        case 'rust':
-          depList = rustDeps;
-          break;
-        case 'php':
-          depList = composerDeps;
-          break;
-        case 'elixir':
-          depList = elixirDeps;
-          break;
-      }
-      hasDep = rule.packageKeys.some(key => depList.some(dep => dep.toLowerCase().includes(key.toLowerCase())));
-    }
+    const hasMarker = rule.markers.some(marker => fileExists(projectDir, marker));
+    const hasDep = hasDependencyMatch(rule, dependencySources);
 
     if (hasMarker || hasDep) {
       frameworks.push(rule.framework);
     }
   }
 
-  // Step 3: Determine primary type
-  let primary = 'unknown';
-  if (frameworks.length > 0) {
-    primary = frameworks[0];
-  } else if (languages.length > 0) {
-    primary = languages[0];
-  }
+  return frameworks;
+}
 
-  // Determine if fullstack (both frontend and backend languages)
+function determinePrimary(languages, frameworks) {
   const frontendSignals = ['react', 'vue', 'angular', 'svelte', 'nextjs', 'nuxt', 'astro', 'remix'];
   const backendSignals = ['django', 'fastapi', 'flask', 'express', 'nestjs', 'rails', 'spring', 'laravel', 'phoenix', 'gin', 'echo', 'actix', 'axum'];
-  const hasFrontend = frameworks.some(f => frontendSignals.includes(f));
-  const hasBackend = frameworks.some(f => backendSignals.includes(f));
+
+  const hasFrontend = frameworks.some(framework => frontendSignals.includes(framework));
+  const hasBackend = frameworks.some(framework => backendSignals.includes(framework));
 
   if (hasFrontend && hasBackend) {
-    primary = 'fullstack';
+    return 'fullstack';
   }
+  if (frameworks.length > 0) {
+    return frameworks[0];
+  }
+  if (languages.length > 0) {
+    return languages[0];
+  }
+
+  return 'unknown';
+}
+
+/**
+ * Detect project languages and frameworks
+ * @param {string} [projectDir] - Project directory (defaults to cwd)
+ * @returns {{ languages: string[], frameworks: string[], primary: string, projectDir: string }}
+ */
+function detectProjectType(projectDir) {
+  const resolvedProjectDir = resolveProjectDir(projectDir);
+  const languages = dedupeLanguages(detectLanguages(resolvedProjectDir));
+  const dependencySources = getDependencySources(resolvedProjectDir);
+  const frameworks = detectFrameworks(resolvedProjectDir, dependencySources);
+  const primary = determinePrimary(languages, frameworks);
 
   return {
     languages,
     frameworks,
     primary,
-    projectDir
+    projectDir: resolvedProjectDir
   };
 }
 

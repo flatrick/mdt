@@ -63,7 +63,7 @@ Codex is a command-line wrapper focusing tightly on file system access and syste
 Gemini (powered structurally by Antigravity) reads local workspace variables deeply. Our installer maps MDT assets perfectly to Google's folder structures.
 
 - **Global Install:** `~/.gemini/antigravity/.agents` (Skills/Workflows) and `~/.gemini/commands` (CLI custom commands). Appends rules to `~/.gemini/GEMINI.md`.
-- **Local Install:** `.agent/` and `.gemini/`. 
+- **Local Install:** `.agent/` and `.gemini/`.
 - **Commands:** The installer parses MDT's Markdown commands and reconstructs them into TOML structures inside `.gemini/commands/{brand}.toml` for Native Gemini CLI auto-completions.
 - **Workflows:** MDT agents drop cleanly into `workflows/`.
 - **Skills:** Drop precisely into `skills/`.

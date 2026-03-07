@@ -194,6 +194,27 @@ function findFiles(dir, pattern, options = {}) {
     .replace(/\?/g, '.');
   const regex = new RegExp(`^${regexPattern}$`);
 
+  function isWithinMaxAge(mtimeMs) {
+    if (maxAge === null) return true;
+    const ageInDays = (Date.now() - mtimeMs) / (1000 * 60 * 60 * 24);
+    return ageInDays <= maxAge;
+  }
+
+  function addFileResultIfMatch(fullPath, fileName) {
+    if (!regex.test(fileName)) return;
+
+    let stats;
+    try {
+      stats = fs.statSync(fullPath);
+    } catch {
+      return; // File deleted between readdir and stat
+    }
+
+    if (isWithinMaxAge(stats.mtimeMs)) {
+      results.push({ path: fullPath, mtime: stats.mtimeMs });
+    }
+  }
+
   function searchDir(currentDir) {
     try {
       const entries = fs.readdirSync(currentDir, { withFileTypes: true });
@@ -201,23 +222,12 @@ function findFiles(dir, pattern, options = {}) {
       for (const entry of entries) {
         const fullPath = path.join(currentDir, entry.name);
 
-        if (entry.isFile() && regex.test(entry.name)) {
-          let stats;
-          try {
-            stats = fs.statSync(fullPath);
-          } catch {
-            continue; // File deleted between readdir and stat
-          }
+        if (entry.isFile()) {
+          addFileResultIfMatch(fullPath, entry.name);
+          continue;
+        }
 
-          if (maxAge !== null) {
-            const ageInDays = (Date.now() - stats.mtimeMs) / (1000 * 60 * 60 * 24);
-            if (ageInDays <= maxAge) {
-              results.push({ path: fullPath, mtime: stats.mtimeMs });
-            }
-          } else {
-            results.push({ path: fullPath, mtime: stats.mtimeMs });
-          }
-        } else if (entry.isDirectory() && recursive) {
+        if (entry.isDirectory() && recursive) {
           searchDir(fullPath);
         }
       }

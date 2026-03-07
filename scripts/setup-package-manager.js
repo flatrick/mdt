@@ -158,55 +158,73 @@ function setProject(pmName, io, deps, cwd) {
   }
 }
 
+function getArgForFlag(args, flag) {
+  const idx = args.indexOf(flag);
+  if (idx === -1) return null;
+  return args[idx + 1];
+}
+
+function runSimpleModes(args, io, deps, env) {
+  if (args.length === 0 || args.includes('--help') || args.includes('-h')) {
+    showHelp(io);
+    return 0;
+  }
+  if (args.includes('--detect')) {
+    detectAndShow(io, deps, env);
+    return 0;
+  }
+  if (args.includes('--list')) {
+    listAvailable(io, deps);
+    return 0;
+  }
+  return null;
+}
+
+function runScopedMode(args, io, deps, cwd) {
+  const globalPm = getArgForFlag(args, '--global');
+  if (globalPm !== null) {
+    if (!globalPm || globalPm.startsWith('-')) {
+      io.error('Error: --global requires a package manager name');
+      return 1;
+    }
+    return setGlobal(globalPm, io, deps);
+  }
+
+  const projectPm = getArgForFlag(args, '--project');
+  if (projectPm !== null) {
+    if (!projectPm || projectPm.startsWith('-')) {
+      io.error('Error: --project requires a package manager name');
+      return 1;
+    }
+    return setProject(projectPm, io, deps, cwd);
+  }
+
+  return null;
+}
+
+function runDefaultMode(args, io, deps) {
+  const pmName = args[0];
+  if (deps.PACKAGE_MANAGERS[pmName]) {
+    return setGlobal(pmName, io, deps);
+  }
+  io.error(`Error: Unknown option or package manager "${pmName}"`);
+  showHelp(io);
+  return 1;
+}
+
 function runSetupPackageManager(args = [], options = {}) {
   const deps = options.deps || packageManagerLib;
   const env = options.env || process.env;
   const cwd = options.cwd || process.cwd();
   const io = createIo(options.io);
 
-  if (args.length === 0 || args.includes('--help') || args.includes('-h')) {
-    showHelp(io);
-    return 0;
-  }
+  const simpleModeExitCode = runSimpleModes(args, io, deps, env);
+  if (simpleModeExitCode !== null) return simpleModeExitCode;
 
-  if (args.includes('--detect')) {
-    detectAndShow(io, deps, env);
-    return 0;
-  }
+  const scopedModeExitCode = runScopedMode(args, io, deps, cwd);
+  if (scopedModeExitCode !== null) return scopedModeExitCode;
 
-  if (args.includes('--list')) {
-    listAvailable(io, deps);
-    return 0;
-  }
-
-  const globalIdx = args.indexOf('--global');
-  if (globalIdx !== -1) {
-    const pmName = args[globalIdx + 1];
-    if (!pmName || pmName.startsWith('-')) {
-      io.error('Error: --global requires a package manager name');
-      return 1;
-    }
-    return setGlobal(pmName, io, deps);
-  }
-
-  const projectIdx = args.indexOf('--project');
-  if (projectIdx !== -1) {
-    const pmName = args[projectIdx + 1];
-    if (!pmName || pmName.startsWith('-')) {
-      io.error('Error: --project requires a package manager name');
-      return 1;
-    }
-    return setProject(pmName, io, deps, cwd);
-  }
-
-  const pmName = args[0];
-  if (deps.PACKAGE_MANAGERS[pmName]) {
-    return setGlobal(pmName, io, deps);
-  }
-
-  io.error(`Error: Unknown option or package manager "${pmName}"`);
-  showHelp(io);
-  return 1;
+  return runDefaultMode(args, io, deps);
 }
 
 if (require.main === module) {
