@@ -41,6 +41,7 @@ function parseArgsFrom(args) {
   for (let i = 0; i < args.length; i++) {
     if (args[i] === '--target' && args[i + 1]) {
       target = args[++i];
+      if (target === 'antigravity') target = 'gemini';
     } else if (args[i] === '--global') {
       globalScope = true;
     } else if (args[i] === '--list') {
@@ -66,8 +67,8 @@ function getAvailableLanguages() {
 }
 
 function printAvailableOptions(target) {
-  console.log('Available targets: claude, cursor, codex');
-  if (target !== 'codex') {
+  console.log('Available targets: claude, cursor, codex, gemini');
+  if (target !== 'codex' && target !== 'gemini') {
     const langs = getAvailableLanguages();
     console.log('Available languages:');
     if (langs.length === 0) {
@@ -86,6 +87,21 @@ function buildInstallPlan({ target, globalScope, languages }) {
 
   if (target === 'codex') {
     lines.push(`[dry-run] Would install from ${CODEX_SRC} to ${path.join(os.homedir(), '.codex')}`);
+    return lines;
+  }
+
+  if (target === 'gemini') {
+    const agentsDest = globalScope ? path.join(os.homedir(), '.gemini/antigravity/.agents') : path.join(process.cwd(), '.agent');
+    const cmdsDest = globalScope ? path.join(os.homedir(), '.gemini/commands') : path.join(process.cwd(), '.gemini/commands');
+    lines.push(`[dry-run] Would install agents and skills to ${agentsDest}`);
+    lines.push(`[dry-run] Would install custom commands to ${cmdsDest}`);
+    if (languages.length > 0) {
+      if (globalScope) {
+        lines.push(`[dry-run] Would append rules for [${languages.join(', ')}] to ${path.join(os.homedir(), '.gemini/GEMINI.md')}`);
+      } else {
+        lines.push(`[dry-run] Would install rules for [${languages.join(', ')}] to ${path.join(agentsDest, 'rules')}`);
+      }
+    }
     return lines;
   }
 
@@ -138,19 +154,20 @@ function copyRuntimeScripts(destScriptsDir) {
 }
 
 function usage(target) {
-  console.error('Usage: node scripts/install-ecc.js [--target claude|cursor|codex] [--global] [--list] [--dry-run] [language ...]');
+  console.error('Usage: node scripts/install-ecc.js [--target claude|cursor|codex|gemini] [--global] [--list] [--dry-run] [language ...]');
   console.error('');
   console.error('Targets:');
   console.error('  claude (default) — Install rules, agents, commands, hooks, skills to ~/.claude/');
   console.error('  cursor           — Install to ./.cursor/ (or ~/.cursor/ with --global)');
   console.error('  codex            — Install Codex CLI config to ~/.codex/ (no language needed)');
+  console.error('  gemini           — Install Antigravity/Gemini CLI configs to .agent/ and .gemini/ (or ~/.gemini... with --global)');
   console.error('');
   console.error('Options:');
-  console.error('  --global         — For cursor, install to ~/.cursor/ instead of current directory.');
+  console.error('  --global         — For cursor and gemini, install to home directory.');
   console.error('  --list           — Show available targets/languages and exit.');
   console.error('  --dry-run        — Print planned install actions without writing files.');
   console.error('');
-  if (target !== 'codex') {
+  if (target !== 'codex' && target !== 'gemini') {
     console.error('Available languages:');
     getAvailableLanguages().forEach((lang) => console.error('  - ' + lang));
   }
@@ -418,11 +435,133 @@ function installCodex() {
   console.log('Done. Codex configs installed to ' + destDir + '/');
 }
 
+function convertCommandsToToml(commandsSrc, commandsDest) {
+  if (!fs.existsSync(commandsSrc)) return;
+  fs.mkdirSync(commandsDest, { recursive: true });
+  fs.readdirSync(commandsSrc).forEach(f => {
+    if (f.endsWith('.md')) {
+      const p = path.join(commandsSrc, f);
+      const content = fs.readFileSync(p, 'utf8');
+
+      let description = '';
+      let promptContent = content;
+
+      if (content.startsWith('---')) {
+        const parts = content.split('---');
+        if (parts.length >= 3) {
+          const fm = parts[1];
+          const descMatch = fm.match(/description:\s*(.*)/);
+          if (descMatch) description = descMatch[1].trim();
+          promptContent = parts.slice(2).join('---').trim();
+        }
+      }
+
+      const tomlPath = path.join(commandsDest, f.replace('.md', '.toml'));
+      let tomlStr = '';
+      if (description) {
+        const cleanDesc = description.replace(/"/g, '\\"');
+        tomlStr += `description = "${cleanDesc}"\n`;
+      }
+      const cleanPrompt = promptContent.replace(/"""/g, '""\\"');
+      tomlStr += `prompt = """\n${cleanPrompt}\n"""\n`;
+      fs.writeFileSync(tomlPath, tomlStr, 'utf8');
+    }
+  });
+}
+
+function installGemini(languages, globalScope) {
+  console.log('Installing Gemini CLI / Antigravity configs...');
+
+  const destDirAgent = globalScope ? path.join(os.homedir(), '.gemini/antigravity/.agents') : path.join(process.cwd(), '.agent');
+  const destDirGemini = globalScope ? path.join(os.homedir(), '.gemini') : path.join(process.cwd(), '.gemini');
+
+  // Rules
+  const cursorRules = path.join(CURSOR_SRC, 'rules');
+  if (languages.length > 0 && fs.existsSync(cursorRules)) {
+    if (globalScope) {
+      const geminiMdPath = path.join(destDirGemini, 'GEMINI.md');
+      fs.mkdirSync(destDirGemini, { recursive: true });
+      let rulesCombined = '';
+      fs.readdirSync(cursorRules).forEach(f => {
+        if (f.startsWith('common-') && f.endsWith('.md')) {
+          rulesCombined += '\\n\\n' + fs.readFileSync(path.join(cursorRules, f), 'utf8');
+        }
+      });
+      for (const lang of languages) {
+        if (!/^[a-zA-Z0-9_-]+$/.test(lang)) continue;
+        fs.readdirSync(cursorRules).forEach(f => {
+          if (f.startsWith(lang + '-') && f.endsWith('.md')) {
+            rulesCombined += '\\n\\n' + fs.readFileSync(path.join(cursorRules, f), 'utf8');
+          }
+        });
+      }
+      if (rulesCombined.trim()) {
+        let existing = fs.existsSync(geminiMdPath) ? fs.readFileSync(geminiMdPath, 'utf8') : '';
+        fs.writeFileSync(geminiMdPath, existing + '\\n' + rulesCombined.trim() + '\\n', 'utf8');
+        console.log('Appended rules for ' + languages.join(', ') + ' to ' + geminiMdPath);
+      }
+    } else {
+      const rulesDest = path.join(destDirAgent, 'rules');
+      fs.mkdirSync(rulesDest, { recursive: true });
+      let foundRules = false;
+      fs.readdirSync(cursorRules).forEach(f => {
+        if (f.startsWith('common-') && f.endsWith('.md')) {
+          fs.copyFileSync(path.join(cursorRules, f), path.join(rulesDest, f));
+          foundRules = true;
+        }
+      });
+      for (const lang of languages) {
+        if (!/^[a-zA-Z0-9_-]+$/.test(lang)) continue;
+        fs.readdirSync(cursorRules).forEach(f => {
+          if (f.startsWith(lang + '-') && f.endsWith('.md')) {
+            fs.copyFileSync(path.join(cursorRules, f), path.join(rulesDest, f));
+            foundRules = true;
+          }
+        });
+      }
+      if (foundRules) {
+        console.log('Installing base & ' + languages.join(', ') + ' rules -> ' + rulesDest + '/');
+      }
+    }
+  } else if (!languages.length) {
+    console.log('No languages provided, skipping rules...');
+  }
+
+  // Skills
+  const skillsSrc = path.join(REPO_ROOT, 'skills');
+  if (fs.existsSync(skillsSrc)) {
+    const skillsDest = path.join(destDirAgent, 'skills');
+    console.log('Installing skills -> ' + skillsDest + '/');
+    copyRecursiveSync(skillsSrc, skillsDest);
+  }
+
+  // Workflows (Agents)
+  const agentsSrc = path.join(REPO_ROOT, 'agents');
+  if (fs.existsSync(agentsSrc)) {
+    const workflowsDest = path.join(destDirAgent, 'workflows');
+    console.log('Installing agents as workflows -> ' + workflowsDest + '/');
+    fs.mkdirSync(workflowsDest, { recursive: true });
+    fs.readdirSync(agentsSrc).forEach(f => {
+      if (f.endsWith('.md')) fs.copyFileSync(path.join(agentsSrc, f), path.join(workflowsDest, f));
+    });
+  }
+
+  // Commands
+  const commandsSrc = path.join(REPO_ROOT, 'commands');
+  if (fs.existsSync(commandsSrc)) {
+    const commandsDest = path.join(destDirGemini, 'commands');
+    console.log('Installing commands -> ' + commandsDest + '/');
+    convertCommandsToToml(commandsSrc, commandsDest);
+  }
+
+  console.log('Done. Gemini configs installed.');
+}
+
 function main() {
   const { target, globalScope, listMode, dryRun, languages } = parseArgs();
 
-  if (target !== 'claude' && target !== 'cursor' && target !== 'codex') {
-    console.error("Error: unknown target '" + target + "'. Must be claude, cursor, or codex.");
+  if (target !== 'claude' && target !== 'cursor' && target !== 'codex' && target !== 'gemini') {
+    console.error("Error: unknown target '" + target + "'. Must be claude, cursor, codex, or gemini.");
     process.exit(1);
   }
   if (listMode) {
@@ -434,12 +573,13 @@ function main() {
     plan.forEach((line) => console.log(line));
     process.exit(0);
   }
-  if (globalScope && target !== 'cursor') {
-    console.error("Warning: --global is only supported for cursor target. Ignored.");
+  if (globalScope && target !== 'cursor' && target !== 'gemini') {
+    console.error("Warning: --global is only supported for cursor and gemini target. Ignored.");
   }
 
   if (target === 'claude') installClaude(languages);
   else if (target === 'cursor') installCursor(languages, globalScope);
+  else if (target === 'gemini') installGemini(languages, globalScope);
   else installCodex();
 }
 

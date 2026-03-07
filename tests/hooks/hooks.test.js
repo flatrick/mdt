@@ -173,34 +173,39 @@ async function runTests() {
   })) passed++; else failed++;
 
   if (await asyncTest('creates or updates session file', async () => {
-    await runScript(path.join(scriptsDir, 'session-end.js'));
+    const testDir = createTestDir();
+    await runScript(path.join(scriptsDir, 'session-end.js'), '', { HOME: testDir, USERPROFILE: testDir });
 
-    const utils = require('../../scripts/lib/utils');
-    const sessionsDir = utils.getSessionsDir();
+    const sessionsDir = getSessionsDirForHome(testDir);
     const now = new Date();
     const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
-    const expectedId = utils.getSessionIdShort();
+    const utils = require('../../scripts/lib/utils');
+    const expectedId = 'everything-claude-code';
     const sessionFile = path.join(sessionsDir, `${today}-${expectedId}-session.tmp`);
 
     assert.ok(fs.existsSync(sessionFile), `Session file should exist: ${sessionFile}`);
+    cleanupTestDir(testDir);
   })) passed++; else failed++;
 
   if (await asyncTest('includes session ID in filename', async () => {
+    const testDir = createTestDir();
     const testSessionId = 'test-session-abc12345';
     const expectedShortId = 'abc12345'; // Last 8 chars
 
-    // Run with custom session ID
+    // Run with custom session ID and isolated HOME
     await runScript(path.join(scriptsDir, 'session-end.js'), '', {
-      CLAUDE_SESSION_ID: testSessionId
+      CLAUDE_SESSION_ID: testSessionId,
+      HOME: testDir,
+      USERPROFILE: testDir
     });
 
-    const utils = require('../../scripts/lib/utils');
-    const sessionsDir = utils.getSessionsDir();
+    const sessionsDir = getSessionsDirForHome(testDir, { CLAUDE_SESSION_ID: testSessionId });
     const now = new Date();
     const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
     const sessionFile = path.join(sessionsDir, `${today}-${expectedShortId}-session.tmp`);
 
     assert.ok(fs.existsSync(sessionFile), `Session file should exist: ${sessionFile}`);
+    cleanupTestDir(testDir);
   })) passed++; else failed++;
 
   // pre-compact.js tests

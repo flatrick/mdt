@@ -38,6 +38,8 @@
     "url": "https://github.com/flatrick/everything-claude-code/issues"
   },
   "files": [
+    ".agent/",
+    ".gemini/",
     ".agents/",
     ".codex/",
     ".cursor/",

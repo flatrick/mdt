@@ -53,6 +53,17 @@ function runTests() {
     assert.ok(plan.some((line) => line.includes('scripts/hooks + scripts/lib')));
   })) passed++; else failed++;
 
+  if(test('buildInstallPlan includes gemini local paths',()=>{
+    const plan = buildInstallPlan({target:'gemini',globalScope:false,languages:['typescript']});
+    assert.ok(plan.some((l)=>l.includes('Target: gemini')));
+    assert.ok(plan.some((l)=>l.includes('.agent')));
+  })) passed++; else failed++;
+  if(test('buildInstallPlan includes gemini global paths',()=>{
+    const plan = buildInstallPlan({target:'gemini',globalScope:true,languages:['typescript']});
+    assert.ok(plan.some((l)=>l.includes('Target: gemini (global)')));
+    assert.ok(plan.some((l)=>l.includes('GEMINI.md')));
+  })) passed++; else failed++;
+
   console.log(`\nResults: Passed: ${passed}, Failed: ${failed}`);
   process.exit(failed > 0 ? 1 : 0);
 }
