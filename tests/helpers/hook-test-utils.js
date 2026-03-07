@@ -1,14 +1,11 @@
 const path = require('path');
 const { spawn } = require('child_process');
 const { withEnv } = require('./env-test-utils');
+const { buildTestEnv } = require('./test-env-profiles');
 
-function runScript(scriptPath, input = '', env = {}) {
+function runScript(scriptPath, input = '', env = {}, profile = 'neutral') {
   return new Promise((resolve, reject) => {
-    // Merge env: undefined/null values delete the key from the environment
-    const merged = { ...process.env, ...env };
-    for (const key of Object.keys(merged)) {
-      if (merged[key] === undefined || merged[key] === null) delete merged[key];
-    }
+    const merged = buildTestEnv(profile, env);
     const proc = spawn('node', [scriptPath], {
       env: merged,
       stdio: ['pipe', 'pipe', 'pipe']

@@ -10,6 +10,7 @@ const path = require('path');
 const { spawnSync } = require('child_process');
 const { ensureSubprocessCapability } = require('../helpers/subprocess-capability');
 const { test, createTestDir, cleanupTestDir } = require('../helpers/test-runner');
+const { buildTestEnv } = require('../helpers/test-env-profiles');
 
 function runInstaller(args, options = {}) {
   const repoRoot = path.join(__dirname, '..', '..');
@@ -17,7 +18,7 @@ function runInstaller(args, options = {}) {
   return spawnSync('node', [installerPath, ...args], {
     encoding: 'utf8',
     cwd: options.cwd || repoRoot,
-    env: { ...process.env, ...(options.env || {}) },
+    env: buildTestEnv(options.profile || 'neutral', options.env || {}),
     stdio: ['pipe', 'pipe', 'pipe'],
     timeout: 20000
   });

@@ -1,13 +1,14 @@
 const path = require('path');
 const { spawn } = require('child_process');
+const { buildTestEnv } = require('./test-env-profiles');
 
 /**
  * Run a hook script with simulated Claude Code input.
  */
-function runHookWithInput(scriptPath, input = {}, env = {}, timeoutMs = 10000) {
+function runHookWithInput(scriptPath, input = {}, env = {}, timeoutMs = 10000, profile = 'neutral') {
   return new Promise((resolve, reject) => {
     const proc = spawn('node', [scriptPath], {
-      env: { ...process.env, ...env },
+      env: buildTestEnv(profile, env),
       stdio: ['pipe', 'pipe', 'pipe']
     });
 
@@ -65,12 +66,12 @@ function parseHookCommand(command, pluginRoot) {
 /**
  * Run a hook command string from hooks.json (`node -e ...` or `node "...js"`).
  */
-function runHookCommand(command, input = {}, env = {}, timeoutMs = 10000, pluginRoot = path.join(__dirname, '..', '..')) {
+function runHookCommand(command, input = {}, env = {}, timeoutMs = 10000, pluginRoot = path.join(__dirname, '..', '..'), profile = 'neutral') {
   return new Promise((resolve, reject) => {
     const parsed = parseHookCommand(command, pluginRoot);
 
     const proc = spawn(parsed.cmd, parsed.args, {
-      env: { ...process.env, ...env },
+      env: buildTestEnv(profile, env),
       stdio: ['pipe', 'pipe', 'pipe']
     });
 
