@@ -21,19 +21,58 @@ function parseRequestedProfile(argv, env) {
   const profileFromArg = argv.find((arg) => arg.startsWith('--profile='));
   if (profileFromArg) {
     const value = profileFromArg.slice('--profile='.length).trim();
-    if (value) return value;
+    if (value) {
+      return {
+        profile: value,
+        profileOverrideSource: '--profile'
+      };
+    }
   }
 
   const profileFlagIndex = argv.indexOf('--profile');
   if (profileFlagIndex >= 0) {
     const value = (argv[profileFlagIndex + 1] || '').trim();
-    if (value) return value;
+    if (value) {
+      return {
+        profile: value,
+        profileOverrideSource: '--profile'
+      };
+    }
   }
 
-  return env.ECC_TEST_ENV_PROFILE || 'neutral';
+  if (env.ECC_TEST_ENV_PROFILE) {
+    return {
+      profile: env.ECC_TEST_ENV_PROFILE,
+      profileOverrideSource: 'ECC_TEST_ENV_PROFILE'
+    };
+  }
+
+  return {
+    profile: 'neutral',
+    profileOverrideSource: 'none'
+  };
 }
 
-const requestedProfile = parseRequestedProfile(process.argv.slice(2), process.env);
+function isDebugModeEnabled(env) {
+  return env.ECC_TEST_ENV_DEBUG === '1';
+}
+
+const { profile: requestedProfile, profileOverrideSource } = parseRequestedProfile(process.argv.slice(2), process.env);
+const debugModeEnabled = isDebugModeEnabled(process.env);
+
+if (debugModeEnabled) {
+  const detectionKeys = ['CURSOR_AGENT', 'CLAUDE_SESSION_ID', 'CLAUDE_CODE', 'CURSOR_TRACE_ID'];
+  const debugLine = (label, value) => `${label.padEnd(24)}: ${value}`;
+
+  console.log('[ECC test preflight]');
+  console.log(debugLine('selected profile', requestedProfile));
+  console.log(debugLine('profile override source', profileOverrideSource));
+  for (const key of detectionKeys) {
+    const value = process.env[key];
+    console.log(debugLine(key, value && value.length > 0 ? value : '<unset>'));
+  }
+  console.log();
+}
 
 try {
   buildTestEnv(requestedProfile);
