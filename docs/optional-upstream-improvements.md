@@ -1,5 +1,7 @@
 # Optional Improvements from affaan-m to Consider
 
+Plan for the **ModelDev Toolkit (MDT)** fork. Upstream is affaan-m/everything-claude-code (ECC); this doc uses MDT naming where the repo has been renamed.
+
 You already ported the three high-value items: **runtime hook controls** (MDT_HOOK_PROFILE / MDT_DISABLED_HOOKS), **session persistence on Stop**, and the **doc-file-warning allowlist**. Below are remaining upstream additions.
 
 ---
@@ -51,7 +53,7 @@ Use this section to avoid mistakes; update it after changes.
 
 ## 1. OpenCode plugin: profile and disabled-hooks support
 
-**What:** In affaan-m, `.opencode/plugins/mdt-hooks.ts` reads `MDT_HOOK_PROFILE` and `MDT_DISABLED_HOOKS`, defines `hookEnabled(hookId, requiredProfile)`, and gates each behavior (format, console.log warn, tsc, etc.) with it.
+**What:** In affaan-m, `.opencode/plugins/ecc-hooks.ts` uses `ECC_HOOK_PROFILE` / `ECC_DISABLED_HOOKS` and `hookEnabled()`. In this fork the plugin is `.opencode/plugins/mdt-hooks.ts`; use `MDT_HOOK_PROFILE` / `MDT_DISABLED_HOOKS` and gate each behavior (format, console.log warn, tsc, etc.) with `hookEnabled(...)`.
 
 **This repo:** `.opencode/plugins/mdt-hooks.ts` has no profile or disabled-hooks logic; every hook behavior always runs.
 
