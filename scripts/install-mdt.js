@@ -1,15 +1,16 @@
 #!/usr/bin/env node
 /**
- * ECC installer — Node-only. Install rules, agents, skills, commands, hooks, and configs.
+ * ModelDev Toolkit installer.
+ * Node-only installer for rules, agents, skills, commands, hooks, and configs.
  *
  * Usage:
- *   node scripts/install-ecc.js [--target claude|cursor|codex] [--global] [language ...]
+ *   node scripts/install-mdt.js [--target claude|cursor|codex] [--global] [language ...]
  *
  * Examples:
- *   node scripts/install-ecc.js typescript
- *   node scripts/install-ecc.js --target cursor typescript
- *   node scripts/install-ecc.js --target cursor --global typescript
- *   node scripts/install-ecc.js --target codex
+ *   node scripts/install-mdt.js typescript
+ *   node scripts/install-mdt.js --target cursor typescript
+ *   node scripts/install-mdt.js --target cursor --global typescript
+ *   node scripts/install-mdt.js --target codex
  *
  * Targets:
  *   claude (default) — Install to ./.claude/ or ~/.claude/ with --global
@@ -158,7 +159,7 @@ function copyRuntimeScripts(destScriptsDir) {
 }
 
 function usage(target) {
-  console.error('Usage: node scripts/install-ecc.js [--target claude|cursor|codex|gemini] [--global] [--list] [--dry-run] [language ...]');
+  console.error('Usage: node scripts/install-mdt.js [--target claude|cursor|codex|gemini] [--global] [--list] [--dry-run] [language ...]');
   console.error('');
   console.error('Targets:');
   console.error('  claude (default) — Install to ./.claude/ (or ~/.claude/ with --global)');

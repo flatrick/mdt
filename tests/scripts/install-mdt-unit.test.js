@@ -1,7 +1,7 @@
 /**
- * Unit tests for scripts/install-ecc.js argument parsing and dry-run planning.
+ * Unit tests for scripts/install-mdt.js argument parsing and dry-run planning.
  *
- * Run with: node tests/scripts/install-ecc-unit.test.js
+ * Run with: node tests/scripts/install-mdt-unit.test.js
  */
 
 const assert = require('assert');
@@ -9,10 +9,10 @@ const { test } = require('../helpers/test-runner');
 const {
   parseArgsFrom,
   buildInstallPlan
-} = require('../../scripts/install-ecc');
+} = require('../../scripts/install-mdt');
 
 function runTests() {
-  console.log('\n=== Testing install-ecc.js (unit) ===\n');
+  console.log('\n=== Testing install-mdt.js (unit) ===\n');
 
   let passed = 0;
   let failed = 0;
@@ -92,4 +92,3 @@ function runTests() {
 }
 
 runTests();
-

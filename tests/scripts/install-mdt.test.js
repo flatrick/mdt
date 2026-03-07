@@ -1,7 +1,7 @@
 /**
- * Tests for scripts/install-ecc.js
+ * Tests for scripts/install-mdt.js
  *
- * Run with: node tests/scripts/install-ecc.test.js
+ * Run with: node tests/scripts/install-mdt.test.js
  */
 
 const assert = require('assert');
@@ -14,7 +14,7 @@ const { buildTestEnv } = require('../helpers/test-env-profiles');
 
 function runInstaller(args, options = {}) {
   const repoRoot = path.join(__dirname, '..', '..');
-  const installerPath = path.join(repoRoot, 'scripts', 'install-ecc.js');
+  const installerPath = path.join(repoRoot, 'scripts', 'install-mdt.js');
   return spawnSync('node', [installerPath, ...args], {
     encoding: 'utf8',
     cwd: options.cwd || repoRoot,
@@ -33,13 +33,13 @@ function assertSuccess(result, context) {
 }
 
 function runTests() {
-  console.log('\n=== Testing install-ecc.js ===\n');
+  console.log('\n=== Testing install-mdt.js ===\n');
 
   let passed = 0;
   let failed = 0;
 
   if (test('claude install copies runtime scripts only (hooks + lib)', () => {
-    const tmpHome = createTestDir('ecc-install-claude-');
+    const tmpHome = createTestDir('mdt-install-claude-');
     const claudeBase = path.join(tmpHome, '.claude');
 
     try {
@@ -55,15 +55,15 @@ function runTests() {
       assert.ok(fs.existsSync(path.join(claudeBase, 'scripts', 'hooks', 'session-start.js')));
       assert.ok(fs.existsSync(path.join(claudeBase, 'scripts', 'lib', 'utils.js')));
       assert.ok(!fs.existsSync(path.join(claudeBase, 'scripts', 'ci')), 'scripts/ci must not be installed');
-      assert.ok(!fs.existsSync(path.join(claudeBase, 'scripts', 'install-ecc.js')), 'top-level installer must not be installed');
+      assert.ok(!fs.existsSync(path.join(claudeBase, 'scripts', 'install-mdt.js')), 'top-level installer must not be installed');
     } finally {
       cleanupTestDir(tmpHome);
     }
   })) passed++; else failed++;
 
   if (test('cursor install copies runtime scripts only (hooks + lib)', () => {
-    const tmpHome = createTestDir('ecc-install-cursor-home-');
-    const tmpProject = createTestDir('ecc-install-cursor-proj-');
+    const tmpHome = createTestDir('mdt-install-cursor-home-');
+    const tmpProject = createTestDir('mdt-install-cursor-proj-');
 
     try {
       const result = runInstaller(['--target', 'cursor', 'typescript'], {
@@ -79,7 +79,7 @@ function runTests() {
       assert.ok(fs.existsSync(path.join(cursorRoot, 'scripts', 'hooks', 'session-start.js')));
       assert.ok(fs.existsSync(path.join(cursorRoot, 'scripts', 'lib', 'utils.js')));
       assert.ok(!fs.existsSync(path.join(cursorRoot, 'scripts', 'ci')), 'scripts/ci must not be installed');
-      assert.ok(!fs.existsSync(path.join(cursorRoot, 'scripts', 'install-ecc.js')), 'top-level installer must not be installed');
+      assert.ok(!fs.existsSync(path.join(cursorRoot, 'scripts', 'install-mdt.js')), 'top-level installer must not be installed');
     } finally {
       cleanupTestDir(tmpHome);
       cleanupTestDir(tmpProject);
@@ -87,7 +87,7 @@ function runTests() {
   })) passed++; else failed++;
 
   if (test('claude install merges hooks into existing settings.json and preserves other keys', () => {
-    const tmpHome = createTestDir('ecc-install-settings-');
+    const tmpHome = createTestDir('mdt-install-settings-');
     const claudeBase = path.join(tmpHome, '.claude');
 
     try {
@@ -122,7 +122,7 @@ function runTests() {
   })) passed++; else failed++;
 
   if (test('claude project-level install copies to cwd .claude', () => {
-    const tmpProject = createTestDir('ecc-install-claude-proj-');
+    const tmpProject = createTestDir('mdt-install-claude-proj-');
 
     try {
       const result = runInstaller(['typescript'], {
@@ -156,5 +156,5 @@ function runTests() {
   process.exit(failed > 0 ? 1 : 0);
 }
 
-ensureSubprocessCapability('tests/scripts/install-ecc.test.js');
+ensureSubprocessCapability('tests/scripts/install-mdt.test.js');
 runTests();
