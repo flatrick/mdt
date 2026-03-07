@@ -144,18 +144,12 @@ function runTests() {
 
   if (test('ignores global config with non-string packageManager', () => {
     // This tests the path through loadConfig where packageManager is not a valid PM name
-    const originalEnv = process.env.CLAUDE_PACKAGE_MANAGER;
-    try {
-      delete process.env.CLAUDE_PACKAGE_MANAGER;
+    withEnv({ CLAUDE_PACKAGE_MANAGER: undefined }, () => {
       // getPackageManager should fall through to default when no valid config exists
       const result = pm.getPackageManager({ projectDir: os.tmpdir() });
       assert.ok(result.name, 'Should return a package manager name');
       assert.ok(result.config, 'Should return config object');
-    } finally {
-      if (originalEnv !== undefined) {
-        process.env.CLAUDE_PACKAGE_MANAGER = originalEnv;
-      }
-    }
+    });
   })) passed++;
   else failed++;
 
@@ -230,41 +224,26 @@ function runTests() {
   console.log('\ngetExecCommand (safe argument edge cases, Round 31):');
 
   if (test('allows colons in args (e.g. --fix:all)', () => {
-    const originalEnv = process.env.CLAUDE_PACKAGE_MANAGER;
-    try {
-      process.env.CLAUDE_PACKAGE_MANAGER = 'npm';
+    withEnv({ CLAUDE_PACKAGE_MANAGER: 'npm' }, () => {
       const cmd = pm.getExecCommand('eslint', '--fix:all');
       assert.ok(cmd.includes('--fix:all'), 'Colons should be allowed in args');
-    } finally {
-      if (originalEnv !== undefined) process.env.CLAUDE_PACKAGE_MANAGER = originalEnv;
-      else delete process.env.CLAUDE_PACKAGE_MANAGER;
-    }
+    });
   })) passed++;
   else failed++;
 
   if (test('allows at-sign in args (e.g. @latest)', () => {
-    const originalEnv = process.env.CLAUDE_PACKAGE_MANAGER;
-    try {
-      process.env.CLAUDE_PACKAGE_MANAGER = 'npm';
+    withEnv({ CLAUDE_PACKAGE_MANAGER: 'npm' }, () => {
       const cmd = pm.getExecCommand('create-next-app', '@latest');
       assert.ok(cmd.includes('@latest'), 'At-sign should be allowed in args');
-    } finally {
-      if (originalEnv !== undefined) process.env.CLAUDE_PACKAGE_MANAGER = originalEnv;
-      else delete process.env.CLAUDE_PACKAGE_MANAGER;
-    }
+    });
   })) passed++;
   else failed++;
 
   if (test('allows equals in args (e.g. --config=path)', () => {
-    const originalEnv = process.env.CLAUDE_PACKAGE_MANAGER;
-    try {
-      process.env.CLAUDE_PACKAGE_MANAGER = 'npm';
+    withEnv({ CLAUDE_PACKAGE_MANAGER: 'npm' }, () => {
       const cmd = pm.getExecCommand('prettier', '--config=.prettierrc');
       assert.ok(cmd.includes('--config=.prettierrc'), 'Equals should be allowed');
-    } finally {
-      if (originalEnv !== undefined) process.env.CLAUDE_PACKAGE_MANAGER = originalEnv;
-      else delete process.env.CLAUDE_PACKAGE_MANAGER;
-    }
+    });
   })) passed++;
   else failed++;
 
@@ -272,45 +251,30 @@ function runTests() {
   console.log('\nRound 34: getExecCommand non-string args:');
 
   if (test('getExecCommand with args=0 produces command without extra args', () => {
-    const originalEnv = process.env.CLAUDE_PACKAGE_MANAGER;
-    try {
-      process.env.CLAUDE_PACKAGE_MANAGER = 'npm';
+    withEnv({ CLAUDE_PACKAGE_MANAGER: 'npm' }, () => {
       const cmd = pm.getExecCommand('prettier', 0);
       // 0 is falsy, so ternary `args ? ' ' + args : ''` yields ''
       assert.ok(!cmd.includes(' 0'), 'Should not append 0 as args');
       assert.ok(cmd.includes('prettier'), 'Should include binary name');
-    } finally {
-      if (originalEnv !== undefined) process.env.CLAUDE_PACKAGE_MANAGER = originalEnv;
-      else delete process.env.CLAUDE_PACKAGE_MANAGER;
-    }
+    });
   })) passed++;
   else failed++;
 
   if (test('getExecCommand with args=false produces command without extra args', () => {
-    const originalEnv = process.env.CLAUDE_PACKAGE_MANAGER;
-    try {
-      process.env.CLAUDE_PACKAGE_MANAGER = 'npm';
+    withEnv({ CLAUDE_PACKAGE_MANAGER: 'npm' }, () => {
       const cmd = pm.getExecCommand('eslint', false);
       assert.ok(!cmd.includes('false'), 'Should not append false as args');
       assert.ok(cmd.includes('eslint'), 'Should include binary name');
-    } finally {
-      if (originalEnv !== undefined) process.env.CLAUDE_PACKAGE_MANAGER = originalEnv;
-      else delete process.env.CLAUDE_PACKAGE_MANAGER;
-    }
+    });
   })) passed++;
   else failed++;
 
   if (test('getExecCommand with args=null produces command without extra args', () => {
-    const originalEnv = process.env.CLAUDE_PACKAGE_MANAGER;
-    try {
-      process.env.CLAUDE_PACKAGE_MANAGER = 'npm';
+    withEnv({ CLAUDE_PACKAGE_MANAGER: 'npm' }, () => {
       const cmd = pm.getExecCommand('tsc', null);
       assert.ok(!cmd.includes('null'), 'Should not append null as args');
       assert.ok(cmd.includes('tsc'), 'Should include binary name');
-    } finally {
-      if (originalEnv !== undefined) process.env.CLAUDE_PACKAGE_MANAGER = originalEnv;
-      else delete process.env.CLAUDE_PACKAGE_MANAGER;
-    }
+    });
   })) passed++;
   else failed++;
 
@@ -376,11 +340,8 @@ function runTests() {
     const projDir = path.join(tmpDir, 'proj');
     fs.mkdirSync(projDir, { recursive: true });
 
-    const origPM = process.env.CLAUDE_PACKAGE_MANAGER;
-
     try {
-      delete process.env.CLAUDE_PACKAGE_MANAGER;
-      withEnv({ HOME: tmpDir, USERPROFILE: tmpDir }, () => {
+      withEnv({ CLAUDE_PACKAGE_MANAGER: undefined, HOME: tmpDir, USERPROFILE: tmpDir }, () => {
         delete require.cache[require.resolve('../../scripts/lib/detect-env')];
         delete require.cache[require.resolve('../../scripts/lib/utils')];
         const utils = require('../../scripts/lib/utils');
@@ -396,8 +357,6 @@ function runTests() {
         assert.strictEqual(result.source, 'default', 'Source should be default');
       });
     } finally {
-      if (origPM !== undefined) process.env.CLAUDE_PACKAGE_MANAGER = origPM;
-
       delete require.cache[require.resolve('../../scripts/lib/detect-env')];
       delete require.cache[require.resolve('../../scripts/lib/utils')];
       delete require.cache[require.resolve('../../scripts/lib/package-manager')];
@@ -414,11 +373,8 @@ function runTests() {
     const projDir = path.join(tmpDir, 'proj');
     fs.mkdirSync(projDir, { recursive: true });
 
-    const origPM = process.env.CLAUDE_PACKAGE_MANAGER;
-
     try {
-      delete process.env.CLAUDE_PACKAGE_MANAGER;
-      withEnv({ HOME: tmpDir, USERPROFILE: tmpDir }, () => {
+      withEnv({ CLAUDE_PACKAGE_MANAGER: undefined, HOME: tmpDir, USERPROFILE: tmpDir }, () => {
         // Re-require to pick up new HOME / configDir
         delete require.cache[require.resolve('../../scripts/lib/package-manager')];
         delete require.cache[require.resolve('../../scripts/lib/utils')];
@@ -443,8 +399,6 @@ function runTests() {
         assert.strictEqual(result.config.lockFile, 'pnpm-lock.yaml', 'Config should match pnpm');
       });
     } finally {
-      if (origPM !== undefined) process.env.CLAUDE_PACKAGE_MANAGER = origPM;
-
       delete require.cache[require.resolve('../../scripts/lib/package-manager')];
       delete require.cache[require.resolve('../../scripts/lib/utils')];
       cleanupTestDir(tmpDir);
@@ -515,18 +469,13 @@ function runTests() {
   console.log('\nRound 80: getExecCommand (truthy non-string args):');
 
   if (test('getExecCommand rejects truthy non-string args like number 42', () => {
-    const originalEnv = process.env.CLAUDE_PACKAGE_MANAGER;
-    try {
-      process.env.CLAUDE_PACKAGE_MANAGER = 'npm';
+    withEnv({ CLAUDE_PACKAGE_MANAGER: 'npm' }, () => {
       assert.throws(
         () => pm.getExecCommand('prettier', 42),
         /args must be a string/,
         'Truthy non-string args should be rejected'
       );
-    } finally {
-      if (originalEnv !== undefined) process.env.CLAUDE_PACKAGE_MANAGER = originalEnv;
-      else delete process.env.CLAUDE_PACKAGE_MANAGER;
-    }
+    });
   })) passed++;
   else failed++;
 
@@ -626,19 +575,11 @@ function runTests() {
     // package-manager.js line 168: if (envPm && PACKAGE_MANAGERS[envPm])\
     // Empty string '' is falsy — the && short-circuits before checking PACKAGE_MANAGERS.\
     // This is distinct from the 'totally-fake-pm' test (truthy but unknown PM).
-    const originalEnv = process.env.CLAUDE_PACKAGE_MANAGER;
-    try {
-      process.env.CLAUDE_PACKAGE_MANAGER = '';
+    withEnv({ CLAUDE_PACKAGE_MANAGER: '' }, () => {
       const result = pm.getPackageManager();
       assert.notStrictEqual(result.source, 'environment', 'Empty string env var should NOT be treated as environment source');
       assert.ok(result.name, 'Should still return a valid package manager name');
-    } finally {
-      if (originalEnv !== undefined) {
-        process.env.CLAUDE_PACKAGE_MANAGER = originalEnv;
-      } else {
-        delete process.env.CLAUDE_PACKAGE_MANAGER;
-      }
-    }
+    });
   })) passed++;
   else failed++;
 
@@ -680,9 +621,7 @@ function runTests() {
   console.log('\nRound 109: getExecCommand (path traversal in binary is rejected):');
 
   if (test('getExecCommand rejects ../../../etc/passwd and @scope/../../evil as unsafe binary names', () => {
-    const originalEnv = process.env.CLAUDE_PACKAGE_MANAGER;
-    try {
-      process.env.CLAUDE_PACKAGE_MANAGER = 'npm';
+    withEnv({ CLAUDE_PACKAGE_MANAGER: 'npm' }, () => {
       assert.throws(
         () => pm.getExecCommand('../../../etc/passwd'),
         /unsafe characters/,
@@ -693,13 +632,7 @@ function runTests() {
         /unsafe characters/,
         'Scoped path traversal in binary name should be rejected'
       );
-    } finally {
-      if (originalEnv !== undefined) {
-        process.env.CLAUDE_PACKAGE_MANAGER = originalEnv;
-      } else {
-        delete process.env.CLAUDE_PACKAGE_MANAGER;
-      }
-    }
+    });
   })) passed++;
   else failed++;
 
@@ -707,9 +640,7 @@ function runTests() {
   console.log('\nRound 108: getRunCommand (path traversal in script name is rejected):');
 
   if (test('getRunCommand rejects @scope/../../evil and ../../../etc/passwd as unsafe script names', () => {
-    const originalEnv = process.env.CLAUDE_PACKAGE_MANAGER;
-    try {
-      process.env.CLAUDE_PACKAGE_MANAGER = 'npm';
+    withEnv({ CLAUDE_PACKAGE_MANAGER: 'npm' }, () => {
       assert.throws(
         () => pm.getRunCommand('@scope/../../evil'),
         /unsafe characters/,
@@ -720,13 +651,7 @@ function runTests() {
         /unsafe characters/,
         'Bare path traversal script name should be rejected'
       );
-    } finally {
-      if (originalEnv !== undefined) {
-        process.env.CLAUDE_PACKAGE_MANAGER = originalEnv;
-      } else {
-        delete process.env.CLAUDE_PACKAGE_MANAGER;
-      }
-    }
+    });
   })) passed++;
   else failed++;
 
@@ -734,9 +659,7 @@ function runTests() {
   console.log('\n' + String.raw`Round 111: getExecCommand (newline in args is rejected; only space/tab allowed):`);
 
   if (test('getExecCommand rejects newline and carriage return in args but still allows tabs', () => {
-    const originalEnv = process.env.CLAUDE_PACKAGE_MANAGER;
-    try {
-      process.env.CLAUDE_PACKAGE_MANAGER = 'npm';
+    withEnv({ CLAUDE_PACKAGE_MANAGER: 'npm' }, () => {
       // Newline in args should now be rejected
       assert.throws(
         () => pm.getExecCommand('prettier', 'file.js\necho injected'),
@@ -752,11 +675,9 @@ function runTests() {
         /unsafe characters/,
         'Carriage return in args should be rejected'
       );
-    } finally {
-      if (originalEnv !== undefined) process.env.CLAUDE_PACKAGE_MANAGER = originalEnv;
-      else delete process.env.CLAUDE_PACKAGE_MANAGER;
-    }
+    });
   })) passed++;
+
   else failed++;
 
   // Summary

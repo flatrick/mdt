@@ -8,6 +8,7 @@ const assert = require('assert');
 const path = require('path');
 const fs = require('fs');
 const { test } = require('../helpers/test-runner');
+const { withEnv } = require('../helpers/env-test-utils');
 
 // Import the module
 const utils = require('../../scripts/lib/utils');
@@ -112,41 +113,22 @@ function runTests() {
   console.log('\nSession ID Functions:');
 
   if (test('getSessionIdShort falls back to project name when no session signals are set', () => {
-    const original = process.env.CLAUDE_SESSION_ID;
-    const originalCursorTraceId = process.env.CURSOR_TRACE_ID;
-    delete process.env.CLAUDE_SESSION_ID;
-    delete process.env.CURSOR_TRACE_ID;
-    try {
+    withEnv({ CLAUDE_SESSION_ID: undefined, CURSOR_TRACE_ID: undefined }, () => {
       const shortId = utils.getSessionIdShort();
       assert.strictEqual(shortId, utils.getProjectName());
-    } finally {
-      if (original) process.env.CLAUDE_SESSION_ID = original;
-      else delete process.env.CLAUDE_SESSION_ID;
-      if (originalCursorTraceId) process.env.CURSOR_TRACE_ID = originalCursorTraceId;
-      else delete process.env.CURSOR_TRACE_ID;
-    }
+    });
   })) passed++; else failed++;
 
   if (test('getSessionIdShort returns last 8 characters', () => {
-    const original = process.env.CLAUDE_SESSION_ID;
-    process.env.CLAUDE_SESSION_ID = 'test-session-abc12345';
-    try {
+    withEnv({ CLAUDE_SESSION_ID: 'test-session-abc12345' }, () => {
       assert.strictEqual(utils.getSessionIdShort(), 'abc12345');
-    } finally {
-      if (original) process.env.CLAUDE_SESSION_ID = original;
-      else delete process.env.CLAUDE_SESSION_ID;
-    }
+    });
   })) passed++; else failed++;
 
   if (test('getSessionIdShort handles short session IDs', () => {
-    const original = process.env.CLAUDE_SESSION_ID;
-    process.env.CLAUDE_SESSION_ID = 'short';
-    try {
+    withEnv({ CLAUDE_SESSION_ID: 'short' }, () => {
       assert.strictEqual(utils.getSessionIdShort(), 'short');
-    } finally {
-      if (original) process.env.CLAUDE_SESSION_ID = original;
-      else delete process.env.CLAUDE_SESSION_ID;
-    }
+    });
   })) passed++; else failed++;
 
   // File operations tests
@@ -381,18 +363,9 @@ function runTests() {
   })) passed++; else failed++;
 
   if (test('getSessionIdShort uses CURSOR_TRACE_ID when CLAUDE_SESSION_ID is not set', () => {
-    const original = process.env.CLAUDE_SESSION_ID;
-    const originalCursorTraceId = process.env.CURSOR_TRACE_ID;
-    delete process.env.CLAUDE_SESSION_ID;
-    process.env.CURSOR_TRACE_ID = 'cursor-trace-xyz98765';
-    try {
+    withEnv({ CLAUDE_SESSION_ID: undefined, CURSOR_TRACE_ID: 'cursor-trace-xyz98765' }, () => {
       assert.strictEqual(utils.getSessionIdShort(), 'xyz98765');
-    } finally {
-      if (original !== undefined) process.env.CLAUDE_SESSION_ID = original;
-      else delete process.env.CLAUDE_SESSION_ID;
-      if (originalCursorTraceId !== undefined) process.env.CURSOR_TRACE_ID = originalCursorTraceId;
-      else delete process.env.CURSOR_TRACE_ID;
-    }
+    });
   })) passed++; else failed++;
 
   if (test('commandExists returns false for fake command', () => {
@@ -909,4 +882,3 @@ function runTests() {
 }
 
 runTests();
-
