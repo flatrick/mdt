@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 /**
  * Enforce Node-only runtime: no .sh/.ps1 anywhere in repo, no hardcoded ~/.claude/ in JS.
- * Replaces the former validate-windows-parity check; ECC uses JavaScript/Node only.
+ * Replaces the former validate-windows-parity check; MDT uses JavaScript/Node only.
  */
 
 const fs = require('fs');
@@ -34,8 +34,8 @@ function checkNoHardcodedPaths(repoRoot = REPO_ROOT) {
   ];
   const selfRel = path.relative(repoRoot, path.join(__dirname, 'validate-no-hardcoded-paths.js'));
   const detectEnvRel = path.relative(repoRoot, path.join(repoRoot, 'scripts', 'lib', 'detect-env.js'));
-  const installEccRel = path.relative(repoRoot, path.join(repoRoot, 'scripts', 'install-ecc.js'));
-  const excluded = new Set([selfRel, detectEnvRel, installEccRel]);
+  const installMdtRel = path.relative(repoRoot, path.join(repoRoot, 'scripts', 'install-mdt.js'));
+  const excluded = new Set([selfRel, detectEnvRel, installMdtRel]);
   for (const dir of jsDirs) {
     if (!fs.existsSync(dir)) continue;
     const walk = (d) => {
@@ -77,7 +77,7 @@ function checkNoShellScriptsInRepo(repoRoot = REPO_ROOT) {
       else if (e.isFile() && (e.name.endsWith('.sh') || e.name.endsWith('.ps1'))) {
         if (!seen.has(rel)) {
           seen.add(rel);
-          errors.push(rel + ': ECC is Node-only; remove .sh/.ps1 scripts');
+          errors.push(rel + ': MDT is Node-only; remove .sh/.ps1 scripts');
         }
       }
     }

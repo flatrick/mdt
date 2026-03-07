@@ -131,8 +131,8 @@ jobs:
         run: node tests/run-all.js
         env:
           CLAUDE_CODE_PACKAGE_MANAGER: ${{ matrix.pm }}
-          ECC_REQUIRE_SUBPROCESS_TESTS: '1'
-          ECC_TEST_ENV_PROFILE: neutral
+          MDT_REQUIRE_SUBPROCESS_TESTS: '1'
+          MDT_TEST_ENV_PROFILE: neutral
 
       # Upload test artifacts on failure
       - name: Upload test artifacts
@@ -171,7 +171,7 @@ jobs:
         run: node tests/run-all.js --profile ${{ matrix.profile }}
         env:
           CLAUDE_CODE_PACKAGE_MANAGER: npm
-          ECC_REQUIRE_SUBPROCESS_TESTS: '1'
+          MDT_REQUIRE_SUBPROCESS_TESTS: '1'
 
       - name: Upload test artifacts
         if: failure()
