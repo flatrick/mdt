@@ -171,6 +171,30 @@ More: [CLAUDE.md](CLAUDE.md), [AGENTS.md](AGENTS.md), and `docs/`.
 node tests/run-all.js
 ```
 
+Profile-specific shortcuts:
+
+```bash
+npm run test:neutral
+npm run test:claude
+npm run test:cursor
+npm run test:codex
+npm run test:gemini
+```
+
+You can also set `ECC_TEST_ENV_PROFILE` when running the test runner directly:
+
+```bash
+ECC_TEST_ENV_PROFILE=cursor node tests/run-all.js
+```
+
+Equivalent direct CLI usage:
+
+```bash
+node tests/run-all.js --profile cursor
+```
+
+Valid profile values: `neutral`, `claude`, `cursor`, `codex`, `gemini`.
+
 Single files: `node tests/lib/utils.test.js`, `node tests/hooks/hooks.test.js`, etc.
 
 ---
