@@ -172,6 +172,9 @@ async function runTests() {
     assert.ok(!runAllSource.includes('execSync'), 'Should not use execSync');
     // Verify it shows stderr
     assert.ok(runAllSource.includes('stderr'), 'Should handle stderr output');
+    // Verify debug preflight support is present
+    assert.ok(runAllSource.includes('ECC_TEST_ENV_DEBUG'), 'Should support debug mode toggle');
+    assert.ok(runAllSource.includes('[ECC test preflight]'), 'Should print preflight header in debug mode');
   })) passed++; else failed++;
 
   // ── Round 32: post-edit-typecheck special characters & check-console-log ──
