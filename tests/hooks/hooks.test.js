@@ -174,13 +174,24 @@ async function runTests() {
 
   if (await asyncTest('creates or updates session file', async () => {
     const testDir = createTestDir();
-    await runScript(path.join(scriptsDir, 'session-end.js'), '', { HOME: testDir, USERPROFILE: testDir });
+    // Neutralize tool-detection env vars so subprocess and in-process detection agree,
+    // regardless of which LLM tool (Claude, Cursor, etc.) is running the tests
+    const neutralEnv = {
+      HOME: testDir,
+      USERPROFILE: testDir,
+      CLAUDE_SESSION_ID: undefined,
+      CURSOR_TRACE_ID: undefined,
+      CURSOR_AGENT: undefined,
+      CLAUDE_CODE: undefined
+    };
 
-    const sessionsDir = getSessionsDirForHome(testDir);
+    await runScript(path.join(scriptsDir, 'session-end.js'), '', neutralEnv);
+
+    const sessionsDir = getSessionsDirForHome(testDir, neutralEnv);
     const now = new Date();
     const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
-    const utils = require('../../scripts/lib/utils');
-    const expectedId = 'everything-claude-code';
+    // Derive expected project name dynamically (matches getSessionIdShort fallback in worktrees etc.)
+    const expectedId = path.basename(process.cwd());
     const sessionFile = path.join(sessionsDir, `${today}-${expectedId}-session.tmp`);
 
     assert.ok(fs.existsSync(sessionFile), `Session file should exist: ${sessionFile}`);

@@ -4,8 +4,13 @@ const { withEnv } = require('./env-test-utils');
 
 function runScript(scriptPath, input = '', env = {}) {
   return new Promise((resolve, reject) => {
+    // Merge env: undefined/null values delete the key from the environment
+    const merged = { ...process.env, ...env };
+    for (const key of Object.keys(merged)) {
+      if (merged[key] === undefined || merged[key] === null) delete merged[key];
+    }
     const proc = spawn('node', [scriptPath], {
-      env: { ...process.env, ...env },
+      env: merged,
       stdio: ['pipe', 'pipe', 'pipe']
     });
 
