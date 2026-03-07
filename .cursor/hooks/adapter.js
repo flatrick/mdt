@@ -72,11 +72,11 @@ function transformToClaude(cursorInput, overrides = {}) {
 }
 
 function hookEnabled(hookId, allowedProfiles = ['standard', 'strict']) {
-  const rawProfile = String(process.env.ECC_HOOK_PROFILE || 'standard').toLowerCase();
+  const rawProfile = String(process.env.MDT_HOOK_PROFILE || 'standard').toLowerCase();
   const profile = ['minimal', 'standard', 'strict'].includes(rawProfile) ? rawProfile : 'standard';
 
   const disabled = new Set(
-    String(process.env.ECC_DISABLED_HOOKS || '')
+    String(process.env.MDT_DISABLED_HOOKS || '')
       .split(',')
       .map(v => v.trim().toLowerCase())
       .filter(Boolean)
@@ -92,8 +92,8 @@ function hookEnabled(hookId, allowedProfiles = ['standard', 'strict']) {
 function runExistingHook(scriptName, stdinData) {
   const scriptPath = resolveDelegatedHook(scriptName);
   if (!fs.existsSync(scriptPath)) {
-    console.error(`[ECC] Delegated hook missing: ${scriptName}`);
-    console.error(`[ECC] Expected script path: ${scriptPath}`);
+    console.error(`[MDT] Delegated hook missing: ${scriptName}`);
+    console.error(`[MDT] Expected script path: ${scriptPath}`);
     return;
   }
 
@@ -106,11 +106,11 @@ function runExistingHook(scriptName, stdinData) {
     });
   } catch (e) {
     const detail = String((e.stderr || e.message || '')).trim();
-    console.error(`[ECC] Delegated hook failed: ${scriptName}`);
-    console.error(`[ECC] Script path: ${scriptPath}`);
+    console.error(`[MDT] Delegated hook failed: ${scriptName}`);
+    console.error(`[MDT] Script path: ${scriptPath}`);
     if (detail) {
       const lastLine = detail.split(/\r?\n/).slice(-1)[0];
-      console.error(`[ECC] ${lastLine}`);
+      console.error(`[MDT] ${lastLine}`);
     }
     if (e.status === 2) process.exit(2); // Forward blocking exit code
   }

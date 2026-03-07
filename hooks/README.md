@@ -51,14 +51,14 @@ User request → Claude picks a tool → PreToolUse hook runs → Tool executes 
 
 You can enable or disable hooks at runtime without editing `hooks.json`:
 
-- **`ECC_HOOK_PROFILE`** — `minimal`, `standard` (default), or `strict`. Some hooks run only in certain profiles (e.g. tmux reminder only in `strict`).
-- **`ECC_DISABLED_HOOKS`** — Comma-separated hook IDs to disable (e.g. `pre:bash:tmux-reminder,post:edit:typecheck`).
+- **`MDT_HOOK_PROFILE`** — `minimal`, `standard` (default), or `strict`. Some hooks run only in certain profiles (e.g. tmux reminder only in `strict`).
+- **`MDT_DISABLED_HOOKS`** — Comma-separated hook IDs to disable (e.g. `pre:bash:tmux-reminder,post:edit:typecheck`).
 
 Example:
 
 ```bash
-export ECC_HOOK_PROFILE=standard
-export ECC_DISABLED_HOOKS="pre:bash:tmux-reminder,post:edit:typecheck"
+export MDT_HOOK_PROFILE=standard
+export MDT_DISABLED_HOOKS="pre:bash:tmux-reminder,post:edit:typecheck"
 ```
 
 Hook IDs match the first argument passed to `run-with-flags.js` in `hooks.json` (e.g. `pre:bash:dev-server-block`, `stop:session-end`).
@@ -67,7 +67,7 @@ Hook IDs match the first argument passed to `run-with-flags.js` in `hooks.json` 
 
 ### Disabling a Hook
 
-Use **`ECC_DISABLED_HOOKS`** (see above) to disable without editing files. Or remove or comment out the hook entry in `hooks.json`. If installed as a plugin, override in your `~/.claude/settings.json`:
+Use **`MDT_DISABLED_HOOKS`** (see above) to disable without editing files. Or remove or comment out the hook entry in `hooks.json`. If installed as a plugin, override in your `~/.claude/settings.json`:
 
 ```json
 {

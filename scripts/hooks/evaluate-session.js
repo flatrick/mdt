@@ -21,7 +21,7 @@ const {
 const MAX_STDIN = 1024 * 1024;
 
 function getDefaultConfigPath(env = process.env) {
-  return env.ECC_CONTINUOUS_LEARNING_CONFIG || path.join(__dirname, '..', '..', 'skills', 'continuous-learning', 'config.json');
+  return env.MDT_CONTINUOUS_LEARNING_CONFIG || path.join(__dirname, '..', '..', 'skills', 'continuous-learning', 'config.json');
 }
 
 function loadEvaluateConfig(configPath, logger = log) {
