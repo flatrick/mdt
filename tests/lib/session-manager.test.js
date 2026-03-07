@@ -309,7 +309,7 @@ src/main.ts
 
   // Override HOME to a temp dir for isolated getAllSessions/getSessionById tests
   // On Windows, os.homedir() uses USERPROFILE, not HOME  set both for cross-platform
-  const tmpHome = path.join(os.tmpdir(), `ecc-session-mgr-test-${Date.now()}`);
+  const tmpHome = path.join(os.tmpdir(), `MDT-session-mgr-test-${Date.now()}`);
   const inTmpSessionHome = fn => withEnv({ HOME: tmpHome, USERPROFILE: tmpHome }, fn);
   // Use the same sessions dir the implementation uses (tool-agnostic: .cursor or .claude)
   const tmpSessionsDir = inTmpSessionHome(() => {

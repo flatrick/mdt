@@ -112,7 +112,7 @@ function runTests() {
     try {
       const result = evaluateSession({
         input: { transcript_path: transcript },
-        env: { ...process.env, ECC_CONTINUOUS_LEARNING_CONFIG: configPath },
+        env: { ...process.env, MDT_CONTINUOUS_LEARNING_CONFIG: configPath },
         logger: msg => logs.push(msg)
       });
       assert.strictEqual(result.shouldEvaluate, true);
@@ -133,7 +133,7 @@ function runTests() {
     try {
       const result = evaluateSession({
         input: { transcript_path: transcript },
-        env: { ...process.env, ECC_CONTINUOUS_LEARNING_CONFIG: configPath }
+        env: { ...process.env, MDT_CONTINUOUS_LEARNING_CONFIG: configPath }
       });
       assert.strictEqual(result.shouldEvaluate, true);
       assert.ok(result.learnedSkillsPath.includes('custom-learned-skills-dir'));

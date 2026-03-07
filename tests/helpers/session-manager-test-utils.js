@@ -9,7 +9,7 @@ function clearSessionManagerCache() {
 }
 
 function createTempSessionDir() {
-  const dir = path.join(os.tmpdir(), `ecc-test-sessions-${Date.now()}`);
+  const dir = path.join(os.tmpdir(), `MDT-test-sessions-${Date.now()}`);
   fs.mkdirSync(dir, { recursive: true });
   return dir;
 }

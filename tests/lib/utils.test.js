@@ -461,7 +461,7 @@ function runTests() {
       console.log('    (skipped â command execution unavailable in sandbox)');
       return;
     }
-    // We're running from within the ECC repo, so this should be true
+    // We're running from within the MDT repo, so this should be true
     assert.strictEqual(utils.isGitRepo(), true);
   })) passed++; else failed++;
 

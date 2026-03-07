@@ -24,7 +24,7 @@ async function runTests() {
   console.log('\nRound 41: pre-compact.js (multiple session files):');
 
   if (await asyncTest('annotates only the newest session file when multiple exist', async () => {
-    const isoHome = path.join(os.tmpdir(), `ecc-compact-multi-${Date.now()}`);
+    const isoHome = path.join(os.tmpdir(), `MDT-compact-multi-${Date.now()}`);
     const sessionsDir = getSessionsDirForHome(isoHome);
     fs.mkdirSync(sessionsDir, { recursive: true });
 
@@ -108,7 +108,7 @@ async function runTests() {
   console.log('\nRound 44: session-start.js (empty session file):');
 
   if (await asyncTest('does not inject empty session file content into context', async () => {
-    const isoHome = path.join(os.tmpdir(), `ecc-start-empty-file-${Date.now()}`);
+    const isoHome = path.join(os.tmpdir(), `MDT-start-empty-file-${Date.now()}`);
     const sessionsDir = getSessionsDirForHome(isoHome);
     fs.mkdirSync(sessionsDir, { recursive: true });
     fs.mkdirSync(path.join(path.dirname(sessionsDir), 'skills', 'learned'), { recursive: true });
@@ -158,7 +158,7 @@ async function runTests() {
   console.log('\nRound 49: session-end.js (conditional summary sections):');
 
   if (await asyncTest('summary omits Files Modified and Tools Used when none found', async () => {
-    const isoHome = path.join(os.tmpdir(), `ecc-notools-${Date.now()}`);
+    const isoHome = path.join(os.tmpdir(), `MDT-notools-${Date.now()}`);
     const sessionsDir = getSessionsDirForHome(isoHome);
     fs.mkdirSync(sessionsDir, { recursive: true });
 
@@ -194,7 +194,7 @@ async function runTests() {
   console.log('\nRound 50: session-start.js (alias reporting):');
 
   if (await asyncTest('reports available session aliases on startup', async () => {
-    const isoHome = path.join(os.tmpdir(), `ecc-start-alias-${Date.now()}`);
+    const isoHome = path.join(os.tmpdir(), `MDT-start-alias-${Date.now()}`);
     const sessionsDir = getSessionsDirForHome(isoHome);
     const configDir = path.dirname(sessionsDir);
     fs.mkdirSync(sessionsDir, { recursive: true });
@@ -227,7 +227,7 @@ async function runTests() {
   console.log('\nRound 50: pre-compact.js (parallel execution):');
 
   if (await asyncTest('parallel compaction runs all append to log without loss', async () => {
-    const isoHome = path.join(os.tmpdir(), `ecc-compact-par-${Date.now()}`);
+    const isoHome = path.join(os.tmpdir(), `MDT-compact-par-${Date.now()}`);
     const sessionsDir = getSessionsDirForHome(isoHome);
     fs.mkdirSync(sessionsDir, { recursive: true });
 
@@ -251,7 +251,7 @@ async function runTests() {
   })) passed++; else failed++;
 
   if (await asyncTest('rotates oversized compaction log to bounded tail', async () => {
-    const isoHome = path.join(os.tmpdir(), `ecc-compact-rotate-${Date.now()}`);
+    const isoHome = path.join(os.tmpdir(), `MDT-compact-rotate-${Date.now()}`);
     const sessionsDir = getSessionsDirForHome(isoHome);
     fs.mkdirSync(sessionsDir, { recursive: true });
     const logFile = path.join(sessionsDir, 'compaction-log.txt');
@@ -282,7 +282,7 @@ async function runTests() {
   console.log('\nRound 50: session-start.js (graceful degradation):');
 
   if (await asyncTest('exits 0 when sessions path is a file (not a directory)', async () => {
-    const isoHome = path.join(os.tmpdir(), `ecc-start-blocked-${Date.now()}`);
+    const isoHome = path.join(os.tmpdir(), `MDT-start-blocked-${Date.now()}`);
     const sessionsPath = getSessionsDirForHome(isoHome);
     fs.mkdirSync(path.dirname(sessionsPath), { recursive: true });
     fs.writeFileSync(sessionsPath, 'blocked');
@@ -334,7 +334,7 @@ async function runTests() {
   console.log('\nRound 55: session-start.js (maxAge 7-day boundary):');
 
   if (await asyncTest('excludes session files older than 7 days', async () => {
-    const isoHome = path.join(os.tmpdir(), `ecc-start-7day-${Date.now()}`);
+    const isoHome = path.join(os.tmpdir(), `MDT-start-7day-${Date.now()}`);
     const sessionsDir = getSessionsDirForHome(isoHome);
     fs.mkdirSync(sessionsDir, { recursive: true });
     fs.mkdirSync(path.join(path.dirname(sessionsDir), 'skills', 'learned'), { recursive: true });
@@ -370,7 +370,7 @@ async function runTests() {
   console.log('\nRound 55: session-start.js (newest session selection):');
 
   if (await asyncTest('injects newest session when multiple recent sessions exist', async () => {
-    const isoHome = path.join(os.tmpdir(), `ecc-start-multi-${Date.now()}`);
+    const isoHome = path.join(os.tmpdir(), `MDT-start-multi-${Date.now()}`);
     const sessionsDir = getSessionsDirForHome(isoHome);
     fs.mkdirSync(sessionsDir, { recursive: true });
     fs.mkdirSync(path.join(path.dirname(sessionsDir), 'skills', 'learned'), { recursive: true });
@@ -482,7 +482,7 @@ async function runTests() {
       console.log('    (skipped — not supported on this platform)');
       return;
     }
-    const isoHome = path.join(os.tmpdir(), `ecc-start-unreadable-${Date.now()}`);
+    const isoHome = path.join(os.tmpdir(), `MDT-start-unreadable-${Date.now()}`);
     const sessionsDir = getSessionsDirForHome(isoHome);
     fs.mkdirSync(sessionsDir, { recursive: true });
 
@@ -529,7 +529,7 @@ async function runTests() {
       console.log('    (skipped — not supported on this platform)');
       return;
     }
-    const isoHome = path.join(os.tmpdir(), `ecc-compact-ro-${Date.now()}`);
+    const isoHome = path.join(os.tmpdir(), `MDT-compact-ro-${Date.now()}`);
     const sessionsDir = getSessionsDirForHome(isoHome);
     fs.mkdirSync(sessionsDir, { recursive: true });
 

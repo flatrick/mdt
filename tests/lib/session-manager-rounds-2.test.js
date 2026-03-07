@@ -23,7 +23,7 @@ function runTests() {
   // -- Round 109: getAllSessions skips .tmp files that don't match session filename format --
   console.log('\nRound 109: getAllSessions (non-session .tmp files ï¿½ parseSessionFilename returns null ? skip):');
   if (test('getAllSessions ignores .tmp files with non-matching filenames', () => {
-    const isoHome = path.join(os.tmpdir(), `ecc-r109-nonsession-${Date.now()}`);
+    const isoHome = path.join(os.tmpdir(), `MDT-r109-nonsession-${Date.now()}`);
     try {
       withEnv({ HOME: isoHome, USERPROFILE: isoHome }, () => {
         clearSessionManagerCache();

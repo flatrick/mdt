@@ -173,8 +173,8 @@ async function runTests() {
     // Verify it shows stderr
     assert.ok(runAllSource.includes('stderr'), 'Should handle stderr output');
     // Verify debug preflight support is present
-    assert.ok(runAllSource.includes('ECC_TEST_ENV_DEBUG'), 'Should support debug mode toggle');
-    assert.ok(runAllSource.includes('[ECC test preflight]'), 'Should print preflight header in debug mode');
+    assert.ok(runAllSource.includes('MDT_TEST_ENV_DEBUG'), 'Should support debug mode toggle');
+    assert.ok(runAllSource.includes('[MDT test preflight]'), 'Should print preflight header in debug mode');
   })) passed++; else failed++;
 
   // ── Round 32: post-edit-typecheck special characters & check-console-log ──
@@ -301,7 +301,7 @@ async function runTests() {
     const stdinJson = JSON.stringify({ transcript_path: transcriptPath });
     const result = await runScript(evaluateSessionScript, stdinJson, {
       HOME: testDir, USERPROFILE: testDir,
-      ECC_CONTINUOUS_LEARNING_CONFIG: configPath
+      MDT_CONTINUOUS_LEARNING_CONFIG: configPath
     });
     assert.strictEqual(result.code, 0);
     // ~ should expand to os.homedir() which during the script run is the real home
@@ -332,7 +332,7 @@ async function runTests() {
     const stdinJson = JSON.stringify({ transcript_path: transcriptPath });
     const result = await runScript(evaluateSessionScript, stdinJson, {
       HOME: testDir, USERPROFILE: testDir,
-      ECC_CONTINUOUS_LEARNING_CONFIG: configPath
+      MDT_CONTINUOUS_LEARNING_CONFIG: configPath
     });
     assert.strictEqual(result.code, 0);
     // The directory with ~ in the middle should be created as-is
@@ -356,7 +356,7 @@ async function runTests() {
     const stdinJson = JSON.stringify({ transcript_path: transcriptPath });
     const result = await runScript(evaluateSessionScript, stdinJson, {
       HOME: testDir, USERPROFILE: testDir,
-      ECC_CONTINUOUS_LEARNING_CONFIG: configPath
+      MDT_CONTINUOUS_LEARNING_CONFIG: configPath
     });
     assert.strictEqual(result.code, 0);
     // With no config file, default min_session_length=10 applies

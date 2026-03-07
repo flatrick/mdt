@@ -14,7 +14,7 @@ const { detectProjectType, LANGUAGE_RULES, FRAMEWORK_RULES, getPackageJsonDeps, 
 
 // Create a temporary directory for testing
 function createTempDir() {
-  return fs.mkdtempSync(path.join(os.tmpdir(), 'ecc-test-'));
+  return fs.mkdtempSync(path.join(os.tmpdir(), 'MDT-test-'));
 }
 
 // Clean up temp directory

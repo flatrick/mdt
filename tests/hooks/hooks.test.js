@@ -42,7 +42,7 @@ async function runTests() {
   console.log('\nsession-start.js (edge cases):');
 
   if (await asyncTest('exits 0 even with isolated empty HOME', async () => {
-    const isoHome = path.join(os.tmpdir(), `ecc-iso-start-${Date.now()}`);
+    const isoHome = path.join(os.tmpdir(), `MDT-iso-start-${Date.now()}`);
     const sessionsDir = getSessionsDirForHome(isoHome);
     fs.mkdirSync(sessionsDir, { recursive: true });
     fs.mkdirSync(path.join(path.dirname(sessionsDir), 'skills', 'learned'), { recursive: true });
@@ -65,7 +65,7 @@ async function runTests() {
   })) passed++; else failed++;
 
   if (await asyncTest('skips template session content', async () => {
-    const isoHome = path.join(os.tmpdir(), `ecc-tpl-start-${Date.now()}`);
+    const isoHome = path.join(os.tmpdir(), `MDT-tpl-start-${Date.now()}`);
     const sessionsDir = getSessionsDirForHome(isoHome);
     fs.mkdirSync(sessionsDir, { recursive: true });
     fs.mkdirSync(path.join(path.dirname(sessionsDir), 'skills', 'learned'), { recursive: true });
@@ -90,7 +90,7 @@ async function runTests() {
   })) passed++; else failed++;
 
   if (await asyncTest('injects real session content', async () => {
-    const isoHome = path.join(os.tmpdir(), `ecc-real-start-${Date.now()}`);
+    const isoHome = path.join(os.tmpdir(), `MDT-real-start-${Date.now()}`);
     const sessionsDir = getSessionsDirForHome(isoHome);
     fs.mkdirSync(sessionsDir, { recursive: true });
     fs.mkdirSync(path.join(path.dirname(sessionsDir), 'skills', 'learned'), { recursive: true });
@@ -118,7 +118,7 @@ async function runTests() {
   })) passed++; else failed++;
 
   if (await asyncTest('reports learned skills count', async () => {
-    const isoHome = path.join(os.tmpdir(), `ecc-skills-start-${Date.now()}`);
+    const isoHome = path.join(os.tmpdir(), `MDT-skills-start-${Date.now()}`);
     const sessionsDir = getSessionsDirForHome(isoHome);
     const learnedDir = path.join(path.dirname(sessionsDir), 'skills', 'learned');
     fs.mkdirSync(learnedDir, { recursive: true });
@@ -240,7 +240,7 @@ async function runTests() {
   })) passed++; else failed++;
 
   if (await asyncTest('annotates active session file with compaction marker', async () => {
-    const isoHome = path.join(os.tmpdir(), `ecc-compact-annotate-${Date.now()}`);
+    const isoHome = path.join(os.tmpdir(), `MDT-compact-annotate-${Date.now()}`);
     const sessionsDir = getSessionsDirForHome(isoHome);
     fs.mkdirSync(sessionsDir, { recursive: true });
 
@@ -264,7 +264,7 @@ async function runTests() {
   })) passed++; else failed++;
 
   if (await asyncTest('compaction log contains timestamp', async () => {
-    const isoHome = path.join(os.tmpdir(), `ecc-compact-ts-${Date.now()}`);
+    const isoHome = path.join(os.tmpdir(), `MDT-compact-ts-${Date.now()}`);
     const sessionsDir = getSessionsDirForHome(isoHome);
     fs.mkdirSync(sessionsDir, { recursive: true });
 

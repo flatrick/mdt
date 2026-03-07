@@ -161,7 +161,7 @@ function runTests() {
       console.log('    (skipped â chmod ineffective on Windows/root)');
       return;
     }
-    const tmpDir = path.join(utils.getTempDir(), `ecc-findfiles-r71-${Date.now()}`);
+    const tmpDir = path.join(utils.getTempDir(), `MDT-findfiles-r71-${Date.now()}`);
     const readableSubdir = path.join(tmpDir, 'readable');
     const unreadableSubdir = path.join(tmpDir, 'unreadable');
     fs.mkdirSync(readableSubdir, { recursive: true });
@@ -235,7 +235,7 @@ function runTests() {
     // To reliably trigger the statSync catch: create a real file, list it, then
     // simulate the race. Since we can't truly race, we use a broken symlink which
     // will at minimum verify the function doesn't crash on unusual dir entries.
-    const tmpDir = path.join(utils.getTempDir(), `ecc-r84-findfiles-toctou-${Date.now()}`);
+    const tmpDir = path.join(utils.getTempDir(), `MDT-r84-findfiles-toctou-${Date.now()}`);
     fs.mkdirSync(tmpDir, { recursive: true });
 
     // Create a real file and a broken symlink, both matching *.txt
@@ -280,7 +280,7 @@ function runTests() {
   // ââ Round 88: replaceInFile with empty replacement (deletion) ââ
   console.log('\nRound 88: replaceInFile with empty replacement string (deletion):');
   if (test('replaceInFile with empty string replacement deletes matched text', () => {
-    const tmpDir = path.join(utils.getTempDir(), `ecc-r88-replace-empty-${Date.now()}`);
+    const tmpDir = path.join(utils.getTempDir(), `MDT-r88-replace-empty-${Date.now()}`);
     fs.mkdirSync(tmpDir, { recursive: true });
     const tmpFile = path.join(tmpDir, 'delete-test.txt');
     try {
@@ -298,7 +298,7 @@ function runTests() {
   // ââ Round 88: countInFile with valid file but zero matches ââ
   console.log('\nRound 88: countInFile with existing file but non-matching pattern:');
   if (test('countInFile returns 0 for valid file with no pattern matches', () => {
-    const tmpDir = path.join(utils.getTempDir(), `ecc-r88-count-zero-${Date.now()}`);
+    const tmpDir = path.join(utils.getTempDir(), `MDT-r88-count-zero-${Date.now()}`);
     fs.mkdirSync(tmpDir, { recursive: true });
     const tmpFile = path.join(tmpDir, 'no-match.txt');
     try {
@@ -369,7 +369,7 @@ function runTests() {
   console.log('\nRound 95: countInFile (regex alternation without g flag):');
 
   if (test('countInFile with /apple|banana/ (alternation, no g) counts all matches', () => {
-    const tmpDir = path.join(utils.getTempDir(), `ecc-r95-alternation-${Date.now()}`);
+    const tmpDir = path.join(utils.getTempDir(), `MDT-r95-alternation-${Date.now()}`);
     fs.mkdirSync(tmpDir, { recursive: true });
     const testFile = path.join(tmpDir, 'alternation.txt');
     try {

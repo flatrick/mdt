@@ -1,5 +1,5 @@
 /**
- * Environment detection and path resolution for Everything Claude Code.
+ * Environment detection and path resolution for ModelDev Toolkit.
  *
  * Responsibilities:
  * - Detect running tool (Cursor, Claude Code, unknown)

@@ -14,7 +14,7 @@ const { buildTestEnv } = require('./helpers/test-env-profiles');
 ensureSubprocessCapability('tests/run-all.js');
 
 const testsDir = __dirname;
-const parsedTimeoutMs = parseInt(process.env.ECC_TEST_SUITE_TIMEOUT_MS || '60000', 10);
+const parsedTimeoutMs = parseInt(process.env.MDT_TEST_SUITE_TIMEOUT_MS || '60000', 10);
 const SUITE_TIMEOUT_MS = Number.isFinite(parsedTimeoutMs) && parsedTimeoutMs > 0 ? parsedTimeoutMs : 60000;
 
 function parseRequestedProfile(argv, env) {
@@ -40,10 +40,10 @@ function parseRequestedProfile(argv, env) {
     }
   }
 
-  if (env.ECC_TEST_ENV_PROFILE) {
+  if (env.MDT_TEST_ENV_PROFILE) {
     return {
-      profile: env.ECC_TEST_ENV_PROFILE,
-      profileOverrideSource: 'ECC_TEST_ENV_PROFILE'
+      profile: env.MDT_TEST_ENV_PROFILE,
+      profileOverrideSource: 'MDT_TEST_ENV_PROFILE'
     };
   }
 
@@ -54,7 +54,7 @@ function parseRequestedProfile(argv, env) {
 }
 
 function isDebugModeEnabled(env) {
-  return env.ECC_TEST_ENV_DEBUG === '1';
+  return env.MDT_TEST_ENV_DEBUG === '1';
 }
 
 const { profile: requestedProfile, profileOverrideSource } = parseRequestedProfile(process.argv.slice(2), process.env);
@@ -64,7 +64,7 @@ if (debugModeEnabled) {
   const detectionKeys = ['CURSOR_AGENT', 'CLAUDE_SESSION_ID', 'CLAUDE_CODE', 'CURSOR_TRACE_ID'];
   const debugLine = (label, value) => `${label.padEnd(24)}: ${value}`;
 
-  console.log('[ECC test preflight]');
+  console.log('[MDT test preflight]');
   console.log(debugLine('selected profile', requestedProfile));
   console.log(debugLine('profile override source', profileOverrideSource));
   for (const key of detectionKeys) {
@@ -77,7 +77,7 @@ if (debugModeEnabled) {
 try {
   buildTestEnv(requestedProfile);
 } catch (error) {
-  console.error(`✗ Invalid ECC_TEST_ENV_PROFILE: ${requestedProfile}`);
+  console.error(`✗ Invalid MDT_TEST_ENV_PROFILE: ${requestedProfile}`);
   console.error(`  ${error.message}`);
   process.exit(1);
 }
@@ -112,8 +112,8 @@ const testFiles = [
   'ci/validators-rounds-2.test.js',
   'scripts/claw.test.js',
   'scripts/check-dependencies.test.js',
-  'scripts/install-ecc-unit.test.js',
-  'scripts/install-ecc.test.js',
+  'scripts/install-mdt-unit.test.js',
+  'scripts/install-mdt.test.js',
   'scripts/setup-package-manager.test.js',
   'scripts/skill-create-output.test.js',
   'scripts/node-runtime-scripts.test.js'
@@ -123,7 +123,7 @@ const BOX_W = 58; // inner width between ║ delimiters
 const boxLine = (s) => `║${s.padEnd(BOX_W)}║`;
 
 console.log('╔' + '═'.repeat(BOX_W) + '╗');
-console.log(boxLine('           Everything Claude Code - Test Suite'));
+console.log(boxLine('             ModelDev Toolkit - Test Suite'));
 console.log('╚' + '═'.repeat(BOX_W) + '╝');
 console.log(`Profile: ${requestedProfile}`);
 console.log();
@@ -178,7 +178,7 @@ for (const testFile of testFiles) {
     stdio: ['pipe', 'pipe', 'pipe'],
     timeout: SUITE_TIMEOUT_MS,
     env: buildTestEnv(requestedProfile, {
-      ECC_TEST_ENV_PROFILE: requestedProfile
+      MDT_TEST_ENV_PROFILE: requestedProfile
     })
   });
 

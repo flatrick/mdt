@@ -23,7 +23,7 @@ function runTests() {
 
   // Isolated fixture for rounds that depend on seeded sessions via HOME/USERPROFILE.
   // Matches the source data used in the original monolithic suite.
-  const tmpHome = path.join(os.tmpdir(), `ecc-session-mgr-test-${Date.now()}`);
+  const tmpHome = path.join(os.tmpdir(), `MDT-session-mgr-test-${Date.now()}`);
   try {
     withEnv({ HOME: tmpHome, USERPROFILE: tmpHome }, () => {
       clearSessionManagerCache();
@@ -174,7 +174,7 @@ function runTests() {
   console.log('\ncreatedTime fallback (Round 33):');
 
   // Use HOME override approach (consistent with existing getAllSessions tests)
-  const r33Home = path.join(os.tmpdir(), `ecc-r33-birthtime-${Date.now()}`);
+  const r33Home = path.join(os.tmpdir(), `MDT-r33-birthtime-${Date.now()}`);
   try {
     withEnv({ HOME: r33Home, USERPROFILE: r33Home }, () => {
       clearSessionManagerCache();
@@ -325,7 +325,7 @@ function runTests() {
   console.log('\nRound 78: getAllSessions (hasContent field):');
 
   if (test('getAllSessions hasContent is true for non-empty and false for empty files', () => {
-    const isoHome = path.join(os.tmpdir(), `ecc-hascontent-${Date.now()}`);
+    const isoHome = path.join(os.tmpdir(), `MDT-hascontent-${Date.now()}`);
     try {
       withEnv({ HOME: isoHome, USERPROFILE: isoHome }, () => {
         clearSessionManagerCache();
@@ -401,7 +401,7 @@ function runTests() {
   if (test('getAllSessions skips broken symlink .tmp files gracefully', () => {
     // getAllSessions at line 241-246: statSync throws for broken symlinks,
     // the catch causes `continue`, skipping that entry entirely.
-    const isoHome = path.join(os.tmpdir(), `ecc-r83-toctou-${Date.now()}`);
+    const isoHome = path.join(os.tmpdir(), `MDT-r83-toctou-${Date.now()}`);
     try {
       withEnv({ HOME: isoHome, USERPROFILE: isoHome }, () => {
         clearSessionManagerCache();
@@ -436,7 +436,7 @@ function runTests() {
   if (test('getSessionById returns null when matching session is a broken symlink', () => {
     // getSessionById at line 307-310: statSync throws for broken symlinks,
     // the catch returns null (file deleted between readdir and stat).
-    const isoHome = path.join(os.tmpdir(), `ecc-r84-getbyid-toctou-${Date.now()}`);
+    const isoHome = path.join(os.tmpdir(), `MDT-r84-getbyid-toctou-${Date.now()}`);
     try {
       withEnv({ HOME: isoHome, USERPROFILE: isoHome }, () => {
         clearSessionManagerCache();
@@ -482,7 +482,7 @@ function runTests() {
 
   if (test('getAllSessions skips subdirectories inside sessions dir', () => {
     // session-manager.js line 220: if (!entry.isFile() || ...) continue;
-    const isoHome = path.join(os.tmpdir(), `ecc-r89-subdir-skip-${Date.now()}`);
+    const isoHome = path.join(os.tmpdir(), `MDT-r89-subdir-skip-${Date.now()}`);
     try {
       withEnv({ HOME: isoHome, USERPROFILE: isoHome }, () => {
         clearSessionManagerCache();
@@ -556,7 +556,7 @@ function runTests() {
   })) passed++; else failed++;
 
   // Re-establish test environment for Rounds 95-98 (these tests need sessions to exist)
-  const tmpHome2 = path.join(os.tmpdir(), `ecc-session-mgr-test-2-${Date.now()}`);
+  const tmpHome2 = path.join(os.tmpdir(), `MDT-session-mgr-test-2-${Date.now()}`);
   try {
     withEnv({ HOME: tmpHome2, USERPROFILE: tmpHome2 }, () => {
       clearSessionManagerCache();
@@ -837,7 +837,7 @@ file.ts
   // -- Round 106: getAllSessions with array/object limit ï¿½ Number() coercion edge cases --
   console.log('\nRound 106: getAllSessions (array/object limit coercion ï¿½ Number([5])?5, Number({})?NaN?50):');
   if (test('getAllSessions coerces array/object limit via Number() with NaN fallback to 50', () => {
-    const isoHome = path.join(os.tmpdir(), `ecc-r106-limit-coerce-${Date.now()}`);
+    const isoHome = path.join(os.tmpdir(), `MDT-r106-limit-coerce-${Date.now()}`);
     try {
       withEnv({ HOME: isoHome, USERPROFILE: isoHome }, () => {
         clearSessionManagerCache();

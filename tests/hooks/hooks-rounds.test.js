@@ -123,7 +123,7 @@ async function runTests() {
     const stdinJson = JSON.stringify({ transcript_path: transcriptPath });
     const result = await runScript(evaluateSessionScript, stdinJson, {
       HOME: testDir, USERPROFILE: testDir,
-      ECC_CONTINUOUS_LEARNING_CONFIG: configPath
+      MDT_CONTINUOUS_LEARNING_CONFIG: configPath
     });
     assert.strictEqual(result.code, 0);
     // With min_session_length=0, even 2 messages should trigger evaluation
@@ -153,7 +153,7 @@ async function runTests() {
     const stdinJson = JSON.stringify({ transcript_path: transcriptPath });
     const result = await runScript(evaluateSessionScript, stdinJson, {
       HOME: testDir, USERPROFILE: testDir,
-      ECC_CONTINUOUS_LEARNING_CONFIG: configPath
+      MDT_CONTINUOUS_LEARNING_CONFIG: configPath
     });
     assert.strictEqual(result.code, 0);
     // null ?? 10 === 10, so 5 messages should be "too short"
@@ -177,7 +177,7 @@ async function runTests() {
     const stdinJson = JSON.stringify({ transcript_path: transcriptPath });
     await runScript(evaluateSessionScript, stdinJson, {
       HOME: testDir, USERPROFILE: testDir,
-      ECC_CONTINUOUS_LEARNING_CONFIG: configPath
+      MDT_CONTINUOUS_LEARNING_CONFIG: configPath
     });
     assert.ok(fs.existsSync(customLearnedDir), 'Should create custom learned skills directory');
     cleanupTestDir(testDir);
@@ -198,7 +198,7 @@ async function runTests() {
     const stdinJson = JSON.stringify({ transcript_path: transcriptPath });
     const result = await runScript(evaluateSessionScript, stdinJson, {
       HOME: testDir, USERPROFILE: testDir,
-      ECC_CONTINUOUS_LEARNING_CONFIG: configPath
+      MDT_CONTINUOUS_LEARNING_CONFIG: configPath
     });
     assert.strictEqual(result.code, 0);
     // Should log parse failure and fall back to default 10 → 5 msgs too short
@@ -299,7 +299,7 @@ async function runTests() {
   console.log('\nRound 23: pre-compact.js (glob specificity):');
 
   if (await asyncTest('only annotates *-session.tmp files, not other .tmp files', async () => {
-    const isoHome = path.join(os.tmpdir(), `ecc-compact-glob-${Date.now()}`);
+    const isoHome = path.join(os.tmpdir(), `MDT-compact-glob-${Date.now()}`);
     const sessionsDir = getSessionsDirForHome(isoHome);
     fs.mkdirSync(sessionsDir, { recursive: true });
 
@@ -325,7 +325,7 @@ async function runTests() {
   })) passed++; else failed++;
 
   if (await asyncTest('handles no active session files gracefully', async () => {
-    const isoHome = path.join(os.tmpdir(), `ecc-compact-nosession-${Date.now()}`);
+    const isoHome = path.join(os.tmpdir(), `MDT-compact-nosession-${Date.now()}`);
     const sessionsDir = getSessionsDirForHome(isoHome);
     fs.mkdirSync(sessionsDir, { recursive: true });
 
@@ -522,7 +522,7 @@ async function runTests() {
   console.log('\nRound 24: session-start.js (edge cases):');
 
   if (await asyncTest('exits 0 with empty sessions directory (no recent sessions)', async () => {
-    const isoHome = path.join(os.tmpdir(), `ecc-start-empty-${Date.now()}`);
+    const isoHome = path.join(os.tmpdir(), `MDT-start-empty-${Date.now()}`);
     const sessionsDir = getSessionsDirForHome(isoHome);
     fs.mkdirSync(sessionsDir, { recursive: true });
     fs.mkdirSync(path.join(path.dirname(sessionsDir), 'skills', 'learned'), { recursive: true });
@@ -539,7 +539,7 @@ async function runTests() {
   })) passed++; else failed++;
 
   if (await asyncTest('does not inject blank template session into context', async () => {
-    const isoHome = path.join(os.tmpdir(), `ecc-start-blank-${Date.now()}`);
+    const isoHome = path.join(os.tmpdir(), `MDT-start-blank-${Date.now()}`);
     const sessionsDir = getSessionsDirForHome(isoHome);
     fs.mkdirSync(sessionsDir, { recursive: true });
     fs.mkdirSync(path.join(path.dirname(sessionsDir), 'skills', 'learned'), { recursive: true });

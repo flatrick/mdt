@@ -19,7 +19,7 @@ const {
   listSessions,
   loadHistory,
   appendTurn,
-  loadECCContext,
+  loadMDTContext,
   buildPrompt,
   askClaude,
   isValidSessionName,
@@ -103,18 +103,18 @@ function runTests() {
 
   console.log('\nContext:');
 
-  if (test('loadECCContext() returns "" when no skills specified', () => {
-    const result = loadECCContext('');
+  if (test('loadMDTContext() returns "" when no skills specified', () => {
+    const result = loadMDTContext('');
     assert.strictEqual(result, '');
   })) passed++; else failed++;
 
-  if (test('loadECCContext() skips missing skill directories gracefully', () => {
-    const result = loadECCContext('nonexistent-skill-xyz');
+  if (test('loadMDTContext() skips missing skill directories gracefully', () => {
+    const result = loadMDTContext('nonexistent-skill-xyz');
     assert.strictEqual(result, '');
   })) passed++; else failed++;
 
-  if (test('loadECCContext() concatenates multiple skill files', () => {
-    // Use real skills from the ECC repo if they exist
+  if (test('loadMDTContext() concatenates multiple skill files', () => {
+    // Use real skills from the MDT repo if they exist
     const skillsDir = path.join(process.cwd(), 'skills');
     if (!fs.existsSync(skillsDir)) {
       console.log('    (skipped — no skills/ directory in CWD)');
@@ -129,7 +129,7 @@ function runTests() {
       return;
     }
     const twoSkills = available.slice(0, 2).join(',');
-    const result = loadECCContext(twoSkills);
+    const result = loadMDTContext(twoSkills);
     assert.ok(result.length > 0, 'Should return non-empty context');
     // Should contain content from both skills
     for (const name of available.slice(0, 2)) {
@@ -183,7 +183,7 @@ function runTests() {
     const claw = require(path.join(__dirname, '..', '..', 'scripts', 'claw.js'));
     const required = [
       'getClawDir', 'getSessionPath', 'listSessions', 'loadHistory',
-      'appendTurn', 'loadECCContext', 'askClaude', 'main'
+      'appendTurn', 'loadMDTContext', 'askClaude', 'main'
     ];
     for (const fn of required) {
       assert.strictEqual(typeof claw[fn], 'function',

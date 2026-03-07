@@ -2,7 +2,7 @@
 
 const { spawnSync } = require('child_process');
 
-const STRICT_ENV_VAR = 'ECC_REQUIRE_SUBPROCESS_TESTS';
+const STRICT_ENV_VAR = 'MDT_REQUIRE_SUBPROCESS_TESTS';
 
 function isStrictMode() {
   return process.env[STRICT_ENV_VAR] === '1';

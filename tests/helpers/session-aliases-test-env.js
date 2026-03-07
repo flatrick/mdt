@@ -17,7 +17,7 @@ function createAliasesEnvProxy(aliases, envOverrides) {
 
 function setupSessionAliasesTestEnv() {
   // Mock config home before requiring module so it binds to isolated temp storage.
-  const tmpHome = path.join(os.tmpdir(), `ecc-alias-test-${Date.now()}`);
+  const tmpHome = path.join(os.tmpdir(), `MDT-alias-test-${Date.now()}`);
   fs.mkdirSync(path.join(tmpHome, '.claude'), { recursive: true });
   const envOverrides = { HOME: tmpHome, USERPROFILE: tmpHome }; // Windows: os.homedir() uses USERPROFILE
   const aliases = withEnv(envOverrides, () => require('../../scripts/lib/session-aliases'));

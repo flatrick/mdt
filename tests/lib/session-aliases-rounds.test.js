@@ -368,7 +368,7 @@ function runTests() {
     // Use a fresh isolated HOME to avoid .tmp/.bak leftovers from other tests.
     // On macOS, overwriting an EXISTING file in a read-only dir succeeds,
     // so we must start clean with ONLY the .json file present.
-    const isoHome = path.join(os.tmpdir(), `ecc-alias-r70-${Date.now()}`);
+    const isoHome = path.join(os.tmpdir(), `MDT-alias-r70-${Date.now()}`);
     const isoClaudeDir = path.join(isoHome, '.claude');
     fs.mkdirSync(isoClaudeDir, { recursive: true });
     try {
@@ -408,7 +408,7 @@ function runTests() {
       console.log('    (skipped â chmod ineffective on Windows/root)');
       return;
     }
-    const isoHome = path.join(os.tmpdir(), `ecc-alias-r72-${Date.now()}`);
+    const isoHome = path.join(os.tmpdir(), `MDT-alias-r72-${Date.now()}`);
     const isoClaudeDir = path.join(isoHome, '.claude');
     fs.mkdirSync(isoClaudeDir, { recursive: true });
     try {
@@ -446,7 +446,7 @@ function runTests() {
       console.log('    (skipped â chmod ineffective on Windows/root)');
       return;
     }
-    const isoHome = path.join(os.tmpdir(), `ecc-alias-r73-cleanup-${Date.now()}`);
+    const isoHome = path.join(os.tmpdir(), `MDT-alias-r73-cleanup-${Date.now()}`);
     const isoClaudeDir = path.join(isoHome, '.claude');
     fs.mkdirSync(isoClaudeDir, { recursive: true });
     try {
@@ -487,7 +487,7 @@ function runTests() {
       console.log('    (skipped â chmod ineffective on Windows/root)');
       return;
     }
-    const isoHome = path.join(os.tmpdir(), `ecc-alias-r73-set-${Date.now()}`);
+    const isoHome = path.join(os.tmpdir(), `MDT-alias-r73-set-${Date.now()}`);
     const isoClaudeDir = path.join(isoHome, '.claude');
     fs.mkdirSync(isoClaudeDir, { recursive: true });
     try {
@@ -585,7 +585,7 @@ function runTests() {
   console.log('\nRound 90: saveAliases (backup restore double failure):');
 
   if (test('saveAliases triggers inner restoreErr catch when both save and restore fail', () => {
-    const isoHome = path.join(os.tmpdir(), `ecc-r90-restore-fail-${Date.now()}`);
+    const isoHome = path.join(os.tmpdir(), `MDT-r90-restore-fail-${Date.now()}`);
     const claudeDir = path.join(isoHome, '.claude');
     fs.mkdirSync(claudeDir, { recursive: true });
 

@@ -23,7 +23,7 @@ async function runTests() {
   console.log('\nRound 60: session-end.js (replaceInFile returns false — timestamp update warning):');
 
   if (await asyncTest('logs warning when existing session file lacks Last Updated field', async () => {
-    const isoHome = path.join(os.tmpdir(), `ecc-end-nots-${Date.now()}`);
+    const isoHome = path.join(os.tmpdir(), `MDT-end-nots-${Date.now()}`);
     const sessionsDir = getSessionsDirForHome(isoHome);
     fs.mkdirSync(sessionsDir, { recursive: true });
 
@@ -98,7 +98,7 @@ async function runTests() {
   console.log('\nRound 66: session-end.js (entry.role user fallback):');
 
   if (await asyncTest('extracts user messages from role-only format (no type field)', async () => {
-    const isoHome = path.join(os.tmpdir(), `ecc-role-only-${Date.now()}`);
+    const isoHome = path.join(os.tmpdir(), `MDT-role-only-${Date.now()}`);
     const sessionsDir = getSessionsDirForHome(isoHome);
     fs.mkdirSync(sessionsDir, { recursive: true });
 
@@ -134,7 +134,7 @@ async function runTests() {
   console.log('\nRound 66: session-end.js (nonexistent transcript path):');
 
   if (await asyncTest('logs "Transcript not found" for nonexistent transcript_path', async () => {
-    const isoHome = path.join(os.tmpdir(), `ecc-notfound-${Date.now()}`);
+    const isoHome = path.join(os.tmpdir(), `MDT-notfound-${Date.now()}`);
     const sessionsDir = getSessionsDirForHome(isoHome);
     fs.mkdirSync(sessionsDir, { recursive: true });
 
@@ -161,7 +161,7 @@ async function runTests() {
   console.log('\nRound 70: session-end.js (entry.name/entry.input fallback):');
 
   if (await asyncTest('extracts tool name and file path from entry.name/entry.input (not tool_name/tool_input)', async () => {
-    const isoHome = path.join(os.tmpdir(), `ecc-r70-entryname-${Date.now()}`);
+    const isoHome = path.join(os.tmpdir(), `MDT-r70-entryname-${Date.now()}`);
     const sessionsDir = getSessionsDirForHome(isoHome);
     fs.mkdirSync(sessionsDir, { recursive: true });
     const transcriptPath = path.join(isoHome, 'transcript.jsonl');
@@ -203,7 +203,7 @@ async function runTests() {
   console.log('\nRound 71: session-start.js (default source — selection prompt):');
 
   if (await asyncTest('shows selection prompt when no package manager preference found (default source)', async () => {
-    const isoHome = path.join(os.tmpdir(), `ecc-r71-ss-default-${Date.now()}`);
+    const isoHome = path.join(os.tmpdir(), `MDT-r71-ss-default-${Date.now()}`);
     const isoProject = path.join(isoHome, 'project');
     const sessionsDir = getSessionsDirForHome(isoHome);
     fs.mkdirSync(sessionsDir, { recursive: true });
@@ -339,7 +339,7 @@ async function runTests() {
   console.log('\nRound 80: session-end.js (entry.message.role user — third OR condition):');
 
   if (await asyncTest('extracts user messages from entries where only message.role is user (not type or role)', async () => {
-    const isoHome = path.join(os.tmpdir(), `ecc-msgrole-${Date.now()}`);
+    const isoHome = path.join(os.tmpdir(), `MDT-msgrole-${Date.now()}`);
     const sessionsDir = getSessionsDirForHome(isoHome);
     fs.mkdirSync(sessionsDir, { recursive: true });
 
@@ -398,7 +398,7 @@ async function runTests() {
   console.log('\nRound 81: session-end.js (user entry with non-string non-array content):');
 
   if (await asyncTest('skips user messages with numeric content (non-string non-array branch)', async () => {
-    const isoHome = path.join(os.tmpdir(), `ecc-r81-numcontent-${Date.now()}`);
+    const isoHome = path.join(os.tmpdir(), `MDT-r81-numcontent-${Date.now()}`);
     const sessionsDir = getSessionsDirForHome(isoHome);
     fs.mkdirSync(sessionsDir, { recursive: true });
     const transcriptPath = path.join(isoHome, 'transcript.jsonl');
@@ -444,7 +444,7 @@ async function runTests() {
   console.log('\nRound 82: session-end.js (entry.tool_name without type=tool_use):');
 
   if (await asyncTest('collects tool name from entry with tool_name but non-tool_use type', async () => {
-    const isoHome = path.join(os.tmpdir(), `ecc-r82-toolname-${Date.now()}`);
+    const isoHome = path.join(os.tmpdir(), `MDT-r82-toolname-${Date.now()}`);
     const sessionsDir = getSessionsDirForHome(isoHome);
     fs.mkdirSync(sessionsDir, { recursive: true });
 
@@ -477,7 +477,7 @@ async function runTests() {
   console.log('\nRound 82: session-end.js (template marker present but regex no-match):');
 
   if (await asyncTest('preserves file when marker present but regex does not match corrupted template', async () => {
-    const isoHome = path.join(os.tmpdir(), `ecc-r82-tmpl-${Date.now()}`);
+    const isoHome = path.join(os.tmpdir(), `MDT-r82-tmpl-${Date.now()}`);
     const sessionsDir = getSessionsDirForHome(isoHome);
     fs.mkdirSync(sessionsDir, { recursive: true });
 

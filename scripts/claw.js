@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * NanoClaw — Barebones Agent REPL for Everything Claude Code
+ * NanoClaw — Barebones Agent REPL for ModelDev Toolkit
  *
  * A persistent, session-aware AI agent loop that delegates to `claude -p`.
  * Zero external dependencies. Markdown-as-database. Synchronous REPL.
@@ -66,7 +66,7 @@ function appendTurn(filePath, role, content, timestamp) {
 
 // ─── Context & Delegation Pipeline ──────────────────────────────────────────
 
-function loadECCContext(skillList) {
+function loadMDTContext(skillList) {
   const raw = skillList !== undefined ? skillList : (process.env.CLAW_SKILLS || '');
   if (!raw.trim()) {
     return '';
@@ -173,7 +173,7 @@ function main() {
   fs.mkdirSync(clawDir, { recursive: true });
 
   const sessionPath = getSessionPath(sessionName);
-  const eccContext = loadECCContext();
+  const eccContext = loadMDTContext();
 
   const requestedSkills = (process.env.CLAW_SKILLS || '').split(',').map(s => s.trim()).filter(Boolean);
   const loadedCount = requestedSkills.filter(name =>
@@ -252,7 +252,7 @@ module.exports = {
   listSessions,
   loadHistory,
   appendTurn,
-  loadECCContext,
+  loadMDTContext,
   askClaude,
   buildPrompt,
   isValidSessionName,
