@@ -569,7 +569,7 @@ The patterns in this guide aren't complex. They're habits. Build them into your 
 
 **MDT Ecosystem:**
 - [AgentShield on npm](https://www.npmjs.com/package/MDT-agentshield) — Zero-install agent security scanning
-- [Everything Claude Code (this fork)](https://github.com/flatrick/everything-claude-code) — production-ready agent configurations
+- [ModelDev Toolkit (this fork)](https://github.com/flatrick/modeldev-toolkit) — production-ready agent configurations
 - [The Shorthand Guide](./the-shortform-guide.md) — Setup and configuration fundamentals
 - [The Longform Guide](./the-longform-guide.md) — Advanced patterns and optimization
 - [The OpenClaw Guide](./the-openclaw-guide.md) — Security lessons from the agent frontier
@@ -592,4 +592,4 @@ The patterns in this guide aren't complex. They're habits. Build them into your 
 
 *Built from 10 months of maintaining the most-forked agent configuration on GitHub, auditing thousands of community contributions, and building the tools to automate what humans can't catch at scale.*
 
-*Affaan Mustafa ([@affaanmustafa](https://x.com/affaanmustafa)) — Creator of Everything Claude Code and AgentShield*
+*Affaan Mustafa ([@affaanmustafa](https://x.com/affaanmustafa)) — Creator of ModelDev Toolkit and AgentShield*

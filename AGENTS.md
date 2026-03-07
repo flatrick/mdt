@@ -1,4 +1,4 @@
-# Everything Claude Code (MDT) — Agent Instructions
+# ModelDev Toolkit (MDT) — Agent Instructions
 
 This is a **production-ready AI coding plugin** providing 16 specialized agents, 60+ skills, 35 commands, and automated hook workflows for software development.
 

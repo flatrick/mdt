@@ -17,7 +17,7 @@ After the ModelDev Toolkit Node-only migration, skills and hooks run only via No
 
 3. **Re-run the installer** from the ModelDev Toolkit repo (Node only):
    ```bash
-   cd /path/to/everything-claude-code
+   cd /path/to/modeldev-toolkit
    node scripts/install-mdt.js typescript
    ```
    For Cursor (project or global):

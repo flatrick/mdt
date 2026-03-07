@@ -2,7 +2,7 @@
 
 Generic model toolkit for software development workflows and scaffolding.
 
-**This project is a rebranded fork of [Everything Claude Code](https://github.com/affaan-m/everything-claude-code).** It has been modified to use a Node-only runtime and installer; the original repo (plugin, guides, community) remains the upstream source.
+**This project is a rebranded fork of [ModelDev Toolkit](https://github.com/affaan-m/modeldev-toolkit).** It has been modified to use a Node-only runtime and installer; the original repo (plugin, guides, community) remains the upstream source.
 
 Not just configs. A complete system: skills, agents, hooks, rules, and MCP configurations. Works with **Claude Code**, **Cursor**, **Codex**, and other AI agent harnesses.
 
@@ -34,8 +34,8 @@ Guides refer to the upstream project; this fork may differ. For this fork, prefe
 | Parallelization | Git worktrees, cascade method, when to scale instances |
 | Subagent Orchestration | The context problem, iterative retrieval pattern |
 
-- **Shorthand Guide (start here):** [The Shorthand Guide to Everything Claude Code](https://x.com/affaanmustafa/status/2012378465664745795)
-- **Longform Guide (advanced):** [The Longform Guide to Everything Claude Code](https://x.com/affaanmustafa/status/2014040193557471352)
+- **Shorthand Guide (start here):** [The Shorthand Guide to ModelDev Toolkit](https://x.com/affaanmustafa/status/2012378465664745795)
+- **Longform Guide (advanced):** [The Longform Guide to ModelDev Toolkit](https://x.com/affaanmustafa/status/2014040193557471352)
 
 ---
 
@@ -43,8 +43,8 @@ Guides refer to the upstream project; this fork may differ. For this fork, prefe
 
 1. **Clone this repo**
    ```bash
-   git clone https://github.com/flatrick/everything-claude-code.git
-   cd everything-claude-code
+   git clone https://github.com/flatrick/modeldev-toolkit.git
+   cd modeldev-toolkit
    ```
 
 2. **Install** (pick target and language)
@@ -67,7 +67,7 @@ Guides refer to the upstream project; this fork may differ. For this fork, prefe
 
 3. **Use** commands and agents in your tool (e.g. `/plan`, `/tdd`, `/code-review`). Full layout: [CLAUDE.md](CLAUDE.md), [AGENTS.md](AGENTS.md).
 
-For the official Claude Code plugin (marketplace install), use the [original repo](https://github.com/affaan-m/everything-claude-code).
+For the official Claude Code plugin (marketplace install), use the [original repo](https://github.com/affaan-m/modeldev-toolkit).
 
 ---
 
@@ -166,7 +166,7 @@ Use `node scripts/install-mdt.js` with your language(s). Default target is Claud
 Yes. Use `--target cursor` or `--target codex`. Each tool gets its own install directory; see [Cursor / Codex / OpenCode](#cursor--codex--opencode).
 
 **Duplicate hooks / plugin.json?**  
-Do not add a `"hooks"` field to `.claude-plugin/plugin.json`. Claude Code loads `hooks/hooks.json` by convention. See [upstream repo](https://github.com/affaan-m/everything-claude-code) for history (#29, #52, #103).
+Do not add a `"hooks"` field to `.claude-plugin/plugin.json`. Claude Code loads `hooks/hooks.json` by convention. See [upstream repo](https://github.com/affaan-m/modeldev-toolkit) for history (#29, #52, #103).
 
 More: [CLAUDE.md](CLAUDE.md), [AGENTS.md](AGENTS.md), and `docs/`.
 
@@ -216,15 +216,15 @@ See [docs/token-optimization.md](docs/token-optimization.md) for recommended set
 
 - **Customize:** Start with what fits your stack; add or remove rules/skills as needed.
 - **Original author:** [@affaan-m](https://github.com/affaan-m). To support the original project: [GitHub Sponsors](https://github.com/sponsors/affaan-m).
-- **Ecosystem:** Upstream has AgentShield, Skill Creator, and Plankton — see [original README](https://github.com/affaan-m/everything-claude-code).
+- **Ecosystem:** Upstream has AgentShield, Skill Creator, and Plankton — see [original README](https://github.com/affaan-m/modeldev-toolkit).
 
 ---
 
 ## Links
 
-- **Original project:** [Everything Claude Code](https://github.com/affaan-m/everything-claude-code) — plugin, guides, community
-- **Shorthand Guide:** [The Shorthand Guide to Everything Claude Code](https://x.com/affaanmustafa/status/2012378465664745795)
-- **Longform Guide:** [The Longform Guide to Everything Claude Code](https://x.com/affaanmustafa/status/2014040193557471352)
+- **Original project:** [ModelDev Toolkit](https://github.com/affaan-m/modeldev-toolkit) — plugin, guides, community
+- **Shorthand Guide:** [The Shorthand Guide to ModelDev Toolkit](https://x.com/affaanmustafa/status/2012378465664745795)
+- **Longform Guide:** [The Longform Guide to ModelDev Toolkit](https://x.com/affaanmustafa/status/2014040193557471352)
 
 ---
 

@@ -4,7 +4,7 @@
 
 ---
 
-> **This is Part 3 of the Everything Claude Code guide series.** Part 1 is [The Shorthand Guide](./the-shortform-guide.md) (setup and configuration). Part 2 is [The Longform Guide](./the-longform-guide.md) (advanced patterns and workflows). This guide is about security — specifically, what happens when recursive agent infrastructure treats it as an afterthought.
+> **This is Part 3 of the ModelDev Toolkit guide series.** Part 1 is [The Shorthand Guide](./the-shortform-guide.md) (setup and configuration). Part 2 is [The Longform Guide](./the-longform-guide.md) (advanced patterns and workflows). This guide is about security — specifically, what happens when recursive agent infrastructure treats it as an afterthought.
 
 I used OpenClaw for a week. This is what I found.
 
@@ -15,7 +15,7 @@ I used OpenClaw for a week. This is what I found.
 
 ## 1 Week of OpenClaw Use
 
-I want to be upfront about my perspective. I build AI coding tools. My everything-claude-code repo has 50K+ stars. I created AgentShield. I spend most of my working hours thinking about how agents should interact with systems, and how those interactions can go wrong.
+I want to be upfront about my perspective. I build AI coding tools. My ModelDev Toolkit repo has 50K+ stars. I created AgentShield. I spend most of my working hours thinking about how agents should interact with systems, and how those interactions can go wrong.
 
 So when OpenClaw started gaining traction, I did what I always do with new tooling: I installed it, connected it to a few channels, and started probing. Not to break it. To understand the security model.
 
@@ -460,11 +460,11 @@ Build secure by design. Not secure by accident.
 - [AgentShield on npm](https://www.npmjs.com/package/MDT-agentshield) — Zero-install agent security scanning
 
 > **Series navigation:**
-> - Part 1: [The Shorthand Guide to Everything Claude Code](./the-shortform-guide.md) — Setup and configuration
-> - Part 2: [The Longform Guide to Everything Claude Code](./the-longform-guide.md) — Advanced patterns and workflows
+> - Part 1: [The Shorthand Guide to ModelDev Toolkit](./the-shortform-guide.md) — Setup and configuration
+> - Part 2: [The Longform Guide to ModelDev Toolkit](./the-longform-guide.md) — Advanced patterns and workflows
 > - Part 3: The Hidden Danger of OpenClaw (this article) — Security lessons from the agent frontier
 > - Part 4: [The Shorthand Guide to Securing Your Agent](./the-security-guide.md) — Practical agent security
 
 ---
 
-*Affaan Mustafa ([@affaanmustafa](https://x.com/affaanmustafa)) builds AI coding tools and writes about AI infrastructure security. His everything-claude-code repo has 50K+ GitHub stars. He created AgentShield and won the Anthropic x Forum Ventures hackathon building [zenith.chat](https://zenith.chat).*
+*Affaan Mustafa ([@affaanmustafa](https://x.com/affaanmustafa)) builds AI coding tools and writes about AI infrastructure security. His ModelDev Toolkit repo has 50K+ GitHub stars. He created AgentShield and won the Anthropic x Forum Ventures hackathon building [zenith.chat](https://zenith.chat).*

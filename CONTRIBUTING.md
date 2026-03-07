@@ -1,10 +1,10 @@
-# Contributing to Everything Claude Code
+# Contributing to ModelDev Toolkit
 
 Thanks for wanting to contribute.
 
-This repository is a fork-first v1 track (`flatrick/everything-claude-code`).
+This repository is a fork-first v1 track (`flatrick/modeldev-toolkit`).
 Submit issues/PRs here for this fork. If your change is intended for upstream,
-open a separate PR against `affaan-m/everything-claude-code`.
+open a separate PR against `affaan-m/modeldev-toolkit`.
 
 ## Table of Contents
 
@@ -53,8 +53,8 @@ Slash commands that invoke useful workflows:
 
 ```bash
 # 1. Fork and clone this repo
-gh repo fork flatrick/everything-claude-code --clone
-cd everything-claude-code
+gh repo fork flatrick/modeldev-toolkit --clone
+cd modeldev-toolkit
 
 # 2. Create a branch
 git checkout -b feat/my-contribution
@@ -423,7 +423,7 @@ For environment-dependent tests, follow the shared detection contract in `tests/
 
 ## Questions?
 
-- **Issues:** [github.com/flatrick/everything-claude-code/issues](https://github.com/flatrick/everything-claude-code/issues)
+- **Issues:** [github.com/flatrick/modeldev-toolkit/issues](https://github.com/flatrick/modeldev-toolkit/issues)
 - **X/Twitter:** [@affaanmustafa](https://x.com/affaanmustafa)
 
 ---

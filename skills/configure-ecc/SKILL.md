@@ -1,15 +1,15 @@
 ---
 name: configure-mdt
-description: Interactive installer for Everything Claude Code — guides users through selecting and installing skills and rules to user-level or project-level directories, verifies paths, and optionally optimizes installed files.
+description: Interactive installer for ModelDev Toolkit — guides users through selecting and installing skills and rules to user-level or project-level directories, verifies paths, and optionally optimizes installed files.
 ---
 
-# Configure Everything Claude Code (MDT)
+# Configure ModelDev Toolkit (MDT)
 
-An interactive, step-by-step installation wizard for the Everything Claude Code project. Uses `AskUserQuestion` to guide users through selective installation of skills and rules, then verifies correctness and offers optimization.
+An interactive, step-by-step installation wizard for the ModelDev Toolkit project. Uses `AskUserQuestion` to guide users through selective installation of skills and rules, then verifies correctness and offers optimization.
 
 ## When to Activate
 
-- User says "configure MDT", "install MDT", "setup everything claude code", or similar
+- User says "configure MDT", "install MDT", "setup ModelDev Toolkit", or similar
 - User wants to selectively install skills or rules from this project
 - User wants to verify or fix an existing MDT installation
 - User wants to optimize installed skills or rules for their project
@@ -17,7 +17,7 @@ An interactive, step-by-step installation wizard for the Everything Claude Code 
 ## Prerequisites
 
 This skill must be accessible to Claude Code before activation. Two ways to bootstrap:
-1. **Via Plugin**: `/plugin install everything-claude-code` — the plugin loads this skill automatically
+1. **Via Plugin**: `/plugin install modeldev-toolkit` — the plugin loads this skill automatically
 2. **Manual**: Copy only this skill to `~/.claude/skills/configure-mdt/SKILL.md`, then activate by saying "configure MDT"
 
 ---
@@ -27,11 +27,11 @@ This skill must be accessible to Claude Code before activation. Two ways to boot
 Before any installation, clone the latest MDT source to `/tmp`:
 
 ```bash
-rm -rf /tmp/everything-claude-code
-git clone https://github.com/flatrick/everything-claude-code.git /tmp/everything-claude-code
+rm -rf /tmp/modeldev-toolkit
+git clone https://github.com/flatrick/modeldev-toolkit.git /tmp/modeldev-toolkit
 ```
 
-Set `MDT_ROOT=/tmp/everything-claude-code` as the source for all subsequent copy operations.
+Set `MDT_ROOT=/tmp/modeldev-toolkit` as the source for all subsequent copy operations.
 
 If the clone fails (network issues, etc.), use `AskUserQuestion` to ask the user to provide a local path to an existing MDT clone.
 
@@ -276,7 +276,7 @@ Options:
 Clean up the cloned repository from `/tmp`:
 
 ```bash
-rm -rf /tmp/everything-claude-code
+rm -rf /tmp/modeldev-toolkit
 ```
 
 Then print a summary report:

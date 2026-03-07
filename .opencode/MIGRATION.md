@@ -1,6 +1,6 @@
 # Migration Guide: Claude Code to OpenCode
 
-This guide helps you migrate from Claude Code to OpenCode while using ModelDev Toolkit (forked from Everything Claude Code).
+This guide helps you migrate from Claude Code to OpenCode while using ModelDev Toolkit (forked from ModelDev Toolkit).
 
 ## Overview
 
@@ -350,4 +350,4 @@ If you need to switch back:
 
 For issues specific to:
 - **OpenCode CLI**: Report to OpenCode's issue tracker
-- **MDT Configuration**: Report to [github.com/affaan-m/everything-claude-code](https://github.com/affaan-m/everything-claude-code)
+- **MDT Configuration**: Report to [github.com/affaan-m/modeldev-toolkit](https://github.com/affaan-m/modeldev-toolkit)

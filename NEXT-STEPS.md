@@ -30,7 +30,7 @@ But I'm also hoping to share it with some friends and coworkers who could benefi
 
 ## 2. What is your relationship with upstream?
 
-`affaan-m/everything-claude-code` will keep shipping new agents, skills, and
+`affaan-m/modeldev-toolkit` will keep shipping new agents, skills, and
 commands. You need a policy:
 
 - **Track upstream**: Periodically merge upstream changes and adapt them to

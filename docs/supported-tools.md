@@ -1,6 +1,6 @@
 # Supported LLM Tools
 
-Everything Claude Code (MDT) spans multiple LLM modalities and IDEs. Because each tool has its own architecture, MDT installs distinct configurations when you use `npx mdt-install --target <tool>`.
+ModelDev Toolkit (MDT) spans multiple LLM modalities and IDEs. Because each tool has its own architecture, MDT installs distinct configurations when you use `npx mdt-install --target <tool>`.
 
 This matrix explains what features are supported natively in each tool and how the underlying configuration works.
 

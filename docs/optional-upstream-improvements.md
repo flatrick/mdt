@@ -14,6 +14,22 @@ You already ported the three high-value items: **runtime hook controls** (MDT_HO
 
 ---
 
+## Current state (re-scan)
+
+Use this section to avoid mistakes; update it after changes.
+
+| Item | Status | Notes |
+|------|--------|--------|
+| **check-hook-enabled.js** | Not present | Add to `scripts/hooks/`. Depends on `scripts/lib/hook-flags.js` (present). |
+| **cost-tracker.js** | Not present | Add to `scripts/hooks/`. No `stop:cost-tracker` in `hooks/hooks.json` or `.cursor/hooks/stop.js`. Use `getConfigDir()` from `scripts/lib/utils.js` (or `getClaudeDir()` which delegates to it) for metrics path. |
+| **OpenCode profile support** | Not present | **Plugin file is `.opencode/plugins/mdt-hooks.ts`** (MDTHooksPlugin). Add MDT_HOOK_PROFILE / MDT_DISABLED_HOOKS and hookEnabled gating there. |
+| **Harness/loop commands** | Not present | `commands/` has no harness-audit, loop-start, loop-status, quality-gate, model-route. `.opencode/commands/` has 23 files, same gap. |
+| **Harness/loop agents** | Not present | `agents/` has no harness-optimizer, loop-operator. |
+| **hook-flags.js** | Present | `scripts/lib/hook-flags.js` exists. |
+| **run-with-flags.js** | Present | `scripts/hooks/run-with-flags.js` exists; Stop already has session-end, evaluate-session, session-end-marker. |
+
+---
+
 ## Implementation scope (confirmed)
 
 **In scope now:**
@@ -123,7 +139,7 @@ Use the indented rows under each task for status updates, gotchas found during w
 
 - [ ] **OpenCode profile support**
   - *(Add status or important notes here when working on this task.)*
-  - Port from affaan-m: `normalizeProfile`, `disabledHooks`, `profileOrder`, `profileAllowed`, `hookEnabled`. Gate each `file.edited` and `tool.execute.after` behavior with `if (hookEnabled(...))`.
+  - **Target file is `.opencode/plugins/mdt-hooks.ts`** (MDTHooksPlugin), not ecc-hooks.ts. Port from affaan-m's ecc-hooks.ts: `normalizeProfile`, `disabledHooks`, `profileOrder`, `profileAllowed`, `hookEnabled`. Gate each `file.edited` and `tool.execute.after` behavior with `if (hookEnabled(...))`.
 
 - [ ] **Harness/loop commands and agents**
   - *(Add status or important notes here when working on this task.)*
