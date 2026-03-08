@@ -2,7 +2,7 @@
  * Tests for scripts/lib/session-aliases.js
  *
  * These tests use a temporary directory to avoid touching
- * the real ~/.claude/session-aliases.json.
+ * the real active config dir's session-aliases.json.
  *
  * Run with: node tests/lib/session-aliases-rounds-2.test.js
  */

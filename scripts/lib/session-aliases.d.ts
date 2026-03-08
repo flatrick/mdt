@@ -1,6 +1,6 @@
 /**
- * Session Aliases Library for Claude Code.
- * Manages named aliases for session files, stored in ~/.claude/session-aliases.json.
+ * Session Aliases Library for MDT.
+ * Manages named aliases for session files, stored in the active config dir's session-aliases.json.
  */
 
 /** Internal alias storage entry */

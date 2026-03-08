@@ -10,7 +10,7 @@ paths:
 
 ## PostToolUse Hooks
 
-Configure in `~/.claude/settings.json`:
+Configure in your config directory settings file (for example `<config>/settings.json`):
 
 - **PSScriptAnalyzer**: Run after editing `.ps1`/`.psm1` files to catch style and security issues
 - **Pester**: Run tests after editing PowerShell module files

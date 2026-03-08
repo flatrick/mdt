@@ -1,7 +1,7 @@
 # Next Steps: Questions Before v2
 
-The v1 migration is complete. All planned items were implemented and verified.
-Tests pass. The codebase is clean, Node-only, and hardened.
+The runtime migration track is complete, but v1 stabilization is still active.
+Tests pass. The codebase is Node-only and hardened, but naming, metadata, and tool-agnostic documentation still need cleanup.
 
 Before writing any more code, answer these questions honestly.
 
@@ -130,3 +130,46 @@ it is time to iron out any and all bugs from the move away from python/shell-scr
 
 The codebase is in good shape. The risk now is not broken code — it's
 building things you don't need.
+
+---
+
+## Post-Stabilization Follow-Up
+
+After the v1 stabilization pass, the next work should stay narrow and
+operational rather than expanding features.
+
+### 1. Enforce the new checks in CI
+
+Make sure every PR runs the stabilization guards, not just local test runs:
+
+- `scripts/ci/validate-metadata.js`
+- Schema contract coverage for real shipped configs/manifests
+- `MDT_ROOT` regression coverage
+
+### 2. Review the deliberate leftovers
+
+The remaining references to `~/.claude/` should each be clearly intentional and
+fall into one of these buckets:
+
+- Claude-specific docs/examples
+- upstream or historical references
+- tests/validator text
+
+If a leftover does not fit one of those buckets, clean it up.
+
+### 3. Cut a stabilization release
+
+This is a good release boundary because contracts, naming, installer output,
+runtime placeholders, and docs all changed together.
+
+Release notes should call out:
+
+- `MDT_ROOT` is now the preferred runtime placeholder
+- schemas were corrected to match shipped formats
+- metadata consistency is now validated
+
+### 4. Do one final narrow cleanup pass before new features
+
+The best candidate is the remaining Claude-only documentation/examples, to
+make sure they are explicitly labeled as Claude-specific and never read like
+generic MDT guidance.

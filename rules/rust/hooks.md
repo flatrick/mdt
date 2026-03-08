@@ -9,7 +9,7 @@ paths:
 
 ## PostToolUse Hooks
 
-Configure in `~/.claude/settings.json`:
+Configure in your config directory settings file (for example `<config>/settings.json`):
 
 - **cargo fmt**: Auto-format `.rs` files after edit
 - **cargo check**: Fast compilation check after changes

@@ -76,6 +76,8 @@ claude plugin marketplace add https://github.com/mixedbread-ai/mgrep
 
 ## Plugin Files Location
 
+This section is Claude Code specific. Other tools keep plugin or extension state in their own config/data directories.
+
 ```
 ~/.claude/plugins/
 |-- cache/                    # Downloaded plugins

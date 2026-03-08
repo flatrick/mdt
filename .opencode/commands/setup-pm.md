@@ -14,10 +14,10 @@ Set up package manager preference for the project or globally.
 ## Detection Order
 
 1. **Environment variable**: `CLAUDE_PACKAGE_MANAGER`
-2. **Project config**: `.claude/package-manager.json`
+2. **Project config**: `.claude/package-manager.json` (current repo-local path)
 3. **package.json**: `packageManager` field
 4. **Lock file**: Auto-detect from lock files
-5. **Global config**: `~/.claude/package-manager.json`
+5. **Global config**: `<config>/package-manager.json`
 6. **Fallback**: First available
 
 ## Configuration Options
@@ -42,8 +42,8 @@ echo '{"packageManager": "pnpm"}' > .claude/package-manager.json
 
 ### Option 4: Global Config
 ```bash
-# Create ~/.claude/package-manager.json
-echo '{"packageManager": "yarn"}' > ~/.claude/package-manager.json
+# Create <config>/package-manager.json
+echo '{"packageManager": "yarn"}' > <config>/package-manager.json
 ```
 
 ## Supported Package Managers

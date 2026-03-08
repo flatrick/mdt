@@ -9,7 +9,7 @@ paths:
 
 ## PostToolUse Hooks
 
-Configure in `~/.claude/settings.json`:
+Configure in your config directory settings file (for example `<config>/settings.json`):
 
 - **sqlfluff**: SQL linter and formatter — `sqlfluff lint` / `sqlfluff fix`
 

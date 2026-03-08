@@ -8,16 +8,16 @@ command: true
 
 ## Implementation
 
-Run the instinct CLI using the plugin root path:
+Run the instinct CLI using `MDT_ROOT` when available:
 
 ```bash
-node "${CLAUDE_PLUGIN_ROOT}/skills/continuous-learning-v2/scripts/instinct-cli.js" import <file-or-url> [--dry-run] [--force] [--min-confidence 0.7] [--scope project|global]
+node "${MDT_ROOT}/skills/continuous-learning-v2/scripts/instinct-cli.js" import <file-or-url> [--dry-run] [--force] [--min-confidence 0.7] [--scope project|global]
 ```
 
-Or if `CLAUDE_PLUGIN_ROOT` is not set (manual installation):
+For manual installs, replace `<config>` with your MDT config directory (for example `~/.claude` or `~/.cursor`):
 
 ```bash
-node ~/.claude/skills/continuous-learning-v2/scripts/instinct-cli.js import <file-or-url>
+node "<config>/skills/continuous-learning-v2/scripts/instinct-cli.js" import <file-or-url>
 ```
 
 Import instincts from local file paths or HTTP(S) URLs.
@@ -38,8 +38,8 @@ Import instincts from local file paths or HTTP(S) URLs.
 3. Check for duplicates with existing instincts
 4. Merge or add new instincts
 5. Save to inherited instincts directory:
-   - Project scope: `~/.claude/homunculus/projects/<project-id>/instincts/inherited/`
-   - Global scope: `~/.claude/homunculus/instincts/inherited/`
+   - Project scope: `<data>/homunculus/projects/<project-id>/instincts/inherited/`
+   - Global scope: `<data>/homunculus/instincts/inherited/`
 
 ## Import Process
 
@@ -108,7 +108,7 @@ Added: 8 instincts
 Updated: 1 instinct
 Skipped: 3 instincts (equal/higher confidence already exists)
 
-New instincts saved to: ~/.claude/homunculus/instincts/inherited/
+New instincts saved to: <data>/homunculus/instincts/inherited/
 
 Run /instinct-status to see all instincts.
 ```

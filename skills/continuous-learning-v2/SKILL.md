@@ -25,7 +25,7 @@ An advanced learning system that turns your Claude Code sessions into reusable k
 
 | Feature | v2.0 | v2.1 |
 |---------|------|------|
-| Storage | Global (~/.claude/homunculus/) | Project-scoped (projects/<hash>/) |
+| Storage | Global (`<data>/homunculus/`) | Project-scoped (projects/<hash>/) |
 | Scope | All instincts apply everywhere | Project-scoped + global |
 | Detection | None | git remote URL / repo path |
 | Promotion | N/A | Project → global when seen in 2+ projects |
@@ -131,13 +131,13 @@ The system automatically detects your current project:
 3. **`git rev-parse --show-toplevel`** -- fallback using repo path (machine-specific)
 4. **Global fallback** -- if no project is detected, instincts go to global scope
 
-Each project gets a 12-character hash ID (e.g., `a1b2c3d4e5f6`). A registry file at `~/.claude/homunculus/projects.json` maps IDs to human-readable names.
+Each project gets a 12-character hash ID (e.g., `a1b2c3d4e5f6`). A registry file at `<data>/homunculus/projects.json` maps IDs to human-readable names.
 
 ## Quick Start
 
 ### 1. Enable Observation Hooks
 
-Add to your `~/.claude/settings.json`.
+Add to your config directory settings file (for Claude Code this is `~/.claude/settings.json`).
 
 **If installed as a plugin** (recommended):
 
@@ -148,21 +148,21 @@ Add to your `~/.claude/settings.json`.
       "matcher": "*",
       "hooks": [{
         "type": "command",
-        "command": "node \"${CLAUDE_PLUGIN_ROOT}/skills/continuous-learning-v2/hooks/observe.js\" pre"
+        "command": "node \"${MDT_ROOT}/skills/continuous-learning-v2/hooks/observe.js\" pre"
       }]
     }],
     "PostToolUse": [{
       "matcher": "*",
       "hooks": [{
         "type": "command",
-        "command": "node \"${CLAUDE_PLUGIN_ROOT}/skills/continuous-learning-v2/hooks/observe.js\" post"
+        "command": "node \"${MDT_ROOT}/skills/continuous-learning-v2/hooks/observe.js\" post"
       }]
     }]
   }
 }
 ```
 
-**If installed manually** to `~/.claude/skills`:
+**If installed manually** to `<config>/skills` where `<config>` is your MDT config directory (for example `~/.claude` or `~/.cursor`):
 
 ```json
 {
@@ -171,14 +171,14 @@ Add to your `~/.claude/settings.json`.
       "matcher": "*",
       "hooks": [{
         "type": "command",
-        "command": "node ~/.claude/skills/continuous-learning-v2/hooks/observe.js pre"
+        "command": "node <config>/skills/continuous-learning-v2/hooks/observe.js pre"
       }]
     }],
     "PostToolUse": [{
       "matcher": "*",
       "hooks": [{
         "type": "command",
-        "command": "node ~/.claude/skills/continuous-learning-v2/hooks/observe.js post"
+        "command": "node <config>/skills/continuous-learning-v2/hooks/observe.js post"
       }]
     }]
   }
@@ -191,7 +191,7 @@ The system creates directories automatically on first use, but you can also crea
 
 ```bash
 # Global directories
-mkdir -p ~/.claude/homunculus/{instincts/{personal,inherited},evolved/{agents,skills,commands},projects}
+mkdir -p <data>/homunculus/{instincts/{personal,inherited},evolved/{agents,skills,commands},projects}
 
 # Project directories are auto-created when the hook first runs in a git repo
 ```
@@ -246,7 +246,7 @@ Other behavior (observation capture, instinct thresholds, project scoping, promo
 ## File Structure
 
 ```
-~/.claude/homunculus/
+<data>/homunculus/
 +-- identity.json           # Your profile, technical level
 +-- projects.json           # Registry: project hash -> name/path/remote
 +-- observations.jsonl      # Global observations (fallback)
@@ -297,18 +297,18 @@ When the same instinct appears in multiple projects with high confidence, it's a
 
 ```bash
 # Promote a specific instinct
-node "${CLAUDE_PLUGIN_ROOT}/skills/continuous-learning-v2/scripts/instinct-cli.js" promote prefer-explicit-errors
+node "${MDT_ROOT}/skills/continuous-learning-v2/scripts/instinct-cli.js" promote prefer-explicit-errors
 
 # Auto-promote all qualifying instincts
-node "${CLAUDE_PLUGIN_ROOT}/skills/continuous-learning-v2/scripts/instinct-cli.js" promote
+node "${MDT_ROOT}/skills/continuous-learning-v2/scripts/instinct-cli.js" promote
 
 # Preview without changes
-node "${CLAUDE_PLUGIN_ROOT}/skills/continuous-learning-v2/scripts/instinct-cli.js" promote --dry-run
+node "${MDT_ROOT}/skills/continuous-learning-v2/scripts/instinct-cli.js" promote --dry-run
 ```
 
-If `CLAUDE_PLUGIN_ROOT` is not set, use the fallback path for your tool:
+For manual installs, replace `<config>` with your MDT config directory:
 ```bash
-node ~/.claude/skills/continuous-learning-v2/scripts/instinct-cli.js promote
+node "<config>/skills/continuous-learning-v2/scripts/instinct-cli.js" promote
 ```
 
 The `/evolve` command also suggests promotion candidates.
@@ -346,8 +346,8 @@ Hooks fire **100% of the time**, deterministically. This means:
 ## Backward Compatibility
 
 v2.1 is fully compatible with v2.0 and v1:
-- Existing global instincts in `~/.claude/homunculus/instincts/` still work as global instincts
-- Existing `~/.claude/skills/learned/` skills from v1 still work
+- Existing global instincts in `<data>/homunculus/instincts/` still work as global instincts
+- Existing learned skills in `<config>/skills/learned/` still work
 - Stop hook still runs (but now also feeds into v2)
 - Gradual migration: run both in parallel
 

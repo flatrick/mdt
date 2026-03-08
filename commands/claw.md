@@ -40,18 +40,18 @@ exit        Quit the REPL
 ## How It Works
 
 1. Reads `CLAW_SESSION` env var to select a named session (default: `default`)
-2. Loads conversation history from `~/.claude/claw/{session}.md`
+2. Loads conversation history from `<data>/claw/{session}.md`
 3. Optionally loads MDT skill context from `CLAW_SKILLS` env var
 4. Enters a blocking prompt loop — each user message is sent to `claude -p` with full history
 5. Responses are appended to the session file for persistence across restarts
 
 ## Session Storage
 
-Sessions are stored as Markdown files in `~/.claude/claw/`:
+Sessions are stored as Markdown files in `<data>/claw/`:
 
 ```
-~/.claude/claw/default.md
-~/.claude/claw/my-project.md
+<data>/claw/default.md
+<data>/claw/my-project.md
 ```
 
 Each turn is formatted as:

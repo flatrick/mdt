@@ -12,12 +12,12 @@ Show continuous-learning-v2 project registry and stats: $ARGUMENTS
 Run:
 
 ```bash
-node "${CLAUDE_PLUGIN_ROOT}/skills/continuous-learning-v2/scripts/instinct-cli.js" projects
+node "${MDT_ROOT}/skills/continuous-learning-v2/scripts/instinct-cli.js" projects
 ```
 
-If `CLAUDE_PLUGIN_ROOT` is unavailable, use:
+For manual installs, replace `<config>` with your MDT config directory:
 
 ```bash
-node ~/.claude/skills/continuous-learning-v2/scripts/instinct-cli.js projects
+node "<config>/skills/continuous-learning-v2/scripts/instinct-cli.js" projects
 ```
 

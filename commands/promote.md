@@ -10,16 +10,16 @@ Promote instincts from project scope to global scope in continuous-learning-v2.
 
 ## Implementation
 
-Run the instinct CLI using the plugin root path:
+Run the instinct CLI using `MDT_ROOT` when available:
 
 ```bash
-node "${CLAUDE_PLUGIN_ROOT}/skills/continuous-learning-v2/scripts/instinct-cli.js" promote [instinct-id] [--force] [--dry-run]
+node "${MDT_ROOT}/skills/continuous-learning-v2/scripts/instinct-cli.js" promote [instinct-id] [--force] [--dry-run]
 ```
 
-Or if `CLAUDE_PLUGIN_ROOT` is not set (manual installation):
+For manual installs, replace `<config>` with your MDT config directory (for example `~/.claude` or `~/.cursor`):
 
 ```bash
-node ~/.claude/skills/continuous-learning-v2/scripts/instinct-cli.js promote [instinct-id] [--force] [--dry-run]
+node "<config>/skills/continuous-learning-v2/scripts/instinct-cli.js" promote [instinct-id] [--force] [--dry-run]
 ```
 
 ## Usage
@@ -38,4 +38,4 @@ node ~/.claude/skills/continuous-learning-v2/scripts/instinct-cli.js promote [in
 3. Otherwise, find cross-project candidates that:
    - Appear in at least 2 projects
    - Meet confidence threshold
-4. Write promoted instincts to `~/.claude/homunculus/instincts/personal/` with `scope: global`
+4. Write promoted instincts to `<data>/homunculus/instincts/personal/` with `scope: global`

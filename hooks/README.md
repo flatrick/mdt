@@ -82,7 +82,7 @@ Hook IDs match the first argument passed to `run-with-flags.js` in `hooks.json` 
 
 ### Disabling a Hook
 
-Use **`MDT_DISABLED_HOOKS`** (see above) to disable without editing files. Or remove or comment out the hook entry in `hooks.json`. If installed as a plugin, override in your `~/.claude/settings.json`:
+Use **`MDT_DISABLED_HOOKS`** (see above) to disable without editing files. Or remove or comment out the hook entry in `hooks.json`. If installed as a plugin, override in your config directory settings file (for Claude Code this is `~/.claude/settings.json`):
 
 ```json
 {

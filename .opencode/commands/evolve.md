@@ -12,13 +12,13 @@ Analyze and evolve instincts in continuous-learning-v2: $ARGUMENTS
 Run:
 
 ```bash
-node "${CLAUDE_PLUGIN_ROOT}/skills/continuous-learning-v2/scripts/instinct-cli.js" evolve $ARGUMENTS
+node "${MDT_ROOT}/skills/continuous-learning-v2/scripts/instinct-cli.js" evolve $ARGUMENTS
 ```
 
-If `CLAUDE_PLUGIN_ROOT` is unavailable, use:
+For manual installs, replace `<config>` with your MDT config directory:
 
 ```bash
-node ~/.claude/skills/continuous-learning-v2/scripts/instinct-cli.js evolve $ARGUMENTS
+node "<config>/skills/continuous-learning-v2/scripts/instinct-cli.js" evolve $ARGUMENTS
 ```
 
 ## Supported Args (v2.1)
@@ -32,5 +32,5 @@ node ~/.claude/skills/continuous-learning-v2/scripts/instinct-cli.js evolve $ARG
 - Shows skill/command/agent candidates from trigger and domain clustering.
 - Shows project -> global promotion candidates.
 - With `--generate`, output path is:
-  - project context: `~/.claude/homunculus/projects/<project-id>/evolved/`
-  - global fallback: `~/.claude/homunculus/evolved/`
+  - project context: `<data>/homunculus/projects/<project-id>/evolved/`
+  - global fallback: `<data>/homunculus/evolved/`

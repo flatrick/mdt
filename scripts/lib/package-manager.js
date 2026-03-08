@@ -177,7 +177,7 @@ function readJsonConfig(configPath) {
  * 2. Project-specific config (in .claude/package-manager.json)
  * 3. package.json packageManager field
  * 4. Lock file detection
- * 5. Global user preference (in ~/.claude/package-manager.json)
+ * 5. Global user preference (in the active config dir's package-manager.json, for example <config>/package-manager.json)
  * 6. Default to npm (no child processes spawned)
  *
  * @param {object} options - Options
@@ -345,7 +345,7 @@ function getSelectionPrompt() {
   message += 'Supported package managers: ' + Object.keys(PACKAGE_MANAGERS).join(', ') + '\n';
   message += '\nTo set your preferred package manager:\n';
   message += '  - Global: Set CLAUDE_PACKAGE_MANAGER environment variable\n';
-  message += '  - Or add to ~/.claude/package-manager.json: {"packageManager": "pnpm"}\n';
+  message += '  - Or add to your config dir/package-manager.json (for example <config>/package-manager.json)\n';
   message += '  - Or add to package.json: {"packageManager": "pnpm@8"}\n';
   message += '  - Or add a lock file to your project (e.g., pnpm-lock.yaml)\n';
 

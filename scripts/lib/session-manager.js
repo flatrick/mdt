@@ -1,8 +1,8 @@
 /**
- * Session Manager Library for Claude Code
+ * Session Manager Library for MDT
  * Provides core session CRUD operations for listing, loading, and managing sessions
  *
- * Sessions are stored as markdown files in ~/.claude/sessions/ with format:
+ * Sessions are stored as markdown files in the active config dir's sessions/ folder with format:
  * - YYYY-MM-DD-session.tmp (old format)
  * - YYYY-MM-DD-<short-id>-session.tmp (new format)
  */

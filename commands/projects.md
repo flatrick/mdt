@@ -10,16 +10,16 @@ List project registry entries and per-project instinct/observation counts for co
 
 ## Implementation
 
-Run the instinct CLI using the plugin root path:
+Run the instinct CLI using `MDT_ROOT` when available:
 
 ```bash
-node "${CLAUDE_PLUGIN_ROOT}/skills/continuous-learning-v2/scripts/instinct-cli.js" projects
+node "${MDT_ROOT}/skills/continuous-learning-v2/scripts/instinct-cli.js" projects
 ```
 
-Or if `CLAUDE_PLUGIN_ROOT` is not set (manual installation):
+For manual installs, replace `<config>` with your MDT config directory (for example `~/.claude` or `~/.cursor`):
 
 ```bash
-node ~/.claude/skills/continuous-learning-v2/scripts/instinct-cli.js projects
+node "<config>/skills/continuous-learning-v2/scripts/instinct-cli.js" projects
 ```
 
 ## Usage
@@ -30,7 +30,7 @@ node ~/.claude/skills/continuous-learning-v2/scripts/instinct-cli.js projects
 
 ## What to Do
 
-1. Read `~/.claude/homunculus/projects.json`
+1. Read `<data>/homunculus/projects.json`
 2. For each project, display:
    - Project name, id, root, remote
    - Personal and inherited instinct counts

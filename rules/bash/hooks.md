@@ -9,7 +9,7 @@ paths:
 
 ## PostToolUse Hooks
 
-Configure in `~/.claude/settings.json`:
+Configure in your config directory settings file (for example `<config>/settings.json`):
 
 - **shellcheck**: Run after editing `.sh` files to catch bugs and style issues
 - **bash -n**: Syntax check after editing shell scripts

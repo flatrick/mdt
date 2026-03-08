@@ -45,11 +45,11 @@ node scripts/install-mdt.js typescript python
 
 ```bash
 # Install common rules (required for all projects)
-cp -r rules/common ~/.claude/rules/common
+cp -r rules/common "<config>/rules/common"
 
 # Install language-specific rules based on your project's tech stack
-cp -r rules/typescript ~/.claude/rules/typescript
-cp -r rules/python ~/.claude/rules/python
+cp -r rules/typescript "<config>/rules/typescript"
+cp -r rules/python "<config>/rules/python"
 
 # Attention ! ! ! Configure according to your actual project requirements; the configuration here is for reference only.
 ```

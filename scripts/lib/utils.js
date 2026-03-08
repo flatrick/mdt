@@ -1,5 +1,5 @@
 /**
- * Cross-platform utility functions for Claude Code hooks and scripts
+ * Cross-platform utility functions for MDT hooks and scripts
  * Works on Windows, macOS, and Linux
  */
 
@@ -39,7 +39,7 @@ function getDataDir() {
 }
 
 /**
- * Get the Claude config directory
+ * Get the active MDT config directory.
  *
  * Deprecated: use getConfigDir()/getDataDir() instead. This now delegates
  * to detect-env so callers automatically respect Cursor/Claude/unknown

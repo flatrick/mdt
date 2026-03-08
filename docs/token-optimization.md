@@ -10,7 +10,7 @@ Practical settings and habits to reduce token consumption, extend session qualit
 
 These are recommended defaults for most users. Power users can tune values further based on their workload — for example, setting `MAX_THINKING_TOKENS` lower for simple tasks or higher for complex architectural work.
 
-Add to your `~/.claude/settings.json`:
+Add to your config directory settings file (for example `<config>/settings.json`):
 
 ```json
 {
@@ -128,7 +128,7 @@ The `configure-mdt` install wizard could offer to set these environment variable
 /compact                   # At logical breakpoints
 /cost                      # Check spending
 
-# Environment variables (add to ~/.claude/settings.json "env" block)
+# Environment variables (add to your config directory settings file's `env` block)
 MAX_THINKING_TOKENS=10000
 CLAUDE_AUTOCOMPACT_PCT_OVERRIDE=50
 CLAUDE_CODE_SUBAGENT_MODEL=haiku

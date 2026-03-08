@@ -1,5 +1,5 @@
 /**
- * Cross-platform utility functions for Claude Code hooks and scripts.
+ * Cross-platform utility functions for MDT hooks and scripts.
  * Works on Windows, macOS, and Linux.
  */
 
@@ -15,13 +15,13 @@ export const isLinux: boolean;
 /** Get the user's home directory (cross-platform) */
 export function getHomeDir(): string;
 
-/** Get the Claude config directory (~/.claude) */
+/** Get the active MDT config directory (for example ~/.claude or ~/.cursor) */
 export function getClaudeDir(): string;
 
-/** Get the sessions directory (~/.claude/sessions) */
+/** Get the sessions directory under the active config dir */
 export function getSessionsDir(): string;
 
-/** Get the learned skills directory (~/.claude/skills/learned) */
+/** Get the learned skills directory under the active config dir */
 export function getLearnedSkillsDir(): string;
 
 /** Get the temp directory (cross-platform) */
@@ -156,10 +156,10 @@ export function readStdinJson(options?: ReadStdinJsonOptions): Promise<Record<st
 /** Parse text as a JSON object safely. Returns {} on invalid/empty input. */
 export function parseJsonObject(input: string): Record<string, unknown>;
 
-/** Log a message to stderr (visible to user in Claude Code terminal) */
+/** Log a message to stderr (visible to user in the active tool terminal) */
 export function log(message: string): void;
 
-/** Output data to stdout (returned to Claude's context) */
+/** Output data to stdout (returned to the tool context) */
 export function output(data: string | Record<string, unknown>): void;
 
 // --- System ---

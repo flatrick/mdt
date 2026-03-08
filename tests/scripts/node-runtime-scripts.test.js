@@ -85,7 +85,7 @@ function runTests() {
     const tmpDir = createTestDir('js-save-');
     const resultsPath = path.join(tmpDir, 'results.json');
     try {
-      const stdin = JSON.stringify({ mode: 'quick', skills: { demo: { path: '~/.claude/skills/demo/SKILL.md', verdict: 'Keep' } } });
+      const stdin = JSON.stringify({ mode: 'quick', skills: { demo: { path: '<config>/skills/demo/SKILL.md', verdict: 'Keep' } } });
       const res = spawnSync('node', [path.join(repoRoot, 'skills/skill-stocktake/scripts/save-results.js'), resultsPath], {
         input: stdin,
         encoding: 'utf8',

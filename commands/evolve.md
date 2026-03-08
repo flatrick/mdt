@@ -8,16 +8,16 @@ command: true
 
 ## Implementation
 
-Run the instinct CLI using the plugin root path:
+Run the instinct CLI using `MDT_ROOT` when available:
 
 ```bash
-node "${CLAUDE_PLUGIN_ROOT}/skills/continuous-learning-v2/scripts/instinct-cli.js" evolve [--generate]
+node "${MDT_ROOT}/skills/continuous-learning-v2/scripts/instinct-cli.js" evolve [--generate]
 ```
 
-Or if `CLAUDE_PLUGIN_ROOT` is not set (manual installation):
+For manual installs, replace `<config>` with your MDT config directory (for example `~/.claude` or `~/.cursor`):
 
 ```bash
-node ~/.claude/skills/continuous-learning-v2/scripts/instinct-cli.js evolve [--generate]
+node "<config>/skills/continuous-learning-v2/scripts/instinct-cli.js" evolve [--generate]
 ```
 
 Analyzes instincts and clusters related ones into higher-level structures:
@@ -85,8 +85,8 @@ Example:
    - Agent candidates (larger, high-confidence clusters)
 5. Show promotion candidates (project -> global) when applicable
 6. If `--generate` is passed, write files to:
-   - Project scope: `~/.claude/homunculus/projects/<project-id>/evolved/`
-   - Global fallback: `~/.claude/homunculus/evolved/`
+   - Project scope: `<data>/homunculus/projects/<project-id>/evolved/`
+   - Global fallback: `<data>/homunculus/evolved/`
 
 ## Output Format
 

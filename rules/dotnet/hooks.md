@@ -11,7 +11,7 @@ paths:
 
 ## PostToolUse Hooks
 
-Configure in `~/.claude/settings.json`:
+Configure in your config directory settings file (for example `<config>/settings.json`):
 
 - **dotnet format**: Auto-format C# files after edit
 - **dotnet build**: Incremental build after significant changes
