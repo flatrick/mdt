@@ -1,6 +1,6 @@
 # ModelDev Toolkit (MDT) — Agent Instructions
 
-This is a **production-ready AI coding plugin** providing 16 specialized agents, 60+ skills, 35 commands, and automated hook workflows for software development.
+This is a multi-tool, Node-first AI coding repository with specialized agents, skills, commands, and automation adapters for software development workflows.
 
 ## Core Principles
 
@@ -9,6 +9,14 @@ This is a **production-ready AI coding plugin** providing 16 specialized agents,
 3. **Security-First** — Never compromise on security; validate all inputs
 4. **Immutability** — Always create new objects, never mutate existing ones
 5. **Plan Before Execute** — Plan complex features before writing code
+
+## Repo-Specific Working Rules
+
+- Treat `docs/supported-tools.md` and `docs/tools/` as the source of truth for Claude Code, Cursor, Codex, and OpenCode capability claims.
+- Do not assume a file under `.cursor/`, `.codex/`, or `.opencode/` proves that the corresponding vendor supports that feature natively.
+- When updating cross-tool capability documentation, use `skills/tool-doc-maintainer/SKILL.md` and follow its verification workflow.
+- Prefer the repo's Node-first runtime and adapters. Do not reintroduce Bash-, PowerShell-, or Python-specific runtime assumptions unless the repo already requires them.
+- Do not assume a specific OS or shell. Verify the environment before giving shell-specific instructions, and prefer shell-neutral guidance when possible.
 
 ## Available Agents
 
@@ -29,7 +37,11 @@ This is a **production-ready AI coding plugin** providing 16 specialized agents,
 | powershell-reviewer | PowerShell code review | PowerShell scripts and cross-platform PS |
 | dotnet-reviewer | .NET code review | C#/VB.NET reviews and architecture checks |
 | rust-reviewer | Rust code review | Rust ownership, async, and unsafe audits |
+| harness-optimizer | Harness and eval loop optimization | Improving evaluation, grading, and workflow harnesses |
+| loop-operator | Loop workflow operations | Operating iterative or long-running loop workflows |
 | chief-of-staff | Communication triage and response drafting | Email/chat triage and follow-up workflows |
+
+The `agents/` directory is authoritative if this table drifts.
 
 ## Agent Orchestration
 
@@ -97,6 +109,16 @@ Troubleshoot failures: check test isolation → verify mocks → fix implementat
 3. **Review** — Use code-reviewer agent immediately, address CRITICAL/HIGH issues
 4. **Commit** — Conventional commits format, comprehensive PR summaries
 
+## Tool Capability Docs
+
+When working on cross-tool behavior for Claude Code, Cursor, Codex, or OpenCode:
+
+- Treat `docs/supported-tools.md` and `docs/tools/` as the repo's capability source of truth.
+- Read `docs/tools/capability-matrix.md` and the relevant per-tool page before making claims about hooks, skills, commands, agents, rules, memory, or MCP support.
+- Do not assume a Claude-native feature maps directly to another tool just because MDT has an adapter file for it.
+- If capability docs need to be updated, use `skills/tool-doc-maintainer/SKILL.md` and follow its verification workflow before changing support labels.
+- Files outside `docs/tools/` may be stale; verify tool capability claims against the docs pack, local CLI behavior, and official vendor docs before repeating them.
+
 ## Git Workflow
 
 **Commit format:** `<type>: <description>` — Types: feat, fix, refactor, docs, test, chore, perf, ci
@@ -120,9 +142,10 @@ Troubleshoot failures: check test isolation → verify mocks → fix implementat
 ## Project Structure
 
 ```
-agents/          — 18 specialized subagents
-skills/          — 60+ workflow skills and domain knowledge
-commands/        — 35 slash commands
+agents/          — Specialized subagents and role prompts
+skills/          — Workflow skills and domain knowledge
+commands/        — Markdown command prompts
+docs/tools/      — Cross-tool capability docs and verification guidance
 hooks/           — Trigger-based automations
 rules/           — Always-follow guidelines (common + per-language)
 scripts/         — Cross-platform Node.js utilities

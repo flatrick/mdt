@@ -1,78 +1,49 @@
-# Supported LLM Tools
+# Supported Tools
 
-ModelDev Toolkit (MDT) spans multiple LLM modalities and IDEs. Because each tool has its own architecture, MDT installs distinct configurations when you use `npx mdt-install --target <tool>`.
+This page is the entrypoint for MDT's audited tool-capability docs.
 
-This matrix explains what features are supported natively in each tool and how the underlying configuration works.
+Use this when you need to answer:
+- Can tool `X` do feature `Y`?
+- What is the native surface called in that tool?
+- Is MDT using an official vendor surface, an experimental adapter, or a repo-only convention?
+- How can I verify the claim locally on this machine?
 
-| Feature | Claude Code | Cursor | Codex | Gemini (Antigravity) | OpenCode |
-|---------|-------------|--------|-------|-----------------------|-----------|
-| **Install Target** | `claude` | `cursor` | `codex` | `gemini` | N/A (Plugin) |
-| **Agents / Workflows** | Yes (`/plan`, etc.) | Yes (Local) | Yes | Yes (Native Workflows) | Yes |
-| **Skills / Contexts** | Yes (`skills/`) | Yes (`skills/`) | Limited | Yes (Rules/Skills) | Yes |
-| **Custom Commands** | Yes (`commands/`) | Yes (`commands/`) | N/A | Yes (`.toml` Commands) | Yes |
-| **System Hooks** | Yes (JS/Node) | Yes (JS/Node) | N/A | N/A | Yes |
-| **Rules Configuration** | Global & Local | Local Only (`.cursorrules`) | Global Instructs | Global & Local | Yes |
+## Status Labels
 
----
+- `official` - confirmed in vendor documentation during this audit
+- `locally-verified` - confirmed on this machine with installed CLI/help output
+- `experimental` - present in repo or tool, but not treated as stable/default
+- `repo-adapter` - MDT-specific mapping layer, not a native vendor concept
+- `unsupported` - do not assume this exists
+- `not-locally-verified` - tool is not installed on this machine
 
-## Claude Code (Default)
-**Target:** `claude` (Local/Global to `~/.claude/`)
+## Start Here
 
-Claude Code is Anthropic's CLI. It natively supports commands, agents, skills, and rules via markdown configurations located in `~/.claude/`.
+- [Docs Pack Index](./tools/README.md)
+- [Capability Matrix](./tools/capability-matrix.md)
+- [Claude Code](./tools/claude-code.md)
+- [Cursor](./tools/cursor.md)
+- [Codex](./tools/codex.md)
+- [OpenCode](./tools/opencode.md)
+- [Local Verification Playbook](./tools/local-verification.md)
 
-- **Rules:** Appends rules to `~/.claude/rules/`.
-- **Agents:** Populates `~/.claude/agents/`. You invoke them via slash commands.
-- **Skills:** Loaded from `~/.claude/skills/`. Read manually by Claude.
-- **Commands:** Copied to `~/.claude/commands/`.
-- **Hooks:** Merges events into `~/.claude/settings.json` and runs `scripts/hooks` logic.
+## Current Audit Summary
 
-**What you can't do here:** Claude Code doesn't natively parse deep workspace integrations without explicitly setting up custom tools. It runs fully isolated in your CLI.
+- Claude Code is the closest match to MDT's current structure: hooks, slash commands, subagents, skills, and `CLAUDE.md`/memory are all native concepts.
+- Cursor officially supports rules, `AGENTS.md`, custom commands, memories, background agents, and a terminal agent/CLI. MDT's current `.cursor/hooks.json` flow should be treated as `experimental` until Cursor documents that surface.
+- Codex officially supports layered `AGENTS.md`, rule files, skills, and built-in slash commands. The repo currently underuses Codex by shipping only `config.toml` and `AGENTS.md`.
+- OpenCode officially exposes config-driven `instructions`, `agent`, `command`, and `plugin` surfaces. It is not installed locally on this machine, so its page is `not-locally-verified`.
 
----
+## Local Tool Versions Observed During This Audit
 
-## Cursor IDE
-**Target:** `cursor` (Project-local `.cursor/` or Global `~/.cursor/`)
+- Claude Code: `2.1.71`
+- Cursor IDE: `2.6.13`
+- Cursor terminal agent present: `agent` (with `cursor-agent` also installed locally here)
+- Codex CLI: `0.111.0`
+- OpenCode: not installed locally
 
-Cursor is an AI-first IDE fork of VSCode.
+## Source Policy
 
-- **Rules:** Copies markdown rules into `.cursor/rules/`. **Note:** You cannot use file-based rules globally in Cursor (they must exist in `.cursor/rules/`). For global, you must paste rules manually into Settings.
-- **Agents / Skills:** Loaded as read context internally by Cursor's codebase indexer.
-- **Hooks:** Uses custom Node scripts attached to file events, defined in `.cursor/hooks.json`.
-- **Custom Commands:** Setup for the Cursor Composer terminal.
-
-**What you can't do here:** Global rule installations without manual UI copy-pasting.
-
----
-
-## OpenAI Codex CLI
-**Target:** `codex` (Global `~/.codex/config.toml`)
-
-Codex is a command-line wrapper focusing tightly on file system access and system generation.
-
-- **Configuration:** Employs a single `~/.codex/config.toml`.
-- **Instructions:** Uses an `instructions` string in TOML rather than an entire localized `rules/` directory tree.
-- **Agents:** Relies completely on a master `AGENTS.md` file rather than segmented subagents, instructing Codex on how to dynamically resolve roles.
-
-**What you can't do here:** Codex does not support discrete slash commands or individual agent profiles. Everything operates under its monolithic system prompt.
-
----
-
-## Gemini CLI & Antigravity
-**Target:** `gemini` (Project-local `.agent/` and `.gemini/`, or Global)
-
-Gemini (powered structurally by Antigravity) reads local workspace variables deeply. Our installer maps MDT assets perfectly to Google's folder structures.
-
-- **Global Install:** `~/.gemini/antigravity/.agents` (Skills/Workflows) and `~/.gemini/commands` (CLI custom commands). Appends rules to `~/.gemini/GEMINI.md`.
-- **Local Install:** `.agent/` and `.gemini/`.
-- **Commands:** The installer parses MDT's Markdown commands and reconstructs them into TOML structures inside `.gemini/commands/{brand}.toml` for Native Gemini CLI auto-completions.
-- **Workflows:** MDT agents drop cleanly into `workflows/`.
-- **Skills:** Drop precisely into `skills/`.
-
-**What you can't do here:** Gemini does not natively execute post-generation JS hooks like Claude/Cursor, it operates securely via strict MCP or plugin constraints.
-
----
-
-## OpenCode
-**Target:** N/A (Loaded as NPM Plugin)
-
-OpenCode reads everything dynamically from `opencode.json` plugins. No CLI scaffolding is required; you simply `npm install opencode-MDT` and run `/plan`! It maps MDT hooks directly internally.
+- Prefer these docs first when working in MDT.
+- If a page here is stale, use the verification workflow in [Local Verification Playbook](./tools/local-verification.md).
+- Do not promote a claim from `experimental` or `repo-adapter` to `official` without checking vendor docs.
