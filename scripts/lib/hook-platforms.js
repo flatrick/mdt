@@ -7,7 +7,7 @@ const REPO_ROOT = path.join(__dirname, '..', '..');
 const HOOK_PLATFORMS = Object.freeze({
   claude: Object.freeze({
     name: 'claude',
-    sourceConfig: path.join(REPO_ROOT, 'hooks', 'claude', 'hooks.json'),
+    sourceConfig: path.join(REPO_ROOT, 'claude-template', 'hooks.json'),
     mirrorConfig: path.join(REPO_ROOT, 'hooks', 'hooks.json'),
     sourceScriptsDir: null,
     mirrorScriptsDir: null

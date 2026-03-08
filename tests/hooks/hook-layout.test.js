@@ -33,7 +33,7 @@ function runTests() {
   let failed = 0;
 
   const repoRoot = path.join(__dirname, '..', '..');
-  const claudeSource = path.join(repoRoot, 'hooks', 'claude', 'hooks.json');
+  const claudeSource = path.join(repoRoot, 'claude-template', 'hooks.json');
   const claudeMirror = path.join(repoRoot, 'hooks', 'hooks.json');
   const cursorSource = path.join(repoRoot, 'hooks', 'cursor', 'hooks.json');
   const cursorMirror = path.join(repoRoot, 'cursor-template', 'hooks.json');

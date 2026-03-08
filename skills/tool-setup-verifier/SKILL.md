@@ -5,6 +5,10 @@ description: Verify MDT's shipped Claude, Cursor, Codex, and OpenCode setups aga
 
 # Tool Setup Verifier
 
+## When to Use
+
+Use this skill when auditing MDT's local tool adapters, validating documented workflow coverage, or producing a per-tool readiness report without relying on CI or live model calls.
+
 Use this skill to verify that MDT's documented workflows still map cleanly onto the shipped tool adapters.
 
 ## Source Of Truth

@@ -22,9 +22,9 @@ function runTests() {
     assert.ok(HOOK_PLATFORMS.cursor, 'cursor platform missing');
   })) passed++; else failed++;
 
-  if (test('Claude platform points at hooks/claude/hooks.json and hooks/hooks.json mirror', () => {
+  if (test('Claude platform points at claude-template/hooks.json and hooks/hooks.json mirror', () => {
     const claude = getHookPlatform('claude');
-    assert.ok(claude.sourceConfig.endsWith(path.join('hooks', 'claude', 'hooks.json')));
+    assert.ok(claude.sourceConfig.endsWith(path.join('claude-template', 'hooks.json')));
     assert.ok(claude.mirrorConfig.endsWith(path.join('hooks', 'hooks.json')));
     assert.strictEqual(claude.sourceScriptsDir, null);
     assert.strictEqual(claude.mirrorScriptsDir, null);

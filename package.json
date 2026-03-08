@@ -43,6 +43,7 @@
     ".agent/",
     ".gemini/",
     ".agents/",
+    "claude-template/",
     "codex-template/",
     "cursor-template/",
     "opencode-template/commands/",

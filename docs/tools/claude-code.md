@@ -38,7 +38,7 @@ This is the tool that most directly matches MDT's current repo structure.
 
 MDT's Claude hook source of truth is:
 
-- `hooks/claude/hooks.json`
+- `claude-template/hooks.json`
 - mirrored to `hooks/hooks.json`
 
 The commands in that file use the `MDT_ROOT` placeholder, for example:

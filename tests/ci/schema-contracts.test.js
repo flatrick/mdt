@@ -20,7 +20,7 @@ function runTests() {
 
   if (test('hooks schema enumerates all shipped Claude hook event names', () => {
     const schema = readJson('schemas', 'claude-hooks.schema.json');
-    const hooksConfig = readJson('hooks', 'claude', 'hooks.json');
+    const hooksConfig = readJson('claude-template', 'hooks.json');
 
     const declaredEvents = schema.$defs.eventName.enum;
     for (const eventName of Object.keys(hooksConfig.hooks)) {

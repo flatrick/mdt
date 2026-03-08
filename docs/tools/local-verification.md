@@ -93,7 +93,7 @@ If `opencode` is not installed:
 
 Use these files to confirm what MDT actually ships:
 
-- Claude: `hooks/claude/hooks.json`, `commands/`, `agents/`, `skills/`
+- Claude: `claude-template/hooks.json`, `commands/`, `agents/`, `skills/`
 - Cursor: `cursor-template/rules/`, `cursor-template/hooks.json`, `cursor-template/hooks/`
 - Codex: `codex-template/config.toml`, `codex-template/AGENTS.md`
 - OpenCode: `opencode-template/opencode.json`, `opencode-template/plugins/`, `opencode-template/commands/`, `opencode-template/prompts/agents/`
