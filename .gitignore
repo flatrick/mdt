@@ -62,3 +62,9 @@ verify-tool-setups.js.txt
 
 # Local Claude settings
 .claude/settings.local.json
+
+# Local Claude config installation
+.claude/
+
+# Local Cursor config installation
+.cursor/
