@@ -120,8 +120,9 @@ node scripts/install-mdt.js --target claude --dry-run typescript
 - `rules/` — Common + language-specific rules (TypeScript, Python, …)
 - `hooks/` — Platform-scoped hook sources (`hooks/claude/`, `hooks/cursor/`) plus Claude mirror `hooks/hooks.json`
 - `scripts/` — Node.js only (install-mdt.js, hooks, lib, detect-env, sync-hook-mirrors.js)
-- `.cursor/` — Cursor-ready config (rules, commands, mcp.json) plus synced hook mirrors
-- `.codex/` — Codex config (config.toml, AGENTS.md)
+- `cursor-template/` — Cursor source templates (rules, hooks, skills, and config files rendered into `.cursor/` on install)
+- `codex-template/` — Codex source templates (`config.toml`, `AGENTS.md`) rendered into `~/.codex/` on install
+- `opencode-template/` — OpenCode source templates (commands, prompts, plugins, tools, config)
 - `tests/` — Test suite
 
 Full layout and details: [CLAUDE.md](CLAUDE.md), [AGENTS.md](AGENTS.md).
@@ -130,11 +131,11 @@ Full layout and details: [CLAUDE.md](CLAUDE.md), [AGENTS.md](AGENTS.md).
 
 ## Cursor / Codex / OpenCode
 
-**Cursor:** Configs in `.cursor/`. Quick start: `node scripts/install-mdt.js --target cursor typescript`. Local install gets rules, agents, skills, commands, hooks, and MCP. Use `--global` for `~/.cursor/` (rules not supported there by Cursor).
+**Cursor:** Repo source lives in `cursor-template/`. Quick start: `node scripts/install-mdt.js --target cursor typescript`. Local install renders rules, agents, skills, commands, hooks, and MCP into project `.cursor/`. Use `--global` for `~/.cursor/` (rules not supported there by Cursor).
 
-**Codex:** Config in `.codex/`. Quick start: `node scripts/install-mdt.js --target codex`. Installs config.toml and AGENTS.md to `~/.codex/`.
+**Codex:** Repo source lives in `codex-template/`. Quick start: `node scripts/install-mdt.js --target codex`. Installs `config.toml` and `AGENTS.md` to `~/.codex/`.
 
-**OpenCode:** Config in `.opencode/`. See [.opencode/README.md](.opencode/README.md) for plugin install and feature parity in this fork.
+**OpenCode:** Repo source lives in `opencode-template/`. See [opencode-template/README.md](opencode-template/README.md) for plugin install and feature parity in this fork.
 
 ---
 

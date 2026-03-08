@@ -17,7 +17,7 @@ function getManifestPaths(repoRoot) {
     packageJson: path.join(repoRoot, 'package.json'),
     pluginJson: path.join(repoRoot, '.claude-plugin', 'plugin.json'),
     marketplaceJson: path.join(repoRoot, '.claude-plugin', 'marketplace.json'),
-    openCodePackageJson: path.join(repoRoot, '.opencode', 'package.json')
+    openCodePackageJson: path.join(repoRoot, 'opencode-template', 'package.json')
   };
 }
 
@@ -91,10 +91,10 @@ function compareMarketplaceMetadata(marketplaceJson, expected, io) {
 
 function compareOpenCodeMetadata(openCodePackageJson, expected, io) {
   let hasErrors = false;
-  hasErrors = compareValue('.opencode/package.json name', openCodePackageJson.name, expected.name, io) || hasErrors;
-  hasErrors = compareValue('.opencode/package.json version', openCodePackageJson.version, expected.version, io) || hasErrors;
-  hasErrors = compareValue('.opencode/package.json repository', normalizeUrl(openCodePackageJson.repository), expected.repository, io) || hasErrors;
-  hasErrors = compareValue('.opencode/package.json homepage', normalizeUrl(openCodePackageJson.homepage), expected.homepage, io) || hasErrors;
+  hasErrors = compareValue('opencode-template/package.json name', openCodePackageJson.name, expected.name, io) || hasErrors;
+  hasErrors = compareValue('opencode-template/package.json version', openCodePackageJson.version, expected.version, io) || hasErrors;
+  hasErrors = compareValue('opencode-template/package.json repository', normalizeUrl(openCodePackageJson.repository), expected.repository, io) || hasErrors;
+  hasErrors = compareValue('opencode-template/package.json homepage', normalizeUrl(openCodePackageJson.homepage), expected.homepage, io) || hasErrors;
   return hasErrors;
 }
 
@@ -106,7 +106,7 @@ function validateMetadata(options = {}) {
   const packageJson = readJsonFile(manifestPaths.packageJson, 'package.json', io);
   const pluginJson = readJsonFile(manifestPaths.pluginJson, '.claude-plugin/plugin.json', io);
   const marketplaceJson = readJsonFile(manifestPaths.marketplaceJson, '.claude-plugin/marketplace.json', io);
-  const openCodePackageJson = readJsonFile(manifestPaths.openCodePackageJson, '.opencode/package.json', io);
+  const openCodePackageJson = readJsonFile(manifestPaths.openCodePackageJson, 'opencode-template/package.json', io);
 
   if (!packageJson || !pluginJson || !marketplaceJson || !openCodePackageJson) {
     return { exitCode: 1, hasErrors: true };

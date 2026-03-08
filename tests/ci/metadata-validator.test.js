@@ -82,7 +82,7 @@ function createFixtureRepo(overrides = {}) {
     ...marketplaceJson,
     ...(overrides.marketplaceJson || {})
   });
-  writeJson(path.join(repoRoot, '.opencode', 'package.json'), {
+  writeJson(path.join(repoRoot, 'opencode-template', 'package.json'), {
     ...openCodePackageJson,
     ...(overrides.openCodePackageJson || {})
   });

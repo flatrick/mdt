@@ -76,7 +76,7 @@ function runTests() {
     const rootDir = createFixtureRoot();
 
     try {
-      fs.rmSync(path.join(rootDir, '.opencode', 'tools', 'run-tests.ts'));
+      fs.rmSync(path.join(rootDir, 'opencode-template', 'tools', 'run-tests.ts'));
 
       const errors = [];
       const result = evaluateToolSetups({
@@ -88,7 +88,7 @@ function runTests() {
       });
 
       assert.strictEqual(result.exitCode, 1, 'Expected missing required file to fail');
-      assert.ok(errors.join('\n').includes('.opencode/tools/run-tests.ts'), 'Expected missing file path in error output');
+      assert.ok(errors.join('\n').includes('opencode-template/tools/run-tests.ts'), 'Expected missing file path in error output');
     } finally {
       cleanupTestDir(rootDir);
     }
