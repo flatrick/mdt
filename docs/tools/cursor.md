@@ -17,6 +17,7 @@ Local versions and binaries seen:
 - project/user rules
 - `AGENTS.md`
 - custom commands
+- skills (`.cursor/skills/`, `~/.cursor/skills/`)
 - memories
 - background agents
 - terminal agent / CLI
@@ -28,10 +29,10 @@ These are official Cursor surfaces and should be treated as the primary integrat
 
 | MDT Concern | Cursor surface | Repo status |
 |---|---|---|
-| Rules / project guidance | `.cursor/rules/` plus `AGENTS.md` | official |
+| Rules / project guidance | `.cursor/rules/` (project only); user-level rules are database-backed and cannot be file-installed | official (project scope only) |
 | Commands | Cursor custom commands | official vendor surface, not yet fully documented as an MDT adapter in this repo |
 | Agents / delegation | custom modes, background agents, terminal agent | official |
-| Skills / reusable workflows | no clearly named Cursor-native "skills" abstraction in this audit | `repo-adapter` at best |
+| Skills / reusable workflows | `.cursor/skills/` (project) and `~/.cursor/skills/` (user); `SKILL.md` format with YAML frontmatter; auto-discovered and `/`-invocable | official |
 | Persistent context | rules, memories, `AGENTS.md` | official |
 | Automations / hooks | no vendor-documented equivalent to MDT `.cursor/hooks.json` found during this audit | treat current repo hook path as `experimental` |
 | MCP | Cursor CLI and agent can manage/use MCP | official |
@@ -40,6 +41,7 @@ These are official Cursor surfaces and should be treated as the primary integrat
 
 The repo currently ships:
 - `.cursor/rules/`
+- `.cursor/skills/frontend-slides/` (one skill; others need to be added)
 - `.cursor/hooks.json`
 - `.cursor/hooks/*.js`
 
@@ -56,7 +58,8 @@ as MDT's `experimental` Cursor adapter, not as vendor truth.
 
 ### Official guidance surfaces
 
-- Rules in `.cursor/rules/`
+- Rules in `.cursor/rules/` — **project-scope only**; user-level rules are stored in a database and cannot be file-installed
+- Skills in `.cursor/skills/` (project) or `~/.cursor/skills/` (user) — `SKILL.md` with YAML frontmatter
 - `AGENTS.md` at repo root
 - custom commands in Cursor's documented command system
 - memories in Cursor's documented memory system
@@ -86,7 +89,8 @@ That makes Cursor a viable official target for planning, Q&A, MCP, and rule-gene
 ## What Not To Assume
 
 - Do not assume `.cursor/hooks.json` is official just because it exists in this repo.
-- Do not assume "skills" are a first-class Cursor concept equivalent to Claude skills or Codex skills.
+- Skills are a first-class Cursor concept. Use `.cursor/skills/` with `SKILL.md` files — same format as Claude Code and Codex. Do not convert skills to rules when the skill format is the right fit.
+- Do not attempt to file-install user-level rules into `~/.cursor/rules/`. Cursor stores user rules in a database; only project-level rules (`.cursor/rules/`) are file-based and installable by MDT.
 - Do not force Claude hook semantics onto Cursor when rules, memories, background agents, or commands achieve the same MDT outcome more cleanly.
 
 ## Local Verification Commands
@@ -112,3 +116,4 @@ Look for:
 - Memories: https://docs.cursor.com/en/context/memories
 - Background agents: https://docs.cursor.com/en/background-agents/overview
 - Terminal agent / CLI: https://docs.cursor.com/en/cli/agent
+- Skills: https://cursor.com/docs/skills
