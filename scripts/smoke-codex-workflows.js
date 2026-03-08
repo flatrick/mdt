@@ -41,8 +41,8 @@ function buildPlanChecks(files) {
         message: 'root AGENTS.md should expose the planner agent'
       },
       {
-        path: '.codex/AGENTS.md',
-        ok: files['.codex/AGENTS.md'].exists && files['.codex/AGENTS.md'].content.includes('Complex features, architecture'),
+        path: 'codex-template/AGENTS.md',
+        ok: files['codex-template/AGENTS.md'].exists && files['codex-template/AGENTS.md'].content.includes('Complex features, architecture'),
         message: 'Codex AGENTS should recommend the planning model path for complex work'
       }
     ]
@@ -59,8 +59,8 @@ function buildTddChecks(files) {
         message: 'root AGENTS.md should require TDD'
       },
       {
-        path: '.codex/AGENTS.md',
-        ok: files['.codex/AGENTS.md'].exists && files['.codex/AGENTS.md'].content.includes('tdd-workflow'),
+        path: 'codex-template/AGENTS.md',
+        ok: files['codex-template/AGENTS.md'].exists && files['codex-template/AGENTS.md'].content.includes('tdd-workflow'),
         message: 'Codex AGENTS should advertise the tdd-workflow skill'
       },
       {
@@ -69,8 +69,8 @@ function buildTddChecks(files) {
         message: 'Codex TDD skill should exist and describe the workflow'
       },
       {
-        path: '.codex/config.toml',
-        ok: files['.codex/config.toml'].exists && files['.codex/config.toml'].content.includes('Test-Driven Development (TDD)'),
+        path: 'codex-template/config.toml',
+        ok: files['codex-template/config.toml'].exists && files['codex-template/config.toml'].content.includes('Test-Driven Development (TDD)'),
         message: 'Codex config should reinforce TDD in persistent instructions'
       }
     ]
@@ -82,8 +82,8 @@ function buildVerifyChecks(files) {
     workflow: 'verify',
     checks: [
       {
-        path: '.codex/AGENTS.md',
-        ok: files['.codex/AGENTS.md'].exists && files['.codex/AGENTS.md'].content.includes('verification-loop'),
+        path: 'codex-template/AGENTS.md',
+        ok: files['codex-template/AGENTS.md'].exists && files['codex-template/AGENTS.md'].content.includes('verification-loop'),
         message: 'Codex AGENTS should advertise the verification-loop skill'
       },
       {
@@ -92,12 +92,12 @@ function buildVerifyChecks(files) {
         message: 'Codex verification skill should exist and describe the verification loop'
       },
       {
-        path: '.codex/config.toml',
+        path: 'codex-template/config.toml',
         ok:
-          files['.codex/config.toml'].exists &&
-          files['.codex/config.toml'].content.includes('sandbox_mode = "workspace-write"') &&
-          files['.codex/config.toml'].content.includes('[mcp_servers.github]') &&
-          files['.codex/config.toml'].content.includes('[mcp_servers.sequential-thinking]'),
+          files['codex-template/config.toml'].exists &&
+          files['codex-template/config.toml'].content.includes('sandbox_mode = "workspace-write"') &&
+          files['codex-template/config.toml'].content.includes('[mcp_servers.github]') &&
+          files['codex-template/config.toml'].content.includes('[mcp_servers.sequential-thinking]'),
         message: 'Codex config should provide the expected verification sandbox and MCP scaffolding'
       }
     ]
@@ -113,8 +113,8 @@ function smokeCodexWorkflows(options = {}) {
   const io = options.io || console;
   const files = {
     'AGENTS.md': readRepoFile(rootDir, 'AGENTS.md'),
-    '.codex/AGENTS.md': readRepoFile(rootDir, path.join('.codex', 'AGENTS.md')),
-    '.codex/config.toml': readRepoFile(rootDir, path.join('.codex', 'config.toml')),
+    'codex-template/AGENTS.md': readRepoFile(rootDir, path.join('codex-template', 'AGENTS.md')),
+    'codex-template/config.toml': readRepoFile(rootDir, path.join('codex-template', 'config.toml')),
     '.agents/skills/tdd-workflow/SKILL.md': readRepoFile(rootDir, path.join('.agents', 'skills', 'tdd-workflow', 'SKILL.md')),
     '.agents/skills/verification-loop/SKILL.md': readRepoFile(rootDir, path.join('.agents', 'skills', 'verification-loop', 'SKILL.md'))
   };

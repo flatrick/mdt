@@ -111,7 +111,7 @@ If Claude still has any tracked source under `.claude/`, move that too.
 
 ### Phase 4. Update installer
 
-Refactor [scripts/install-mdt.js](/\\?\\C:\\src\\github\\flatrick\\mdt/scripts/install-mdt.js) so it installs from `*-template/` dirs only.
+Refactor [scripts/install-mdt.js](../scripts/install-mdt.js) so it installs from `*-template/` dirs only.
 
 Rules:
 

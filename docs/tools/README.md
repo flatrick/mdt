@@ -46,4 +46,4 @@ Do not assume that a feature with the same name across tools has the same behavi
 Examples:
 - Claude `hooks` are not the same thing as Codex automations.
 - Codex slash commands are built-in session controls, not the same thing as Claude/MDT markdown prompt commands.
-- Cursor `AGENTS.md`, rules, custom commands, memories, and background agents are official; MDT's `.cursor/hooks.json` path is still only a repo adapter unless Cursor documents it.
+- Cursor `AGENTS.md`, rules, custom commands, memories, and background agents are official; MDT's `cursor-template/hooks.json` path is still only a repo adapter unless Cursor documents it.

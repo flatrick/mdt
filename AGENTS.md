@@ -13,7 +13,7 @@ This is a multi-tool, Node-first AI coding repository with specialized agents, s
 ## Repo-Specific Working Rules
 
 - Treat `docs/supported-tools.md` and `docs/tools/` as the source of truth for Claude Code, Cursor, Codex, and OpenCode capability claims.
-- Do not assume a file under `.cursor/`, `.codex/`, or `.opencode/` proves that the corresponding vendor supports that feature natively.
+- Do not assume a file under `cursor-template/`, `codex-template/`, or `.opencode/` proves that the corresponding vendor supports that feature natively.
 - When updating cross-tool capability documentation, use `skills/tool-doc-maintainer/SKILL.md` and follow its verification workflow.
 - Prefer the repo's Node-first runtime and adapters. Do not reintroduce Bash-, PowerShell-, or Python-specific runtime assumptions unless the repo already requires them.
 - Do not assume a specific OS or shell. Verify the environment before giving shell-specific instructions, and prefer shell-neutral guidance when possible.

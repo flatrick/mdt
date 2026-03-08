@@ -34,22 +34,22 @@ These are official Cursor surfaces and should be treated as the primary integrat
 | Agents / delegation | custom modes, background agents, terminal agent | official |
 | Skills / reusable workflows | `.cursor/skills/` (project) and `~/.cursor/skills/` (user); `SKILL.md` format with YAML frontmatter; auto-discovered and `/`-invocable | official |
 | Persistent context | rules, memories, `AGENTS.md` | official |
-| Automations / hooks | no vendor-documented equivalent to MDT `.cursor/hooks.json` found during this audit | treat current repo hook path as `experimental` |
+| Automations / hooks | no vendor-documented equivalent to MDT `cursor-template/hooks.json` found during this audit | treat current repo hook path as `experimental` |
 | MCP | Cursor CLI and agent can manage/use MCP | official |
 
 ## What MDT Currently Ships
 
 The repo currently ships:
-- `.cursor/rules/`
-- `.cursor/skills/frontend-slides/` (one skill; others need to be added)
-- `.cursor/hooks.json`
-- `.cursor/hooks/*.js`
+- `cursor-template/rules/`
+- `cursor-template/skills/frontend-slides/` (one skill; others need to be added)
+- `cursor-template/hooks.json`
+- `cursor-template/hooks/*.js`
 
 The rules are easy to justify from official docs.
 
 The hook layer is not yet something future agents should assume is an official Cursor feature. Until Cursor publishes that surface clearly, treat:
-- `.cursor/hooks.json`
-- `.cursor/hooks/*.js`
+- `cursor-template/hooks.json`
+- `cursor-template/hooks/*.js`
 - `hooks/cursor/*`
 
 as MDT's `experimental` Cursor adapter, not as vendor truth.
@@ -88,7 +88,7 @@ That makes Cursor a viable official target for planning, Q&A, MCP, and rule-gene
 
 ## What Not To Assume
 
-- Do not assume `.cursor/hooks.json` is official just because it exists in this repo.
+- Do not assume `cursor-template/hooks.json` is official just because it exists in this repo.
 - Skills are a first-class Cursor concept. Use `.cursor/skills/` with `SKILL.md` files — same format as Claude Code and Codex. Do not convert skills to rules when the skill format is the right fit.
 - Do not attempt to file-install user-level rules into `~/.cursor/rules/`. Cursor stores user rules in a database; only project-level rules (`.cursor/rules/`) are file-based and installable by MDT.
 - Do not force Claude hook semantics onto Cursor when rules, memories, background agents, or commands achieve the same MDT outcome more cleanly.

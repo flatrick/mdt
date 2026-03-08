@@ -26,7 +26,7 @@ function createFixtureRoot() {
 
   writeFile(
     rootDir,
-    path.join('.codex', 'AGENTS.md'),
+    path.join('codex-template', 'AGENTS.md'),
     [
       '# Codex',
       'Complex features, architecture',
@@ -37,7 +37,7 @@ function createFixtureRoot() {
 
   writeFile(
     rootDir,
-    path.join('.codex', 'config.toml'),
+    path.join('codex-template', 'config.toml'),
     [
       'instructions = """',
       'Test-Driven Development (TDD)',
@@ -102,7 +102,7 @@ function runTests() {
     try {
       writeFile(
         rootDir,
-        path.join('.codex', 'config.toml'),
+        path.join('codex-template', 'config.toml'),
         ['instructions = """', 'Test-Driven Development (TDD)', '"""'].join('\n')
       );
 
@@ -116,7 +116,7 @@ function runTests() {
 
       assert.strictEqual(result.exitCode, 1, 'Expected missing verification scaffolding to fail');
       assert.ok(output.join('\n').includes('verify: FAIL'));
-      assert.ok(output.join('\n').includes('.codex/config.toml'));
+      assert.ok(output.join('\n').includes('codex-template/config.toml'));
     } finally {
       cleanupTestDir(rootDir);
     }

@@ -13,12 +13,12 @@ const TOOL_WORKFLOW_CONTRACT = {
         cursor: {
           status: 'repo-adapter',
           verificationMode: 'installer-target',
-          requiredFiles: ['AGENTS.md', '.cursor/rules/common-development-workflow.md']
+          requiredFiles: ['AGENTS.md', 'cursor-template/rules/common-development-workflow.md']
         },
         codex: {
           status: 'repo-adapter',
           verificationMode: 'installer-target',
-          requiredFiles: ['.codex/config.toml', '.codex/AGENTS.md']
+          requiredFiles: ['codex-template/config.toml', 'codex-template/AGENTS.md']
         },
         opencode: {
           status: 'official',
@@ -44,12 +44,12 @@ const TOOL_WORKFLOW_CONTRACT = {
         cursor: {
           status: 'repo-adapter',
           verificationMode: 'installer-target',
-          requiredFiles: ['AGENTS.md', '.cursor/rules/common-testing.md']
+          requiredFiles: ['AGENTS.md', 'cursor-template/rules/common-testing.md']
         },
         codex: {
           status: 'repo-adapter',
           verificationMode: 'installer-target',
-          requiredFiles: ['.codex/config.toml', '.codex/AGENTS.md', '.agents/skills/tdd-workflow/SKILL.md']
+          requiredFiles: ['codex-template/config.toml', 'codex-template/AGENTS.md', '.agents/skills/tdd-workflow/SKILL.md']
         },
         opencode: {
           status: 'official',
@@ -75,12 +75,12 @@ const TOOL_WORKFLOW_CONTRACT = {
         cursor: {
           status: 'repo-adapter',
           verificationMode: 'installer-target',
-          requiredFiles: ['AGENTS.md', '.cursor/rules/common-coding-style.md']
+          requiredFiles: ['AGENTS.md', 'cursor-template/rules/common-coding-style.md']
         },
         codex: {
           status: 'repo-adapter',
           verificationMode: 'installer-target',
-          requiredFiles: ['.codex/config.toml', '.codex/AGENTS.md']
+          requiredFiles: ['codex-template/config.toml', 'codex-template/AGENTS.md']
         },
         opencode: {
           status: 'official',
@@ -106,12 +106,12 @@ const TOOL_WORKFLOW_CONTRACT = {
         cursor: {
           status: 'repo-adapter',
           verificationMode: 'installer-target',
-          requiredFiles: ['AGENTS.md', '.cursor/rules/common-testing.md']
+          requiredFiles: ['AGENTS.md', 'cursor-template/rules/common-testing.md']
         },
         codex: {
           status: 'repo-adapter',
           verificationMode: 'installer-target',
-          requiredFiles: ['.codex/config.toml', '.codex/AGENTS.md', '.agents/skills/verification-loop/SKILL.md']
+          requiredFiles: ['codex-template/config.toml', 'codex-template/AGENTS.md', '.agents/skills/verification-loop/SKILL.md']
         },
         opencode: {
           status: 'official',
@@ -137,12 +137,12 @@ const TOOL_WORKFLOW_CONTRACT = {
         cursor: {
           status: 'repo-adapter',
           verificationMode: 'installer-target',
-          requiredFiles: ['AGENTS.md', '.cursor/rules/common-security.md']
+          requiredFiles: ['AGENTS.md', 'cursor-template/rules/common-security.md']
         },
         codex: {
           status: 'repo-adapter',
           verificationMode: 'installer-target',
-          requiredFiles: ['.codex/config.toml', '.codex/AGENTS.md', '.agents/skills/security-review/SKILL.md']
+          requiredFiles: ['codex-template/config.toml', 'codex-template/AGENTS.md', '.agents/skills/security-review/SKILL.md']
         },
         opencode: {
           status: 'official',
@@ -169,12 +169,12 @@ const TOOL_WORKFLOW_CONTRACT = {
         cursor: {
           status: 'repo-adapter',
           verificationMode: 'installer-target',
-          requiredFiles: ['AGENTS.md', '.cursor/rules/common-testing.md']
+          requiredFiles: ['AGENTS.md', 'cursor-template/rules/common-testing.md']
         },
         codex: {
           status: 'repo-adapter',
           verificationMode: 'installer-target',
-          requiredFiles: ['.codex/config.toml', '.codex/AGENTS.md', '.agents/skills/e2e-testing/SKILL.md']
+          requiredFiles: ['codex-template/config.toml', 'codex-template/AGENTS.md', '.agents/skills/e2e-testing/SKILL.md']
         },
         opencode: {
           status: 'official',

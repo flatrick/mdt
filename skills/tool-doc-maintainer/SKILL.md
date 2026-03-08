@@ -109,8 +109,8 @@ Record the exact version you saw.
 Inspect the relevant repo files before making claims:
 
 - Claude: `hooks/claude/hooks.json`, `commands/`, `agents/`, `skills/`
-- Cursor: `.cursor/rules/`, `.cursor/hooks.json`, `.cursor/hooks/`
-- Codex: `.codex/config.toml`, `.codex/AGENTS.md`
+- Cursor: `cursor-template/rules/`, `cursor-template/hooks.json`, `cursor-template/hooks/`
+- Codex: `codex-template/config.toml`, `codex-template/AGENTS.md`
 - OpenCode: `.opencode/opencode.json`, `.opencode/plugins/`, `.opencode/commands/`
 
 This tells you what MDT is doing, not what the vendor guarantees.

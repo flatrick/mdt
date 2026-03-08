@@ -25,8 +25,8 @@ const { getHookPlatform } = require('./lib/hook-platforms');
 
 const REPO_ROOT = path.join(__dirname, '..');
 const RULES_DIR = path.join(REPO_ROOT, 'rules');
-const CURSOR_SRC = path.join(REPO_ROOT, '.cursor');
-const CODEX_SRC = path.join(REPO_ROOT, '.codex');
+const CURSOR_SRC = path.join(REPO_ROOT, 'cursor-template');
+const CODEX_SRC = path.join(REPO_ROOT, 'codex-template');
 
 function parseArgs() {
   const args = process.argv.slice(2);
@@ -483,7 +483,7 @@ function installCursor(languages, globalScope) {
 
 function installCodex() {
   if (!fs.existsSync(CODEX_SRC)) {
-    console.error('Error: .codex/ source directory not found at ' + CODEX_SRC);
+    console.error('Error: codex-template source directory not found at ' + CODEX_SRC);
     process.exit(1);
   }
   const destDir = path.join(os.homedir(), '.codex');

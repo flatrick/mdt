@@ -37,8 +37,8 @@ Local version seen:
 ## What MDT Currently Ships
 
 The repo currently ships:
-- `.codex/config.toml`
-- `.codex/AGENTS.md`
+- `codex-template/config.toml`
+- `codex-template/AGENTS.md`
 
 That is useful, but narrower than what Codex officially supports.
 
@@ -56,7 +56,7 @@ Codex reads layered instruction files. Official docs describe:
 - project: repository `AGENTS.md`
 - nested overrides closer to the working directory
 
-The repo's `.codex/AGENTS.md` should be treated as a Codex-specific supplement, not as proof that Codex lacks richer structure.
+The repo's `codex-template/AGENTS.md` should be treated as a Codex-specific supplement, not as proof that Codex lacks richer structure.
 
 ### Rule files
 

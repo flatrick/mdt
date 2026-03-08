@@ -41,7 +41,7 @@ For `setup` scope, return:
 
 - Inspect `hooks/hooks.json`, `scripts/hooks/`, and hook tests.
 - Inspect `skills/`, command coverage, and agent coverage.
-- Verify cross-harness parity for `.cursor/`, `.opencode/`, `.codex/`.
+- Verify cross-harness parity for `cursor-template/`, `.opencode/`, and `codex-template/`.
 - Flag broken or stale references.
 - For `setup` scope, use `skills/tool-setup-verifier/SKILL.md`, `docs/tools/workflow-matrix.md`, and `scripts/lib/tool-workflow-contract.js`.
 

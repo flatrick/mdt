@@ -30,12 +30,12 @@ function runTests() {
     assert.strictEqual(claude.mirrorScriptsDir, null);
   })) passed++; else failed++;
 
-  if (test('Cursor platform points at hooks/cursor sources and .cursor mirrors', () => {
+  if (test('Cursor platform points at hooks/cursor sources and cursor-template mirrors', () => {
     const cursor = getHookPlatform('cursor');
     assert.ok(cursor.sourceConfig.endsWith(path.join('hooks', 'cursor', 'hooks.json')));
     assert.ok(cursor.sourceScriptsDir.endsWith(path.join('hooks', 'cursor', 'scripts')));
-    assert.ok(cursor.mirrorConfig.endsWith(path.join('.cursor', 'hooks.json')));
-    assert.ok(cursor.mirrorScriptsDir.endsWith(path.join('.cursor', 'hooks')));
+    assert.ok(cursor.mirrorConfig.endsWith(path.join('cursor-template', 'hooks.json')));
+    assert.ok(cursor.mirrorScriptsDir.endsWith(path.join('cursor-template', 'hooks')));
   })) passed++; else failed++;
 
   if (test('getHookPlatform throws for unknown platform', () => {

@@ -40,9 +40,9 @@ function runTests() {
         },
         cursor: {
           sourceConfig: path.join(tempDir, 'hooks', 'cursor', 'hooks.json'),
-          mirrorConfig: path.join(tempDir, '.cursor', 'hooks.json'),
+          mirrorConfig: path.join(tempDir, 'cursor-template', 'hooks.json'),
           sourceScriptsDir: path.join(tempDir, 'hooks', 'cursor', 'scripts'),
-          mirrorScriptsDir: path.join(tempDir, '.cursor', 'hooks')
+          mirrorScriptsDir: path.join(tempDir, 'cursor-template', 'hooks')
         }
       };
 
