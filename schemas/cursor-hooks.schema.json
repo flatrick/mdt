@@ -1,0 +1,66 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "MDT Cursor Hook Configuration",
+  "description": "Schema for the Cursor-style hook config shipped in hooks/cursor/hooks.json and mirrored to .cursor/hooks.json.",
+  "type": "object",
+  "required": ["version", "hooks"],
+  "additionalProperties": false,
+  "properties": {
+    "version": {
+      "type": "integer",
+      "const": 1
+    },
+    "hooks": {
+      "type": "object",
+      "propertyNames": {
+        "$ref": "#/$defs/eventName"
+      },
+      "additionalProperties": {
+        "type": "array",
+        "items": {
+          "$ref": "#/$defs/hookEntry"
+        }
+      }
+    }
+  },
+  "$defs": {
+    "eventName": {
+      "type": "string",
+      "enum": [
+        "sessionStart",
+        "sessionEnd",
+        "beforeShellExecution",
+        "afterShellExecution",
+        "afterFileEdit",
+        "beforeMCPExecution",
+        "afterMCPExecution",
+        "beforeReadFile",
+        "beforeSubmitPrompt",
+        "subagentStart",
+        "subagentStop",
+        "beforeTabFileRead",
+        "afterTabFileEdit",
+        "preCompact",
+        "stop"
+      ]
+    },
+    "hookEntry": {
+      "type": "object",
+      "required": ["command", "event"],
+      "additionalProperties": false,
+      "properties": {
+        "command": {
+          "type": "string",
+          "minLength": 1
+        },
+        "event": {
+          "$ref": "#/$defs/eventName",
+          "description": "Must match the parent key"
+        },
+        "description": {
+          "type": "string"
+        }
+      }
+    }
+  }
+}

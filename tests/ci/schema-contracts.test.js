@@ -19,7 +19,7 @@ function runTests() {
   let failed = 0;
 
   if (test('hooks schema enumerates all shipped Claude hook event names', () => {
-    const schema = readJson('schemas', 'hooks.schema.json');
+    const schema = readJson('schemas', 'claude-hooks.schema.json');
     const hooksConfig = readJson('hooks', 'claude', 'hooks.json');
 
     const declaredEvents = schema.$defs.eventName.enum;
@@ -32,13 +32,35 @@ function runTests() {
   })) passed++; else failed++;
 
   if (test('hooks schema models command hook entries instead of event-type hook items', () => {
-    const schema = readJson('schemas', 'hooks.schema.json');
+    const schema = readJson('schemas', 'claude-hooks.schema.json');
     const hookCommand = schema.$defs.commandHook;
 
     assert.ok(hookCommand, 'Schema should define a commandHook shape');
     assert.strictEqual(hookCommand.properties.type.const, 'command', 'Hook item type should be command');
     assert.ok(hookCommand.required.includes('type'), 'commandHook should require type');
     assert.ok(hookCommand.required.includes('command'), 'commandHook should require command');
+  })) passed++; else failed++;
+
+  if (test('cursor hooks schema enumerates all shipped Cursor hook event names', () => {
+    const schema = readJson('schemas', 'cursor-hooks.schema.json');
+    const hooksConfig = readJson('hooks', 'cursor', 'hooks.json');
+
+    const declaredEvents = schema.$defs.eventName.enum;
+    for (const eventName of Object.keys(hooksConfig.hooks)) {
+      assert.ok(
+        declaredEvents.includes(eventName),
+        `Cursor schema event enum should include ${eventName}`
+      );
+    }
+  })) passed++; else failed++;
+
+  if (test('cursor hooks schema models hook entries with command and event fields', () => {
+    const schema = readJson('schemas', 'cursor-hooks.schema.json');
+    const hookEntry = schema.$defs.hookEntry;
+
+    assert.ok(hookEntry, 'Schema should define a hookEntry shape');
+    assert.ok(hookEntry.required.includes('command'), 'hookEntry should require command');
+    assert.ok(hookEntry.required.includes('event'), 'hookEntry should require event');
   })) passed++; else failed++;
 
   if (test('plugin schema requires version and documents reference-only status', () => {

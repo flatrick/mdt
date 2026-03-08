@@ -1,13 +1,16 @@
-# Workflow - Multi-Model Collaborative Development
+# Multi - Multi-Model Collaborative Development
 
 Multi-model collaborative development workflow (Research → Ideation → Plan → Execute → Optimize → Review), with intelligent routing: Frontend → Gemini, Backend → Codex.
 
 Structured development workflow with quality gates, MCP services, and multi-model collaboration.
 
+Consolidates the former `multi-plan`, `multi-backend`, `multi-frontend`, and `multi-execute` commands. Auto-routes by task type — no need for separate commands.
+
 ## Usage
 
 ```bash
-/workflow <task description>
+/multi <task description>
+/multi --plan-only <task description>   # Stop after planning phase (no execution)
 ```
 
 ## Context

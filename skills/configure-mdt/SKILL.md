@@ -65,7 +65,7 @@ mkdir -p $TARGET/skills $TARGET/rules
 
 ### 2a: Choose Scope (Core vs Niche)
 
-Default to **Core (recommended for new users)** — copy `.agents/skills/*` plus `skills/search-first/` for research-first workflows. This bundle covers engineering, evals, verification, security, strategic compaction, frontend design, and Anthropic cross-functional skills (article-writing, content-engine, market-research, frontend-slides).
+Default to **Core (recommended for new users)** — copy `.agents/skills/*` plus `skills/search-first/` for research-first workflows. This bundle covers engineering, evals, verification, security, strategic compaction, and frontend design.
 
 Use `AskUserQuestion` (single select):
 ```
@@ -81,13 +81,13 @@ If the user chooses niche or core + niche, continue to category selection below 
 
 ### 2b: Choose Skill Categories
 
-There are 27 skills organized into 4 categories. Use `AskUserQuestion` with `multiSelect: true`:
+There are 21 skills organized into 3 categories. Use `AskUserQuestion` with `multiSelect: true`:
 
 ```
 Question: "Which skill categories do you want to install?"
 Options:
   - "Framework & Language" — "Django, Spring Boot, Python, Java, .NET, Rust, Bash, Frontend, Backend patterns"
-  - "Database" — "PostgreSQL, ClickHouse, JPA/Hibernate patterns"
+  - "Database" — "PostgreSQL, JPA/Hibernate patterns"
   - "Workflow & Quality" — "TDD, verification, learning, security review, compaction"
   - "All skills" — "Install every available skill"
 ```
@@ -116,11 +116,10 @@ For each selected category, print the full list of skills below and ask the user
 | `springboot-tdd` | Spring Boot TDD with JUnit 5, Mockito, MockMvc, Testcontainers |
 | `springboot-verification` | Spring Boot verification: build, static analysis, tests, security scans |
 
-**Category: Database (3 skills)**
+**Category: Database (2 skills)**
 
 | Skill | Description |
 |-------|-------------|
-| `clickhouse-io` | ClickHouse patterns, query optimization, analytics, data engineering |
 | `jpa-patterns` | JPA/Hibernate entity design, relationships, query optimization, transactions |
 | `postgres-patterns` | PostgreSQL query optimization, schema design, indexing, security |
 
@@ -136,16 +135,6 @@ For each selected category, print the full list of skills below and ask the user
 | `strategic-compact` | Suggests manual context compaction at logical intervals |
 | `tdd-workflow` | Enforces TDD with 80%+ coverage: unit, integration, E2E |
 | `verification-loop` | Verification and quality loop patterns |
-
-**Category: Business & Content (5 skills)**
-
-| Skill | Description |
-|-------|-------------|
-| `article-writing` | Long-form writing in a supplied voice using notes, examples, or source docs |
-| `content-engine` | Multi-platform social content, scripts, and repurposing workflows |
-| `market-research` | Source-attributed market, competitor, fund, and technology research |
-| `investor-materials` | Pitch decks, one-pagers, investor memos, and financial models |
-| `investor-outreach` | Personalized investor cold emails, warm intros, and follow-ups |
 
 **Standalone**
 
