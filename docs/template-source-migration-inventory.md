@@ -11,7 +11,7 @@ directories.
 
 | Current Path | Classification | Planned Destination | Notes |
 | --- | --- | --- | --- |
-| `.claude/package-manager.json` | template source | `claude-template/config/package-manager.json` | Remaining tracked Claude-specific config at repo root. |
+| `.claude/package-manager.json` | local-only state | ignore | Removed from version control; keep as machine-local runtime state under ignored `.claude/`. |
 | `.cursor/hooks.json` | template source | `cursor-template/config/hooks.json` | Checked-in Cursor hook config currently lives in a runtime-named dir. |
 | `.cursor/hooks/` | template source | `cursor-template/hooks/` | Cursor adapter hook scripts are tracked source, not local output. |
 | `.cursor/rules/` | template source | `cursor-template/rules/` | Cursor project-rule adapter source. |

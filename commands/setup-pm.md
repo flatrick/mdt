@@ -28,7 +28,7 @@ node scripts/setup-package-manager.js --list
 When determining which package manager to use, the following order is checked:
 
 1. **Environment variable**: `CLAUDE_PACKAGE_MANAGER`
-2. **Project config**: `.claude/package-manager.json` (current repo-local path)
+2. **Project config**: `.claude/package-manager.json` (project-local runtime path)
 3. **package.json**: `packageManager` field
 4. **Lock file**: Presence of package-lock.json, yarn.lock, pnpm-lock.yaml, or bun.lockb
 5. **Global config**: `<config>/package-manager.json`
@@ -36,7 +36,7 @@ When determining which package manager to use, the following order is checked:
 
 ## Configuration Files
 
-Global preference uses MDT's active config dir (`<config>`). Project preference currently uses `.claude/package-manager.json`.
+Global preference uses MDT's active config dir (`<config>`). Project preference currently uses the project's `.claude/package-manager.json`.
 
 ### Global Configuration
 ```json
