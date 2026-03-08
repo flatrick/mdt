@@ -11,7 +11,7 @@ Local installation state:
 
 This page relies on:
 - official OpenCode docs
-- repo config under `.opencode/`
+- repo template config under `opencode-template/`
 
 ## MDT-Relevant Native Surfaces
 
@@ -39,20 +39,20 @@ These are all first-class config/plugin surfaces. OpenCode should be documented 
 ## What MDT Currently Ships
 
 The repo already contains a serious OpenCode adapter:
-- `.opencode/opencode.json`
-- `.opencode/commands/`
-- `.opencode/prompts/agents/`
-- `.opencode/plugins/`
-- `.opencode/tools/`
-- `.opencode/instructions/INSTRUCTIONS.md`
+- `opencode-template/opencode.json`
+- `opencode-template/commands/`
+- `opencode-template/prompts/agents/`
+- `opencode-template/plugins/`
+- `opencode-template/tools/`
+- `opencode-template/instructions/INSTRUCTIONS.md`
 
 That means OpenCode should be treated as a structured adapter target, not as an afterthought.
 
 ## Important Drift To Remember
 
 The repo currently contains conflicting OpenCode claims outside `docs/`:
-- `.opencode/MIGRATION.md` says hooks have full parity and more
-- `.opencode/prompts/agents/code-reviewer.txt` says hooks are not available in OpenCode
+- `opencode-template/MIGRATION.md` says hooks have full parity and more
+- `opencode-template/prompts/agents/code-reviewer.txt` says hooks are not available in OpenCode
 
 This docs pack is now the source of truth. Future work should reconcile those files later, but do not use them as authoritative without cross-checking.
 
@@ -61,23 +61,23 @@ This docs pack is now the source of truth. Future work should reconcile those fi
 The native config center is:
 
 ```text
-.opencode/opencode.json
+opencode-template/opencode.json
 ```
 
 MDT uses these native sections there:
 
 ```json
 {
-  "instructions": ["AGENTS.md", ".opencode/instructions/INSTRUCTIONS.md"],
-  "plugin": ["./.opencode/plugins"],
+  "instructions": ["AGENTS.md", "opencode-template/instructions/INSTRUCTIONS.md"],
+  "plugin": ["./opencode-template/plugins"],
   "agent": {},
   "command": {}
 }
 ```
 
 Repo plugin/tool examples live in:
-- `.opencode/plugins/`
-- `.opencode/tools/`
+- `opencode-template/plugins/`
+- `opencode-template/tools/`
 
 ## What Not To Assume
 
@@ -95,7 +95,7 @@ opencode --help
 Repo-only checks available right now:
 
 ```bash
-cat .opencode/opencode.json
+cat opencode-template/opencode.json
 ```
 
 ## Source Links

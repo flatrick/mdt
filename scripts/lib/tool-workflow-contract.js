@@ -24,9 +24,9 @@ const TOOL_WORKFLOW_CONTRACT = {
           status: 'official',
           verificationMode: 'repo-adapter',
           requiredFiles: [
-            '.opencode/opencode.json',
-            '.opencode/commands/plan.md',
-            '.opencode/prompts/agents/planner.txt'
+            'opencode-template/opencode.json',
+            'opencode-template/commands/plan.md',
+            'opencode-template/prompts/agents/planner.txt'
           ]
         }
       }
@@ -55,9 +55,9 @@ const TOOL_WORKFLOW_CONTRACT = {
           status: 'official',
           verificationMode: 'repo-adapter',
           requiredFiles: [
-            '.opencode/opencode.json',
-            '.opencode/commands/tdd.md',
-            '.opencode/prompts/agents/tdd-guide.txt'
+            'opencode-template/opencode.json',
+            'opencode-template/commands/tdd.md',
+            'opencode-template/prompts/agents/tdd-guide.txt'
           ]
         }
       }
@@ -86,9 +86,9 @@ const TOOL_WORKFLOW_CONTRACT = {
           status: 'official',
           verificationMode: 'repo-adapter',
           requiredFiles: [
-            '.opencode/opencode.json',
-            '.opencode/commands/code-review.md',
-            '.opencode/prompts/agents/code-reviewer.txt'
+            'opencode-template/opencode.json',
+            'opencode-template/commands/code-review.md',
+            'opencode-template/prompts/agents/code-reviewer.txt'
           ]
         }
       }
@@ -117,9 +117,9 @@ const TOOL_WORKFLOW_CONTRACT = {
           status: 'official',
           verificationMode: 'repo-adapter',
           requiredFiles: [
-            '.opencode/opencode.json',
-            '.opencode/commands/verify.md',
-            '.opencode/tools/run-tests.ts'
+            'opencode-template/opencode.json',
+            'opencode-template/commands/verify.md',
+            'opencode-template/tools/run-tests.ts'
           ]
         }
       }
@@ -148,10 +148,10 @@ const TOOL_WORKFLOW_CONTRACT = {
           status: 'official',
           verificationMode: 'repo-adapter',
           requiredFiles: [
-            '.opencode/opencode.json',
-            '.opencode/commands/security.md',
-            '.opencode/prompts/agents/security-reviewer.txt',
-            '.opencode/tools/security-audit.ts'
+            'opencode-template/opencode.json',
+            'opencode-template/commands/security.md',
+            'opencode-template/prompts/agents/security-reviewer.txt',
+            'opencode-template/tools/security-audit.ts'
           ]
         }
       }
@@ -180,9 +180,9 @@ const TOOL_WORKFLOW_CONTRACT = {
           status: 'official',
           verificationMode: 'repo-adapter',
           requiredFiles: [
-            '.opencode/opencode.json',
-            '.opencode/commands/e2e.md',
-            '.opencode/prompts/agents/e2e-runner.txt'
+            'opencode-template/opencode.json',
+            'opencode-template/commands/e2e.md',
+            'opencode-template/prompts/agents/e2e-runner.txt'
           ]
         }
       }

@@ -85,8 +85,8 @@ opencode --help
 ```
 
 If `opencode` is not installed:
-- inspect `.opencode/opencode.json`
-- inspect `.opencode/plugins/`
+- inspect `opencode-template/opencode.json`
+- inspect `opencode-template/plugins/`
 - keep status as `not-locally-verified`
 
 ## Repo Adapter Checks
@@ -96,7 +96,7 @@ Use these files to confirm what MDT actually ships:
 - Claude: `hooks/claude/hooks.json`, `commands/`, `agents/`, `skills/`
 - Cursor: `cursor-template/rules/`, `cursor-template/hooks.json`, `cursor-template/hooks/`
 - Codex: `codex-template/config.toml`, `codex-template/AGENTS.md`
-- OpenCode: `.opencode/opencode.json`, `.opencode/plugins/`, `.opencode/commands/`, `.opencode/prompts/agents/`
+- OpenCode: `opencode-template/opencode.json`, `opencode-template/plugins/`, `opencode-template/commands/`, `opencode-template/prompts/agents/`
 
 ## Minimum Evidence Required Per Claim
 
