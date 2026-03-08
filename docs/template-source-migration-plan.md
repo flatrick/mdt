@@ -226,14 +226,22 @@ Acceptance criteria:
 - repo runtime dirs are ignored
 - local verification still passes
 
-## Recommended First Implementation Slice
+## Recommended Next Implementation Slice
 
-Start with Cursor and Codex only.
+The initial Cursor/Codex/OpenCode migration slices are complete, and the top-level adapter layout decision is locked to root-level `*-template/` directories.
+
+Start next with Claude adapter completion and migration closeout:
+
+1. classify remaining Claude-adjacent tracked assets as:
+   - `claude-template/` source
+   - root-level shared MDT source
+   - mirror/rendered output
+   - local/runtime-only state
+2. document and enforce mirror semantics for Claude hook config (source vs mirror ownership)
+3. define and add migration-complete criteria and verification commands in the status docs
 
 Reason:
 
-- Cursor is the current parity hotspot
-- Codex is already under active local smoke coverage
-- this gives you the template-source pattern before touching OpenCode's larger surface
-
-If that slice works cleanly, apply the same pattern to Claude and OpenCode.
+- this finishes the only partially migrated adapter
+- it avoids unnecessary path churn after the layout decision
+- it creates a clear end-state gate for future migration work
