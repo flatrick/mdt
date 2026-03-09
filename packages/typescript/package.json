@@ -26,6 +26,7 @@
     "e2e-runner.md"
   ],
   "commands": [
+    "docs-health.md",
     "plan.md",
     "tdd.md",
     "verify.md",
@@ -34,6 +35,7 @@
     "e2e.md"
   ],
   "skills": [
+    "documentation-steward",
     "coding-standards",
     "tdd-workflow",
     "verification-loop",
@@ -64,6 +66,7 @@
         "frontend-slides"
       ],
       "commands": [
+        "docs-health.md",
         "plan.md",
         "tdd.md",
         "verify.md",

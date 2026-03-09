@@ -14,6 +14,7 @@
   ],
   "agents": [],
   "commands": [
+    "docs-health.md",
     "evolve.md",
     "instinct-export.md",
     "instinct-import.md",
@@ -24,6 +25,7 @@
     "skill-create.md"
   ],
   "skills": [
+    "documentation-steward",
     "continuous-learning-v2"
   ],
   "tools": {
@@ -39,12 +41,10 @@
       ],
       "skills": [],
       "commands": [
+        "docs-health.md",
         "learn.md",
         "skill-create.md"
       ]
-    },
-    "codex": {
-      "skills": []
     }
   },
   "requires": {

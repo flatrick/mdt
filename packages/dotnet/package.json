@@ -26,12 +26,14 @@
     "dotnet-reviewer.md"
   ],
   "commands": [
+    "docs-health.md",
     "plan.md",
     "tdd.md",
     "verify.md",
     "code-review.md"
   ],
   "skills": [
+    "documentation-steward",
     "dotnet-patterns",
     "tdd-workflow",
     "verification-loop",
@@ -40,7 +42,10 @@
   "tools": {
     "cursor": {
       "rules": [],
-      "skills": []
+      "skills": [],
+      "commands": [
+        "docs-health.md"
+      ]
     },
     "gemini": {
       "rules": [

@@ -51,7 +51,7 @@ function runTests() {
   const counters = { passed: 0, failed: 0 };
   const testCases = [
     {
-      name: 'claude install copies runtime scripts only (hooks + lib)',
+      name: 'claude install copies runtime scripts and docs validators only',
       run: () => {
         const tmpHome = createTestDir('mdt-install-claude-');
         const claudeBase = path.join(tmpHome, '.claude');
@@ -68,7 +68,10 @@ function runTests() {
 
           assert.ok(fs.existsSync(path.join(claudeBase, 'scripts', 'hooks', 'session-start.js')));
           assert.ok(fs.existsSync(path.join(claudeBase, 'scripts', 'lib', 'utils.js')));
-          assert.ok(!fs.existsSync(path.join(claudeBase, 'scripts', 'ci')), 'scripts/ci must not be installed');
+          assert.ok(fs.existsSync(path.join(claudeBase, 'scripts', 'ci', 'validate-markdown-links.js')));
+          assert.ok(fs.existsSync(path.join(claudeBase, 'scripts', 'ci', 'validate-markdown-path-refs.js')));
+          assert.ok(fs.existsSync(path.join(claudeBase, 'scripts', 'ci', 'markdown-utils.js')));
+          assert.ok(!fs.existsSync(path.join(claudeBase, 'scripts', 'ci', 'validate-install-packages.js')), 'only selected docs validators should be installed');
           assert.ok(!fs.existsSync(path.join(claudeBase, 'scripts', 'install-mdt.js')), 'top-level installer must not be installed');
         } finally {
           cleanupTestDir(tmpHome);
@@ -76,7 +79,7 @@ function runTests() {
       }
     },
     {
-      name: 'cursor install copies runtime scripts only (hooks + lib)',
+      name: 'cursor install copies runtime scripts and docs validators only',
       run: () => {
         const tmpHome = createTestDir('mdt-install-cursor-home-');
         const tmpProject = createTestDir('mdt-install-cursor-proj-');
@@ -94,7 +97,10 @@ function runTests() {
           const cursorRoot = path.join(tmpProject, '.cursor');
           assert.ok(fs.existsSync(path.join(cursorRoot, 'scripts', 'hooks', 'session-start.js')));
           assert.ok(fs.existsSync(path.join(cursorRoot, 'scripts', 'lib', 'utils.js')));
-          assert.ok(!fs.existsSync(path.join(cursorRoot, 'scripts', 'ci')), 'scripts/ci must not be installed');
+          assert.ok(fs.existsSync(path.join(cursorRoot, 'scripts', 'ci', 'validate-markdown-links.js')));
+          assert.ok(fs.existsSync(path.join(cursorRoot, 'scripts', 'ci', 'validate-markdown-path-refs.js')));
+          assert.ok(fs.existsSync(path.join(cursorRoot, 'scripts', 'ci', 'markdown-utils.js')));
+          assert.ok(!fs.existsSync(path.join(cursorRoot, 'scripts', 'ci', 'validate-install-packages.js')), 'only selected docs validators should be installed');
           assert.ok(!fs.existsSync(path.join(cursorRoot, 'scripts', 'install-mdt.js')), 'top-level installer must not be installed');
         } finally {
           cleanupTestDir(tmpHome);
@@ -119,6 +125,10 @@ function runTests() {
           assertSuccess(result, 'cursor package install');
 
           const cursorRoot = path.join(tmpProject, '.cursor');
+          assert.ok(
+            fs.existsSync(path.join(cursorRoot, 'skills', 'documentation-steward', 'SKILL.md')),
+            'Cursor install should copy the shared documentation-steward skill'
+          );
           assert.ok(
             fs.existsSync(path.join(cursorRoot, 'skills', 'frontend-slides', 'SKILL.md')),
             'Cursor install should copy the declared frontend-slides skill'
@@ -169,6 +179,10 @@ function runTests() {
           const commandsRoot = path.join(cursorRoot, 'commands');
 
           assert.ok(
+            fs.existsSync(path.join(commandsRoot, 'docs-health.md')),
+            'Cursor install should copy the docs-health command prompt'
+          );
+          assert.ok(
             fs.existsSync(path.join(commandsRoot, 'plan.md')),
             'Cursor install should copy the plan command template from cursor-template/commands for typescript'
           );
@@ -197,11 +211,16 @@ function runTests() {
             'Cursor install should copy the skill-create command prompt from cursor-template/commands for continuous-learning'
           );
 
+          const docsHealthCommand = fs.readFileSync(path.join(commandsRoot, 'docs-health.md'), 'utf8');
           const planCommand = fs.readFileSync(path.join(commandsRoot, 'plan.md'), 'utf8');
           const smokeCommand = fs.readFileSync(path.join(commandsRoot, 'smoke.md'), 'utf8');
           const verifyCommand = fs.readFileSync(path.join(commandsRoot, 'verify.md'), 'utf8');
           const learnCommand = fs.readFileSync(path.join(commandsRoot, 'learn.md'), 'utf8');
 
+          assert.ok(
+            docsHealthCommand.includes('DOCS HEALTH: PASS|PARTIAL|FAIL'),
+            'Cursor docs-health command should contain the documentation audit report contract'
+          );
           assert.ok(
             planCommand.includes('Wait for explicit user confirmation before making code changes.'),
             'Cursor plan command should contain a real planning workflow prompt'
@@ -273,6 +292,8 @@ function runTests() {
           const claudeRoot = path.join(tmpProject, '.claude');
           assert.ok(fs.existsSync(path.join(claudeRoot, 'rules', 'common', 'coding-style.md')));
           assert.ok(fs.existsSync(path.join(claudeRoot, 'rules', 'typescript', 'coding-style.md')));
+          assert.ok(fs.existsSync(path.join(claudeRoot, 'commands', 'docs-health.md')));
+          assert.ok(fs.existsSync(path.join(claudeRoot, 'skills', 'documentation-steward', 'SKILL.md')));
           assert.ok(fs.existsSync(path.join(claudeRoot, 'commands', 'smoke.md')));
           assert.ok(
             !fs.existsSync(path.join(claudeRoot, 'rules', 'python', 'coding-style.md')),
@@ -464,9 +485,12 @@ function runTests() {
           assert.ok(fs.existsSync(path.join(codexRoot, 'config.toml')));
           assert.ok(fs.existsSync(path.join(codexRoot, 'AGENTS.md')));
           assert.ok(fs.existsSync(path.join(projectAgentsRoot, 'skills', 'coding-standards', 'SKILL.md')));
+          assert.ok(fs.existsSync(path.join(projectAgentsRoot, 'skills', 'documentation-steward', 'SKILL.md')));
           assert.ok(fs.existsSync(path.join(projectAgentsRoot, 'skills', 'tool-setup-verifier', 'SKILL.md')));
           assert.ok(fs.existsSync(path.join(projectAgentsRoot, 'skills', 'continuous-learning-v2', 'SKILL.md')));
           assert.ok(fs.existsSync(path.join(projectAgentsRoot, 'scripts', 'lib', 'detect-env.js')));
+          assert.ok(fs.existsSync(path.join(projectAgentsRoot, 'scripts', 'ci', 'validate-markdown-links.js')));
+          assert.ok(fs.existsSync(path.join(projectAgentsRoot, 'scripts', 'ci', 'validate-markdown-path-refs.js')));
           assert.ok(fs.existsSync(path.join(projectAgentsRoot, 'scripts', 'smoke-tool-setups.js')));
           assert.ok(fs.existsSync(path.join(projectAgentsRoot, 'scripts', 'smoke-codex-workflows.js')));
           assert.ok(!fs.existsSync(path.join(projectAgentsRoot, 'skills', 'python-patterns', 'SKILL.md')));

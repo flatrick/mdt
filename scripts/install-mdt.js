@@ -31,6 +31,11 @@ const CURSOR_SRC = path.join(REPO_ROOT, 'cursor-template');
 const CODEX_SRC = path.join(REPO_ROOT, 'codex-template');
 const CODEX_SKILLS_SRC = path.join(CODEX_SRC, 'skills');
 const CODEX_RULES_SRC = path.join(CODEX_SRC, 'rules');
+const RUNTIME_CI_FILES = [
+  'markdown-utils.js',
+  'validate-markdown-links.js',
+  'validate-markdown-path-refs.js'
+];
 const SUPPORTED_PACKAGE_TARGETS = new Set(['claude', 'cursor', 'gemini', 'codex']);
 const TARGET_CAPABILITIES = {
   claude: { hooks: 'official', runtimeScripts: true, sessionData: true },
@@ -509,6 +514,12 @@ function copyRuntimeScripts(destScriptsDir) {
     if (fs.existsSync(srcDir)) {
       copyRecursiveSync(srcDir, destDir);
     }
+  }
+
+  const ciSrcDir = path.join(REPO_ROOT, 'scripts', 'ci');
+  const ciDestDir = path.join(destScriptsDir, 'ci');
+  if (copyExplicitFiles(ciSrcDir, ciDestDir, RUNTIME_CI_FILES, 'Runtime CI script') > 0) {
+    // Installed docs-health workflows rely on these validator scripts.
   }
 }
 

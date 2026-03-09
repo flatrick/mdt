@@ -223,14 +223,16 @@ function runTests() {
     assert.ok(manifest.rules.includes('common/coding-style.md'));
     assert.ok(manifest.rules.includes('typescript/coding-style.md'));
     assert.ok(manifest.agents.includes('planner.md'));
+    assert.ok(manifest.commands.includes('docs-health.md'));
     assert.ok(manifest.commands.includes('plan.md'));
+    assert.ok(manifest.skills.includes('documentation-steward'));
     assert.ok(manifest.skills.includes('coding-standards'));
     assert.ok(Array.isArray(manifest.tools.cursor.rules));
     assert.ok(manifest.tools.cursor.rules.includes('typescript-coding-style.md'));
     assert.ok(Array.isArray(manifest.tools.gemini.rules));
     assert.ok(manifest.tools.gemini.rules.includes('typescript-coding-style.md'));
     assert.deepStrictEqual(manifest.tools.cursor.skills, ['frontend-slides']);
-    assert.deepStrictEqual(manifest.tools.cursor.commands, ['plan.md', 'tdd.md', 'verify.md', 'code-review.md', 'smoke.md']);
+    assert.deepStrictEqual(manifest.tools.cursor.commands, ['docs-health.md', 'plan.md', 'tdd.md', 'verify.md', 'code-review.md', 'smoke.md']);
     assert.deepStrictEqual(manifest.tools.codex.skills, ['tool-setup-verifier']);
     assert.deepStrictEqual(manifest.requires, {});
   })) passed++; else failed++;
@@ -243,10 +245,13 @@ function runTests() {
     assert.ok(manifest.rules.includes('common/coding-style.md'));
     assert.ok(manifest.rules.includes('python/coding-style.md'));
     assert.ok(manifest.agents.includes('python-reviewer.md'));
+    assert.ok(manifest.commands.includes('docs-health.md'));
     assert.ok(manifest.commands.includes('python-review.md'));
+    assert.ok(manifest.skills.includes('documentation-steward'));
     assert.ok(manifest.skills.includes('python-patterns'));
     assert.ok(Array.isArray(manifest.tools.cursor.rules));
     assert.ok(manifest.tools.cursor.rules.includes('python-coding-style.md'));
+    assert.deepStrictEqual(manifest.tools.cursor.commands, ['docs-health.md']);
     assert.ok(Array.isArray(manifest.tools.gemini.rules));
     assert.ok(manifest.tools.gemini.rules.includes('python-coding-style.md'));
     assert.deepStrictEqual(manifest.requires, {});
@@ -260,8 +265,7 @@ function runTests() {
       sessionData: true,
       tools: ['claude', 'cursor', 'codex']
     });
-    assert.deepStrictEqual(manifest.tools.cursor.commands, ['learn.md', 'skill-create.md']);
-    assert.deepStrictEqual(manifest.tools.codex.skills, []);
+    assert.deepStrictEqual(manifest.tools.cursor.commands, ['docs-health.md', 'learn.md', 'skill-create.md']);
   })) passed++; else failed++;
 
   if (test('buildInstallPlan includes global cursor rule-skip note and packages', () => {
@@ -347,14 +351,18 @@ function runTests() {
       assert.ok(fs.existsSync(path.join(tempDir, 'skills', 'frontend-slides', 'SKILL.md')));
       assert.ok(fs.existsSync(path.join(tempDir, 'skills', 'continuous-learning-v2', 'SKILL.md')));
       assert.ok(!fs.existsSync(path.join(tempDir, 'skills', 'rust-patterns', 'SKILL.md')));
+      assert.ok(fs.existsSync(path.join(tempDir, 'commands', 'docs-health.md')));
       assert.ok(fs.existsSync(path.join(tempDir, 'commands', 'plan.md')));
       assert.ok(fs.existsSync(path.join(tempDir, 'commands', 'smoke.md')));
+      assert.ok(fs.existsSync(path.join(tempDir, 'skills', 'documentation-steward', 'SKILL.md')));
       assert.ok(fs.existsSync(path.join(tempDir, 'commands', 'learn.md')));
 
       const planCommand = fs.readFileSync(path.join(tempDir, 'commands', 'plan.md'), 'utf8');
+      const docsHealthCommand = fs.readFileSync(path.join(tempDir, 'commands', 'docs-health.md'), 'utf8');
       const smokeCommand = fs.readFileSync(path.join(tempDir, 'commands', 'smoke.md'), 'utf8');
       assert.ok(planCommand.includes('Wait for explicit user confirmation before making code changes.'));
       assert.ok(!planCommand.includes('Use Cursor’s custom command UI'));
+      assert.ok(docsHealthCommand.includes('DOCS HEALTH: PASS|PARTIAL|FAIL'));
       assert.ok(smokeCommand.includes('SMOKE: PASS|FAIL|PARTIAL'));
     });
   })) passed++; else failed++;
@@ -367,8 +375,10 @@ function runTests() {
 
       assert.ok(fs.existsSync(path.join(agentDir, 'workflows', 'planner.md')));
       assert.ok(!fs.existsSync(path.join(agentDir, 'workflows', 'python-reviewer.md')));
+      assert.ok(fs.existsSync(path.join(agentDir, 'skills', 'documentation-steward', 'SKILL.md')));
       assert.ok(fs.existsSync(path.join(agentDir, 'skills', 'coding-standards', 'SKILL.md')));
       assert.ok(!fs.existsSync(path.join(agentDir, 'skills', 'python-patterns', 'SKILL.md')));
+      assert.ok(fs.existsSync(path.join(geminiDir, 'commands', 'docs-health.toml')));
       assert.ok(fs.existsSync(path.join(geminiDir, 'commands', 'plan.toml')));
       assert.ok(!fs.existsSync(path.join(geminiDir, 'commands', 'python-review.toml')));
     });
@@ -379,6 +389,7 @@ function runTests() {
       installCodexSkills(resolveSelectedPackages(['typescript', 'continuous-learning']), tempDir);
 
       assert.ok(fs.existsSync(path.join(tempDir, 'skills', 'coding-standards', 'SKILL.md')));
+      assert.ok(fs.existsSync(path.join(tempDir, 'skills', 'documentation-steward', 'SKILL.md')));
       assert.ok(fs.existsSync(path.join(tempDir, 'skills', 'tool-setup-verifier', 'SKILL.md')));
       assert.ok(fs.existsSync(path.join(tempDir, 'skills', 'continuous-learning-v2', 'SKILL.md')));
       assert.ok(!fs.existsSync(path.join(tempDir, 'skills', 'python-patterns', 'SKILL.md')));
