@@ -1,6 +1,26 @@
 {
   "name": "dotnet",
+  "description": "Base .NET workflow package for C# and VB.NET projects",
   "ruleDirectory": "dotnet",
+  "agents": [
+    "planner.md",
+    "code-reviewer.md",
+    "security-reviewer.md",
+    "tdd-guide.md",
+    "dotnet-reviewer.md"
+  ],
+  "commands": [
+    "plan.md",
+    "tdd.md",
+    "verify.md",
+    "code-review.md"
+  ],
+  "skills": [
+    "dotnet-patterns",
+    "tdd-workflow",
+    "verification-loop",
+    "security-review"
+  ],
   "tools": {
     "cursor": {
       "rules": [],

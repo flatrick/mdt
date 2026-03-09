@@ -1,6 +1,25 @@
 {
   "name": "sql",
+  "description": "Base SQL and data workflow package",
   "ruleDirectory": "sql",
+  "agents": [
+    "planner.md",
+    "code-reviewer.md",
+    "database-reviewer.md",
+    "security-reviewer.md"
+  ],
+  "commands": [
+    "plan.md",
+    "verify.md",
+    "code-review.md"
+  ],
+  "skills": [
+    "database-migrations",
+    "postgres-patterns",
+    "sqlserver-patterns",
+    "verification-loop",
+    "security-review"
+  ],
   "tools": {
     "cursor": {
       "rules": [],

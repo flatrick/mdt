@@ -1,6 +1,26 @@
 {
   "name": "rust",
+  "description": "Base Rust workflow package",
   "ruleDirectory": "rust",
+  "agents": [
+    "planner.md",
+    "code-reviewer.md",
+    "security-reviewer.md",
+    "tdd-guide.md",
+    "rust-reviewer.md"
+  ],
+  "commands": [
+    "plan.md",
+    "tdd.md",
+    "verify.md",
+    "code-review.md"
+  ],
+  "skills": [
+    "rust-patterns",
+    "tdd-workflow",
+    "verification-loop",
+    "security-review"
+  ],
   "tools": {
     "cursor": {
       "rules": [],

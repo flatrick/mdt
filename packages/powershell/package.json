@@ -1,6 +1,23 @@
 {
   "name": "powershell",
+  "description": "Base PowerShell 7+ workflow package",
   "ruleDirectory": "powershell",
+  "agents": [
+    "planner.md",
+    "code-reviewer.md",
+    "security-reviewer.md",
+    "powershell-reviewer.md"
+  ],
+  "commands": [
+    "plan.md",
+    "verify.md",
+    "code-review.md"
+  ],
+  "skills": [
+    "powershell-patterns",
+    "verification-loop",
+    "security-review"
+  ],
   "tools": {
     "cursor": {
       "rules": [],

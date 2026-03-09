@@ -1,6 +1,30 @@
 {
   "name": "typescript",
+  "description": "Base TypeScript workflow package",
   "ruleDirectory": "typescript",
+  "agents": [
+    "planner.md",
+    "code-reviewer.md",
+    "security-reviewer.md",
+    "tdd-guide.md",
+    "e2e-runner.md"
+  ],
+  "commands": [
+    "plan.md",
+    "tdd.md",
+    "verify.md",
+    "code-review.md",
+    "e2e.md"
+  ],
+  "skills": [
+    "coding-standards",
+    "tdd-workflow",
+    "verification-loop",
+    "security-review",
+    "backend-patterns",
+    "frontend-patterns",
+    "e2e-testing"
+  ],
   "tools": {
     "cursor": {
       "rules": [

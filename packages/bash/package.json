@@ -1,6 +1,23 @@
 {
   "name": "bash",
+  "description": "Base Bash and shell workflow package",
   "ruleDirectory": "bash",
+  "agents": [
+    "planner.md",
+    "code-reviewer.md",
+    "security-reviewer.md",
+    "bash-reviewer.md"
+  ],
+  "commands": [
+    "plan.md",
+    "verify.md",
+    "code-review.md"
+  ],
+  "skills": [
+    "bash-patterns",
+    "verification-loop",
+    "security-review"
+  ],
   "tools": {
     "cursor": {
       "rules": [],

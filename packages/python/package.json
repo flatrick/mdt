@@ -1,6 +1,28 @@
 {
   "name": "python",
+  "description": "Base Python workflow package",
   "ruleDirectory": "python",
+  "agents": [
+    "planner.md",
+    "code-reviewer.md",
+    "security-reviewer.md",
+    "tdd-guide.md",
+    "python-reviewer.md"
+  ],
+  "commands": [
+    "plan.md",
+    "tdd.md",
+    "verify.md",
+    "code-review.md",
+    "python-review.md"
+  ],
+  "skills": [
+    "python-patterns",
+    "python-testing",
+    "tdd-workflow",
+    "verification-loop",
+    "security-review"
+  ],
   "tools": {
     "cursor": {
       "rules": [

@@ -11,6 +11,9 @@ const path = require('path');
 const REPO_ROOT = path.join(__dirname, '../..');
 const DEFAULT_PACKAGES_DIR = path.join(REPO_ROOT, 'packages');
 const DEFAULT_RULES_DIR = path.join(REPO_ROOT, 'rules');
+const DEFAULT_AGENTS_DIR = path.join(REPO_ROOT, 'agents');
+const DEFAULT_COMMANDS_DIR = path.join(REPO_ROOT, 'commands');
+const DEFAULT_SKILLS_DIR = path.join(REPO_ROOT, 'skills');
 const DEFAULT_CURSOR_RULES_DIR = path.join(REPO_ROOT, 'cursor-template', 'rules');
 const DEFAULT_CURSOR_SKILLS_DIR = path.join(REPO_ROOT, 'cursor-template', 'skills');
 const REQUIRED_PACKAGES = new Set(['typescript', 'sql', 'dotnet', 'rust', 'python', 'bash', 'powershell']);
@@ -26,6 +29,9 @@ function isStringArray(value) {
 function validateInstallPackages(options = {}) {
   const packagesDir = options.packagesDir || DEFAULT_PACKAGES_DIR;
   const rulesDir = options.rulesDir || DEFAULT_RULES_DIR;
+  const agentsDir = options.agentsDir || DEFAULT_AGENTS_DIR;
+  const commandsDir = options.commandsDir || DEFAULT_COMMANDS_DIR;
+  const skillsDir = options.skillsDir || DEFAULT_SKILLS_DIR;
   const cursorRulesDir = options.cursorRulesDir || DEFAULT_CURSOR_RULES_DIR;
   const cursorSkillsDir = options.cursorSkillsDir || DEFAULT_CURSOR_SKILLS_DIR;
   const io = options.io || { log: console.log, error: console.error };
@@ -75,12 +81,53 @@ function validateInstallPackages(options = {}) {
       hasErrors = true;
     }
 
+    if (typeof manifest.description !== 'string' || !manifest.description.trim()) {
+      io.error(`ERROR: ${packageName}/package.json - Missing non-empty description`);
+      hasErrors = true;
+    }
+
     if (typeof manifest.ruleDirectory !== 'string' || !manifest.ruleDirectory.trim()) {
       io.error(`ERROR: ${packageName}/package.json - Missing non-empty ruleDirectory`);
       hasErrors = true;
     } else if (!fs.existsSync(path.join(rulesDir, manifest.ruleDirectory))) {
       io.error(`ERROR: ${packageName}/package.json - ruleDirectory '${manifest.ruleDirectory}' does not exist under rules/`);
       hasErrors = true;
+    }
+
+    if (!isStringArray(manifest.agents)) {
+      io.error(`ERROR: ${packageName}/package.json - agents must be an array of non-empty strings`);
+      hasErrors = true;
+    } else {
+      for (const agentFile of manifest.agents) {
+        if (!fs.existsSync(path.join(agentsDir, agentFile))) {
+          io.error(`ERROR: ${packageName}/package.json - missing agent reference: ${agentFile}`);
+          hasErrors = true;
+        }
+      }
+    }
+
+    if (!isStringArray(manifest.commands)) {
+      io.error(`ERROR: ${packageName}/package.json - commands must be an array of non-empty strings`);
+      hasErrors = true;
+    } else {
+      for (const commandFile of manifest.commands) {
+        if (!fs.existsSync(path.join(commandsDir, commandFile))) {
+          io.error(`ERROR: ${packageName}/package.json - missing command reference: ${commandFile}`);
+          hasErrors = true;
+        }
+      }
+    }
+
+    if (!isStringArray(manifest.skills)) {
+      io.error(`ERROR: ${packageName}/package.json - skills must be an array of non-empty strings`);
+      hasErrors = true;
+    } else {
+      for (const skillName of manifest.skills) {
+        if (!fs.existsSync(path.join(skillsDir, skillName))) {
+          io.error(`ERROR: ${packageName}/package.json - missing shared skill reference: ${skillName}`);
+          hasErrors = true;
+        }
+      }
     }
 
     const tools = manifest.tools;
