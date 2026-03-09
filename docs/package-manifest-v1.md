@@ -77,6 +77,9 @@ They are not tied to a language like `typescript`, and they are not the same
 thing as domain scaffolding like `frontend` or `backend`.
 
 These packages should also be first-class, installable, and composable.
+For continuous-learning style capabilities, the design goal should be signal
+quality over event volume: sparse capture first, then retrospective analysis
+that surfaces automation opportunities.
 
 Two concrete examples already fit this model:
 
@@ -84,6 +87,8 @@ Two concrete examples already fit this model:
   - owns `skills/continuous-learning-v2`
   - owns the instinct-management commands such as `/instinct-status`, `/evolve`, `/instinct-export`, `/instinct-import`, `/promote`, and `/projects`
   - depends on hook wiring, runtime scripts, and writable session data storage
+  - should prioritize detecting candidates for scripts, custom commands, and
+    MCP integrations over recording every low-value interaction
 - `context-compaction`
   - owns `skills/strategic-compact`
   - depends on compaction-related hook/runtime behavior such as `scripts/hooks/suggest-compact.js` and `scripts/hooks/pre-compact.js`

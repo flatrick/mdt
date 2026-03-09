@@ -22,7 +22,7 @@ The second goal is to steer away from being all about Claude Code as the primary
 - **Node-only:** No Bash or PowerShell scripts. All install and hook logic is JavaScript run with Node.js.
 - **Single installer:** `node scripts/install-mdt.js` installs to Claude Code, Cursor, or Codex (see Installation).
 - **Per-tool installs:** Each tool gets its own directory — Claude → `~/.claude/`, Codex → `~/.codex/`, Cursor → project `.cursor/` or `~/.cursor/` with `--global`. Nothing points Cursor or Codex at `~/.claude/`.
-- **Cursor:** Default is project-local (full rules, agents, skills, commands, hooks, MCP). Use `--global` to install to `~/.cursor/` (rules skipped there; Cursor does not support file-based rules globally).
+- **Cursor:** Default is project-local (rules, agents, skills, custom commands, **experimental hooks adapter**, MCP). Use `--global` to install to `~/.cursor/` (rules skipped there; Cursor does not support file-based rules globally). Cursor does not yet document `.cursor/hooks.json` as an official surface; MDT treats Cursor hooks as optional safety rails, not a required runtime.
 - **Fork v1 direction:** Backwards compatibility with legacy passthrough behavior is not a goal; this fork prioritizes explicit, security-first defaults.
 
 Reset or reinstall: [docs/MIGRATION.md](docs/MIGRATION.md).
@@ -134,7 +134,7 @@ Full layout and details: [CLAUDE.md](CLAUDE.md), [AGENTS.md](AGENTS.md).
 
 ## Cursor / Codex / OpenCode
 
-**Cursor:** Repo source lives in `cursor-template/`. Quick start: `node scripts/install-mdt.js --target cursor typescript`. Local install renders rules, agents, skills, commands, hooks, and MCP into project `.cursor/`. Use `--global` for `~/.cursor/` (rules not supported there by Cursor).
+**Cursor:** Repo source lives in `cursor-template/`. Quick start: `node scripts/install-mdt.js --target cursor typescript`. Local install renders rules, agents, skills, an **experimental hook adapter**, and MCP config into project `.cursor/`. If Cursor stops loading `.cursor/hooks.json` or `.cursor/hooks/`, MDT workflows still function via rules, skills, `AGENTS.md`, and Cursor’s own command system. Use `--global` for `~/.cursor/` (rules not supported there by Cursor).
 
 **Codex:** Repo source lives in `codex-template/`. Quick start: `node scripts/install-mdt.js --target codex`. Installs `config.toml` and `AGENTS.md` to `~/.codex/`.
 

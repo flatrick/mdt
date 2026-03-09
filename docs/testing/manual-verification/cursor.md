@@ -11,14 +11,14 @@ Use this page to confirm MDT behavior inside Cursor desktop after installing int
 node scripts/install-mdt.js --target cursor typescript continuous-learning
 ```
 
-3. Confirm the install exists:
+3. Confirm the install exists (full MDT baseline with experimental hooks enabled):
 
 ```bash
 node -e "const fs=require('fs'); console.log(fs.existsSync('.cursor/hooks.json'));"
 ```
 
 Expected:
-- `.cursor/hooks.json` exists
+- `.cursor/hooks.json` exists (experimental adapter, not a vendor-documented surface)
 - `.cursor/hooks/` exists
 - `.cursor/skills/continuous-learning-v2/` exists
 
@@ -125,3 +125,19 @@ Expected:
 - observer status reports `cursor`
 - observer uses Cursor CLI defaults, with model `auto` unless overridden
 - session summaries still persist correctly under `.cursor/sessions/`
+
+## Behavior Without Hooks
+
+If a future Cursor build stops loading `.cursor/hooks.json` or you install MDT
+with `MDT_SKIP_CURSOR_HOOKS=1` set in the environment:
+
+- Rules in `.cursor/rules/` continue to apply as project guidance.
+- Skills in `.cursor/skills/` (including `continuous-learning-v2` and the core
+  coding/testing/security patterns) remain available via `/` in Agent chat.
+- `AGENTS.md` at the project root still participates in Cursor’s agent system.
+- Cursor’s custom commands, memories, background agents, and MCP features
+  remain available as documented in [docs/tools/cursor.md](../../tools/cursor.md).
+
+In that configuration you will not see hook-driven behaviors (e.g. dev-server
+blocking, automatic console.log audits, or automatic observation capture), but
+the core MDT workflows remain usable through rules, skills, and agents.

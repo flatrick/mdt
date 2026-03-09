@@ -54,7 +54,8 @@ function runValidatorWithDir(validatorName, dirConstant, overridePath) {
     GITIGNORE_FILE: 'gitignorePath',
     PACKAGES_DIR: 'packagesDir',
     CURSOR_RULES_DIR: 'cursorRulesDir',
-    CURSOR_SKILLS_DIR: 'cursorSkillsDir'
+    CURSOR_SKILLS_DIR: 'cursorSkillsDir',
+    CURSOR_COMMANDS_DIR: 'cursorCommandsDir'
   };
   const key = optionMap[dirConstant];
   if (!key) throw new Error(`Unsupported dir constant: ${dirConstant}`);
@@ -71,7 +72,8 @@ function runValidatorWithDirs(validatorName, overrides) {
     GITIGNORE_FILE: 'gitignorePath',
     PACKAGES_DIR: 'packagesDir',
     CURSOR_RULES_DIR: 'cursorRulesDir',
-    CURSOR_SKILLS_DIR: 'cursorSkillsDir'
+    CURSOR_SKILLS_DIR: 'cursorSkillsDir',
+    CURSOR_COMMANDS_DIR: 'cursorCommandsDir'
   };
   const options = {};
   for (const [constant, overridePath] of Object.entries(overrides)) {

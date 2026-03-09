@@ -61,6 +61,12 @@
       ],
       "skills": [
         "frontend-slides"
+      ],
+      "commands": [
+        "plan.md",
+        "tdd.md",
+        "verify.md",
+        "code-review.md"
       ]
     },
     "gemini": {

@@ -50,3 +50,5 @@ skills intended for the requested install scope, or otherwise follow an explicit
 tool-level rule for which skills are global versus language-specific. It should
 not silently install unrelated language skills when only `typescript` was
 requested.
+
+---

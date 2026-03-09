@@ -407,6 +407,7 @@ function runTests() {
     const skillsDir = createTestDir();
     const cursorRulesDir = createTestDir();
     const cursorSkillsDir = createTestDir();
+    const cursorCommandsDir = createTestDir();
 
     fs.mkdirSync(path.join(packagesDir, 'typescript'));
     fs.writeFileSync(path.join(agentsDir, 'planner.md'), '---\nmodel: sonnet\ntools: Read\n---\n# Planner');
@@ -434,7 +435,8 @@ function runTests() {
       COMMANDS_DIR: commandsDir,
       SKILLS_DIR: skillsDir,
       CURSOR_RULES_DIR: cursorRulesDir,
-      CURSOR_SKILLS_DIR: cursorSkillsDir
+      CURSOR_SKILLS_DIR: cursorSkillsDir,
+      CURSOR_COMMANDS_DIR: cursorCommandsDir
     });
     assert.strictEqual(result.code, 1, 'Should fail when required packages are missing');
     assert.ok(result.stderr.includes('Missing required package manifest directory: python'), 'Should report missing required package');
@@ -445,6 +447,70 @@ function runTests() {
     cleanupTestDir(skillsDir);
     cleanupTestDir(cursorRulesDir);
     cleanupTestDir(cursorSkillsDir);
+    cleanupTestDir(cursorCommandsDir);
+  })) passed++; else failed++;
+
+  if (test('fails when tools.cursor.commands references a missing Cursor command file', () => {
+    const packagesDir = createTestDir();
+    const rulesDir = createTestDir();
+    const agentsDir = createTestDir();
+    const commandsDir = createTestDir();
+    const skillsDir = createTestDir();
+    const cursorRulesDir = createTestDir();
+    const cursorSkillsDir = createTestDir();
+    const cursorCommandsDir = createTestDir();
+
+    for (const packageName of ['typescript', 'sql', 'dotnet', 'rust', 'python', 'bash', 'powershell']) {
+      fs.mkdirSync(path.join(packagesDir, packageName), { recursive: true });
+      fs.mkdirSync(path.join(rulesDir, packageName), { recursive: true });
+      fs.writeFileSync(path.join(rulesDir, packageName, 'coding-style.md'), `# ${packageName}\nBody`);
+      fs.writeFileSync(
+        path.join(packagesDir, packageName, 'package.json'),
+        JSON.stringify(buildValidPackageManifest(packageName, {
+          tools: {
+            cursor: {
+              rules: [],
+              skills: [],
+              commands: packageName === 'typescript' ? ['missing-command.md'] : []
+            },
+            gemini: {
+              rules: []
+            }
+          }
+        })),
+        'utf8'
+      );
+    }
+
+    fs.mkdirSync(path.join(rulesDir, 'common'), { recursive: true });
+    fs.writeFileSync(path.join(rulesDir, 'common', 'coding-style.md'), '# Common\nBody');
+    fs.writeFileSync(path.join(agentsDir, 'planner.md'), '---\nmodel: sonnet\ntools: Read\n---\n# Planner');
+    fs.writeFileSync(path.join(commandsDir, 'plan.md'), '# Plan\nBody');
+    fs.mkdirSync(path.join(skillsDir, 'verification-loop'), { recursive: true });
+    fs.writeFileSync(path.join(skillsDir, 'verification-loop', 'SKILL.md'), '# Verification Loop\n\n## When to Use\nUse this skill for verification.');
+
+    const result = runValidatorWithDirs('validate-install-packages', {
+      PACKAGES_DIR: packagesDir,
+      RULES_DIR: rulesDir,
+      AGENTS_DIR: agentsDir,
+      COMMANDS_DIR: commandsDir,
+      SKILLS_DIR: skillsDir,
+      CURSOR_RULES_DIR: cursorRulesDir,
+      CURSOR_SKILLS_DIR: cursorSkillsDir,
+      CURSOR_COMMANDS_DIR: cursorCommandsDir
+    });
+
+    assert.strictEqual(result.code, 1, 'Should fail when Cursor command reference is missing');
+    assert.ok(result.stderr.includes('missing Cursor command reference: missing-command.md'));
+
+    cleanupTestDir(packagesDir);
+    cleanupTestDir(rulesDir);
+    cleanupTestDir(agentsDir);
+    cleanupTestDir(commandsDir);
+    cleanupTestDir(skillsDir);
+    cleanupTestDir(cursorRulesDir);
+    cleanupTestDir(cursorSkillsDir);
+    cleanupTestDir(cursorCommandsDir);
   })) passed++; else failed++;
 
   if (test('fails when referenced Cursor assets do not exist', () => {

@@ -16,6 +16,7 @@ const DEFAULT_COMMANDS_DIR = path.join(REPO_ROOT, 'commands');
 const DEFAULT_SKILLS_DIR = path.join(REPO_ROOT, 'skills');
 const DEFAULT_CURSOR_RULES_DIR = path.join(REPO_ROOT, 'cursor-template', 'rules');
 const DEFAULT_CURSOR_SKILLS_DIR = path.join(REPO_ROOT, 'cursor-template', 'skills');
+const DEFAULT_CURSOR_COMMANDS_DIR = path.join(REPO_ROOT, 'cursor-template', 'commands');
 const REQUIRED_PACKAGES = new Set(['typescript', 'sql', 'dotnet', 'rust', 'python', 'bash', 'powershell']);
 const PACKAGE_KINDS = new Set(['language', 'scaffolding', 'capability']);
 const PACKAGE_TARGETS = new Set(['claude', 'cursor', 'gemini']);
@@ -127,6 +128,7 @@ function validateInstallPackages(options = {}) {
   const skillsDir = options.skillsDir || DEFAULT_SKILLS_DIR;
   const cursorRulesDir = options.cursorRulesDir || DEFAULT_CURSOR_RULES_DIR;
   const cursorSkillsDir = options.cursorSkillsDir || DEFAULT_CURSOR_SKILLS_DIR;
+  const cursorCommandsDir = options.cursorCommandsDir || DEFAULT_CURSOR_COMMANDS_DIR;
   const io = options.io || { log: console.log, error: console.error };
 
   if (!fs.existsSync(packagesDir)) {
@@ -293,6 +295,20 @@ function validateInstallPackages(options = {}) {
             if (!fs.existsSync(path.join(cursorSkillsDir, skillName))) {
               io.error(`ERROR: ${packageName}/package.json - missing Cursor skill reference: ${skillName}`);
               hasErrors = true;
+            }
+          }
+        }
+
+        if (cursor.commands !== undefined) {
+          if (!isStringArray(cursor.commands)) {
+            io.error(`ERROR: ${packageName}/package.json - tools.cursor.commands must be an array of non-empty strings when provided`);
+            hasErrors = true;
+          } else {
+            for (const commandFile of cursor.commands) {
+              if (!fs.existsSync(path.join(cursorCommandsDir, commandFile))) {
+                io.error(`ERROR: ${packageName}/package.json - missing Cursor command reference: ${commandFile}`);
+                hasErrors = true;
+              }
             }
           }
         }

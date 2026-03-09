@@ -19,7 +19,9 @@
     "instinct-import.md",
     "instinct-status.md",
     "projects.md",
-    "promote.md"
+    "promote.md",
+    "learn.md",
+    "skill-create.md"
   ],
   "skills": [
     "continuous-learning-v2"
@@ -35,7 +37,11 @@
         "common-security.md",
         "common-testing.md"
       ],
-      "skills": []
+      "skills": [],
+      "commands": [
+        "learn.md",
+        "skill-create.md"
+      ]
     }
   },
   "requires": {

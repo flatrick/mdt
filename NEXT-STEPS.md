@@ -77,35 +77,55 @@ Status:
 
 ### 2. Cursor parity — wire continuous learning (P1)
 
-`skills/continuous-learning-v2/hooks/observe.js` is called at Pre/PostToolUse in
-Claude hooks but is not wired in Cursor hooks at all. `observe.js` already supports
-Cursor via `detect-env.js`. Add calls to `afterFileEdit` and `afterShellExecution`
-Cursor hooks.
+Status: **done** — Cursor continuous-learning wiring now uses native Cursor
+payloads and storage.
+
+`skills/continuous-learning-v2/hooks/observe.js` is now called from
+`hooks/cursor/scripts/after-file-edit.js` and
+`hooks/cursor/scripts/after-shell-execution.js` via the Cursor hook adapter.
+The adapter:
+
+- anchors `CONFIG_DIR` and `MDT_ROOT` to the project `.cursor/` install
+- sends Cursor-native payloads into `observe.js` (no dependency on Claude
+  `transcript_path`)
+- writes observations under `.cursor/homunculus/...`
+
+Manual verification lives in
+`docs/testing/manual-verification/cursor.md` (Continuous Learning +
+Session Lifecycle sections).
+
+Continuous-learning planning constraint:
+
+- keep observation capture sparse and event-driven rather than logging every
+  conversational turn
+- optimize for detecting repeated or costly workflows that should become
+  dedicated scripts, custom commands, or MCP-backed integrations
+- treat raw observation volume as a cost unless it produces better automation
+  candidates
 
 ### 3. Cursor parity — populate `.cursor/skills/` (P2)
+
+Status: **first slice complete** — Cursor skills are now package-driven.
 
 Cursor has a native skills system using the same `SKILL.md` format and
 auto-discovery as Claude Code. Skills live in `.cursor/skills/` (project) or
 `~/.cursor/skills/` (user) and are invocable via `/` in Agent chat.
 
-This should happen through the package-manifest model above, not by blindly
-copying the shared repo `skills/` tree.
+MDT now installs Cursor skills via the package-manifest model:
 
-Currently only `frontend-slides` is in `.cursor/skills/`. Additional skills
-should be added intentionally through Cursor-facing package definitions, not
-converted to rules and not copied implicitly.
+- language packages (for example `typescript`) list shared skills explicitly
+  under `"skills"` (`tdd-workflow`, `verification-loop`, `coding-standards`,
+  `security-review`, `backend-patterns`, `frontend-patterns`, `e2e-testing`)
+- capability packages such as `continuous-learning` and `context-compaction`
+  list their own skills
+- `installCursorSkills()` copies only package-selected skills from `skills/*/`
+  plus any Cursor-specific skills from `cursor-template/skills/`
 
-Priority skills to add first:
-- `tdd-workflow`
-- `verification-loop`
-- `coding-standards`
-- `security-review`
-- `backend-patterns`
-- `frontend-patterns`
+Follow-ups for this P2 item:
 
-Update `scripts/install-mdt.js` so Cursor installs resolve skills from package
-definitions and Cursor-facing sources, not from the entire shared `skills/`
-directory.
+- keep the priority skills list in sync with `packages/*/package.json`
+- add more Cursor-facing skills intentionally (via packages) rather than by
+  copying the entire shared `skills/` tree
 
 Note: Cursor user-level rules (`~/.cursor/rules/`) are stored in a database and
 cannot be file-installed. The install script must only target project-level paths
@@ -157,16 +177,28 @@ the same runtime truth:
 - packages declare install-time capability constraints
 - skills declare asset-level expectations for direct/manual installs
 
-### 5. Cursor parity — convert commands to Cursor custom commands (P2)
+### 5. Cursor parity — expand custom command coverage (P2)
 
-All commands in `commands/*.md` use Claude Code slash command format. Cursor has
-its own custom command system. Create `.cursor/commands/` and convert the core
-workflows, stripping Claude-specific subagent syntax:
+Status: **first slice done** — package-selected Cursor custom command prompts
+now ship from `cursor-template/commands/`.
 
-- `/tdd`, `/plan`, `/verify`, `/code-review`, `/learn`, `/skill-create`
+Current state:
 
-Update `scripts/install-mdt.js` to install these via package selection rather
-than path-by-path hardcoding.
+- `scripts/install-mdt.js` installs package-selected Cursor commands into
+  `.cursor/commands/`
+- shipped prompts now exist for `plan`, `tdd`, `verify`, `code-review`,
+  `learn`, and `skill-create`
+- package validation now checks `tools.cursor.commands`
+- Cursor command coverage is still intentionally narrower than the shared Claude
+  slash-command catalog
+
+Future work for this item should focus on:
+
+- deciding which additional shared MDT workflows deserve first-class Cursor
+  command prompts
+- keeping Cursor command prompts aligned with the corresponding shared workflow
+  contracts
+- adding manual verification coverage for the shipped Cursor command set
 
 ### 6. Add deeper Claude workflow smoke (P2)
 
@@ -183,7 +215,35 @@ Add test coverage for:
 - continuous-learning wiring in Cursor `afterFileEdit` / `afterShellExecution`
 - package-driven skill/command install output
 
-### 8. Cut a stabilization release boundary (P3)
+### 8. Add weekly continuous-learning retrospectives focused on automation candidates (P2)
+
+Status: **not started**
+
+Goal:
+
+- keep the live observer cheap and low-noise
+- analyze one calendar week of observations and archived batches
+- identify repeated, costly, or failure-prone workflows that should become:
+  - dedicated scripts
+  - custom commands
+  - MCP-backed integrations
+
+Important constraints:
+
+- do not increase observation frequency just to collect more data
+- do not treat raw log volume as a success metric
+- prefer sparse event capture plus higher-value summaries
+- do not add monthly rollups until weekly reports prove useful
+
+Suggested first slice:
+
+1. add an explicit weekly retrospective command for one project and one week
+2. read current `observations.jsonl` plus matching `observations.archive/*.jsonl`
+3. write one structured weekly summary under project storage
+4. include a section for automation candidates and likely script/MCP targets
+5. keep this manual first; do not auto-run it yet
+
+### 9. Cut a stabilization release boundary (P3)
 
 Once Cursor hook parity is working and Claude workflow smoke is added, prepare
 release notes covering:
@@ -192,7 +252,7 @@ release notes covering:
 - Claude workflow smoke coverage
 - package-driven install selection and Cursor skills/commands composition
 
-### 9. Add OpenCode local smoke once installed
+### 10. Add OpenCode local smoke once installed
 
 OpenCode is structurally documented but not locally verified. Once installed:
 

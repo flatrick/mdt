@@ -790,8 +790,12 @@ function installCursorCoreDirs(destDir, selectedPackages) {
   const commandsSrc = path.join(CURSOR_SRC, 'commands');
   const commandsDest = path.join(destDir, 'commands');
   if (fs.existsSync(commandsSrc)) {
-    console.log('Installing commands -> ' + commandsDest + '/');
-    copyRecursiveSync(commandsSrc, commandsDest);
+    const cursorCommandFiles = getToolManifestSelections(selectedPackages, 'cursor', 'commands');
+    if (cursorCommandFiles.length > 0) {
+      if (copySelectedMarkdownFiles(commandsSrc, commandsDest, cursorCommandFiles, 'Cursor package-selected command') > 0) {
+        console.log('Installing Cursor package commands -> ' + commandsDest + '/');
+      }
+    }
   }
 }
 
@@ -851,8 +855,13 @@ function installCursor(packageNames, globalScope) {
   printCursorGlobalRulesNote(globalScope);
   installCursorRules(destDir, selectedPackages, globalScope);
   installCursorCoreDirs(destDir, selectedPackages);
-  installCursorHooksConfig(destDir, globalScope);
-  installCursorHookScripts(destDir);
+  const skipHooks = String(process.env.MDT_SKIP_CURSOR_HOOKS || '').trim() === '1';
+  if (skipHooks) {
+    console.log('Skipping Cursor hooks install because MDT_SKIP_CURSOR_HOOKS=1');
+  } else {
+    installCursorHooksConfig(destDir, globalScope);
+    installCursorHookScripts(destDir);
+  }
   installCursorRuntimeScripts(destDir);
   installCursorMcp(destDir);
   printWindowsHookNote('NOTE: Windows — Cursor hooks use Node.js; tmux features are skipped on Windows.');

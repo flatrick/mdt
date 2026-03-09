@@ -145,6 +145,76 @@ function runTests() {
       }
     },
     {
+      name: 'cursor install copies only package-selected Cursor command prompts',
+      run: () => {
+        const tmpHome = createTestDir('mdt-install-cursor-commands-home-');
+        const tmpProject = createTestDir('mdt-install-cursor-commands-proj-');
+
+        try {
+          const result = runInstaller(['--target', 'cursor', 'typescript', 'continuous-learning'], {
+            cwd: tmpProject,
+            env: {
+              HOME: tmpHome,
+              USERPROFILE: tmpHome
+            }
+          });
+          assertSuccess(result, 'cursor package install with commands');
+
+          const cursorRoot = path.join(tmpProject, '.cursor');
+          const commandsRoot = path.join(cursorRoot, 'commands');
+
+          assert.ok(
+            fs.existsSync(path.join(commandsRoot, 'plan.md')),
+            'Cursor install should copy the plan command template from cursor-template/commands for typescript'
+          );
+          assert.ok(
+            fs.existsSync(path.join(commandsRoot, 'tdd.md')),
+            'Cursor install should copy the tdd command template from cursor-template/commands for typescript'
+          );
+          assert.ok(
+            fs.existsSync(path.join(commandsRoot, 'verify.md')),
+            'Cursor install should copy the verify command template from cursor-template/commands for typescript'
+          );
+          assert.ok(
+            fs.existsSync(path.join(commandsRoot, 'code-review.md')),
+            'Cursor install should copy the code-review command template from cursor-template/commands for typescript'
+          );
+          assert.ok(
+            fs.existsSync(path.join(commandsRoot, 'learn.md')),
+            'Cursor install should copy the learn command template from cursor-template/commands for continuous-learning'
+          );
+          assert.ok(
+            fs.existsSync(path.join(commandsRoot, 'skill-create.md')),
+            'Cursor install should copy the skill-create command prompt from cursor-template/commands for continuous-learning'
+          );
+
+          const planCommand = fs.readFileSync(path.join(commandsRoot, 'plan.md'), 'utf8');
+          const verifyCommand = fs.readFileSync(path.join(commandsRoot, 'verify.md'), 'utf8');
+          const learnCommand = fs.readFileSync(path.join(commandsRoot, 'learn.md'), 'utf8');
+
+          assert.ok(
+            planCommand.includes('Wait for explicit user confirmation before making code changes.'),
+            'Cursor plan command should contain a real planning workflow prompt'
+          );
+          assert.ok(
+            !planCommand.includes('Use Cursor’s custom command UI'),
+            'Cursor plan command should no longer be a setup template'
+          );
+          assert.ok(
+            verifyCommand.includes('VERIFICATION: PASS|FAIL'),
+            'Cursor verify command should contain the verification report contract'
+          );
+          assert.ok(
+            learnCommand.includes('Session Learning Summary'),
+            'Cursor learn command should contain the reusable learning workflow'
+          );
+        } finally {
+          cleanupTestDir(tmpHome);
+          cleanupTestDir(tmpProject);
+        }
+      }
+    },
+    {
       name: 'claude install copies only package-selected shared rules',
       run: () => {
         const tmpProject = createTestDir('mdt-install-claude-rules-');
