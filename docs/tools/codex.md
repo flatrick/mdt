@@ -27,7 +27,7 @@ Local version seen:
 | Rules / reusable guidance | `.rules` files under Codex rule layers | official |
 | Project guidance | layered `AGENTS.md` | official |
 | Skills / reusable workflows | `.agents/skills` plus user/system skill locations | official |
-| Repo-defined workflow commands | not verified as a Claude-style markdown command surface in this audit | unsupported / redesign |
+| Repo-defined workflow commands | not a Claude-style markdown command surface; use skills and local scripts for smoke-style workflow checks | repo-adapter |
 | Built-in slash commands | session-control slash commands such as `/permissions`, `/agent`, `/status`, `/model` | official |
 | Agents / delegation | `AGENTS.md` is official; local feature flags show `multi_agent` and `child_agents_md` as non-stable | `official` plus `experimental` |
 | Event hooks | no Claude-style hooks surface verified | unsupported |
@@ -46,6 +46,7 @@ Important implication:
 - do not document Codex as "single-agent only"
 - do not document Codex as "instructions only"
 - do not document Codex as "no rules" or "no skills"
+- do not force Claude/Cursor markdown command patterns onto Codex when a skill plus local script is the cleaner fit
 
 ## Syntax and Paths To Prefer
 
@@ -81,6 +82,13 @@ Optional UI metadata can live in:
 agents/openai.yaml
 ```
 
+For MDT smoke-style verification in Codex, prefer the shipped
+`tool-setup-verifier` skill plus the local scripts:
+
+- `node scripts/verify-tool-setups.js`
+- `node scripts/smoke-tool-setups.js`
+- `node scripts/smoke-codex-workflows.js`
+
 ### Built-in slash commands
 
 Codex slash commands are built-in session controls, not markdown workflow prompts. They are closer to terminal controls than to MDT's `commands/*.md`.
@@ -100,6 +108,7 @@ Treat those as non-default until explicitly needed.
 - Do not assume Codex repo commands work like Claude markdown slash commands.
 - Do not assume Codex can consume Claude hooks directly.
 - Do not assume the absence of Claude-style hooks means Codex cannot support the same workflow outcome; use `AGENTS.md`, rules, skills, built-in slash commands, and automations instead.
+- Do not try to emulate `/smoke` as a fake markdown command in Codex; use the Codex skill and local smoke scripts instead.
 
 ## Local Verification Commands
 

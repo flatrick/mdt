@@ -29,6 +29,7 @@ Available skills:
 - strategic-compact — Context management
 - api-design — REST API design patterns
 - verification-loop — Build, test, lint, typecheck, security
+- tool-setup-verifier — Smoke-check MDT tool adapters and workflow contracts
 
 ## MCP Servers
 

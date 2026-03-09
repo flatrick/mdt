@@ -140,9 +140,9 @@ const TOOL_WORKFLOW_CONTRACT = {
           requiredFiles: ['cursor-template/commands/smoke.md', 'docs/testing/manual-verification/cursor.md']
         },
         codex: {
-          status: 'unsupported',
+          status: 'repo-adapter',
           verificationMode: 'installer-target',
-          requiredFiles: ['docs/testing/manual-verification/codex.md']
+          requiredFiles: ['.agents/skills/tool-setup-verifier/SKILL.md', 'docs/testing/manual-verification/codex.md']
         },
         opencode: {
           status: 'unsupported',

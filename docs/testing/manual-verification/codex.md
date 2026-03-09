@@ -1,15 +1,25 @@
 # Codex Manual Verification
 
-This page is a prepared manual-verification stub for Codex.
+Use this page for quick Codex sanity checks and deeper runtime verification in a
+real local Codex session.
 
-Use it to record human-run checks for Codex-specific MDT behavior that cannot be fully proven by unit tests or static validation.
+## Quick Smoke
 
-## Current Status
+Codex does not use the same markdown command surface as Claude Code or Cursor.
+For Codex, the smoke path is:
 
-- Stub only
-- Expand this page when Codex-specific runtime behavior needs a repeatable human verification checklist
+- the `tool-setup-verifier` skill under `.agents/skills/`
+- the local scripts:
+  - `node scripts/verify-tool-setups.js`
+  - `node scripts/smoke-tool-setups.js`
+  - `node scripts/smoke-codex-workflows.js`
 
-## Likely Future Sections
+Expected:
+- `verify-tool-setups.js` passes
+- `smoke-tool-setups.js` reports Codex CLI probes as `PASS` when Codex is installed
+- `smoke-codex-workflows.js` reports the current Codex MDT workflows as `PASS`
+
+## Likely Deeper Checks
 
 - local Codex launch verification for this repo
 - sandbox/profile verification for trusted local testing
@@ -19,5 +29,5 @@ Use it to record human-run checks for Codex-specific MDT behavior that cannot be
 
 ## Notes
 
-- Keep this page focused on behavior that must be verified in a real local Codex session
-- Keep CLI-first checks in [docs/tools/local-verification.md](../../tools/local-verification.md)
+- Keep this page focused on behavior that must be verified in a real local Codex session.
+- Keep CLI-first checks in [docs/tools/local-verification.md](../../tools/local-verification.md).
