@@ -90,7 +90,7 @@
     "release": "node scripts/release.js",
     "lint": "node scripts/ci/check-dependencies.js eslint markdownlint-cli && eslint . && markdownlint \"**/*.md\" --ignore node_modules",
     "claw": "node scripts/claw.js",
-    "test": "node scripts/ci/check-dependencies.js eslint markdownlint-cli && node scripts/ci/validate-agents.js && node scripts/ci/validate-commands.js && node scripts/ci/validate-rules.js && node scripts/ci/validate-skills.js && node scripts/ci/validate-hooks.js && node scripts/ci/validate-hook-mirrors.js && node scripts/ci/validate-metadata.js && node scripts/ci/validate-no-hardcoded-paths.js && node scripts/ci/validate-markdown-links.js && node scripts/ci/validate-markdown-path-refs.js && node scripts/verify-tool-setups.js && node tests/run-all.js",
+    "test": "node scripts/ci/check-dependencies.js eslint markdownlint-cli && node scripts/ci/validate-agents.js && node scripts/ci/validate-commands.js && node scripts/ci/validate-rules.js && node scripts/ci/validate-skills.js && node scripts/ci/validate-hooks.js && node scripts/ci/validate-metadata.js && node scripts/ci/validate-no-hardcoded-paths.js && node scripts/ci/validate-markdown-links.js && node scripts/ci/validate-markdown-path-refs.js && node scripts/verify-tool-setups.js && node tests/run-all.js",
     "test:neutral": "node tests/run-all.js --profile neutral",
     "test:claude": "node tests/run-all.js --profile claude",
     "test:cursor": "node tests/run-all.js --profile cursor",

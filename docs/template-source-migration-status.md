@@ -6,8 +6,6 @@ Last updated: 2026-03-08
 
 The migration is in progress and the major runtime-style source trees have already been moved out of repo-root dot-directories for Cursor, Codex, and OpenCode. Claude has only been partially migrated so far: the tracked local package-manager file was removed, and the Claude hook config source now lives in `claude-template/hooks.json`.
 
-The final adapter layout decision is now made: keep the current root-level template directories (`claude-template/`, `cursor-template/`, `codex-template/`, and `opencode-template/`) as the long-term structure.
-
 The repository is currently in a workable intermediate state:
 
 - `cursor-template/` is the tracked Cursor adapter source
@@ -93,7 +91,22 @@ Additional targeted checks that passed during this migration:
 
 ## Remaining Work
 
-### 1. Finish the Claude adapter model
+### 1. Decide the final top-level layout
+
+This is the biggest remaining architectural decision.
+
+The repo is still structurally mixed:
+
+- root-level `agents/`, `commands/`, `skills/`, `rules/`, and `hooks/` still act as canonical MDT assets
+- tool adapters now live in `cursor-template/`, `codex-template/`, `opencode-template/`, and partially in `claude-template/`
+
+What still needs to be decided:
+
+- whether to keep canonical MDT assets at repo root
+- whether to consolidate all tool-specific adapters under a common parent such as `templates/`
+- how `hooks/` should be split between canonical/shared hook logic, per-tool hook sources, and mirrors
+
+### 2. Finish the Claude adapter model
 
 Claude is still only partially template-shaped.
 
@@ -103,13 +116,7 @@ Still to clarify:
 - whether any other Claude-only source assets should move there
 - what remains canonical MDT source versus Claude-only adapter glue
 
-Kickoff progress (this update):
-
-- completed an initial classification pass for remaining Claude-adjacent assets in [template-source-migration-inventory.md](template-source-migration-inventory.md)
-- confirmed no additional obvious tracked repo-root `.claude/` source files currently need migration
-- identified the main remaining Claude task as documenting and locking source-vs-mirror ownership around hook config
-
-### 2. Clean up docs to match the final chosen structure
+### 3. Clean up docs to match the final chosen structure
 
 Some docs have already been updated to the new template-source model, but a full cleanup pass is still needed after the final structure decision.
 
@@ -120,46 +127,13 @@ Expected targets:
 - `docs/tools/*`
 - migration docs themselves
 
-## Newly Locked Decision
+### 4. Add a durable migration-complete checklist
 
-Final top-level adapter layout:
+Once the final structure is chosen, this status file should be updated with:
 
-- keep root-level:
-  - `claude-template/`
-  - `cursor-template/`
-  - `codex-template/`
-  - `opencode-template/`
-- do **not** introduce an additional `templates/` parent directory in this migration
-
-Rationale:
-
-- minimizes churn in installer/test/doc paths that already target `*-template/`
-- keeps migration focused on source ownership boundaries rather than broad structural reshuffles
-- allows the next work item to focus on clarifying and completing the Claude adapter model
-
-
-
-## Migration-Complete Checklist (Draft)
-
-A migration-complete repository should satisfy all of the following:
-
-- [ ] no tracked canonical tool source remains under repo-root runtime directories (`.claude/`, `.cursor/`, `.codex/`, `.opencode/`)
-- [ ] canonical adapter source lives only in `claude-template/`, `cursor-template/`, `codex-template/`, and `opencode-template/`
-- [ ] Claude hook ownership is explicit:
-  - source-of-truth file: `claude-template/hooks.json`
-  - repo mirror file: `hooks/hooks.json`
-  - mirror is byte-identical to source and validated in CI
-- [ ] installer and verification flows treat `*-template/` directories as source of truth
-- [ ] docs consistently describe template directories as source and runtime dot-directories as local/rendered outputs
-
-Verification commands:
-
-- `node scripts/ci/validate-hook-mirrors.js`
-- `node scripts/verify-tool-setups.js`
-- `node scripts/smoke-tool-setups.js`
-- `node scripts/smoke-codex-workflows.js`
-- `node scripts/ci/validate-markdown-links.js`
-- `node scripts/ci/validate-markdown-path-refs.js`
+- final accepted layout
+- explicit “done” criteria
+- verification commands for a migration-complete repo
 
 ## Known Decisions
 
@@ -170,16 +144,21 @@ Verification commands:
 
 ## Current Recommended Next Step
 
-With the top-level layout now locked, complete the Claude adapter definition.
+Before doing more moves, define the final structural model clearly.
 
 Recommended next action:
 
-1. enumerate all remaining Claude-specific source candidates and classify each as:
-   - `claude-template/` source
-   - root-level shared MDT source
-   - local/runtime-only state
-2. move or document each classified Claude-specific source asset
-3. run migration verification commands and capture the resulting status in this file
+1. decide whether the long-term adapter layout should stay as:
+   - `claude-template/`
+   - `cursor-template/`
+   - `codex-template/`
+   - `opencode-template/`
+2. or be normalized into a single parent such as:
+   - `templates/claude/`
+   - `templates/cursor/`
+   - `templates/codex/`
+   - `templates/opencode/`
+3. then update the migration plan to match that final decision before more filesystem churn
 
 ## Notes For Future Agents
 

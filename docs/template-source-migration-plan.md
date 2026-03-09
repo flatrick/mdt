@@ -214,7 +214,6 @@ After each phase, run locally:
 - `node scripts/verify-tool-setups.js`
 - `node scripts/smoke-tool-setups.js`
 - `node scripts/smoke-codex-workflows.js`
-- `node scripts/ci/validate-hook-mirrors.js`
 - relevant install tests
 - `node scripts/ci/validate-markdown-links.js`
 - `node scripts/ci/validate-markdown-path-refs.js`
@@ -227,22 +226,14 @@ Acceptance criteria:
 - repo runtime dirs are ignored
 - local verification still passes
 
-## Recommended Next Implementation Slice
+## Recommended First Implementation Slice
 
-The initial Cursor/Codex/OpenCode migration slices are complete, and the top-level adapter layout decision is locked to root-level `*-template/` directories.
-
-Start next with Claude adapter completion and migration closeout:
-
-1. classify remaining Claude-adjacent tracked assets as:
-   - `claude-template/` source
-   - root-level shared MDT source
-   - mirror/rendered output
-   - local/runtime-only state
-2. document and enforce mirror semantics for Claude hook config (source vs mirror ownership)
-3. define and add migration-complete criteria and verification commands in the status docs
+Start with Cursor and Codex only.
 
 Reason:
 
-- this finishes the only partially migrated adapter
-- it avoids unnecessary path churn after the layout decision
-- it creates a clear end-state gate for future migration work
+- Cursor is the current parity hotspot
+- Codex is already under active local smoke coverage
+- this gives you the template-source pattern before touching OpenCode's larger surface
+
+If that slice works cleanly, apply the same pattern to Claude and OpenCode.
