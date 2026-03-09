@@ -198,12 +198,13 @@ Current candidates:
 
 - `tools.cursor.rules`
 - `tools.cursor.skills`
+- `tools.codex.skills`
 - `tools.gemini.rules`
 
 Not yet justified:
 
 - `tools.cursor.commands`
-- `tools.codex.*`
+- `tools.codex.rules`
 - `tools.opencode.*`
 
 Those should wait until the repo has a real install surface and installer path
@@ -252,10 +253,9 @@ For example, the current first-pass capability manifests can already declare:
     "projects.md"
   ],
   "requires": {
-    "hooks": true,
     "runtimeScripts": true,
     "sessionData": true,
-    "tools": ["claude", "cursor"]
+    "tools": ["claude", "cursor", "codex"]
   }
 }
 ```

@@ -1,0 +1,95 @@
+# Installation
+
+Use `scripts/install-mdt.js` to install MDT into Claude Code, Cursor, Codex, or Gemini.
+
+Detailed tool behavior lives in:
+
+- [Supported Tools](./supported-tools.md)
+- [Claude Code](./tools/claude-code.md)
+- [Cursor](./tools/cursor.md)
+- [Codex](./tools/codex.md)
+- [Local Verification](./tools/local-verification.md)
+- [Reset / Reinstall](./MIGRATION.md)
+
+## CLI
+
+```bash
+node scripts/install-mdt.js [--target claude|cursor|codex|gemini] [--global] [--project-dir <path>] [--list] [--dry-run] [package ...]
+```
+
+Notes:
+
+- positional args are package names
+- default target is `claude`
+- `--project-dir` changes where project-level files are installed
+- `--global` only affects targets that support a user-level install mode
+
+## Target Summary
+
+| Target | User/global layer | Project layer | Notes |
+| --- | --- | --- | --- |
+| `claude` | `~/.claude/` with `--global` | `.claude/` by default | installs rules, agents, commands, skills, hooks, and runtime scripts |
+| `cursor` | `~/.cursor/` with `--global` | `.cursor/` by default | global rules are not file-installable; project install is the primary mode |
+| `codex` | `~/.codex/` always | `.agents/skills/` and `.agents/scripts/` in the target repo | package-driven; use `--project-dir` for clean external repo installs |
+| `gemini` | `~/.gemini/` with `--global` | `.agent/` and `.gemini/` by default | uses Gemini/Antigravity-specific layout |
+
+## Examples
+
+Claude Code:
+
+```bash
+node scripts/install-mdt.js typescript
+node scripts/install-mdt.js --dry-run typescript continuous-learning
+```
+
+Cursor:
+
+```bash
+node scripts/install-mdt.js --target cursor typescript
+node scripts/install-mdt.js --target cursor typescript continuous-learning
+node scripts/install-mdt.js --target cursor --global typescript
+```
+
+Codex:
+
+```bash
+node scripts/install-mdt.js --target codex typescript continuous-learning
+node scripts/install-mdt.js --target codex --project-dir ../scratch-repo typescript continuous-learning
+```
+
+Gemini:
+
+```bash
+node scripts/install-mdt.js --target gemini typescript
+node scripts/install-mdt.js --target gemini --global typescript
+```
+
+Discovery:
+
+```bash
+node scripts/install-mdt.js --list
+node scripts/install-mdt.js --target cursor --dry-run typescript
+```
+
+## Verification
+
+After install, prefer:
+
+```bash
+node scripts/verify-tool-setups.js
+node scripts/smoke-tool-setups.js
+```
+
+Tool-specific manual checks live under:
+
+- [docs/testing/manual-verification/claude-code.md](./testing/manual-verification/claude-code.md)
+- [docs/testing/manual-verification/cursor.md](./testing/manual-verification/cursor.md)
+- [docs/testing/manual-verification/codex.md](./testing/manual-verification/codex.md)
+
+## Pre-v1 Policy
+
+Before `v1.0.0`, assume reinstall rather than in-place upgrade:
+
+- start fresh when install layout changes
+- rerun `node scripts/install-mdt.js`
+- do not rely on compatibility migration steps between intermediate revisions

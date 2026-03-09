@@ -39,8 +39,17 @@ Local version seen:
 The repo currently ships:
 - `codex-template/config.toml`
 - `codex-template/AGENTS.md`
+- `codex-template/skills/` as the install-source tree for Codex-readable skills
+- package-driven Codex installs via `node scripts/install-mdt.js --target codex <package...>`
+- optional explicit project targeting via `node scripts/install-mdt.js --target codex --project-dir <repo> <package...>`
 
-That is useful, but narrower than what Codex officially supports.
+The install path now has two layers:
+
+- user layer: `~/.codex/` for config and Codex-specific global guidance
+- project layer: `.agents/skills/` plus `.agents/scripts/` materialized from `codex-template/` and shared runtime scripts
+
+For Codex, `codex-template/` is the install-source tree. `.agents/skills/` is the
+materialized project-facing surface after install.
 
 Important implication:
 - do not document Codex as "single-agent only"
@@ -89,6 +98,26 @@ For MDT smoke-style verification in Codex, prefer the shipped
 - `node scripts/smoke-tool-setups.js`
 - `node scripts/smoke-codex-workflows.js`
 
+For package-driven Codex installs, the installer materializes selected skills
+from `codex-template/skills/` into `.agents/skills/`.
+
+When testing against a clean repo, prefer:
+
+```bash
+node scripts/install-mdt.js --target codex --project-dir ../scratch-repo typescript continuous-learning
+```
+
+For `continuous-learning`, Codex currently uses an explicit manual workflow
+instead of hooks:
+
+```bash
+node .agents/skills/continuous-learning-v2/scripts/codex-learn.js status
+node .agents/skills/continuous-learning-v2/scripts/codex-learn.js capture < summary.txt
+node .agents/skills/continuous-learning-v2/scripts/codex-learn.js analyze
+```
+
+That writes project-local learning state under `.codex/homunculus/`.
+
 ### Built-in slash commands
 
 Codex slash commands are built-in session controls, not markdown workflow prompts. They are closer to terminal controls than to MDT's `commands/*.md`.
@@ -109,6 +138,8 @@ Treat those as non-default until explicitly needed.
 - Do not assume Codex can consume Claude hooks directly.
 - Do not assume the absence of Claude-style hooks means Codex cannot support the same workflow outcome; use `AGENTS.md`, rules, skills, built-in slash commands, and automations instead.
 - Do not try to emulate `/smoke` as a fake markdown command in Codex; use the Codex skill and local smoke scripts instead.
+- Do not treat `codex-template/` as optional documentation only; it is now the
+  source tree the installer reads from for Codex-facing assets.
 
 ## Local Verification Commands
 

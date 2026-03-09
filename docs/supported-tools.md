@@ -32,7 +32,7 @@ Use this when you need to answer:
 
 - Claude Code is the closest match to MDT's current structure: hooks, slash commands, subagents, skills, and `CLAUDE.md`/memory are all native concepts.
 - Cursor officially supports rules, `AGENTS.md`, custom commands, memories, background agents, and a terminal agent/CLI. MDT's current `cursor-template/hooks.json` flow should be treated as `experimental` until Cursor documents that surface.
-- Codex officially supports layered `AGENTS.md`, rule files, skills, and built-in slash commands. The repo currently underuses Codex by shipping only `config.toml` and `AGENTS.md`.
+- Codex officially supports layered `AGENTS.md`, rule files, skills, and built-in slash commands. MDT now installs package-selected Codex skills and project runtime helpers in addition to `~/.codex` config.
 - OpenCode officially exposes config-driven `instructions`, `agent`, `command`, and `plugin` surfaces. It is not installed locally on this machine, so its page is `not-locally-verified`.
 
 ## Local Tool Versions Observed During This Audit

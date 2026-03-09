@@ -1,7 +1,7 @@
 # Package-Manifest Install Model
 
 Date: 2026-03-09
-Status: Proposed next implementation track
+Status: Historical design note
 
 ## Summary
 
@@ -18,9 +18,12 @@ node scripts/install-mdt.js --target cursor typescript
 can install unrelated skills because Cursor skill install is currently driven by
 path copying rather than by an explicit install bundle definition.
 
-The next restructuring step is to introduce `packages/` manifests that define
-what an install scope actually contains: rules, skills, commands, hooks, and
-tool-specific overlays.
+This note captured the design direction before package manifests were implemented.
+The repo now uses package manifests for install selection. Prefer:
+
+- [docs/package-manifest-v1.md](./package-manifest-v1.md)
+- [docs/INSTALLATION.md](./INSTALLATION.md)
+- [NEXT-STEPS.md](../NEXT-STEPS.md)
 
 ## Pre-v1 Operating Rule
 
@@ -35,7 +38,7 @@ That means:
 This design should optimize for clarity and explicitness, not upgrade-path
 stability across pre-v1 revisions.
 
-## Problems With The Current Model
+## Problems With The Old Model
 
 ### 1. Install scope is implicit
 
@@ -82,7 +85,7 @@ The installer should be easy to test with assertions like:
 
 That is much easier if package composition is explicit data.
 
-## Proposed Model
+## Proposed Model (Implemented Direction)
 
 Add a `packages/` directory containing install manifests.
 
@@ -211,7 +214,7 @@ node scripts/install-mdt.js --target cursor typescript frontend
 
 This should mean “install the `typescript` package plus the `frontend` package”.
 
-## First Implementation Slice
+## First Implementation Slice (Completed)
 
 Keep the first slice narrow.
 

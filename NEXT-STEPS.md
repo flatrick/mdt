@@ -5,6 +5,7 @@
 - This fork is primarily for personal daily use, with possible reuse by friends and coworkers.
 - Upstream ECC is now reference material, not an active sync source.
 - v1 is still stabilization work: remove drift, verify real workflows, and avoid guesswork across tools.
+- The intended destination is documented in [docs/V1-TARGET-STATE.md](docs/V1-TARGET-STATE.md); this file should stay focused on active steps, not restate the whole end-state vision.
 - Until a commit is tagged `v1.0.0`, install layout and package composition are allowed to change.
 - Before `v1.0.0`, assume fresh installs rather than in-place migration: re-run `node scripts/install-mdt.js` instead of preserving upgrade workflows between intermediate layouts.
 
@@ -14,6 +15,8 @@ Recently completed:
 - The Cursor adapter now guarantees `MDT_ROOT` for delegated subprocesses.
 - Cursor cost tracking now records usage when payload data is present and logs an explicit fallback when it is not.
 - Focused Cursor lifecycle tests now cover the native session-end/stop path.
+- Codex installs are now package-driven and materialize package-selected skills into `.agents/skills/` from `codex-template/skills/`.
+- Codex `continuous-learning` now has an explicit project-local workflow under `.codex/homunculus/...` instead of depending on Claude/Cursor hooks.
 
 ---
 
@@ -73,7 +76,7 @@ Status:
 - the first real capability package drafts should be `continuous-learning` and `context-compaction`
 - capability metadata such as `requires.hooks`, `requires.runtimeScripts`, and `requires.sessionData` is now actionable in the installer/validator
 - `requires.tools` currently means "implemented installer support in this repo today", not a permanent product limit
-- the next package-model follow-up should add real Codex/Cursor-native implementations for MDT capability packages and widen `requires.tools` only when those installs actually exist
+- the next package-model follow-up should keep moving Codex install-time sources into `codex-template/` and reduce remaining mixed-source drift between `codex-template/` and `.agents/`
 
 ### 2. Cursor parity — wire continuous learning (P1)
 
@@ -209,13 +212,24 @@ Codex has workflow-level smoke coverage. Claude should get the same for:
 - `verify`
 - `security`
 
-### 7. Extend Cursor parity tests (P2)
+### 7. Codex parity — expand beyond first explicit continuous-learning slice (P2)
+
+Status: **first slice done** — Codex now supports package-driven install plus an
+explicit/manual `continuous-learning` path.
+
+Follow-ups for Codex should focus on:
+
+- deciding whether Codex gets real package-selected rule files under `codex-template/rules/`
+- reducing remaining source-layout drift between `codex-template/skills/` and the current `.agents/skills/` mirror
+- deciding whether any Codex app automations are worth using after the explicit path has proven itself
+- expanding Codex workflow verification beyond smoke into richer manual verification
+### 8. Extend Cursor parity tests (P2)
 
 Add test coverage for:
 - continuous-learning wiring in Cursor `afterFileEdit` / `afterShellExecution`
 - package-driven skill/command install output
 
-### 8. Add weekly continuous-learning retrospectives focused on automation candidates (P2)
+### 9. Add weekly continuous-learning retrospectives focused on automation candidates (P2)
 
 Status: **not started**
 
@@ -243,7 +257,7 @@ Suggested first slice:
 4. include a section for automation candidates and likely script/MCP targets
 5. keep this manual first; do not auto-run it yet
 
-### 9. Cut a stabilization release boundary (P3)
+### 10. Cut a stabilization release boundary (P3)
 
 Once Cursor hook parity is working and Claude workflow smoke is added, prepare
 release notes covering:
@@ -252,7 +266,7 @@ release notes covering:
 - Claude workflow smoke coverage
 - package-driven install selection and Cursor skills/commands composition
 
-### 10. Add OpenCode local smoke once installed
+### 11. Add OpenCode local smoke once installed
 
 OpenCode is structurally documented but not locally verified. Once installed:
 
