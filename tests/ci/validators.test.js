@@ -296,6 +296,77 @@ function runTests() {
   })) passed++; else failed++;
 
   // ==========================================
+  // validate-hook-mirrors.js
+  // ==========================================
+  console.log('\nvalidate-hook-mirrors.js:');
+
+  if (test('passes on real project hook mirrors', () => {
+    const result = runValidator('validate-hook-mirrors');
+    assert.strictEqual(result.code, 0, `Should pass, got stderr: ${result.stderr}`);
+    assert.ok(result.stdout.includes('Validated 2 hook mirror platform'), 'Should report validation success');
+  })) passed++; else failed++;
+
+  // ==========================================
+  // validate-runtime-ignores.js
+  // ==========================================
+  console.log('\nvalidate-runtime-ignores.js:');
+
+  if (test('passes on real project runtime ignores', () => {
+    const result = runValidator('validate-runtime-ignores');
+    assert.strictEqual(result.code, 0, `Should pass, got stderr: ${result.stderr}`);
+    assert.ok(result.stdout.includes('Validated runtime-dir ignores'), 'Should report validation success');
+  })) passed++; else failed++;
+
+  if (test('fails when required runtime ignore entries are missing', () => {
+    const testDir = createTestDir();
+    const gitignoreFile = path.join(testDir, '.gitignore');
+    fs.writeFileSync(gitignoreFile, '.claude/\n.cursor/\n');
+
+    const result = runValidatorWithDir('validate-runtime-ignores', 'GITIGNORE_FILE', gitignoreFile);
+    assert.strictEqual(result.code, 1, 'Should fail when runtime ignore entries are missing');
+    assert.ok(result.stderr.includes('.codex/'), 'Should report missing .codex/');
+    assert.ok(result.stderr.includes('.opencode/'), 'Should report missing .opencode/');
+    cleanupTestDir(testDir);
+  })) passed++; else failed++;
+
+  if (test('ignores comments and blank lines in .gitignore', () => {
+    const testDir = createTestDir();
+    const gitignoreFile = path.join(testDir, '.gitignore');
+    fs.writeFileSync(
+      gitignoreFile,
+      '# Runtime dirs\n\n.claude/\n.cursor/\n.codex/\n.opencode/\n'
+    );
+
+    const result = runValidatorWithDir('validate-runtime-ignores', 'GITIGNORE_FILE', gitignoreFile);
+    assert.strictEqual(result.code, 0, 'Should accept required entries with comments and blank lines');
+    cleanupTestDir(testDir);
+  })) passed++; else failed++;
+
+  if (test('accepts rooted runtime ignore entries', () => {
+    const testDir = createTestDir();
+    const gitignoreFile = path.join(testDir, '.gitignore');
+    fs.writeFileSync(gitignoreFile, '/.claude/\n/.cursor/\n/.codex/\n/.opencode/\n');
+
+    const result = runValidatorWithDir('validate-runtime-ignores', 'GITIGNORE_FILE', gitignoreFile);
+    assert.strictEqual(result.code, 0, 'Should accept rooted runtime ignore entries');
+    cleanupTestDir(testDir);
+  })) passed++; else failed++;
+
+  if (test('fails when a runtime dir is partially unignored later', () => {
+    const testDir = createTestDir();
+    const gitignoreFile = path.join(testDir, '.gitignore');
+    fs.writeFileSync(
+      gitignoreFile,
+      '.claude/\n.cursor/\n.codex/\n.opencode/\n!.codex/AGENTS.md\n'
+    );
+
+    const result = runValidatorWithDir('validate-runtime-ignores', 'GITIGNORE_FILE', gitignoreFile);
+    assert.strictEqual(result.code, 1, 'Should fail when a runtime dir is partially unignored');
+    assert.ok(result.stderr.includes('Runtime dir is partially unignored: .codex/'), 'Should report partial unignore');
+    cleanupTestDir(testDir);
+  })) passed++; else failed++;
+
+  // ==========================================
   // validate-skills.js
   // ==========================================
   console.log('\nvalidate-skills.js:');

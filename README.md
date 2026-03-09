@@ -13,7 +13,7 @@ The original is, at the time of writing this (2026-03-07), using NodeJS, Bash-sc
 
 The second goal is to steer away from being all about Claude Code as the primary LLM-tool, and instead aim for a generic toolkit that will hopefully work well for all/most alternatives.
 
-**2026-03-07 status:** the runtime migration is complete, and v1 stabilization is focused on contracts, metadata consistency, and tool-agnostic docs.
+**2026-03-09 status:** the template-source/runtime-dir migration is complete, and v1 stabilization is focused on contracts, metadata consistency, and tool-agnostic docs.
 
 ### This fork
 

@@ -68,3 +68,9 @@ verify-tool-setups.js.txt
 
 # Local Cursor config installation
 .cursor/
+
+# Local Codex config installation
+.codex/
+
+# Local OpenCode config installation
+.opencode/

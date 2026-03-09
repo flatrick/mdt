@@ -10,8 +10,10 @@ function getValidatorFunction(validatorName) {
     'validate-commands': mod.validateCommands,
     'validate-skills': mod.validateSkills,
     'validate-rules': mod.validateRules,
+    'validate-hook-mirrors': mod.runCli,
     'validate-metadata': mod.validateMetadata,
     'validate-no-hardcoded-paths': mod.validateNoHardcodedPaths,
+    'validate-runtime-ignores': mod.validateRuntimeIgnores,
     'validate-markdown-links': mod.validateMarkdownLinks,
     'validate-markdown-path-refs': mod.validateMarkdownPathRefs
   };
@@ -47,7 +49,8 @@ function runValidatorWithDir(validatorName, dirConstant, overridePath) {
     HOOKS_FILE: 'hooksFile',
     COMMANDS_DIR: 'commandsDir',
     SKILLS_DIR: 'skillsDir',
-    RULES_DIR: 'rulesDir'
+    RULES_DIR: 'rulesDir',
+    GITIGNORE_FILE: 'gitignorePath'
   };
   const key = optionMap[dirConstant];
   if (!key) throw new Error(`Unsupported dir constant: ${dirConstant}`);
@@ -60,7 +63,8 @@ function runValidatorWithDirs(validatorName, overrides) {
     HOOKS_FILE: 'hooksFile',
     COMMANDS_DIR: 'commandsDir',
     SKILLS_DIR: 'skillsDir',
-    RULES_DIR: 'rulesDir'
+    RULES_DIR: 'rulesDir',
+    GITIGNORE_FILE: 'gitignorePath'
   };
   const options = {};
   for (const [constant, overridePath] of Object.entries(overrides)) {

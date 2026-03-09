@@ -1,16 +1,11 @@
 # Template Source Migration
 
-This document is the entrypoint for the template-source migration work.
-
-Use these documents together:
-
-- [Plan](template-source-migration-plan.md) — target architecture, phases, risks, and verification plan
-- [Inventory](template-source-migration-inventory.md) — original classification of tracked runtime-style source assets
-- [Status](template-source-migration-status.md) — what has been completed, what remains, and the current recommended next step
+This document is the stable entrypoint for the completed template-source
+migration record.
 
 ## Purpose
 
-The migration separates:
+The migration separated:
 
 - canonical MDT source assets
 - per-tool adapter/template source
@@ -18,14 +13,32 @@ The migration separates:
 
 The goal is to stop treating repo-root runtime-style directories like `.cursor/`, `.codex/`, `.opencode/`, and `.claude/` as canonical tracked source.
 
-## Current Direction
+## Current State
 
-Completed so far:
+The migration is complete.
 
-- Cursor source moved to `cursor-template/`
-- Codex source moved to `codex-template/`
-- OpenCode source moved to `opencode-template/`
-- Claude hook config moved to `claude-template/hooks.json`
-- local Claude package-manager state stopped being tracked
+- `claude-template/`, `cursor-template/`, `codex-template/`, and
+  `opencode-template/` are the canonical per-tool template dirs.
+- `.claude/`, `.cursor/`, `.codex/`, and `.opencode/` are runtime/install dirs,
+  not canonical repo source.
+- `claude-template/hooks.json` is the canonical Claude hook config source.
+- `hooks/hooks.json` remains the synced Claude-facing mirror.
 
-For the latest exact state, see [Status](template-source-migration-status.md).
+## Historical Record
+
+Detailed migration history now lives in:
+
+- [History: 2026-03-09 template-source migration](history/2026-03-09.template-source-migration.md)
+
+Legacy migration child-note paths are preserved as historical stubs:
+
+- [Plan stub](template-source-migration-plan.md)
+- [Inventory stub](template-source-migration-inventory.md)
+- [Status stub](template-source-migration-status.md)
+
+## Active Follow-Up
+
+Further work should be tracked outside this migration record:
+
+- [NEXT-STEPS.md](../NEXT-STEPS.md)
+- [README.md](../README.md)

@@ -41,27 +41,30 @@ function validateHookMirrors(platforms = HOOK_PLATFORMS) {
   return { valid, results };
 }
 
-function runCli() {
-  const validation = validateHookMirrors();
+function runCli(options = {}) {
+  const io = options.io || console;
+  const validation = validateHookMirrors(options.platforms);
 
   if (!validation.valid) {
     for (const result of validation.results) {
       for (const issue of result.issues) {
-        console.error(`ERROR: ${issue}`);
+        io.error(`ERROR: ${issue}`);
       }
     }
-    process.exit(1);
+    return { exitCode: 1, validation };
   }
 
-  console.log(`Validated ${validation.results.length} hook mirror platform(s)`);
+  io.log(`Validated ${validation.results.length} hook mirror platform(s)`);
+  return { exitCode: 0, validation };
 }
 
 if (require.main === module) {
-  runCli();
+  const result = runCli();
+  process.exit(result.exitCode);
 }
 
 module.exports = {
+  runCli,
   validatePlatformMirror,
   validateHookMirrors,
-  runCli
 };
