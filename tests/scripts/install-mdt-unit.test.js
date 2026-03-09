@@ -213,7 +213,7 @@ function runTests() {
     assert.ok(Array.isArray(manifest.tools.gemini.rules));
     assert.ok(manifest.tools.gemini.rules.includes('typescript-coding-style.md'));
     assert.deepStrictEqual(manifest.tools.cursor.skills, ['frontend-slides']);
-    assert.deepStrictEqual(manifest.tools.cursor.commands, ['plan.md', 'tdd.md', 'verify.md', 'code-review.md']);
+    assert.deepStrictEqual(manifest.tools.cursor.commands, ['plan.md', 'tdd.md', 'verify.md', 'code-review.md', 'smoke.md']);
     assert.deepStrictEqual(manifest.requires, {});
   })) passed++; else failed++;
 
@@ -331,11 +331,14 @@ function runTests() {
       assert.ok(fs.existsSync(path.join(tempDir, 'skills', 'continuous-learning-v2', 'SKILL.md')));
       assert.ok(!fs.existsSync(path.join(tempDir, 'skills', 'rust-patterns', 'SKILL.md')));
       assert.ok(fs.existsSync(path.join(tempDir, 'commands', 'plan.md')));
+      assert.ok(fs.existsSync(path.join(tempDir, 'commands', 'smoke.md')));
       assert.ok(fs.existsSync(path.join(tempDir, 'commands', 'learn.md')));
 
       const planCommand = fs.readFileSync(path.join(tempDir, 'commands', 'plan.md'), 'utf8');
+      const smokeCommand = fs.readFileSync(path.join(tempDir, 'commands', 'smoke.md'), 'utf8');
       assert.ok(planCommand.includes('Wait for explicit user confirmation before making code changes.'));
       assert.ok(!planCommand.includes('Use Cursor’s custom command UI'));
+      assert.ok(smokeCommand.includes('SMOKE: PASS|FAIL|PARTIAL'));
     });
   })) passed++; else failed++;
 

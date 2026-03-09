@@ -125,6 +125,33 @@ const TOOL_WORKFLOW_CONTRACT = {
       }
     },
     {
+      id: 'smoke',
+      title: 'Smoke',
+      outcome: 'Run a quick sanity check that MDT is installed and the tool-specific workflow surfaces are present.',
+      tools: {
+        claude: {
+          status: 'official',
+          verificationMode: 'installer-target',
+          requiredFiles: ['commands/smoke.md', 'docs/testing/manual-verification/claude-code.md']
+        },
+        cursor: {
+          status: 'repo-adapter',
+          verificationMode: 'installer-target',
+          requiredFiles: ['cursor-template/commands/smoke.md', 'docs/testing/manual-verification/cursor.md']
+        },
+        codex: {
+          status: 'unsupported',
+          verificationMode: 'installer-target',
+          requiredFiles: ['docs/testing/manual-verification/codex.md']
+        },
+        opencode: {
+          status: 'unsupported',
+          verificationMode: 'repo-adapter',
+          requiredFiles: ['opencode-template/opencode.json']
+        }
+      }
+    },
+    {
       id: 'security',
       title: 'Security',
       outcome: 'Apply security review guidance before committing changes that touch trust boundaries or secrets.',

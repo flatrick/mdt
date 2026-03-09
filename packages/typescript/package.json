@@ -30,6 +30,7 @@
     "tdd.md",
     "verify.md",
     "code-review.md",
+    "smoke.md",
     "e2e.md"
   ],
   "skills": [
@@ -66,7 +67,8 @@
         "plan.md",
         "tdd.md",
         "verify.md",
-        "code-review.md"
+        "code-review.md",
+        "smoke.md"
       ]
     },
     "gemini": {

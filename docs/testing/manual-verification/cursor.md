@@ -22,6 +22,17 @@ Expected:
 - `.cursor/hooks/` exists
 - `.cursor/skills/continuous-learning-v2/` exists
 
+## Quick Smoke
+
+Run the installed Cursor `smoke` command from Agent chat when you want a fast
+sanity check before doing deeper runtime verification.
+
+Expected:
+- it reports whether `.cursor/` is installed
+- it checks for rules, skills, commands, and `AGENTS.md`
+- it distinguishes runtime `OK`, `SKIPPED`, and `FAIL`
+- it tells you what to test next if runtime behavior is not yet proven
+
 ## Continuous Learning
 
 ### Observation Capture

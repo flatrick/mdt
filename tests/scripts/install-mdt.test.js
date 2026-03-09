@@ -180,6 +180,10 @@ function runTests() {
             'Cursor install should copy the code-review command template from cursor-template/commands for typescript'
           );
           assert.ok(
+            fs.existsSync(path.join(commandsRoot, 'smoke.md')),
+            'Cursor install should copy the smoke command prompt from cursor-template/commands for typescript'
+          );
+          assert.ok(
             fs.existsSync(path.join(commandsRoot, 'learn.md')),
             'Cursor install should copy the learn command template from cursor-template/commands for continuous-learning'
           );
@@ -189,6 +193,7 @@ function runTests() {
           );
 
           const planCommand = fs.readFileSync(path.join(commandsRoot, 'plan.md'), 'utf8');
+          const smokeCommand = fs.readFileSync(path.join(commandsRoot, 'smoke.md'), 'utf8');
           const verifyCommand = fs.readFileSync(path.join(commandsRoot, 'verify.md'), 'utf8');
           const learnCommand = fs.readFileSync(path.join(commandsRoot, 'learn.md'), 'utf8');
 
@@ -199,6 +204,10 @@ function runTests() {
           assert.ok(
             !planCommand.includes('Use Cursor’s custom command UI'),
             'Cursor plan command should no longer be a setup template'
+          );
+          assert.ok(
+            smokeCommand.includes('SMOKE: PASS|FAIL|PARTIAL'),
+            'Cursor smoke command should contain the quick sanity-check report contract'
           );
           assert.ok(
             verifyCommand.includes('VERIFICATION: PASS|FAIL'),
@@ -232,6 +241,7 @@ function runTests() {
           const claudeRoot = path.join(tmpProject, '.claude');
           assert.ok(fs.existsSync(path.join(claudeRoot, 'rules', 'common', 'coding-style.md')));
           assert.ok(fs.existsSync(path.join(claudeRoot, 'rules', 'typescript', 'coding-style.md')));
+          assert.ok(fs.existsSync(path.join(claudeRoot, 'commands', 'smoke.md')));
           assert.ok(
             !fs.existsSync(path.join(claudeRoot, 'rules', 'python', 'coding-style.md')),
             'Claude install should not copy unrelated Python rules'

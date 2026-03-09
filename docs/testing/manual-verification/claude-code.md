@@ -1,15 +1,20 @@
 # Claude Code Manual Verification
 
-This page is a prepared manual-verification stub for Claude Code.
+Use this page for quick Claude Code sanity checks and deeper runtime verification
+when MDT is installed into `.claude/`.
 
-Use it to record human-run checks for Claude-specific MDT behavior that cannot be fully proven by unit tests or static validation.
+## Quick Smoke
 
-## Current Status
+Run the shared `smoke` command from a Claude Code session when you want a fast
+check before doing deeper validation.
 
-- Stub only
-- Expand this page when Claude-specific runtime behavior needs a repeatable human verification checklist
+Expected:
+- it reports whether the active `.claude/` install is present
+- it checks for commands, agents, skills, and hook/runtime assets
+- it distinguishes runtime `OK`, `SKIPPED`, and `FAIL`
+- it points you at the next manual step if runtime behavior still needs proof
 
-## Likely Future Sections
+## Likely Deeper Checks
 
 - fresh install verification under `.claude/`
 - hook execution and hook side effects
@@ -20,5 +25,5 @@ Use it to record human-run checks for Claude-specific MDT behavior that cannot b
 
 ## Notes
 
-- Keep this page focused on behavior that must be verified inside a real Claude Code session
-- Keep CLI-first checks in [docs/tools/local-verification.md](../../tools/local-verification.md)
+- Keep this page focused on behavior that must be verified inside a real Claude Code session.
+- Keep CLI-first checks in [docs/tools/local-verification.md](../../tools/local-verification.md).
