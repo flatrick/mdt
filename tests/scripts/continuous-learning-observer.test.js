@@ -11,7 +11,9 @@ const { test, createTestDir, cleanupTestDir } = require('../helpers/test-runner'
 const {
   DEFAULT_CONFIG,
   analyzeObservations,
+  buildObserverEnv,
   buildAnalyzerInvocation,
+  inferInstalledConfigDir,
   inferObserverTool,
   inferToolFromConfigDir,
   loadObserverConfig
@@ -51,6 +53,33 @@ function runTests() {
     assert.strictEqual(inferToolFromConfigDir('/tmp/project/.unknown'), 'unknown');
   })) passed++; else failed++;
 
+  if (test('inferInstalledConfigDir detects installed project-local Cursor config roots', () => {
+    const tempDir = createTestDir('observer-installed-config-');
+    try {
+      const skillDir = path.join(tempDir, '.cursor', 'skills', 'continuous-learning-v2');
+      fs.mkdirSync(skillDir, { recursive: true });
+      assert.strictEqual(
+        inferInstalledConfigDir(skillDir),
+        path.join(tempDir, '.cursor')
+      );
+    } finally {
+      cleanupTestDir(tempDir);
+    }
+  })) passed++; else failed++;
+
+  if (test('buildObserverEnv anchors direct launches to installed Cursor config roots', () => {
+    const tempDir = createTestDir('observer-env-');
+    try {
+      const skillDir = path.join(tempDir, '.cursor', 'skills', 'continuous-learning-v2');
+      fs.mkdirSync(skillDir, { recursive: true });
+      const env = buildObserverEnv({}, { skillDir });
+      assert.strictEqual(env.CONFIG_DIR, path.join(tempDir, '.cursor'));
+      assert.strictEqual(env.CURSOR_AGENT, '1');
+    } finally {
+      cleanupTestDir(tempDir);
+    }
+  })) passed++; else failed++;
+
   if (test('inferObserverTool prefers explicit env override then detected tool', () => {
     assert.strictEqual(
       inferObserverTool(DEFAULT_CONFIG, { MDT_OBSERVER_TOOL: 'cursor', CURSOR_AGENT: '0' }),
@@ -64,6 +93,17 @@ function runTests() {
       inferObserverTool({ ...DEFAULT_CONFIG, tool: 'claude' }, {}),
       'claude'
     );
+    const tempDir = createTestDir('observer-tool-infer-');
+    try {
+      const skillDir = path.join(tempDir, '.cursor', 'skills', 'continuous-learning-v2');
+      fs.mkdirSync(skillDir, { recursive: true });
+      assert.strictEqual(
+        inferObserverTool(DEFAULT_CONFIG, buildObserverEnv({}, { skillDir })),
+        'cursor'
+      );
+    } finally {
+      cleanupTestDir(tempDir);
+    }
   })) passed++; else failed++;
 
   if (test('buildAnalyzerInvocation uses Claude cheap model runner', () => {

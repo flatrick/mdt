@@ -115,7 +115,7 @@ node scripts/install-mdt.js --target claude --dry-run typescript
 ## What's inside
 
 - `agents/` — Subagents (planner, code-reviewer, tdd-guide, security-reviewer, etc.)
-- `skills/` — Workflow definitions (TDD, security-review, continuous-learning, etc.)
+- `skills/` — Workflow definitions (TDD, security-review, continuous-learning-v2, etc.)
 - `commands/` — Slash commands (/plan, /tdd, /e2e, /code-review, …)
 - `rules/` — Common + language-specific rules (TypeScript, Python, …)
 - `hooks/` — Hook mirrors and shared hook docs; `hooks/hooks.json` remains the Claude-facing mirror

@@ -31,6 +31,40 @@ const DEFAULT_CONFIG = {
   }
 };
 
+function inferInstalledConfigDir(skillDir = skillRoot) {
+  const candidates = [
+    path.resolve(skillDir, '..', '..'),
+    path.resolve(skillDir, '..', '..', '..')
+  ];
+
+  for (const candidate of candidates) {
+    const baseName = path.basename(candidate).toLowerCase();
+    if ((baseName === '.cursor' || baseName === '.claude') && fs.existsSync(candidate)) {
+      return candidate;
+    }
+  }
+
+  return null;
+}
+
+function buildObserverEnv(env = process.env, options = {}) {
+  const nextEnv = { ...env };
+  const installedConfigDir = inferInstalledConfigDir(options.skillDir || skillRoot);
+  if (installedConfigDir && (!nextEnv.CONFIG_DIR || !String(nextEnv.CONFIG_DIR).trim())) {
+    nextEnv.CONFIG_DIR = installedConfigDir;
+  }
+
+  const inferredTool = inferToolFromConfigDir(nextEnv.CONFIG_DIR || installedConfigDir);
+  if (inferredTool === 'cursor' && (!nextEnv.CURSOR_AGENT || !String(nextEnv.CURSOR_AGENT).trim())) {
+    nextEnv.CURSOR_AGENT = '1';
+  }
+  if (inferredTool === 'claude' && (!nextEnv.CLAUDE_CODE || !String(nextEnv.CLAUDE_CODE).trim())) {
+    nextEnv.CLAUDE_CODE = '1';
+  }
+
+  return nextEnv;
+}
+
 function mergeObserverConfig(base, overrides) {
   return {
     ...base,
@@ -70,15 +104,16 @@ function inferToolFromConfigDir(configDir) {
 }
 
 function inferObserverTool(config, env = process.env) {
-  if (env.MDT_OBSERVER_TOOL && env.MDT_OBSERVER_TOOL.trim()) {
-    return env.MDT_OBSERVER_TOOL.trim().toLowerCase();
+  const resolvedEnv = buildObserverEnv(env);
+  if (resolvedEnv.MDT_OBSERVER_TOOL && resolvedEnv.MDT_OBSERVER_TOOL.trim()) {
+    return resolvedEnv.MDT_OBSERVER_TOOL.trim().toLowerCase();
   }
 
   if (config.tool && String(config.tool).trim()) {
     return String(config.tool).trim().toLowerCase();
   }
 
-  const detectEnv = createDetectEnv({ env });
+  const detectEnv = createDetectEnv({ env: resolvedEnv });
   const detectedTool = detectEnv.getTool();
   if (detectedTool === 'cursor' || detectedTool === 'claude') {
     return detectedTool;
@@ -148,7 +183,7 @@ function archiveObservations(observationsFile, projectDir) {
 
 function analyzeObservations(options = {}) {
   const spawnImpl = options.spawnImpl || spawn;
-  const env = options.env || process.env;
+  const env = buildObserverEnv(options.env || process.env, { skillDir: options.skillDir });
   const observationsFile = env.CLV2_OBSERVATIONS_FILE;
   const instinctsDir = env.CLV2_INSTINCTS_DIR;
   const minObs = parseInt(env.CLV2_MIN_OBSERVATIONS || '20', 10);
@@ -221,6 +256,13 @@ function runLoop(options = {}) {
 }
 
 function main() {
+  const observerEnv = buildObserverEnv(process.env);
+  for (const [key, value] of Object.entries(observerEnv)) {
+    if (process.env[key] === undefined && value !== undefined) {
+      process.env[key] = value;
+    }
+  }
+
   const project = detectProject(process.cwd());
   const config = loadObserverConfig();
   const pidFile = path.join(project.project_dir, '.observer.pid');
@@ -318,7 +360,7 @@ function main() {
     detached: true,
     cwd: project.root || process.cwd(),
     env: {
-      ...process.env,
+      ...observerEnv,
       CLV2_PROJECT_DIR: project.project_dir,
       CLV2_OBSERVATIONS_FILE: observationsFile,
       CLV2_INSTINCTS_DIR: instinctsDir,
@@ -358,8 +400,10 @@ if (require.main === module) {
 module.exports = {
   DEFAULT_CONFIG,
   analyzeObservations,
+  buildObserverEnv,
   buildAnalysisPrompt,
   buildAnalyzerInvocation,
+  inferInstalledConfigDir,
   inferObserverTool,
   inferToolFromConfigDir,
   loadObserverConfig,

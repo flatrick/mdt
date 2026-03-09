@@ -53,6 +53,22 @@ async function runTests() {
     assert.strictEqual(env.MDT_ROOT, '/custom/root');
   })) passed++; else failed++;
 
+  if (test('buildHookEnv marks delegated hooks as Cursor and anchors CONFIG_DIR to project .cursor install', () => {
+    const testDir = createTestDir('cursor-hook-env-');
+    const originalCwd = process.cwd();
+    try {
+      const configDir = path.join(testDir, '.cursor');
+      fs.mkdirSync(configDir, { recursive: true });
+      process.chdir(testDir);
+      const env = buildHookEnv({});
+      assert.strictEqual(env.CURSOR_AGENT, '1');
+      assert.strictEqual(env.CONFIG_DIR, configDir);
+    } finally {
+      process.chdir(originalCwd);
+      cleanupTestDir(testDir);
+    }
+  })) passed++; else failed++;
+
   if (test('runExistingHook forwards delegated stderr on success', () => {
     const testDir = createTestDir('cursor-hook-forward-');
     try {

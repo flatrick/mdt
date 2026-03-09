@@ -740,31 +740,37 @@ function installCursorRules(destDir, selectedPackages, globalScope) {
 }
 
 function installCursorSkills(destDir, selectedPackages) {
-  const skillsSrc = path.join(CURSOR_SRC, 'skills');
-  if (!fs.existsSync(skillsSrc)) {
+  const skillsDest = path.join(destDir, 'skills');
+  const sharedSkillsSrc = path.join(REPO_ROOT, 'skills');
+  const sharedSkillNames = getManifestSelections(selectedPackages, 'skills');
+  if (copySelectedDirectories(sharedSkillsSrc, skillsDest, sharedSkillNames, 'Package-selected skill') > 0) {
+    console.log('Installing package-selected skills -> ' + skillsDest + '/');
+  }
+
+  const cursorSkillsSrc = path.join(CURSOR_SRC, 'skills');
+  if (!fs.existsSync(cursorSkillsSrc)) {
     return;
   }
 
-  const skillsDest = path.join(destDir, 'skills');
-  let copied = 0;
+  let copiedCursorSkills = 0;
   for (const selectedPackage of selectedPackages) {
     const cursorSkills = Array.isArray(selectedPackage.tools.cursor?.skills)
       ? selectedPackage.tools.cursor.skills
       : [];
 
     for (const skillName of cursorSkills) {
-      const skillSrc = path.join(skillsSrc, skillName);
+      const skillSrc = path.join(cursorSkillsSrc, skillName);
       const skillDest = path.join(skillsDest, skillName);
       if (!fs.existsSync(skillSrc)) {
         console.error(`Warning: Cursor skill '${skillName}' for package '${selectedPackage.name}' does not exist, skipping.`);
         continue;
       }
       copyRecursiveSync(skillSrc, skillDest);
-      copied++;
+      copiedCursorSkills++;
     }
   }
 
-  if (copied > 0) {
+  if (copiedCursorSkills > 0) {
     console.log('Installing Cursor package skills -> ' + skillsDest + '/');
   }
 }

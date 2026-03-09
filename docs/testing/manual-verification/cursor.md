@@ -55,6 +55,16 @@ node .cursor/skills/continuous-learning-v2/agents/start-observer.js status
 
 Expected:
 - output includes `Observer tool: cursor`
+- `Storage:` points into project `.cursor/homunculus/...`, not `~/.claude/...`
+
+If you are testing an older install that predates the self-anchoring fix, use this fallback:
+
+```powershell
+$env:MDT_OBSERVER_TOOL='cursor'
+$env:CURSOR_AGENT='1'
+$env:CONFIG_DIR=(Resolve-Path .\.cursor).Path
+node .\.cursor\skills\continuous-learning-v2\agents\start-observer.js status
+```
 
 ### Observer Runtime
 

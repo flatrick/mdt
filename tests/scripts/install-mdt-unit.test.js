@@ -319,14 +319,15 @@ function runTests() {
     });
   })) passed++; else failed++;
 
-  if (test('installCursorCoreDirs copies only selected agents and cursor skills', () => {
+  if (test('installCursorCoreDirs copies selected shared skills and cursor skills only', () => {
     withTempDir('mdt-install-cursor-', (tempDir) => {
-      installCursorCoreDirs(tempDir, resolveSelectedPackages(['typescript']));
+      installCursorCoreDirs(tempDir, resolveSelectedPackages(['typescript', 'continuous-learning']));
 
       assert.ok(fs.existsSync(path.join(tempDir, 'agents', 'planner.md')));
       assert.ok(!fs.existsSync(path.join(tempDir, 'agents', 'python-reviewer.md')));
       assert.ok(fs.existsSync(path.join(tempDir, 'skills', 'frontend-slides', 'SKILL.md')));
-      assert.ok(!fs.existsSync(path.join(tempDir, 'skills', 'verification-loop', 'SKILL.md')));
+      assert.ok(fs.existsSync(path.join(tempDir, 'skills', 'continuous-learning-v2', 'SKILL.md')));
+      assert.ok(!fs.existsSync(path.join(tempDir, 'skills', 'rust-patterns', 'SKILL.md')));
     });
   })) passed++; else failed++;
 

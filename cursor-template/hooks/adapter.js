@@ -108,6 +108,20 @@ function buildHookEnv(env = process.env) {
   if (!nextEnv.MDT_ROOT || !String(nextEnv.MDT_ROOT).trim()) {
     nextEnv.MDT_ROOT = getPluginRoot();
   }
+  if (!nextEnv.CURSOR_AGENT || !String(nextEnv.CURSOR_AGENT).trim()) {
+    nextEnv.CURSOR_AGENT = '1';
+  }
+  if (!nextEnv.CONFIG_DIR || !String(nextEnv.CONFIG_DIR).trim()) {
+    const installedConfigDir = path.join(process.cwd(), '.cursor');
+    if (fs.existsSync(installedConfigDir)) {
+      nextEnv.CONFIG_DIR = installedConfigDir;
+    } else {
+      const cursorRoot = getCursorRoot();
+      if (path.basename(cursorRoot).toLowerCase() === '.cursor' && fs.existsSync(cursorRoot)) {
+        nextEnv.CONFIG_DIR = cursorRoot;
+      }
+    }
+  }
   return nextEnv;
 }
 

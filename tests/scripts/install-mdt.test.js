@@ -98,13 +98,13 @@ function runTests() {
       }
     },
     {
-      name: 'cursor install copies only package-selected cursor skills',
+      name: 'cursor install copies selected shared skills and cursor skills only',
       run: () => {
         const tmpHome = createTestDir('mdt-install-cursor-skills-home-');
         const tmpProject = createTestDir('mdt-install-cursor-skills-proj-');
 
         try {
-          const result = runInstaller(['--target', 'cursor', 'typescript'], {
+          const result = runInstaller(['--target', 'cursor', 'typescript', 'continuous-learning'], {
             cwd: tmpProject,
             env: {
               HOME: tmpHome,
@@ -117,6 +117,10 @@ function runTests() {
           assert.ok(
             fs.existsSync(path.join(cursorRoot, 'skills', 'frontend-slides', 'SKILL.md')),
             'Cursor install should copy the declared frontend-slides skill'
+          );
+          assert.ok(
+            fs.existsSync(path.join(cursorRoot, 'skills', 'continuous-learning-v2', 'SKILL.md')),
+            'Cursor install should copy selected shared capability skills'
           );
           assert.ok(
             fs.existsSync(path.join(cursorRoot, 'rules', 'typescript-coding-style.md')),
