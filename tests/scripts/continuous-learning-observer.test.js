@@ -16,7 +16,9 @@ const {
   inferInstalledConfigDir,
   inferObserverTool,
   inferToolFromConfigDir,
-  loadObserverConfig
+  loadObserverConfig,
+  resolveWindowsSpawnInvocation,
+  shouldResolveWindowsSpawnCommand
 } = require('../../skills/continuous-learning-v2/agents/start-observer.js');
 
 function runTests() {
@@ -174,6 +176,25 @@ function runTests() {
     assert.strictEqual(invocation.model, 'gpt-5.3-codex');
   })) passed++; else failed++;
 
+  if (test('shouldResolveWindowsSpawnCommand only targets bare Windows commands', () => {
+    assert.strictEqual(shouldResolveWindowsSpawnCommand('codex', 'win32'), true);
+    assert.strictEqual(shouldResolveWindowsSpawnCommand('C:\\tools\\codex.cmd', 'win32'), false);
+    assert.strictEqual(shouldResolveWindowsSpawnCommand('codex.cmd', 'win32'), false);
+    assert.strictEqual(shouldResolveWindowsSpawnCommand('codex', 'linux'), false);
+  })) passed++; else failed++;
+
+  if (test('resolveWindowsSpawnInvocation prefers cmd/exe shims for Codex on Windows', () => {
+    const resolved = resolveWindowsSpawnInvocation(
+      { command: 'codex', args: ['exec', '--full-auto'] },
+      {
+        platform: 'win32',
+        execFileSyncImpl: () => 'C:\\nvm4w\\nodejs\\codex\nC:\\nvm4w\\nodejs\\codex.cmd\n'
+      }
+    );
+    assert.strictEqual(resolved.command, 'cmd.exe');
+    assert.deepStrictEqual(resolved.args, ['/d', '/s', '/c', 'C:\\nvm4w\\nodejs\\codex.cmd', 'exec', '--full-auto']);
+  })) passed++; else failed++;
+
   if (test('analyzeObservations uses native Cursor runner and archives processed observations', () => {
     const tempDir = createTestDir('observer-runner-');
     try {
@@ -212,7 +233,10 @@ function runTests() {
       });
 
       assert.ok(result, 'Expected analyzer child process');
-      assert.strictEqual(spawned.command, 'agent');
+      assert.ok(
+        spawned.command === 'agent' || spawned.command === 'cmd.exe' || /agent(\.cmd|\.exe|\.ps1)?$/i.test(spawned.command),
+        `Unexpected spawned command: ${spawned.command}`
+      );
       assert.ok(spawned.args.includes('--model'));
       assert.ok(spawned.args.includes('gpt-5-mini'));
       assert.ok(spawned.args.includes('--workspace'));

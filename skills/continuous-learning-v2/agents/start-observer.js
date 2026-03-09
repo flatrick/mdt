@@ -11,6 +11,7 @@
 const fs = require('fs');
 const path = require('path');
 const { spawn } = require('child_process');
+const { execFileSync } = require('child_process');
 
 const skillRoot = path.join(__dirname, '..');
 const { detectProject } = require(path.join(skillRoot, 'scripts', 'detect-project.js'));
@@ -175,6 +176,59 @@ function buildAnalyzerInvocation(options) {
   throw new Error(`Unsupported observer tool '${tool}'`);
 }
 
+function shouldResolveWindowsSpawnCommand(command, platform = process.platform) {
+  return platform === 'win32' && !/[\\/]/.test(command) && !/\.[a-z0-9]+$/i.test(command);
+}
+
+function resolveWindowsSpawnInvocation(invocation, options = {}) {
+  const platform = options.platform || process.platform;
+  const execFileSyncImpl = options.execFileSyncImpl || execFileSync;
+  if (!shouldResolveWindowsSpawnCommand(invocation.command, platform)) {
+    return invocation;
+  }
+
+  try {
+    const output = execFileSyncImpl('where.exe', [invocation.command], {
+      encoding: 'utf8',
+      stdio: ['ignore', 'pipe', 'ignore'],
+      timeout: 15000
+    });
+    const candidates = String(output || '')
+      .split(/\r?\n/)
+      .map((line) => line.trim())
+      .filter(Boolean);
+
+    const preferredPath = candidates.find((candidate) => /\.(cmd|exe|bat)$/i.test(candidate))
+      || candidates[0];
+    if (!preferredPath) {
+      return invocation;
+    }
+
+    if (/\.ps1$/i.test(preferredPath)) {
+      return {
+        ...invocation,
+        command: 'pwsh',
+        args: ['-NoProfile', '-File', preferredPath, ...invocation.args]
+      };
+    }
+
+    if (/\.(cmd|bat)$/i.test(preferredPath)) {
+      return {
+        ...invocation,
+        command: 'cmd.exe',
+        args: ['/d', '/s', '/c', preferredPath, ...invocation.args]
+      };
+    }
+
+    return {
+      ...invocation,
+      command: preferredPath
+    };
+  } catch {
+    return invocation;
+  }
+}
+
 function appendLog(logFile, message) {
   if (!logFile) {
     return;
@@ -224,13 +278,14 @@ function analyzeObservations(options = {}) {
     prompt,
     workspace: projectDir || process.cwd()
   });
+  const resolvedInvocation = resolveWindowsSpawnInvocation(invocation);
 
   appendLog(
     logFile,
     `Analyzing ${lines.length} observations for project ${projectName} with ${tool}${invocation.model ? ` (${invocation.model})` : ''}...`
   );
 
-  const child = spawnImpl(invocation.command, invocation.args, {
+  const child = spawnImpl(resolvedInvocation.command, resolvedInvocation.args, {
     stdio: ['pipe', 'pipe', 'pipe'],
     cwd: projectDir || process.cwd(),
     env
@@ -423,5 +478,7 @@ module.exports = {
   inferToolFromConfigDir,
   loadObserverConfig,
   mergeObserverConfig,
+  resolveWindowsSpawnInvocation,
+  shouldResolveWindowsSpawnCommand,
   runLoop
 };
