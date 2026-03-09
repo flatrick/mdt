@@ -49,7 +49,7 @@ const TOOL_WORKFLOW_CONTRACT = {
         codex: {
           status: 'repo-adapter',
           verificationMode: 'installer-target',
-          requiredFiles: ['codex-template/config.toml', 'codex-template/AGENTS.md', '.agents/skills/tdd-workflow/SKILL.md']
+          requiredFiles: ['codex-template/config.toml', 'codex-template/AGENTS.md', 'codex-template/skills/tdd-workflow/SKILL.md']
         },
         opencode: {
           status: 'official',
@@ -111,7 +111,7 @@ const TOOL_WORKFLOW_CONTRACT = {
         codex: {
           status: 'repo-adapter',
           verificationMode: 'installer-target',
-          requiredFiles: ['codex-template/config.toml', 'codex-template/AGENTS.md', '.agents/skills/verification-loop/SKILL.md']
+          requiredFiles: ['codex-template/config.toml', 'codex-template/AGENTS.md', 'codex-template/skills/verification-loop/SKILL.md']
         },
         opencode: {
           status: 'official',
@@ -142,7 +142,7 @@ const TOOL_WORKFLOW_CONTRACT = {
         codex: {
           status: 'repo-adapter',
           verificationMode: 'installer-target',
-          requiredFiles: ['.agents/skills/tool-setup-verifier/SKILL.md', 'docs/testing/manual-verification/codex.md']
+          requiredFiles: ['codex-template/skills/tool-setup-verifier/SKILL.md', 'docs/testing/manual-verification/codex.md']
         },
         opencode: {
           status: 'unsupported',
@@ -169,7 +169,7 @@ const TOOL_WORKFLOW_CONTRACT = {
         codex: {
           status: 'repo-adapter',
           verificationMode: 'installer-target',
-          requiredFiles: ['codex-template/config.toml', 'codex-template/AGENTS.md', '.agents/skills/security-review/SKILL.md']
+          requiredFiles: ['codex-template/config.toml', 'codex-template/AGENTS.md', 'codex-template/skills/security-review/SKILL.md']
         },
         opencode: {
           status: 'official',
@@ -201,7 +201,7 @@ const TOOL_WORKFLOW_CONTRACT = {
         codex: {
           status: 'repo-adapter',
           verificationMode: 'installer-target',
-          requiredFiles: ['codex-template/config.toml', 'codex-template/AGENTS.md', '.agents/skills/e2e-testing/SKILL.md']
+          requiredFiles: ['codex-template/config.toml', 'codex-template/AGENTS.md', 'codex-template/skills/e2e-testing/SKILL.md']
         },
         opencode: {
           status: 'official',

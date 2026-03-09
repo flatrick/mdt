@@ -17,9 +17,11 @@ const DEFAULT_SKILLS_DIR = path.join(REPO_ROOT, 'skills');
 const DEFAULT_CURSOR_RULES_DIR = path.join(REPO_ROOT, 'cursor-template', 'rules');
 const DEFAULT_CURSOR_SKILLS_DIR = path.join(REPO_ROOT, 'cursor-template', 'skills');
 const DEFAULT_CURSOR_COMMANDS_DIR = path.join(REPO_ROOT, 'cursor-template', 'commands');
+const DEFAULT_CODEX_RULES_DIR = path.join(REPO_ROOT, 'codex-template', 'rules');
+const DEFAULT_CODEX_SKILLS_DIR = path.join(REPO_ROOT, 'codex-template', 'skills');
 const REQUIRED_PACKAGES = new Set(['typescript', 'sql', 'dotnet', 'rust', 'python', 'bash', 'powershell']);
 const PACKAGE_KINDS = new Set(['language', 'scaffolding', 'capability']);
-const PACKAGE_TARGETS = new Set(['claude', 'cursor', 'gemini']);
+const PACKAGE_TARGETS = new Set(['claude', 'cursor', 'gemini', 'codex']);
 
 function readJsonFile(filePath) {
   return JSON.parse(fs.readFileSync(filePath, 'utf8'));
@@ -129,6 +131,8 @@ function validateInstallPackages(options = {}) {
   const cursorRulesDir = options.cursorRulesDir || DEFAULT_CURSOR_RULES_DIR;
   const cursorSkillsDir = options.cursorSkillsDir || DEFAULT_CURSOR_SKILLS_DIR;
   const cursorCommandsDir = options.cursorCommandsDir || DEFAULT_CURSOR_COMMANDS_DIR;
+  const codexRulesDir = options.codexRulesDir || DEFAULT_CODEX_RULES_DIR;
+  const codexSkillsDir = options.codexSkillsDir || DEFAULT_CODEX_SKILLS_DIR;
   const io = options.io || { log: console.log, error: console.error };
 
   if (!fs.existsSync(packagesDir)) {
@@ -328,6 +332,42 @@ function validateInstallPackages(options = {}) {
           if (!fs.existsSync(path.join(cursorRulesDir, ruleFile))) {
             io.error(`ERROR: ${packageName}/package.json - missing Gemini rule reference: ${ruleFile}`);
             hasErrors = true;
+          }
+        }
+      }
+    }
+
+    const codex = tools.codex;
+    if (codex !== undefined) {
+      if (!codex || typeof codex !== 'object' || Array.isArray(codex)) {
+        io.error(`ERROR: ${packageName}/package.json - tools.codex must be an object when provided`);
+        hasErrors = true;
+      } else {
+        if (codex.rules !== undefined) {
+          if (!isStringArray(codex.rules)) {
+            io.error(`ERROR: ${packageName}/package.json - tools.codex.rules must be an array of non-empty strings when provided`);
+            hasErrors = true;
+          } else {
+            for (const ruleFile of codex.rules) {
+              if (!fs.existsSync(path.join(codexRulesDir, ruleFile))) {
+                io.error(`ERROR: ${packageName}/package.json - missing Codex rule reference: ${ruleFile}`);
+                hasErrors = true;
+              }
+            }
+          }
+        }
+
+        if (codex.skills !== undefined) {
+          if (!isStringArray(codex.skills)) {
+            io.error(`ERROR: ${packageName}/package.json - tools.codex.skills must be an array of non-empty strings when provided`);
+            hasErrors = true;
+          } else {
+            for (const skillName of codex.skills) {
+              if (!fs.existsSync(path.join(codexSkillsDir, skillName))) {
+                io.error(`ERROR: ${packageName}/package.json - missing Codex skill reference: ${skillName}`);
+                hasErrors = true;
+              }
+            }
           }
         }
       }

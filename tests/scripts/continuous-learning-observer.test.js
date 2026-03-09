@@ -50,6 +50,7 @@ function runTests() {
   if (test('inferToolFromConfigDir maps tool config roots correctly', () => {
     assert.strictEqual(inferToolFromConfigDir('/tmp/project/.cursor'), 'cursor');
     assert.strictEqual(inferToolFromConfigDir('/tmp/project/.claude'), 'claude');
+    assert.strictEqual(inferToolFromConfigDir('/tmp/project/.agents'), 'codex');
     assert.strictEqual(inferToolFromConfigDir('/tmp/project/.unknown'), 'unknown');
   })) passed++; else failed++;
 
@@ -61,6 +62,20 @@ function runTests() {
       assert.strictEqual(
         inferInstalledConfigDir(skillDir),
         path.join(tempDir, '.cursor')
+      );
+    } finally {
+      cleanupTestDir(tempDir);
+    }
+  })) passed++; else failed++;
+
+  if (test('inferInstalledConfigDir detects installed project-local Codex config roots', () => {
+    const tempDir = createTestDir('observer-installed-codex-config-');
+    try {
+      const skillDir = path.join(tempDir, '.agents', 'skills', 'continuous-learning-v2');
+      fs.mkdirSync(skillDir, { recursive: true });
+      assert.strictEqual(
+        inferInstalledConfigDir(skillDir),
+        path.join(tempDir, '.agents')
       );
     } finally {
       cleanupTestDir(tempDir);
@@ -137,6 +152,26 @@ function runTests() {
       ['--print', '--trust', '--workspace', '/tmp/project', '--model', 'gpt-5-mini', 'Analyze observations']
     );
     assert.strictEqual(invocation.model, 'gpt-5-mini');
+  })) passed++; else failed++;
+
+  if (test('buildAnalyzerInvocation uses Codex exec runner', () => {
+    const invocation = buildAnalyzerInvocation({
+      tool: 'codex',
+      config: {
+        ...DEFAULT_CONFIG,
+        models: { ...DEFAULT_CONFIG.models, codex: 'gpt-5.3-codex' },
+        commands: { ...DEFAULT_CONFIG.commands, codex: 'codex' }
+      },
+      prompt: 'Analyze observations',
+      workspace: '/tmp/project'
+    });
+
+    assert.strictEqual(invocation.command, 'codex');
+    assert.deepStrictEqual(
+      invocation.args,
+      ['exec', '--full-auto', '-C', '/tmp/project', '--model', 'gpt-5.3-codex', 'Analyze observations']
+    );
+    assert.strictEqual(invocation.model, 'gpt-5.3-codex');
   })) passed++; else failed++;
 
   if (test('analyzeObservations uses native Cursor runner and archives processed observations', () => {

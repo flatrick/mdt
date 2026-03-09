@@ -15,7 +15,12 @@ const { buildTestEnv } = require('../helpers/test-env-profiles');
 function runInstaller(args, options = {}) {
   const repoRoot = path.join(__dirname, '..', '..');
   const installerPath = path.join(repoRoot, 'scripts', 'install-mdt.js');
-  return spawnSync('node', [installerPath, ...args], {
+  const installerArgs = [installerPath];
+  if (options.projectDir) {
+    installerArgs.push('--project-dir', options.projectDir);
+  }
+  installerArgs.push(...args);
+  return spawnSync('node', installerArgs, {
     encoding: 'utf8',
     cwd: options.cwd || repoRoot,
     env: buildTestEnv(options.profile || 'neutral', options.env || {}),
@@ -224,6 +229,33 @@ function runTests() {
       }
     },
     {
+      name: 'cursor install supports explicit project dir',
+      run: () => {
+        const tmpHome = createTestDir('mdt-install-cursor-path-home-');
+        const tmpInvoker = createTestDir('mdt-install-cursor-path-invoker-');
+        const tmpProject = createTestDir('mdt-install-cursor-path-proj-');
+
+        try {
+          const result = runInstaller(['--target', 'cursor', 'typescript'], {
+            cwd: tmpInvoker,
+            projectDir: tmpProject,
+            env: {
+              HOME: tmpHome,
+              USERPROFILE: tmpHome
+            }
+          });
+          assertSuccess(result, 'cursor install with explicit project dir');
+
+          assert.ok(fs.existsSync(path.join(tmpProject, '.cursor', 'rules', 'typescript-coding-style.md')));
+          assert.ok(!fs.existsSync(path.join(tmpInvoker, '.cursor')));
+        } finally {
+          cleanupTestDir(tmpHome);
+          cleanupTestDir(tmpInvoker);
+          cleanupTestDir(tmpProject);
+        }
+      }
+    },
+    {
       name: 'claude install copies only package-selected shared rules',
       run: () => {
         const tmpProject = createTestDir('mdt-install-claude-rules-');
@@ -399,8 +431,65 @@ function runTests() {
       run: () => {
         const result = runInstaller(['--dry-run', '--target', 'cursor', 'continuous-learning']);
         assertSuccess(result, 'cursor dry-run with capability package');
-        assert.ok(result.stdout.includes('Warning: package \'continuous-learning\' requires hooks'));
-        assert.ok(result.stdout.includes('Cursor hook support is experimental'));
+        assert.ok(!result.stdout.includes('requires hooks'));
+      }
+    },
+    {
+      name: 'codex install copies selected project skills and runtime scripts',
+      run: () => {
+        const tmpHome = createTestDir('mdt-install-codex-home-');
+        const tmpProject = createTestDir('mdt-install-codex-proj-');
+
+        try {
+          const gitInit = spawnSync('git', ['init'], {
+            encoding: 'utf8',
+            cwd: tmpProject,
+            stdio: ['pipe', 'pipe', 'pipe']
+          });
+          assert.strictEqual(gitInit.status, 0, `git init should succeed\nstdout:\n${gitInit.stdout}\nstderr:\n${gitInit.stderr}`);
+
+          const result = runInstaller(['--target', 'codex', 'typescript', 'continuous-learning'], {
+            cwd: tmpHome,
+            projectDir: tmpProject,
+            env: {
+              HOME: tmpHome,
+              USERPROFILE: tmpHome
+            }
+          });
+          assertSuccess(result, 'codex install');
+
+          const codexRoot = path.join(tmpHome, '.codex');
+          const projectAgentsRoot = path.join(tmpProject, '.agents');
+
+          assert.ok(fs.existsSync(path.join(codexRoot, 'config.toml')));
+          assert.ok(fs.existsSync(path.join(codexRoot, 'AGENTS.md')));
+          assert.ok(fs.existsSync(path.join(projectAgentsRoot, 'skills', 'coding-standards', 'SKILL.md')));
+          assert.ok(fs.existsSync(path.join(projectAgentsRoot, 'skills', 'tool-setup-verifier', 'SKILL.md')));
+          assert.ok(fs.existsSync(path.join(projectAgentsRoot, 'skills', 'continuous-learning-v2', 'SKILL.md')));
+          assert.ok(fs.existsSync(path.join(projectAgentsRoot, 'scripts', 'lib', 'detect-env.js')));
+          assert.ok(!fs.existsSync(path.join(projectAgentsRoot, 'skills', 'python-patterns', 'SKILL.md')));
+
+          const learnStatus = spawnSync(
+            'node',
+            [path.join(projectAgentsRoot, 'skills', 'continuous-learning-v2', 'scripts', 'codex-learn.js'), 'status'],
+            {
+              encoding: 'utf8',
+              cwd: tmpProject,
+              env: {
+                ...process.env,
+                HOME: tmpHome,
+                USERPROFILE: tmpHome
+              },
+              stdio: ['pipe', 'pipe', 'pipe']
+            }
+          );
+          assert.strictEqual(learnStatus.status, 0, `codex learn status should succeed\nstdout:\n${learnStatus.stdout}\nstderr:\n${learnStatus.stderr}`);
+          assert.ok(learnStatus.stdout.includes('Tool: codex'));
+          assert.ok(learnStatus.stdout.includes(path.join(tmpProject, '.codex', 'homunculus', 'projects')));
+        } finally {
+          cleanupTestDir(tmpHome);
+          cleanupTestDir(tmpProject);
+        }
       }
     },
     {

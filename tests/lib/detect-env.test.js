@@ -82,6 +82,16 @@ function runTests() {
   else failed++;
 
   if (
+    test('detects Codex when CODEX_AGENT=1', () => {
+      const env = { CODEX_AGENT: '1' };
+      const d = createDetectEnv({ env });
+      assert.strictEqual(d.tool, 'codex');
+    })
+  )
+    passed++;
+  else failed++;
+
+  if (
     test('treats non-truthy detection values as neutral (unknown)', () => {
       const env = {
         CURSOR_AGENT: '0',
@@ -156,6 +166,17 @@ function runTests() {
       const env = { CLAUDE_SESSION_ID: 'sess-1' };
       const d = createDetectEnv({ env, homedir: () => home, existsSync: () => false });
       assert.strictEqual(d.configDir, path.join(home, '.claude'));
+    })
+  )
+    passed++;
+  else failed++;
+
+  if (
+    test('defaults to ~/.codex for Codex when CONFIG_DIR unset', () => {
+      const home = '/home/test';
+      const env = { CODEX_AGENT: '1' };
+      const d = createDetectEnv({ env, homedir: () => home, existsSync: () => false });
+      assert.strictEqual(d.configDir, path.join(home, '.codex'));
     })
   )
     passed++;
@@ -342,6 +363,16 @@ function runTests() {
       const env = { CURSOR_TRACE_ID: 'trace-xyz' };
       const d = createDetectEnv({ env });
       assert.strictEqual(d.sessionId, 'trace-xyz');
+    })
+  )
+    passed++;
+  else failed++;
+
+  if (
+    test('uses CODEX_SESSION_ID when tool-specific signal is set', () => {
+      const env = { CODEX_SESSION_ID: 'codex-sess-1' };
+      const d = createDetectEnv({ env });
+      assert.strictEqual(d.sessionId, 'codex-sess-1');
     })
   )
     passed++;

@@ -2,7 +2,7 @@
  * Environment detection and path resolution for ModelDev Toolkit.
  *
  * Responsibilities:
- * - Detect running tool (Cursor, Claude Code, unknown)
+ * - Detect running tool (Cursor, Claude Code, Codex, unknown)
  * - Resolve config and data directories with sensible fallbacks
  * - Detect platform (Windows, WSL, Linux, macOS)
  * - Provide derived paths (skills, hooks, homunculus)
@@ -50,6 +50,10 @@ function detectTool(ctx) {
     ctx.cache.tool = 'claude';
     return ctx.cache.tool;
   }
+  if (ctx.env.CODEX_AGENT === '1') {
+    ctx.cache.tool = 'codex';
+    return ctx.cache.tool;
+  }
 
   ctx.cache.tool = 'unknown';
   return ctx.cache.tool;
@@ -89,6 +93,10 @@ function resolveConfigDir(ctx) {
     ctx.cache.configDir = path.join(homeDir, '.claude');
     return ctx.cache.configDir;
   }
+  if (tool === 'codex') {
+    ctx.cache.configDir = path.join(homeDir, '.codex');
+    return ctx.cache.configDir;
+  }
 
   const cursorSkillsDir = path.join(homeDir, '.cursor', 'skills');
   if (ctx.existsSync(cursorSkillsDir)) {
@@ -99,6 +107,12 @@ function resolveConfigDir(ctx) {
   const claudeSkillsDir = path.join(homeDir, '.claude', 'skills');
   if (ctx.existsSync(claudeSkillsDir)) {
     ctx.cache.configDir = path.join(homeDir, '.claude');
+    return ctx.cache.configDir;
+  }
+
+  const codexConfigDir = path.join(homeDir, '.codex');
+  if (ctx.existsSync(codexConfigDir)) {
+    ctx.cache.configDir = codexConfigDir;
     return ctx.cache.configDir;
   }
 
@@ -179,6 +193,10 @@ function resolveSessionId(ctx) {
   }
   if (ctx.env.CURSOR_TRACE_ID && ctx.env.CURSOR_TRACE_ID.length > 0) {
     ctx.cache.sessionId = ctx.env.CURSOR_TRACE_ID;
+    return ctx.cache.sessionId;
+  }
+  if (ctx.env.CODEX_SESSION_ID && ctx.env.CODEX_SESSION_ID.length > 0) {
+    ctx.cache.sessionId = ctx.env.CODEX_SESSION_ID;
     return ctx.cache.sessionId;
   }
 

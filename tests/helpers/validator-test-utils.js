@@ -55,7 +55,9 @@ function runValidatorWithDir(validatorName, dirConstant, overridePath) {
     PACKAGES_DIR: 'packagesDir',
     CURSOR_RULES_DIR: 'cursorRulesDir',
     CURSOR_SKILLS_DIR: 'cursorSkillsDir',
-    CURSOR_COMMANDS_DIR: 'cursorCommandsDir'
+    CURSOR_COMMANDS_DIR: 'cursorCommandsDir',
+    CODEX_RULES_DIR: 'codexRulesDir',
+    CODEX_SKILLS_DIR: 'codexSkillsDir'
   };
   const key = optionMap[dirConstant];
   if (!key) throw new Error(`Unsupported dir constant: ${dirConstant}`);
@@ -73,7 +75,9 @@ function runValidatorWithDirs(validatorName, overrides) {
     PACKAGES_DIR: 'packagesDir',
     CURSOR_RULES_DIR: 'cursorRulesDir',
     CURSOR_SKILLS_DIR: 'cursorSkillsDir',
-    CURSOR_COMMANDS_DIR: 'cursorCommandsDir'
+    CURSOR_COMMANDS_DIR: 'cursorCommandsDir',
+    CODEX_RULES_DIR: 'codexRulesDir',
+    CODEX_SKILLS_DIR: 'codexSkillsDir'
   };
   const options = {};
   for (const [constant, overridePath] of Object.entries(overrides)) {

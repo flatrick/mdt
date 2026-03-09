@@ -71,6 +71,11 @@
         "smoke.md"
       ]
     },
+    "codex": {
+      "skills": [
+        "tool-setup-verifier"
+      ]
+    },
     "gemini": {
       "rules": [
         "common-agents.md",

@@ -42,15 +42,18 @@
         "learn.md",
         "skill-create.md"
       ]
+    },
+    "codex": {
+      "skills": []
     }
   },
   "requires": {
-    "hooks": true,
     "runtimeScripts": true,
     "sessionData": true,
     "tools": [
       "claude",
-      "cursor"
+      "cursor",
+      "codex"
     ]
   }
 }
