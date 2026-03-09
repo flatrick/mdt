@@ -367,6 +367,88 @@ function runTests() {
   })) passed++; else failed++;
 
   // ==========================================
+  // validate-install-packages.js
+  // ==========================================
+  console.log('\nvalidate-install-packages.js:');
+
+  if (test('passes on real project install packages', () => {
+    const result = runValidator('validate-install-packages');
+    assert.strictEqual(result.code, 0, `Should pass, got stderr: ${result.stderr}`);
+    assert.ok(result.stdout.includes('Validated'), 'Should report validation success');
+  })) passed++; else failed++;
+
+  if (test('fails when a required package is missing', () => {
+    const packagesDir = createTestDir();
+    const rulesDir = createTestDir();
+    const cursorRulesDir = createTestDir();
+    const cursorSkillsDir = createTestDir();
+
+    fs.mkdirSync(path.join(packagesDir, 'typescript'));
+    fs.writeFileSync(
+      path.join(packagesDir, 'typescript', 'package.json'),
+      JSON.stringify({
+        name: 'typescript',
+        ruleDirectory: 'typescript',
+        tools: { cursor: { rules: [], skills: [] } }
+      }),
+      'utf8'
+    );
+    fs.mkdirSync(path.join(rulesDir, 'typescript'));
+
+    const result = runValidatorWithDirs('validate-install-packages', {
+      PACKAGES_DIR: packagesDir,
+      RULES_DIR: rulesDir,
+      CURSOR_RULES_DIR: cursorRulesDir,
+      CURSOR_SKILLS_DIR: cursorSkillsDir
+    });
+    assert.strictEqual(result.code, 1, 'Should fail when required packages are missing');
+    assert.ok(result.stderr.includes('Missing required package manifest directory: python'), 'Should report missing required package');
+    cleanupTestDir(packagesDir);
+    cleanupTestDir(rulesDir);
+    cleanupTestDir(cursorRulesDir);
+    cleanupTestDir(cursorSkillsDir);
+  })) passed++; else failed++;
+
+  if (test('fails when referenced Cursor assets do not exist', () => {
+    const packagesDir = createTestDir();
+    const rulesDir = createTestDir();
+    const cursorRulesDir = createTestDir();
+    const cursorSkillsDir = createTestDir();
+
+    for (const packageName of ['typescript', 'sql', 'dotnet', 'rust', 'python', 'bash', 'powershell']) {
+      fs.mkdirSync(path.join(packagesDir, packageName));
+      fs.mkdirSync(path.join(rulesDir, packageName));
+      fs.writeFileSync(
+        path.join(packagesDir, packageName, 'package.json'),
+        JSON.stringify({
+          name: packageName,
+          ruleDirectory: packageName,
+          tools: {
+            cursor: packageName === 'typescript'
+              ? { rules: ['missing-rule.md'], skills: ['missing-skill'] }
+              : { rules: [], skills: [] }
+          }
+        }),
+        'utf8'
+      );
+    }
+
+    const result = runValidatorWithDirs('validate-install-packages', {
+      PACKAGES_DIR: packagesDir,
+      RULES_DIR: rulesDir,
+      CURSOR_RULES_DIR: cursorRulesDir,
+      CURSOR_SKILLS_DIR: cursorSkillsDir
+    });
+    assert.strictEqual(result.code, 1, 'Should fail on missing referenced assets');
+    assert.ok(result.stderr.includes('missing Cursor rule reference: missing-rule.md'), 'Should report missing rule');
+    assert.ok(result.stderr.includes('missing Cursor skill reference: missing-skill'), 'Should report missing skill');
+    cleanupTestDir(packagesDir);
+    cleanupTestDir(rulesDir);
+    cleanupTestDir(cursorRulesDir);
+    cleanupTestDir(cursorSkillsDir);
+  })) passed++; else failed++;
+
+  // ==========================================
   // validate-skills.js
   // ==========================================
   console.log('\nvalidate-skills.js:');

@@ -14,6 +14,7 @@ function getValidatorFunction(validatorName) {
     'validate-metadata': mod.validateMetadata,
     'validate-no-hardcoded-paths': mod.validateNoHardcodedPaths,
     'validate-runtime-ignores': mod.validateRuntimeIgnores,
+    'validate-install-packages': mod.validateInstallPackages,
     'validate-markdown-links': mod.validateMarkdownLinks,
     'validate-markdown-path-refs': mod.validateMarkdownPathRefs
   };
@@ -50,7 +51,10 @@ function runValidatorWithDir(validatorName, dirConstant, overridePath) {
     COMMANDS_DIR: 'commandsDir',
     SKILLS_DIR: 'skillsDir',
     RULES_DIR: 'rulesDir',
-    GITIGNORE_FILE: 'gitignorePath'
+    GITIGNORE_FILE: 'gitignorePath',
+    PACKAGES_DIR: 'packagesDir',
+    CURSOR_RULES_DIR: 'cursorRulesDir',
+    CURSOR_SKILLS_DIR: 'cursorSkillsDir'
   };
   const key = optionMap[dirConstant];
   if (!key) throw new Error(`Unsupported dir constant: ${dirConstant}`);
@@ -64,7 +68,10 @@ function runValidatorWithDirs(validatorName, overrides) {
     COMMANDS_DIR: 'commandsDir',
     SKILLS_DIR: 'skillsDir',
     RULES_DIR: 'rulesDir',
-    GITIGNORE_FILE: 'gitignorePath'
+    GITIGNORE_FILE: 'gitignorePath',
+    PACKAGES_DIR: 'packagesDir',
+    CURSOR_RULES_DIR: 'cursorRulesDir',
+    CURSOR_SKILLS_DIR: 'cursorSkillsDir'
   };
   const options = {};
   for (const [constant, overridePath] of Object.entries(overrides)) {
