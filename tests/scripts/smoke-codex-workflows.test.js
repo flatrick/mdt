@@ -54,6 +54,47 @@ function createFixtureRoot() {
   return rootDir;
 }
 
+function createInstalledFixtureRoot() {
+  const rootDir = createTestDir('codex-installed-workflow-');
+  const fakeHome = createTestDir('codex-installed-home-');
+
+  writeFile(
+    fakeHome,
+    path.join('.codex', 'AGENTS.md'),
+    [
+      '# Codex',
+      'Complex features, architecture',
+      'tdd-workflow',
+      'verification-loop',
+      'security-review'
+    ].join('\n')
+  );
+
+  writeFile(
+    fakeHome,
+    path.join('.codex', 'config.toml'),
+    [
+      'instructions = """',
+      'Test-Driven Development (TDD)',
+      'Security-First',
+      '"""',
+      'sandbox_mode = "workspace-write"',
+      '[mcp_servers.github]',
+      '[mcp_servers.sequential-thinking]'
+    ].join('\n')
+  );
+
+  writeFile(rootDir, path.join('.agents', 'skills', 'tool-setup-verifier', 'SKILL.md'), '# Tool Setup Verifier');
+  writeFile(rootDir, path.join('.agents', 'skills', 'tdd-workflow', 'SKILL.md'), '# Test-Driven Development Workflow');
+  writeFile(rootDir, path.join('.agents', 'skills', 'verification-loop', 'SKILL.md'), '# Verification Loop Skill');
+  writeFile(rootDir, path.join('.agents', 'skills', 'security-review', 'SKILL.md'), '# Security Review Skill');
+  writeFile(rootDir, path.join('.agents', 'skills', 'e2e-testing', 'SKILL.md'), '# E2E Testing Patterns');
+  writeFile(rootDir, path.join('.agents', 'scripts', 'smoke-tool-setups.js'), '// smoke');
+  writeFile(rootDir, path.join('.agents', 'scripts', 'smoke-codex-workflows.js'), '// smoke');
+
+  return { rootDir, fakeHome };
+}
+
 function runTests() {
   console.log('\n=== Testing smoke-codex-workflows.js ===\n');
 
@@ -69,7 +110,7 @@ function runTests() {
     });
 
     assert.strictEqual(result.exitCode, 0, output.join('\n'));
-    assert.ok(output.join('\n').includes('Codex workflow smoke:'));
+    assert.ok(output.join('\n').includes('Codex workflow smoke (repo-source mode):'));
     assert.ok(output.join('\n').includes('plan: PASS'));
     assert.ok(output.join('\n').includes('tdd: PASS'));
     assert.ok(output.join('\n').includes('verify: PASS'));
@@ -119,6 +160,29 @@ function runTests() {
       assert.ok(output.join('\n').includes('codex-template/config.toml'));
     } finally {
       cleanupTestDir(rootDir);
+    }
+  })) passed++; else failed++;
+
+  if (test('passes in installed target repo mode using project .agents and ~/.codex', () => {
+    const { rootDir, fakeHome } = createInstalledFixtureRoot();
+
+    try {
+      const output = [];
+      const result = smokeCodexWorkflows({
+        rootDir,
+        homeDir: fakeHome,
+        io: {
+          log: message => output.push(String(message))
+        }
+      });
+
+      assert.strictEqual(result.exitCode, 0, output.join('\n'));
+      assert.ok(output.join('\n').includes('installed-target'));
+      assert.ok(output.join('\n').includes('smoke: PASS'));
+      assert.ok(output.join('\n').includes('verify: PASS'));
+    } finally {
+      cleanupTestDir(rootDir);
+      cleanupTestDir(fakeHome);
     }
   })) passed++; else failed++;
 

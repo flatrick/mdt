@@ -467,6 +467,8 @@ function runTests() {
           assert.ok(fs.existsSync(path.join(projectAgentsRoot, 'skills', 'tool-setup-verifier', 'SKILL.md')));
           assert.ok(fs.existsSync(path.join(projectAgentsRoot, 'skills', 'continuous-learning-v2', 'SKILL.md')));
           assert.ok(fs.existsSync(path.join(projectAgentsRoot, 'scripts', 'lib', 'detect-env.js')));
+          assert.ok(fs.existsSync(path.join(projectAgentsRoot, 'scripts', 'smoke-tool-setups.js')));
+          assert.ok(fs.existsSync(path.join(projectAgentsRoot, 'scripts', 'smoke-codex-workflows.js')));
           assert.ok(!fs.existsSync(path.join(projectAgentsRoot, 'skills', 'python-patterns', 'SKILL.md')));
 
           const learnStatus = spawnSync(

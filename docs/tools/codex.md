@@ -94,9 +94,13 @@ agents/openai.yaml
 For MDT smoke-style verification in Codex, prefer the shipped
 `tool-setup-verifier` skill plus the local scripts:
 
-- `node scripts/verify-tool-setups.js`
-- `node scripts/smoke-tool-setups.js`
-- `node scripts/smoke-codex-workflows.js`
+- MDT repo mode:
+  - `node scripts/verify-tool-setups.js`
+  - `node scripts/smoke-tool-setups.js`
+  - `node scripts/smoke-codex-workflows.js`
+- installed target repo mode:
+  - `node .agents/scripts/smoke-tool-setups.js`
+  - `node .agents/scripts/smoke-codex-workflows.js`
 
 For package-driven Codex installs, the installer materializes selected skills
 from `codex-template/skills/` into `.agents/skills/`.

@@ -3,6 +3,14 @@
 const fs = require('fs');
 const path = require('path');
 
+function resolveWorkspaceRoot(scriptDir) {
+  const installedRepoRoot = path.join(scriptDir, '..', '..');
+  if (fs.existsSync(path.join(installedRepoRoot, '.agents'))) {
+    return installedRepoRoot;
+  }
+  return path.join(scriptDir, '..');
+}
+
 function parseArgs(argv) {
   const formatArg = argv.find(arg => arg.startsWith('--format='));
   if (formatArg) {
@@ -23,6 +31,15 @@ function readRepoFile(rootDir, relativePath) {
     relativePath,
     exists: fs.existsSync(absolutePath),
     content: fs.existsSync(absolutePath) ? fs.readFileSync(absolutePath, 'utf8') : ''
+  };
+}
+
+function readUserCodexFile(relativePath, homeDir = process.env.HOME || process.env.USERPROFILE || '') {
+  const absolutePath = homeDir ? path.join(homeDir, '.codex', relativePath) : '';
+  return {
+    relativePath: path.join('~/.codex', relativePath),
+    exists: Boolean(absolutePath) && fs.existsSync(absolutePath),
+    content: absolutePath && fs.existsSync(absolutePath) ? fs.readFileSync(absolutePath, 'utf8') : ''
   };
 }
 
@@ -165,29 +182,185 @@ function buildWorkflowChecks(files) {
   ];
 }
 
-function smokeCodexWorkflows(options = {}) {
-  const rootDir = options.rootDir || path.join(__dirname, '..');
-  const io = options.io || console;
-  const files = {
-    'AGENTS.md': readRepoFile(rootDir, 'AGENTS.md'),
-    'codex-template/AGENTS.md': readRepoFile(rootDir, path.join('codex-template', 'AGENTS.md')),
-    'codex-template/config.toml': readRepoFile(rootDir, path.join('codex-template', 'config.toml')),
-    '.agents/skills/tdd-workflow/SKILL.md': readRepoFile(rootDir, path.join('.agents', 'skills', 'tdd-workflow', 'SKILL.md')),
-    '.agents/skills/verification-loop/SKILL.md': readRepoFile(
-      rootDir,
-      path.join('.agents', 'skills', 'verification-loop', 'SKILL.md')
-    ),
-    '.agents/skills/security-review/SKILL.md': readRepoFile(
-      rootDir,
-      path.join('.agents', 'skills', 'security-review', 'SKILL.md')
-    ),
-    '.agents/skills/e2e-testing/SKILL.md': readRepoFile(
-      rootDir,
-      path.join('.agents', 'skills', 'e2e-testing', 'SKILL.md')
-    )
+function buildInstalledPlanChecks(files) {
+  return {
+    workflow: 'plan',
+    checks: [
+      {
+        path: '~/.codex/AGENTS.md',
+        ok:
+          files['~/.codex/AGENTS.md'].exists &&
+          files['~/.codex/AGENTS.md'].content.includes('Complex features, architecture'),
+        message: 'Codex global AGENTS should recommend the planning model path for complex work'
+      },
+      {
+        path: '~/.codex/config.toml',
+        ok: files['~/.codex/config.toml'].exists,
+        message: 'Codex global config.toml should be installed'
+      }
+    ]
   };
+}
 
-  const workflows = buildWorkflowChecks(files).map(entry => {
+function buildInstalledTddChecks(files) {
+  return {
+    workflow: 'tdd',
+    checks: [
+      {
+        path: '~/.codex/AGENTS.md',
+        ok: files['~/.codex/AGENTS.md'].exists && files['~/.codex/AGENTS.md'].content.includes('tdd-workflow'),
+        message: 'Codex global AGENTS should advertise the tdd-workflow skill'
+      },
+      {
+        path: '.agents/skills/tdd-workflow/SKILL.md',
+        ok: files['.agents/skills/tdd-workflow/SKILL.md'].exists && files['.agents/skills/tdd-workflow/SKILL.md'].content.includes('Test-Driven Development Workflow'),
+        message: 'Installed Codex TDD skill should exist and describe the workflow'
+      }
+    ]
+  };
+}
+
+function buildInstalledVerifyChecks(files) {
+  return {
+    workflow: 'verify',
+    checks: [
+      {
+        path: '~/.codex/AGENTS.md',
+        ok: files['~/.codex/AGENTS.md'].exists && files['~/.codex/AGENTS.md'].content.includes('verification-loop'),
+        message: 'Codex global AGENTS should advertise the verification-loop skill'
+      },
+      {
+        path: '.agents/skills/verification-loop/SKILL.md',
+        ok: files['.agents/skills/verification-loop/SKILL.md'].exists && files['.agents/skills/verification-loop/SKILL.md'].content.includes('Verification Loop Skill'),
+        message: 'Installed Codex verification skill should exist and describe the verification loop'
+      },
+      {
+        path: '~/.codex/config.toml',
+        ok:
+          files['~/.codex/config.toml'].exists &&
+          files['~/.codex/config.toml'].content.includes('sandbox_mode = "workspace-write"') &&
+          files['~/.codex/config.toml'].content.includes('[mcp_servers.github]') &&
+          files['~/.codex/config.toml'].content.includes('[mcp_servers.sequential-thinking]'),
+        message: 'Codex global config should provide the expected verification sandbox and MCP scaffolding'
+      }
+    ]
+  };
+}
+
+function buildInstalledSecurityChecks(files) {
+  return {
+    workflow: 'security',
+    checks: [
+      {
+        path: '~/.codex/AGENTS.md',
+        ok: files['~/.codex/AGENTS.md'].exists && files['~/.codex/AGENTS.md'].content.includes('security-review'),
+        message: 'Codex global AGENTS should advertise the security-review skill'
+      },
+      {
+        path: '.agents/skills/security-review/SKILL.md',
+        ok: files['.agents/skills/security-review/SKILL.md'].exists && files['.agents/skills/security-review/SKILL.md'].content.includes('Security Review Skill'),
+        message: 'Installed Codex security-review skill should exist and describe the security workflow'
+      }
+    ]
+  };
+}
+
+function buildInstalledE2eChecks(files) {
+  return {
+    workflow: 'e2e',
+    checks: [
+      {
+        path: '.agents/skills/e2e-testing/SKILL.md',
+        ok: files['.agents/skills/e2e-testing/SKILL.md'].exists && files['.agents/skills/e2e-testing/SKILL.md'].content.includes('E2E Testing Patterns'),
+        message: 'Installed Codex e2e-testing skill should exist and describe the E2E testing patterns'
+      }
+    ]
+  };
+}
+
+function buildInstalledSmokeChecks(files) {
+  return {
+    workflow: 'smoke',
+    checks: [
+      {
+        path: '.agents/skills/tool-setup-verifier/SKILL.md',
+        ok: files['.agents/skills/tool-setup-verifier/SKILL.md'].exists,
+        message: 'Installed Codex smoke verifier skill should exist'
+      },
+      {
+        path: '.agents/scripts/smoke-tool-setups.js',
+        ok: files['.agents/scripts/smoke-tool-setups.js'].exists,
+        message: 'Installed Codex smoke CLI probe script should exist'
+      },
+      {
+        path: '.agents/scripts/smoke-codex-workflows.js',
+        ok: files['.agents/scripts/smoke-codex-workflows.js'].exists,
+        message: 'Installed Codex workflow smoke script should exist'
+      }
+    ]
+  };
+}
+
+function buildInstalledWorkflowChecks(files) {
+  return [
+    buildInstalledPlanChecks(files),
+    buildInstalledTddChecks(files),
+    buildInstalledVerifyChecks(files),
+    buildInstalledSmokeChecks(files),
+    buildInstalledSecurityChecks(files),
+    buildInstalledE2eChecks(files)
+  ];
+}
+
+function smokeCodexWorkflows(options = {}) {
+  const rootDir = options.rootDir || resolveWorkspaceRoot(__dirname);
+  const io = options.io || console;
+  const installedRepoMode = !fs.existsSync(path.join(rootDir, 'codex-template', 'AGENTS.md'))
+    && fs.existsSync(path.join(rootDir, '.agents', 'skills'));
+  const files = installedRepoMode
+    ? {
+        '~/.codex/AGENTS.md': readUserCodexFile('AGENTS.md', options.homeDir),
+        '~/.codex/config.toml': readUserCodexFile('config.toml', options.homeDir),
+        '.agents/skills/tool-setup-verifier/SKILL.md': readRepoFile(
+          rootDir,
+          path.join('.agents', 'skills', 'tool-setup-verifier', 'SKILL.md')
+        ),
+        '.agents/skills/tdd-workflow/SKILL.md': readRepoFile(rootDir, path.join('.agents', 'skills', 'tdd-workflow', 'SKILL.md')),
+        '.agents/skills/verification-loop/SKILL.md': readRepoFile(
+          rootDir,
+          path.join('.agents', 'skills', 'verification-loop', 'SKILL.md')
+        ),
+        '.agents/skills/security-review/SKILL.md': readRepoFile(
+          rootDir,
+          path.join('.agents', 'skills', 'security-review', 'SKILL.md')
+        ),
+        '.agents/skills/e2e-testing/SKILL.md': readRepoFile(
+          rootDir,
+          path.join('.agents', 'skills', 'e2e-testing', 'SKILL.md')
+        ),
+        '.agents/scripts/smoke-tool-setups.js': readRepoFile(rootDir, path.join('.agents', 'scripts', 'smoke-tool-setups.js')),
+        '.agents/scripts/smoke-codex-workflows.js': readRepoFile(rootDir, path.join('.agents', 'scripts', 'smoke-codex-workflows.js'))
+      }
+    : {
+        'AGENTS.md': readRepoFile(rootDir, 'AGENTS.md'),
+        'codex-template/AGENTS.md': readRepoFile(rootDir, path.join('codex-template', 'AGENTS.md')),
+        'codex-template/config.toml': readRepoFile(rootDir, path.join('codex-template', 'config.toml')),
+        '.agents/skills/tdd-workflow/SKILL.md': readRepoFile(rootDir, path.join('.agents', 'skills', 'tdd-workflow', 'SKILL.md')),
+        '.agents/skills/verification-loop/SKILL.md': readRepoFile(
+          rootDir,
+          path.join('.agents', 'skills', 'verification-loop', 'SKILL.md')
+        ),
+        '.agents/skills/security-review/SKILL.md': readRepoFile(
+          rootDir,
+          path.join('.agents', 'skills', 'security-review', 'SKILL.md')
+        ),
+        '.agents/skills/e2e-testing/SKILL.md': readRepoFile(
+          rootDir,
+          path.join('.agents', 'skills', 'e2e-testing', 'SKILL.md')
+        )
+      };
+
+  const workflows = (installedRepoMode ? buildInstalledWorkflowChecks(files) : buildWorkflowChecks(files)).map(entry => {
     const failures = entry.checks.filter(check => !check.ok);
     return {
       workflow: entry.workflow,
@@ -205,7 +378,7 @@ function smokeCodexWorkflows(options = {}) {
   if (options.format === 'json') {
     io.log(JSON.stringify(result, null, 2));
   } else {
-    io.log('Codex workflow smoke:');
+    io.log(`Codex workflow smoke (${installedRepoMode ? 'installed-target' : 'repo-source'} mode):`);
     for (const workflow of workflows) {
       io.log(`- ${workflow.workflow}: ${workflow.status}`);
       for (const failure of workflow.failures) {
@@ -227,5 +400,6 @@ if (require.main === module) {
 }
 
 module.exports = {
+  resolveWorkspaceRoot,
   smokeCodexWorkflows
 };

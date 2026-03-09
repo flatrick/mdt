@@ -583,6 +583,30 @@ function copySelectedDirectories(srcDir, destDir, dirNames, missingContext = '')
   return copied;
 }
 
+function copyExplicitFiles(srcDir, destDir, fileNames, missingContext = '') {
+  if (!fs.existsSync(srcDir) || !Array.isArray(fileNames) || fileNames.length === 0) {
+    return 0;
+  }
+
+  fs.mkdirSync(destDir, { recursive: true });
+  let copied = 0;
+
+  for (const fileName of fileNames) {
+    const srcPath = path.join(srcDir, fileName);
+    const destPath = path.join(destDir, fileName);
+
+    if (!fs.existsSync(srcPath)) {
+      console.error(`Warning: ${missingContext || 'File'} '${fileName}' does not exist, skipping.`);
+      continue;
+    }
+
+    fs.copyFileSync(srcPath, destPath);
+    copied += 1;
+  }
+
+  return copied;
+}
+
 function resolveClaudePaths(globalScope, projectDir) {
   const claudeBase = globalScope
     ? (process.env.CLAUDE_BASE_DIR || path.join(os.homedir(), '.claude'))
@@ -936,6 +960,14 @@ function installCodexRuntimeScripts(projectAgentsDir) {
   copyRuntimeScripts(scriptsDest);
 }
 
+function installCodexWorkflowScripts(projectAgentsDir) {
+  const scriptsDest = path.join(projectAgentsDir, 'scripts');
+  const workflowScripts = ['smoke-tool-setups.js', 'smoke-codex-workflows.js'];
+  if (copyExplicitFiles(path.join(REPO_ROOT, 'scripts'), scriptsDest, workflowScripts, 'Codex workflow script') > 0) {
+    console.log('Installing Codex workflow scripts -> ' + scriptsDest + '/');
+  }
+}
+
 function installCodex(packageNames, projectDir) {
   if (!fs.existsSync(CODEX_SRC)) {
     console.error('Error: codex-template source directory not found at ' + CODEX_SRC);
@@ -972,6 +1004,7 @@ function installCodex(packageNames, projectDir) {
   installCodexRules(selectedPackages, destDir);
   installCodexSkills(selectedPackages, projectAgentsDir);
   installCodexRuntimeScripts(projectAgentsDir);
+  installCodexWorkflowScripts(projectAgentsDir);
 
   if (process.platform === 'win32') {
     console.log('');

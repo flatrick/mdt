@@ -15,6 +15,16 @@ Use this skill for Codex smoke-style sanity checks before deeper verification.
 
 ## Source Of Truth
 
+Choose the right mode first:
+
+### MDT repo mode
+
+Use this when the current repo contains:
+
+- `docs/tools/capability-matrix.md`
+- `docs/tools/workflow-matrix.md`
+- `scripts/lib/tool-workflow-contract.js`
+
 Read these first:
 
 1. `docs/tools/capability-matrix.md`
@@ -24,13 +34,41 @@ Read these first:
 Treat the docs pack as the human-readable source of truth and the JS contract as
 the machine-readable enforcement surface.
 
+### Installed target repo mode
+
+Use this when the current repo only has installed Codex assets such as:
+
+- `.agents/skills/`
+- `.agents/scripts/`
+- optional project `.codex/`
+
+and does **not** have the full MDT docs pack at repo root.
+
+In that mode:
+
+1. read `.agents/skills/tool-setup-verifier/SKILL.md`
+2. read `.agents/scripts/lib/tool-workflow-contract.js`
+3. treat `~/.codex/` plus the local `.agents/` tree as the install surface
+4. do **not** fail just because `docs/tools/*` or `scripts/verify-tool-setups.js`
+   are absent at repo root
+
 ## Required Workflow
+
+### MDT repo mode
 
 1. Run `node scripts/verify-tool-setups.js`.
 2. If the relevant CLIs are installed locally, run `node scripts/smoke-tool-setups.js`.
 3. For deeper Codex coverage, run `node scripts/smoke-codex-workflows.js`.
 4. Summarize results by workflow and by tool.
 5. If something fails, identify the missing file, stale doc claim, or broken local probe before proposing broader changes.
+
+### Installed target repo mode
+
+1. Run `node .agents/scripts/smoke-tool-setups.js`.
+2. Run `node .agents/scripts/smoke-codex-workflows.js`.
+3. Summarize Codex readiness from the installed project/user surfaces only.
+4. If something fails, identify the missing installed skill, missing local script,
+   or missing `~/.codex/` file before proposing broader changes.
 
 ## Reporting Format
 
@@ -56,3 +94,5 @@ Also include:
 - If a tool is not installed locally, mark its smoke status as `SKIP`.
 - Do not promote a workflow claim to `official` unless the docs pack already supports that classification.
 - If the docs and the contract disagree, fix the disagreement before expanding scope.
+- In installed target repo mode, do not report false failures just because the
+  full MDT repo docs pack is not present.

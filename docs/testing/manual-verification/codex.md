@@ -9,13 +9,17 @@ Codex does not use the same markdown command surface as Claude Code or Cursor.
 For Codex, the smoke path is:
 
 - the `tool-setup-verifier` skill under `.agents/skills/`
-- the local scripts:
-  - `node scripts/verify-tool-setups.js`
-  - `node scripts/smoke-tool-setups.js`
-  - `node scripts/smoke-codex-workflows.js`
+- the local smoke scripts for the current repo mode:
+  - MDT repo mode:
+    - `node scripts/verify-tool-setups.js`
+    - `node scripts/smoke-tool-setups.js`
+    - `node scripts/smoke-codex-workflows.js`
+  - installed target repo mode:
+    - `node .agents/scripts/smoke-tool-setups.js`
+    - `node .agents/scripts/smoke-codex-workflows.js`
 
 Expected:
-- `verify-tool-setups.js` passes
+- in MDT repo mode, `verify-tool-setups.js` passes
 - `smoke-tool-setups.js` reports Codex CLI probes as `PASS` when Codex is installed
 - `smoke-codex-workflows.js` reports the current Codex MDT workflows as `PASS`
 

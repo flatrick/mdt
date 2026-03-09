@@ -2,6 +2,6 @@ interface:
   display_name: "Tool Setup Verifier"
   short_description: "Smoke-check MDT tool adapters and workflow contracts"
   brand_color: "#0EA5E9"
-  default_prompt: "Run a quick MDT smoke check using verify-tool-setups.js and the relevant local smoke scripts, then summarize PASS/FAIL/SKIP with the next remediation step."
+  default_prompt: "Run a quick MDT smoke check. In the MDT repo, use verify-tool-setups.js plus the local smoke scripts. In an installed target repo, use .agents/scripts/smoke-tool-setups.js and .agents/scripts/smoke-codex-workflows.js instead, then summarize PASS/FAIL/SKIP with the next remediation step."
 policy:
   allow_implicit_invocation: true
