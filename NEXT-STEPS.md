@@ -67,6 +67,14 @@ Suggested first slice:
 3. switch Cursor skill install logic to use package selection instead of copying the shared `skills/` tree
 4. add tests proving `--target cursor typescript` does not install unrelated skills
 
+Status:
+
+- language packages are now explicit
+- the first real capability package drafts should be `continuous-learning` and `context-compaction`
+- capability metadata such as `requires.hooks`, `requires.runtimeScripts`, and `requires.sessionData` is now actionable in the installer/validator
+- `requires.tools` currently means "implemented installer support in this repo today", not a permanent product limit
+- the next package-model follow-up should add real Codex/Cursor-native implementations for MDT capability packages and widen `requires.tools` only when those installs actually exist
+
 ### 2. Cursor parity — wire continuous learning (P1)
 
 `skills/continuous-learning-v2/hooks/observe.js` is called at Pre/PostToolUse in
@@ -142,6 +150,12 @@ requires:
 3. Update `scripts/install-mdt.js` to read `requires:` and emit warnings when
    installing to a tool/scope that can't satisfy them
 4. Update tests to cover the dependency-check logic
+
+This should align with package-level `requires` metadata so both layers describe
+the same runtime truth:
+
+- packages declare install-time capability constraints
+- skills declare asset-level expectations for direct/manual installs
 
 ### 5. Cursor parity — convert commands to Cursor custom commands (P2)
 

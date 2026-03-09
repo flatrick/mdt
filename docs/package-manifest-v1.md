@@ -78,6 +78,17 @@ thing as domain scaffolding like `frontend` or `backend`.
 
 These packages should also be first-class, installable, and composable.
 
+Two concrete examples already fit this model:
+
+- `continuous-learning`
+  - owns `skills/continuous-learning-v2`
+  - owns the instinct-management commands such as `/instinct-status`, `/evolve`, `/instinct-export`, `/instinct-import`, `/promote`, and `/projects`
+  - depends on hook wiring, runtime scripts, and writable session data storage
+- `context-compaction`
+  - owns `skills/strategic-compact`
+  - depends on compaction-related hook/runtime behavior such as `scripts/hooks/suggest-compact.js` and `scripts/hooks/pre-compact.js`
+  - is generally useful even when continuous learning is not installed
+
 ## Proposed Manifest Shape
 
 ```json
@@ -195,8 +206,9 @@ for them.
 
 ### `requires`
 
-This field is optional for the first implementation, but capability packages are
-the clearest reason to support it later.
+This field is optional for packages that are just asset bundles, but it becomes
+mandatory once a package declares runtime capability flags such as `hooks`,
+`runtimeScripts`, or `sessionData`.
 
 Example shape:
 
@@ -214,10 +226,58 @@ This would let packages declare constraints such as:
 
 - hook infrastructure is required
 - runtime scripts must be installed
-- only certain tools support the capability
+- only certain currently implemented installer targets support the capability
 
 That is especially relevant for capability packages like continuous learning and
 intelligent context compaction.
+
+For example, the current first-pass capability manifests can already declare:
+
+```json
+{
+  "name": "continuous-learning",
+  "kind": "capability",
+  "skills": ["continuous-learning-v2"],
+  "commands": [
+    "instinct-status.md",
+    "evolve.md",
+    "instinct-export.md",
+    "instinct-import.md",
+    "promote.md",
+    "projects.md"
+  ],
+  "requires": {
+    "hooks": true,
+    "runtimeScripts": true,
+    "sessionData": true,
+    "tools": ["claude", "cursor"]
+  }
+}
+```
+
+And:
+
+```json
+{
+  "name": "context-compaction",
+  "kind": "capability",
+  "skills": ["strategic-compact"],
+  "requires": {
+    "hooks": true,
+    "runtimeScripts": true,
+    "sessionData": true,
+    "tools": ["claude", "cursor"]
+  }
+}
+```
+
+`requires` should become the place where the package model says “this package is
+not only a rule/skill bundle; it also assumes hook execution and writable runtime
+state.”
+
+For v1, `requires.tools` should describe current installer support, not a
+permanent product truth. If a capability should later work in Codex or another
+tool, that should be added when the repo has a real install/runtime path for it.
 
 ## Merge Rules
 
@@ -250,6 +310,8 @@ At minimum, validation should enforce:
 - `rules`, `agents`, `commands`, `skills` reference real assets
 - tool-specific rule/skill entries reference real tool assets
 - if `requires` exists, it must match the supported schema
+- if `requires.hooks`, `requires.runtimeScripts`, or `requires.sessionData` is set,
+  `requires.tools` must also be provided
 
 ## Installer Resolution Model
 
@@ -296,6 +358,10 @@ Candidate first set:
 - `session-evaluation`
 - `cost-tracking`
 - `hook-automation`
+
+`continuous-learning` and `context-compaction` are the right first real
+capability packages because they already map to concrete MDT behavior that is not
+language-specific and not domain-specific.
 
 Possible later addition:
 
