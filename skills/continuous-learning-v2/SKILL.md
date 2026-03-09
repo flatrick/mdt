@@ -20,6 +20,7 @@ An advanced learning system that turns MDT tool sessions into reusable knowledge
 - Evolving instincts into full skills, commands, or agents
 - Managing project-scoped vs global instincts
 - Promoting instincts from project to global scope
+- Running low-noise weekly retrospectives to find automation candidates
 
 ## What's New in v2.1
 
@@ -255,6 +256,30 @@ Edit `config.json` to control the background observer:
 All scripts are Node.js (`.js`); no shell or PowerShell variants. Same commands work on Windows, macOS, and Linux.
 
 The observer must use the active tool's native CLI. Cursor setups must not depend on the `claude` binary, and Claude setups must not depend on Cursor.
+
+Codex currently uses an explicit workflow instead of hooks. In a Codex-installed
+repo, the main entrypoint is:
+
+```bash
+node .agents/skills/continuous-learning-v2/scripts/codex-learn.js status
+node .agents/skills/continuous-learning-v2/scripts/codex-learn.js capture < summary.txt
+node .agents/skills/continuous-learning-v2/scripts/codex-learn.js analyze
+node .agents/skills/continuous-learning-v2/scripts/codex-learn.js weekly --week 2026-W11
+```
+
+The weekly retrospective is intentionally manual-first. It reads the current
+project's `observations.jsonl` plus matching archived batches for one ISO week
+and writes a structured summary under:
+
+```text
+.codex/homunculus/projects/<project-id>/retrospectives/weekly/YYYY-Www.json
+```
+
+Its goal is not to log more activity. It should stay sparse and highlight:
+
+- repeated shell commands that deserve a dedicated script or custom command
+- repeated external CLI usage that may deserve an MCP integration
+- repeated multi-step workflows that should be documented or automated
 
 Other behavior (observation capture, instinct thresholds, project scoping, promotion criteria) is configured via code defaults in `instinct-cli.js` and the observe hook script.
 

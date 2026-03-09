@@ -6,6 +6,7 @@
  *   node codex-learn.js status
  *   node codex-learn.js capture < summary.txt
  *   node codex-learn.js analyze
+ *   node codex-learn.js weekly [--week YYYY-Www]
  */
 
 'use strict';
@@ -14,9 +15,30 @@ const fs = require('fs');
 const path = require('path');
 
 const skillRoot = path.join(__dirname, '..');
-const projectRoot = path.join(skillRoot, '..', '..', '..');
 const { detectProject } = require(path.join(__dirname, 'detect-project.js'));
 const { analyzeObservations, loadObserverConfig } = require(path.join(skillRoot, 'agents', 'start-observer.js'));
+const { generateWeeklyRetrospective } = require(path.join(__dirname, 'retrospect-week.js'));
+
+function resolveProjectRoot() {
+  const candidates = [
+    path.resolve(skillRoot, '..', '..', '..'),
+    path.resolve(skillRoot, '..', '..')
+  ];
+
+  for (const candidate of candidates) {
+    if (
+      fs.existsSync(path.join(candidate, '.git')) ||
+      fs.existsSync(path.join(candidate, 'package.json')) ||
+      fs.existsSync(path.join(candidate, 'AGENTS.md'))
+    ) {
+      return candidate;
+    }
+  }
+
+  return candidates[0];
+}
+
+const projectRoot = resolveProjectRoot();
 
 function loadStdin() {
   return new Promise((resolve) => {
@@ -134,7 +156,26 @@ async function run() {
     return;
   }
 
-  console.log('Usage: node codex-learn.js {status|capture|analyze}');
+  if (cmd === 'weekly') {
+    let week = null;
+    for (let i = 3; i < process.argv.length; i++) {
+      if (process.argv[i] === '--week' && process.argv[i + 1]) {
+        week = process.argv[++i];
+      }
+    }
+
+    const retrospective = generateWeeklyRetrospective({
+      cwd: project.root || process.cwd(),
+      project,
+      week
+    });
+
+    console.log(retrospective.text);
+    console.log(`Summary file: ${retrospective.outputPath}`);
+    return;
+  }
+
+  console.log('Usage: node codex-learn.js {status|capture|analyze|weekly} [--week YYYY-Www]');
   process.exit(1);
 }
 

@@ -76,6 +76,18 @@ Expected:
 - `observer.log` is written under project `.codex/homunculus/projects/<id>/`
 - project-scoped instincts can be created under `.codex/homunculus/projects/<id>/instincts/personal/`
 
+4. Generate one weekly retrospective:
+
+```bash
+node .agents/skills/continuous-learning-v2/scripts/codex-learn.js weekly --week 2026-W11
+```
+
+Expected:
+- a summary file is written under `.codex/homunculus/projects/<id>/retrospectives/weekly/`
+- the summary includes automation-oriented sections such as repeated commands,
+  repeated files, repeated workflows, and automation candidates
+- the output stays sparse and reflects only the requested ISO week
+
 ## Likely Deeper Checks
 
 - local Codex launch verification for this repo

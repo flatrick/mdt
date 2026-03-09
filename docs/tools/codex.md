@@ -118,9 +118,22 @@ instead of hooks:
 node .agents/skills/continuous-learning-v2/scripts/codex-learn.js status
 node .agents/skills/continuous-learning-v2/scripts/codex-learn.js capture < summary.txt
 node .agents/skills/continuous-learning-v2/scripts/codex-learn.js analyze
+node .agents/skills/continuous-learning-v2/scripts/codex-learn.js weekly --week 2026-W11
 ```
 
 That writes project-local learning state under `.codex/homunculus/`.
+
+The weekly retrospective path is manual-first and writes one summary per ISO
+week under:
+
+```text
+.codex/homunculus/projects/<project-id>/retrospectives/weekly/YYYY-Www.json
+```
+
+The intended output is low-noise and automation-focused:
+- repeated shell commands that should become scripts or custom commands
+- repeated external CLI workflows that may justify MCP integrations
+- repeated tool sequences that deserve a documented workflow
 
 ### Built-in slash commands
 

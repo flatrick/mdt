@@ -231,7 +231,7 @@ Add test coverage for:
 
 ### 9. Add weekly continuous-learning retrospectives focused on automation candidates (P2)
 
-Status: **not started**
+Status: **first manual slice done**
 
 Goal:
 
@@ -249,13 +249,23 @@ Important constraints:
 - prefer sparse event capture plus higher-value summaries
 - do not add monthly rollups until weekly reports prove useful
 
-Suggested first slice:
+Current state:
 
-1. add an explicit weekly retrospective command for one project and one week
-2. read current `observations.jsonl` plus matching `observations.archive/*.jsonl`
-3. write one structured weekly summary under project storage
-4. include a section for automation candidates and likely script/MCP targets
-5. keep this manual first; do not auto-run it yet
+1. Codex now has an explicit weekly retrospective entrypoint:
+   `node .agents/skills/continuous-learning-v2/scripts/codex-learn.js weekly --week YYYY-Www`
+2. the retrospective reads current `observations.jsonl` plus matching
+   `observations.archive/*.jsonl` for one ISO week
+3. it writes one structured weekly summary under project storage:
+   `.codex/homunculus/projects/<id>/retrospectives/weekly/YYYY-Www.json`
+4. the summary now includes repeated commands, repeated files, repeated
+   workflows, and automation candidates for script/MCP follow-up
+
+Follow-ups for this item:
+
+- manually validate that the weekly summaries produce useful automation
+  candidates instead of noise
+- decide whether Cursor should get the same explicit weekly command surface
+- keep monthly rollups deferred until weekly summaries prove useful
 
 ### 10. Cut a stabilization release boundary (P3)
 
