@@ -309,6 +309,35 @@ function runTests() {
           cleanupTestDir(tmpHome);
         }
       }
+    },
+    {
+      name: 'cursor dry-run warns when package requires experimental hook support',
+      run: () => {
+        const result = runInstaller(['--dry-run', '--target', 'cursor', 'continuous-learning']);
+        assertSuccess(result, 'cursor dry-run with capability package');
+        assert.ok(result.stdout.includes('Warning: package \'continuous-learning\' requires hooks'));
+        assert.ok(result.stdout.includes('Cursor hook support is experimental'));
+      }
+    },
+    {
+      name: 'gemini install rejects package that does not support gemini target',
+      run: () => {
+        const tmpProject = createTestDir('mdt-install-gemini-incompatible-');
+
+        try {
+          const result = runInstaller(['--target', 'gemini', 'continuous-learning'], {
+            cwd: tmpProject,
+            env: {
+              HOME: tmpProject,
+              USERPROFILE: tmpProject
+            }
+          });
+          assert.strictEqual(result.status, 1, `gemini incompatible install should fail\nstdout:\n${result.stdout}\nstderr:\n${result.stderr}`);
+          assert.ok(result.stderr.includes("Package 'continuous-learning' does not support target 'gemini'"));
+        } finally {
+          cleanupTestDir(tmpProject);
+        }
+      }
     }
   ];
 

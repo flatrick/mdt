@@ -28,6 +28,33 @@ const RULES_DIR = path.join(REPO_ROOT, 'rules');
 const PACKAGES_DIR = path.join(REPO_ROOT, 'packages');
 const CURSOR_SRC = path.join(REPO_ROOT, 'cursor-template');
 const CODEX_SRC = path.join(REPO_ROOT, 'codex-template');
+const SUPPORTED_PACKAGE_TARGETS = new Set(['claude', 'cursor', 'gemini', 'codex']);
+const TARGET_CAPABILITIES = {
+  claude: { hooks: 'official', runtimeScripts: true, sessionData: true },
+  cursor: { hooks: 'experimental', runtimeScripts: true, sessionData: true },
+  gemini: { hooks: false, runtimeScripts: false, sessionData: false },
+  codex: { hooks: false, runtimeScripts: false, sessionData: false }
+};
+
+function mergeUniqueOrdered(...arrays) {
+  const seen = new Set();
+  const merged = [];
+
+  for (const values of arrays) {
+    if (!Array.isArray(values)) {
+      continue;
+    }
+    for (const value of values) {
+      if (seen.has(value)) {
+        continue;
+      }
+      seen.add(value);
+      merged.push(value);
+    }
+  }
+
+  return merged;
+}
 
 function parseArgs() {
   const args = process.argv.slice(2);
@@ -59,6 +86,25 @@ function parseArgsFrom(args) {
   return { target, globalScope, listMode, dryRun, packageNames };
 }
 
+function normalizePackageRequires(requiresValue) {
+  if (!requiresValue || typeof requiresValue !== 'object' || Array.isArray(requiresValue)) {
+    return {};
+  }
+
+  const normalized = {};
+  for (const key of ['hooks', 'runtimeScripts', 'sessionData']) {
+    if (requiresValue[key] === true) {
+      normalized[key] = true;
+    }
+  }
+
+  if (Array.isArray(requiresValue.tools)) {
+    normalized.tools = requiresValue.tools.filter((toolName) => typeof toolName === 'string' && toolName.trim().length > 0);
+  }
+
+  return normalized;
+}
+
 function getAvailablePackages() {
   if (!fs.existsSync(PACKAGES_DIR)) {
     return [];
@@ -70,8 +116,9 @@ function getAvailablePackages() {
     .sort();
 }
 
-function loadPackageManifest(packageName) {
-  const packagePath = path.join(PACKAGES_DIR, packageName, 'package.json');
+function loadPackageManifest(packageName, options = {}) {
+  const packagesDir = options.packagesDir || PACKAGES_DIR;
+  const packagePath = path.join(packagesDir, packageName, 'package.json');
   if (!fs.existsSync(packagePath)) {
     throw new Error(`Unknown package '${packageName}'`);
   }
@@ -85,16 +132,137 @@ function loadPackageManifest(packageName) {
     name: parsed.name || packageName,
     description: parsed.description || '',
     ruleDirectory: parsed.ruleDirectory || packageName,
+    extends: Array.isArray(parsed.extends) ? parsed.extends : [],
+    kind: typeof parsed.kind === 'string' ? parsed.kind : 'language',
     rules: Array.isArray(parsed.rules) ? parsed.rules : [],
     agents: Array.isArray(parsed.agents) ? parsed.agents : [],
     commands: Array.isArray(parsed.commands) ? parsed.commands : [],
     skills: Array.isArray(parsed.skills) ? parsed.skills : [],
+    requires: normalizePackageRequires(parsed.requires),
     tools: typeof parsed.tools === 'object' && parsed.tools ? parsed.tools : {}
   };
 }
 
-function resolveSelectedPackages(packageNames) {
-  return packageNames.map(loadPackageManifest);
+function mergeToolConfigs(parentTools, childTools) {
+  const mergedTools = {};
+  const toolNames = mergeUniqueOrdered(
+    Object.keys(parentTools || {}),
+    Object.keys(childTools || {})
+  );
+
+  for (const toolName of toolNames) {
+    const parentConfig = parentTools?.[toolName];
+    const childConfig = childTools?.[toolName];
+
+    if (!parentConfig && childConfig) {
+      mergedTools[toolName] = childConfig;
+      continue;
+    }
+
+    if (parentConfig && !childConfig) {
+      mergedTools[toolName] = parentConfig;
+      continue;
+    }
+
+    if (parentConfig && childConfig && typeof parentConfig === 'object' && typeof childConfig === 'object') {
+      const mergedConfig = {};
+      const configKeys = mergeUniqueOrdered(Object.keys(parentConfig), Object.keys(childConfig));
+      for (const key of configKeys) {
+        const parentValue = parentConfig[key];
+        const childValue = childConfig[key];
+
+        if (Array.isArray(parentValue) || Array.isArray(childValue)) {
+          mergedConfig[key] = mergeUniqueOrdered(parentValue, childValue);
+        } else if (childValue !== undefined) {
+          mergedConfig[key] = childValue;
+        } else {
+          mergedConfig[key] = parentValue;
+        }
+      }
+      mergedTools[toolName] = mergedConfig;
+      continue;
+    }
+
+    mergedTools[toolName] = childConfig !== undefined ? childConfig : parentConfig;
+  }
+
+  return mergedTools;
+}
+
+function mergePackageRequires(parentRequires, childRequires) {
+  const merged = {};
+
+  for (const key of ['hooks', 'runtimeScripts', 'sessionData']) {
+    if (parentRequires?.[key] || childRequires?.[key]) {
+      merged[key] = true;
+    }
+  }
+
+  const parentTools = Array.isArray(parentRequires?.tools) ? parentRequires.tools : null;
+  const childTools = Array.isArray(childRequires?.tools) ? childRequires.tools : null;
+  if (parentTools && childTools) {
+    merged.tools = parentTools.filter((toolName) => childTools.includes(toolName));
+  } else if (parentTools) {
+    merged.tools = [...parentTools];
+  } else if (childTools) {
+    merged.tools = [...childTools];
+  }
+
+  return merged;
+}
+
+function resolvePackageManifest(packageName, options = {}, state = {}) {
+  const cache = state.cache || new Map();
+  const stack = state.stack || [];
+
+  if (cache.has(packageName)) {
+    return cache.get(packageName);
+  }
+
+  if (stack.includes(packageName)) {
+    throw new Error(`Package extends cycle detected: ${[...stack, packageName].join(' -> ')}`);
+  }
+
+  const rawManifest = loadPackageManifest(packageName, options);
+  const nextState = { cache, stack: [...stack, packageName] };
+  const inheritedManifests = rawManifest.extends.map((extendedName) => resolvePackageManifest(extendedName, options, nextState));
+
+  const inheritedManifest = inheritedManifests.reduce((mergedManifest, parentManifest) => ({
+    ...mergedManifest,
+    ruleDirectory: mergedManifest.ruleDirectory || parentManifest.ruleDirectory,
+    rules: mergeUniqueOrdered(mergedManifest.rules, parentManifest.rules),
+    agents: mergeUniqueOrdered(mergedManifest.agents, parentManifest.agents),
+    commands: mergeUniqueOrdered(mergedManifest.commands, parentManifest.commands),
+    skills: mergeUniqueOrdered(mergedManifest.skills, parentManifest.skills),
+    requires: mergePackageRequires(mergedManifest.requires, parentManifest.requires),
+    tools: mergeToolConfigs(mergedManifest.tools, parentManifest.tools)
+  }), {
+    ruleDirectory: '',
+    rules: [],
+    agents: [],
+    commands: [],
+    skills: [],
+    requires: {},
+    tools: {}
+  });
+
+  const resolvedManifest = {
+    ...rawManifest,
+    ruleDirectory: rawManifest.ruleDirectory || inheritedManifest.ruleDirectory,
+    rules: mergeUniqueOrdered(inheritedManifest.rules, rawManifest.rules),
+    agents: mergeUniqueOrdered(inheritedManifest.agents, rawManifest.agents),
+    commands: mergeUniqueOrdered(inheritedManifest.commands, rawManifest.commands),
+    skills: mergeUniqueOrdered(inheritedManifest.skills, rawManifest.skills),
+    requires: mergePackageRequires(inheritedManifest.requires, rawManifest.requires),
+    tools: mergeToolConfigs(inheritedManifest.tools, rawManifest.tools)
+  };
+
+  cache.set(packageName, resolvedManifest);
+  return resolvedManifest;
+}
+
+function resolveSelectedPackages(packageNames, options = {}) {
+  return packageNames.map((packageName) => resolvePackageManifest(packageName, options));
 }
 
 function getSelectedPackageSummary(selectedPackages) {
@@ -113,24 +281,69 @@ function getPackageRuleDirectories(selectedPackages) {
 }
 
 function getManifestRuleSelections(selectedPackages) {
-  return [...new Set(
-    selectedPackages.flatMap((pkg) => Array.isArray(pkg.rules) ? pkg.rules : [])
-  )].sort();
+  return mergeUniqueOrdered(
+    ...selectedPackages.map((pkg) => Array.isArray(pkg.rules) ? pkg.rules : [])
+  );
 }
 
 function getManifestSelections(selectedPackages, key) {
-  return [...new Set(
-    selectedPackages.flatMap((pkg) => Array.isArray(pkg[key]) ? pkg[key] : [])
-  )].sort();
+  return mergeUniqueOrdered(
+    ...selectedPackages.map((pkg) => Array.isArray(pkg[key]) ? pkg[key] : [])
+  );
 }
 
 function getToolManifestSelections(selectedPackages, toolName, key) {
-  return [...new Set(
-    selectedPackages.flatMap((pkg) => {
+  return mergeUniqueOrdered(
+    ...selectedPackages.map((pkg) => {
       const toolConfig = pkg.tools && typeof pkg.tools === 'object' ? pkg.tools[toolName] : null;
       return Array.isArray(toolConfig?.[key]) ? toolConfig[key] : [];
     })
-  )].sort();
+  );
+}
+
+function getPackageRequirementWarnings(target, selectedPackages) {
+  const capabilities = TARGET_CAPABILITIES[target];
+  if (!capabilities) {
+    return [];
+  }
+
+  const warnings = [];
+  for (const selectedPackage of selectedPackages) {
+    const requires = selectedPackage.requires || {};
+    if (requires.hooks && capabilities.hooks === 'experimental') {
+      warnings.push(
+        `package '${selectedPackage.name}' requires hooks. Cursor hook support is experimental in this repo today.`
+      );
+    }
+  }
+
+  return warnings;
+}
+
+function assertPackageRequirements(target, selectedPackages) {
+  const capabilities = TARGET_CAPABILITIES[target];
+  if (!capabilities) {
+    throw new Error(`Unknown target '${target}'`);
+  }
+
+  for (const selectedPackage of selectedPackages) {
+    const requires = selectedPackage.requires || {};
+    const allowedTools = Array.isArray(requires.tools) ? requires.tools : null;
+    if (allowedTools && !allowedTools.includes(target)) {
+      throw new Error(`Package '${selectedPackage.name}' does not support target '${target}'`);
+    }
+    if (requires.hooks && !capabilities.hooks) {
+      throw new Error(`Package '${selectedPackage.name}' requires hooks, but target '${target}' does not support MDT hook installs`);
+    }
+    if (requires.runtimeScripts && !capabilities.runtimeScripts) {
+      throw new Error(`Package '${selectedPackage.name}' requires runtime scripts, but target '${target}' does not install MDT runtime scripts`);
+    }
+    if (requires.sessionData && !capabilities.sessionData) {
+      throw new Error(`Package '${selectedPackage.name}' requires session data support, but target '${target}' does not provide it`);
+    }
+  }
+
+  return getPackageRequirementWarnings(target, selectedPackages);
 }
 
 function printAvailableOptions(target) {
@@ -224,12 +437,15 @@ function buildCursorInstallPlan(lines, globalScope, selectedPackages) {
 function buildInstallPlan({ target, globalScope, packageNames }) {
   const header = getDryRunHeader(target, globalScope);
   const selectedPackages = target === 'codex' ? [] : resolveSelectedPackages(packageNames);
+  const warnings = target === 'codex'
+    ? []
+    : assertPackageRequirements(target, selectedPackages).map((warning) => `[dry-run] Warning: ${warning}`);
 
   if (target === 'codex') return buildCodexInstallPlan(header);
-  if (target === 'gemini') return buildGeminiInstallPlan(header, globalScope, selectedPackages);
-  if (target === 'claude') return buildClaudeInstallPlan(header, globalScope, selectedPackages);
+  if (target === 'gemini') return [...warnings, ...buildGeminiInstallPlan(header, globalScope, selectedPackages)];
+  if (target === 'claude') return [...warnings, ...buildClaudeInstallPlan(header, globalScope, selectedPackages)];
 
-  return buildCursorInstallPlan(header, globalScope, selectedPackages);
+  return [...warnings, ...buildCursorInstallPlan(header, globalScope, selectedPackages)];
 }
 
 function copyRecursiveSync(srcDir, destDir, filter = () => true) {
@@ -458,6 +674,9 @@ function installClaude(packageNames, globalScope) {
   const { claudeBase, rulesDest } = resolveClaudePaths(globalScope);
   if (!packageNames.length) usage('claude');
   const selectedPackages = resolveSelectedPackages(packageNames);
+  for (const warning of assertPackageRequirements('claude', selectedPackages)) {
+    console.warn('Warning: ' + warning);
+  }
 
   warnExistingRulesDir(rulesDest);
   installClaudeRules(selectedPackages, rulesDest);
@@ -618,6 +837,9 @@ function installCursor(packageNames, globalScope) {
   const destDir = resolveCursorDestDir(globalScope);
   if (!packageNames.length) usage('cursor');
   const selectedPackages = resolveSelectedPackages(packageNames);
+  for (const warning of assertPackageRequirements('cursor', selectedPackages)) {
+    console.warn('Warning: ' + warning);
+  }
 
   console.log('Installing Cursor configs to ' + destDir + '/');
   printCursorGlobalRulesNote(globalScope);
@@ -811,6 +1033,9 @@ function installGemini(packageNames, globalScope) {
   console.log('Installing Gemini CLI / Antigravity configs...');
   const { destDirAgent, destDirGemini } = resolveGeminiDestinations(globalScope);
   const selectedPackages = resolveSelectedPackages(packageNames);
+  for (const warning of assertPackageRequirements('gemini', selectedPackages)) {
+    console.warn('Warning: ' + warning);
+  }
   installGeminiRules(selectedPackages, globalScope, destDirAgent, destDirGemini);
   installGeminiContent(destDirAgent, destDirGemini, selectedPackages);
   console.log('Done. Gemini configs installed.');
@@ -862,6 +1087,7 @@ module.exports = {
   parseArgsFrom,
   resolveSelectedPackages,
   buildInstallPlan,
+  assertPackageRequirements,
   installClaudeContentDirs,
   installCursorCoreDirs,
   installGeminiContent

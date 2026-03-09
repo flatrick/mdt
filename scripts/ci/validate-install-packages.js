@@ -17,6 +17,8 @@ const DEFAULT_SKILLS_DIR = path.join(REPO_ROOT, 'skills');
 const DEFAULT_CURSOR_RULES_DIR = path.join(REPO_ROOT, 'cursor-template', 'rules');
 const DEFAULT_CURSOR_SKILLS_DIR = path.join(REPO_ROOT, 'cursor-template', 'skills');
 const REQUIRED_PACKAGES = new Set(['typescript', 'sql', 'dotnet', 'rust', 'python', 'bash', 'powershell']);
+const PACKAGE_KINDS = new Set(['language', 'scaffolding', 'capability']);
+const PACKAGE_TARGETS = new Set(['claude', 'cursor', 'gemini']);
 
 function readJsonFile(filePath) {
   return JSON.parse(fs.readFileSync(filePath, 'utf8'));
@@ -24,6 +26,97 @@ function readJsonFile(filePath) {
 
 function isStringArray(value) {
   return Array.isArray(value) && value.every((entry) => typeof entry === 'string' && entry.trim().length > 0);
+}
+
+function validateRequires(packageName, requires, io) {
+  let hasErrors = false;
+
+  if (requires === undefined) {
+    return hasErrors;
+  }
+
+  if (!requires || typeof requires !== 'object' || Array.isArray(requires)) {
+    io.error(`ERROR: ${packageName}/package.json - requires must be an object when provided`);
+    return true;
+  }
+
+  const allowedKeys = new Set(['hooks', 'runtimeScripts', 'sessionData', 'tools']);
+  for (const key of Object.keys(requires)) {
+    if (!allowedKeys.has(key)) {
+      io.error(`ERROR: ${packageName}/package.json - requires contains unsupported key: ${key}`);
+      hasErrors = true;
+    }
+  }
+
+  for (const key of ['hooks', 'runtimeScripts', 'sessionData']) {
+    if (requires[key] !== undefined && typeof requires[key] !== 'boolean') {
+      io.error(`ERROR: ${packageName}/package.json - requires.${key} must be a boolean when provided`);
+      hasErrors = true;
+    }
+  }
+
+  const declaresCapabilityFlags = ['hooks', 'runtimeScripts', 'sessionData'].some((key) => requires[key] === true);
+
+  if (requires.tools !== undefined) {
+    if (!isStringArray(requires.tools)) {
+      io.error(`ERROR: ${packageName}/package.json - requires.tools must be an array of non-empty strings when provided`);
+      hasErrors = true;
+    } else {
+      for (const toolName of requires.tools) {
+        if (!PACKAGE_TARGETS.has(toolName)) {
+          io.error(`ERROR: ${packageName}/package.json - requires.tools contains unsupported target: ${toolName}`);
+          hasErrors = true;
+        }
+      }
+    }
+  } else if (declaresCapabilityFlags) {
+    io.error(`ERROR: ${packageName}/package.json - requires.tools must be provided when capability flags are set`);
+    hasErrors = true;
+  }
+
+  return hasErrors;
+}
+
+function validateExtendsGraph(manifestsByName, io) {
+  let hasErrors = false;
+  const visiting = new Set();
+  const visited = new Set();
+
+  function visit(packageName, trail = []) {
+    if (visited.has(packageName)) {
+      return;
+    }
+    if (visiting.has(packageName)) {
+      io.error(`ERROR: package extends cycle detected: ${[...trail, packageName].join(' -> ')}`);
+      hasErrors = true;
+      return;
+    }
+
+    const manifest = manifestsByName.get(packageName);
+    if (!manifest) {
+      return;
+    }
+
+    visiting.add(packageName);
+    const nextTrail = [...trail, packageName];
+    const extendedPackages = Array.isArray(manifest.extends) ? manifest.extends : [];
+    for (const extendedName of extendedPackages) {
+      if (!manifestsByName.has(extendedName)) {
+        io.error(`ERROR: ${packageName}/package.json - extends references missing package: ${extendedName}`);
+        hasErrors = true;
+        continue;
+      }
+      visit(extendedName, nextTrail);
+    }
+    visiting.delete(packageName);
+    visited.add(packageName);
+  }
+
+  for (const packageName of manifestsByName.keys()) {
+    visit(packageName);
+  }
+
+  return hasErrors;
 }
 
 function validateInstallPackages(options = {}) {
@@ -43,6 +136,7 @@ function validateInstallPackages(options = {}) {
 
   const entries = fs.readdirSync(packagesDir, { withFileTypes: true }).filter((entry) => entry.isDirectory());
   const packageNames = entries.map((entry) => entry.name).sort();
+  const manifestsByName = new Map();
   let hasErrors = false;
   let validCount = 0;
 
@@ -76,6 +170,8 @@ function validateInstallPackages(options = {}) {
       continue;
     }
 
+    manifestsByName.set(packageName, manifest);
+
     if (manifest.name !== packageName) {
       io.error(`ERROR: ${packageName}/package.json - name must equal directory name '${packageName}'`);
       hasErrors = true;
@@ -86,11 +182,25 @@ function validateInstallPackages(options = {}) {
       hasErrors = true;
     }
 
+    if (manifest.kind !== undefined && !PACKAGE_KINDS.has(manifest.kind)) {
+      io.error(`ERROR: ${packageName}/package.json - kind must be one of: ${[...PACKAGE_KINDS].join(', ')}`);
+      hasErrors = true;
+    }
+
     if (typeof manifest.ruleDirectory !== 'string' || !manifest.ruleDirectory.trim()) {
       io.error(`ERROR: ${packageName}/package.json - Missing non-empty ruleDirectory`);
       hasErrors = true;
     } else if (!fs.existsSync(path.join(rulesDir, manifest.ruleDirectory))) {
       io.error(`ERROR: ${packageName}/package.json - ruleDirectory '${manifest.ruleDirectory}' does not exist under rules/`);
+      hasErrors = true;
+    }
+
+    if (manifest.extends !== undefined && !isStringArray(manifest.extends)) {
+      io.error(`ERROR: ${packageName}/package.json - extends must be an array of non-empty strings when provided`);
+      hasErrors = true;
+    }
+
+    if (validateRequires(packageName, manifest.requires, io)) {
       hasErrors = true;
     }
 
@@ -158,56 +268,60 @@ function validateInstallPackages(options = {}) {
     }
 
     const cursor = tools.cursor;
-    if (!cursor || typeof cursor !== 'object' || Array.isArray(cursor)) {
-      io.error(`ERROR: ${packageName}/package.json - tools.cursor must be an object`);
-      hasErrors = true;
-      continue;
-    }
-
-    if (!isStringArray(cursor.rules)) {
-      io.error(`ERROR: ${packageName}/package.json - tools.cursor.rules must be an array of non-empty strings`);
-      hasErrors = true;
-    } else {
-      for (const ruleFile of cursor.rules) {
-        if (!fs.existsSync(path.join(cursorRulesDir, ruleFile))) {
-          io.error(`ERROR: ${packageName}/package.json - missing Cursor rule reference: ${ruleFile}`);
+    if (cursor !== undefined) {
+      if (!cursor || typeof cursor !== 'object' || Array.isArray(cursor)) {
+        io.error(`ERROR: ${packageName}/package.json - tools.cursor must be an object when provided`);
+        hasErrors = true;
+      } else {
+        if (!isStringArray(cursor.rules)) {
+          io.error(`ERROR: ${packageName}/package.json - tools.cursor.rules must be an array of non-empty strings`);
           hasErrors = true;
+        } else {
+          for (const ruleFile of cursor.rules) {
+            if (!fs.existsSync(path.join(cursorRulesDir, ruleFile))) {
+              io.error(`ERROR: ${packageName}/package.json - missing Cursor rule reference: ${ruleFile}`);
+              hasErrors = true;
+            }
+          }
         }
-      }
-    }
 
-    if (!isStringArray(cursor.skills)) {
-      io.error(`ERROR: ${packageName}/package.json - tools.cursor.skills must be an array of non-empty strings`);
-      hasErrors = true;
-    } else {
-      for (const skillName of cursor.skills) {
-        if (!fs.existsSync(path.join(cursorSkillsDir, skillName))) {
-          io.error(`ERROR: ${packageName}/package.json - missing Cursor skill reference: ${skillName}`);
+        if (!isStringArray(cursor.skills)) {
+          io.error(`ERROR: ${packageName}/package.json - tools.cursor.skills must be an array of non-empty strings`);
           hasErrors = true;
+        } else {
+          for (const skillName of cursor.skills) {
+            if (!fs.existsSync(path.join(cursorSkillsDir, skillName))) {
+              io.error(`ERROR: ${packageName}/package.json - missing Cursor skill reference: ${skillName}`);
+              hasErrors = true;
+            }
+          }
         }
       }
     }
 
     const gemini = tools.gemini;
-    if (!gemini || typeof gemini !== 'object' || Array.isArray(gemini)) {
-      io.error(`ERROR: ${packageName}/package.json - tools.gemini must be an object`);
-      hasErrors = true;
-      continue;
-    }
-
-    if (!isStringArray(gemini.rules)) {
-      io.error(`ERROR: ${packageName}/package.json - tools.gemini.rules must be an array of non-empty strings`);
-      hasErrors = true;
-    } else {
-      for (const ruleFile of gemini.rules) {
-        if (!fs.existsSync(path.join(cursorRulesDir, ruleFile))) {
-          io.error(`ERROR: ${packageName}/package.json - missing Gemini rule reference: ${ruleFile}`);
-          hasErrors = true;
+    if (gemini !== undefined) {
+      if (!gemini || typeof gemini !== 'object' || Array.isArray(gemini)) {
+        io.error(`ERROR: ${packageName}/package.json - tools.gemini must be an object when provided`);
+        hasErrors = true;
+      } else if (!isStringArray(gemini.rules)) {
+        io.error(`ERROR: ${packageName}/package.json - tools.gemini.rules must be an array of non-empty strings`);
+        hasErrors = true;
+      } else {
+        for (const ruleFile of gemini.rules) {
+          if (!fs.existsSync(path.join(cursorRulesDir, ruleFile))) {
+            io.error(`ERROR: ${packageName}/package.json - missing Gemini rule reference: ${ruleFile}`);
+            hasErrors = true;
+          }
         }
       }
     }
 
     validCount++;
+  }
+
+  if (validateExtendsGraph(manifestsByName, io)) {
+    hasErrors = true;
   }
 
   if (hasErrors) {

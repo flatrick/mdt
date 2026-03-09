@@ -1,0 +1,50 @@
+{
+  "name": "continuous-learning",
+  "description": "MDT capability package for instinct-based session learning, export/import, and evolution workflows",
+  "kind": "capability",
+  "ruleDirectory": "common",
+  "rules": [
+    "common/agents.md",
+    "common/development-workflow.md",
+    "common/hooks.md",
+    "common/patterns.md",
+    "common/performance.md",
+    "common/security.md",
+    "common/testing.md"
+  ],
+  "agents": [],
+  "commands": [
+    "evolve.md",
+    "instinct-export.md",
+    "instinct-import.md",
+    "instinct-status.md",
+    "projects.md",
+    "promote.md"
+  ],
+  "skills": [
+    "continuous-learning-v2"
+  ],
+  "tools": {
+    "cursor": {
+      "rules": [
+        "common-agents.md",
+        "common-development-workflow.md",
+        "common-hooks.md",
+        "common-patterns.md",
+        "common-performance.md",
+        "common-security.md",
+        "common-testing.md"
+      ],
+      "skills": []
+    }
+  },
+  "requires": {
+    "hooks": true,
+    "runtimeScripts": true,
+    "sessionData": true,
+    "tools": [
+      "claude",
+      "cursor"
+    ]
+  }
+}
