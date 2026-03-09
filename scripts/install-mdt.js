@@ -83,7 +83,11 @@ function loadPackageManifest(packageName) {
 
   return {
     name: parsed.name || packageName,
+    description: parsed.description || '',
     ruleDirectory: parsed.ruleDirectory || packageName,
+    agents: Array.isArray(parsed.agents) ? parsed.agents : [],
+    commands: Array.isArray(parsed.commands) ? parsed.commands : [],
+    skills: Array.isArray(parsed.skills) ? parsed.skills : [],
     tools: typeof parsed.tools === 'object' && parsed.tools ? parsed.tools : {}
   };
 }
@@ -105,6 +109,12 @@ function getPackageRuleDirectories(selectedPackages) {
     .map((pkg) => pkg.ruleDirectory)
     .filter(Boolean)
     .sort();
+}
+
+function getManifestSelections(selectedPackages, key) {
+  return [...new Set(
+    selectedPackages.flatMap((pkg) => Array.isArray(pkg[key]) ? pkg[key] : [])
+  )].sort();
 }
 
 function printAvailableOptions(target) {
@@ -170,7 +180,7 @@ function buildClaudeInstallPlan(lines, globalScope, selectedPackages) {
     ...lines,
     `[dry-run] Packages: ${packages}`,
     `[dry-run] Would install into ${claudeBase}`,
-    '[dry-run] Would copy rules, agents, commands, skills, hooks, and runtime scripts (scripts/hooks + scripts/lib)'
+    '[dry-run] Would copy rules, package-selected agents/commands/skills, hooks, and runtime scripts (scripts/hooks + scripts/lib)'
   ];
 
   if (globalScope) {
@@ -186,7 +196,7 @@ function buildCursorInstallPlan(lines, globalScope, selectedPackages) {
     ...lines,
     `[dry-run] Packages: ${packages}`,
     `[dry-run] Would install into ${cursorBase}`,
-    '[dry-run] Would copy agents, package-selected skills, commands, hook scripts, hooks config, mcp config, and runtime scripts (scripts/hooks + scripts/lib)'
+    '[dry-run] Would copy package-selected agents, package-selected skills, hook scripts, hooks config, mcp config, and runtime scripts (scripts/hooks + scripts/lib)'
   ];
 
   if (globalScope) {
@@ -267,6 +277,43 @@ function copyMarkdownFiles(srcDir, destDir) {
   });
 }
 
+function copySelectedMarkdownFiles(srcDir, destDir, fileNames, missingContext = '') {
+  if (!fs.existsSync(srcDir) || fileNames.length === 0) return 0;
+  fs.mkdirSync(destDir, { recursive: true });
+  let copied = 0;
+  for (const fileName of fileNames) {
+    const srcPath = path.join(srcDir, fileName);
+    const destPath = path.join(destDir, fileName);
+    if (!fs.existsSync(srcPath)) {
+      if (missingContext) {
+        console.error(`Warning: ${missingContext} '${fileName}' does not exist, skipping.`);
+      }
+      continue;
+    }
+    fs.copyFileSync(srcPath, destPath);
+    copied++;
+  }
+  return copied;
+}
+
+function copySelectedDirectories(srcDir, destDir, dirNames, missingContext = '') {
+  if (!fs.existsSync(srcDir) || dirNames.length === 0) return 0;
+  let copied = 0;
+  for (const dirName of dirNames) {
+    const dirSrc = path.join(srcDir, dirName);
+    const dirDest = path.join(destDir, dirName);
+    if (!fs.existsSync(dirSrc)) {
+      if (missingContext) {
+        console.error(`Warning: ${missingContext} '${dirName}' does not exist, skipping.`);
+      }
+      continue;
+    }
+    copyRecursiveSync(dirSrc, dirDest);
+    copied++;
+  }
+  return copied;
+}
+
 function resolveClaudePaths(globalScope) {
   const claudeBase = globalScope
     ? (process.env.CLAUDE_BASE_DIR || path.join(os.homedir(), '.claude'))
@@ -314,26 +361,32 @@ function installClaudeLanguageRules(selectedPackages, rulesDest) {
   }
 }
 
-function installClaudeContentDirs(claudeBase) {
+function installClaudeContentDirs(claudeBase, selectedPackages) {
   const agentsSrc = path.join(REPO_ROOT, 'agents');
   const agentsDest = path.join(claudeBase, 'agents');
   if (fs.existsSync(agentsSrc) && path.resolve(agentsSrc) !== path.resolve(agentsDest)) {
-    console.log('Installing agents -> ' + agentsDest + '/');
-    copyMarkdownFiles(agentsSrc, agentsDest);
+    const agentFiles = getManifestSelections(selectedPackages, 'agents');
+    if (copySelectedMarkdownFiles(agentsSrc, agentsDest, agentFiles, 'Package-selected agent') > 0) {
+      console.log('Installing package-selected agents -> ' + agentsDest + '/');
+    }
   }
 
   const commandsSrc = path.join(REPO_ROOT, 'commands');
   const commandsDest = path.join(claudeBase, 'commands');
   if (fs.existsSync(commandsSrc) && path.resolve(commandsSrc) !== path.resolve(commandsDest)) {
-    console.log('Installing commands -> ' + commandsDest + '/');
-    copyMarkdownFiles(commandsSrc, commandsDest);
+    const commandFiles = getManifestSelections(selectedPackages, 'commands');
+    if (copySelectedMarkdownFiles(commandsSrc, commandsDest, commandFiles, 'Package-selected command') > 0) {
+      console.log('Installing package-selected commands -> ' + commandsDest + '/');
+    }
   }
 
   const skillsSrc = path.join(REPO_ROOT, 'skills');
   const skillsDest = path.join(claudeBase, 'skills');
   if (fs.existsSync(skillsSrc) && path.resolve(skillsSrc) !== path.resolve(skillsDest)) {
-    console.log('Installing skills -> ' + skillsDest + '/');
-    copyRecursiveSync(skillsSrc, skillsDest);
+    const skillNames = getManifestSelections(selectedPackages, 'skills');
+    if (copySelectedDirectories(skillsSrc, skillsDest, skillNames, 'Package-selected skill') > 0) {
+      console.log('Installing package-selected skills -> ' + skillsDest + '/');
+    }
   }
 }
 
@@ -389,7 +442,7 @@ function installClaude(packageNames, globalScope) {
   warnExistingRulesDir(rulesDest);
   installClaudeCommonRules(rulesDest);
   installClaudeLanguageRules(selectedPackages, rulesDest);
-  installClaudeContentDirs(claudeBase);
+  installClaudeContentDirs(claudeBase, selectedPackages);
   installClaudeHooks(claudeBase, globalScope);
   installClaudeRuntimeScripts(claudeBase);
   printWindowsHookNote('NOTE: Windows — Hook scripts use Node.js; tmux-dependent features are skipped on Windows.');
@@ -482,8 +535,10 @@ function installCursorCoreDirs(destDir, selectedPackages) {
   const agentsSrc = path.join(REPO_ROOT, 'agents');
   const agentsDest = path.join(destDir, 'agents');
   if (fs.existsSync(agentsSrc)) {
-    console.log('Installing agents -> ' + agentsDest + '/');
-    copyMarkdownFiles(agentsSrc, agentsDest);
+    const agentFiles = getManifestSelections(selectedPackages, 'agents');
+    if (copySelectedMarkdownFiles(agentsSrc, agentsDest, agentFiles, 'Package-selected agent') > 0) {
+      console.log('Installing package-selected agents -> ' + agentsDest + '/');
+    }
   }
 
   installCursorSkills(destDir, selectedPackages);
@@ -708,26 +763,39 @@ function installGeminiRules(selectedPackages, globalScope, destDirAgent, destDir
   copyGeminiLocalRules(cursorRules, selectedPackages, destDirAgent);
 }
 
-function installGeminiContent(destDirAgent, destDirGemini) {
+function installGeminiContent(destDirAgent, destDirGemini, selectedPackages) {
   const skillsSrc = path.join(REPO_ROOT, 'skills');
   if (fs.existsSync(skillsSrc)) {
     const skillsDest = path.join(destDirAgent, 'skills');
-    console.log('Installing skills -> ' + skillsDest + '/');
-    copyRecursiveSync(skillsSrc, skillsDest);
+    const skillNames = getManifestSelections(selectedPackages, 'skills');
+    if (copySelectedDirectories(skillsSrc, skillsDest, skillNames, 'Package-selected skill') > 0) {
+      console.log('Installing package-selected skills -> ' + skillsDest + '/');
+    }
   }
 
   const agentsSrc = path.join(REPO_ROOT, 'agents');
   if (fs.existsSync(agentsSrc)) {
     const workflowsDest = path.join(destDirAgent, 'workflows');
-    console.log('Installing agents as workflows -> ' + workflowsDest + '/');
-    copyMarkdownFiles(agentsSrc, workflowsDest);
+    const agentFiles = getManifestSelections(selectedPackages, 'agents');
+    if (copySelectedMarkdownFiles(agentsSrc, workflowsDest, agentFiles, 'Package-selected agent') > 0) {
+      console.log('Installing package-selected agents as workflows -> ' + workflowsDest + '/');
+    }
   }
 
   const commandsSrc = path.join(REPO_ROOT, 'commands');
   if (fs.existsSync(commandsSrc)) {
-    const commandsDest = path.join(destDirGemini, 'commands');
-    console.log('Installing commands -> ' + commandsDest + '/');
-    convertCommandsToToml(commandsSrc, commandsDest);
+    const selectedCommands = getManifestSelections(selectedPackages, 'commands');
+    if (selectedCommands.length > 0) {
+      const tempCommandsSrc = fs.mkdtempSync(path.join(os.tmpdir(), 'mdt-gemini-commands-'));
+      try {
+        copySelectedMarkdownFiles(commandsSrc, tempCommandsSrc, selectedCommands, 'Package-selected command');
+        const commandsDest = path.join(destDirGemini, 'commands');
+        console.log('Installing package-selected commands -> ' + commandsDest + '/');
+        convertCommandsToToml(tempCommandsSrc, commandsDest);
+      } finally {
+        fs.rmSync(tempCommandsSrc, { recursive: true, force: true });
+      }
+    }
   }
 }
 
@@ -736,7 +804,7 @@ function installGemini(packageNames, globalScope) {
   const { destDirAgent, destDirGemini } = resolveGeminiDestinations(globalScope);
   const selectedPackages = resolveSelectedPackages(packageNames);
   installGeminiRules(selectedPackages, globalScope, destDirAgent, destDirGemini);
-  installGeminiContent(destDirAgent, destDirGemini);
+  installGeminiContent(destDirAgent, destDirGemini, selectedPackages);
   console.log('Done. Gemini configs installed.');
 }
 
@@ -785,5 +853,8 @@ module.exports = {
   loadPackageManifest,
   parseArgsFrom,
   resolveSelectedPackages,
-  buildInstallPlan
+  buildInstallPlan,
+  installClaudeContentDirs,
+  installCursorCoreDirs,
+  installGeminiContent
 };
