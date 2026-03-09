@@ -68,6 +68,15 @@ In that mode:
 4. If something fails, identify the missing installed skill, missing local script,
    or missing `~/.codex/` file before proposing broader changes.
 
+## Local Prerequisites
+
+- `node` must be installed and available on `PATH`
+- tool smoke probes require a local shell/session that allows subprocess spawn
+- if `smoke-tool-setups.js` reports `SKIP` with `EPERM` or `EACCES`, treat that
+  as an environment limitation, not as proof that the tool is missing or broken
+- in that case, rely on workflow smoke plus direct local invocation in a less
+  restricted shell before claiming the tool setup is broken
+
 ## Reporting Format
 
 Return a concise matrix that includes:

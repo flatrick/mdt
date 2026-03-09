@@ -55,6 +55,7 @@ function runTests() {
 
     assert.strictEqual(probe.status, 'SKIP');
     assert.ok(probe.detail.includes('EPERM'));
+    assert.ok(probe.detail.includes('allows local process spawn'));
   })) passed++; else failed++;
 
   if (test('returns FAIL when an installed command exits non-zero', () => {

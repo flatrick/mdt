@@ -96,7 +96,7 @@ function handleSpawnError(error, commandText) {
     return {
       status: 'SKIP',
       command: commandText,
-      detail: `probe blocked by local environment (${error.code})`
+      detail: `probe blocked by local environment (${error.code}); rerun in a shell/session that allows local process spawn`
     };
   }
 

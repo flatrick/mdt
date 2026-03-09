@@ -121,6 +121,28 @@ function buildVerifyChecks(files) {
   };
 }
 
+function buildCodeReviewChecks(files) {
+  return {
+    workflow: 'code-review',
+    checks: [
+      {
+        path: 'codex-template/AGENTS.md',
+        ok:
+          files['codex-template/AGENTS.md'].exists &&
+          files['codex-template/AGENTS.md'].content.includes('Complex features, architecture'),
+        message: 'Codex AGENTS should recommend the higher-reasoning review path for complex changes'
+      },
+      {
+        path: '.agents/skills/coding-standards/SKILL.md',
+        ok:
+          files['.agents/skills/coding-standards/SKILL.md'].exists &&
+          files['.agents/skills/coding-standards/SKILL.md'].content.includes('Universal coding standards'),
+        message: 'Codex coding-standards skill should exist to support review-quality guidance'
+      }
+    ]
+  };
+}
+
 function buildSecurityChecks(files) {
   return {
     workflow: 'security',
@@ -176,6 +198,7 @@ function buildWorkflowChecks(files) {
   return [
     buildPlanChecks(files),
     buildTddChecks(files),
+    buildCodeReviewChecks(files),
     buildVerifyChecks(files),
     buildSecurityChecks(files),
     buildE2eChecks(files)
@@ -247,6 +270,28 @@ function buildInstalledVerifyChecks(files) {
   };
 }
 
+function buildInstalledCodeReviewChecks(files) {
+  return {
+    workflow: 'code-review',
+    checks: [
+      {
+        path: '~/.codex/AGENTS.md',
+        ok:
+          files['~/.codex/AGENTS.md'].exists &&
+          files['~/.codex/AGENTS.md'].content.includes('Complex features, architecture'),
+        message: 'Codex global AGENTS should recommend the higher-reasoning review path for complex changes'
+      },
+      {
+        path: '.agents/skills/coding-standards/SKILL.md',
+        ok:
+          files['.agents/skills/coding-standards/SKILL.md'].exists &&
+          files['.agents/skills/coding-standards/SKILL.md'].content.includes('Universal coding standards'),
+        message: 'Installed Codex coding-standards skill should exist to support review-quality guidance'
+      }
+    ]
+  };
+}
+
 function buildInstalledSecurityChecks(files) {
   return {
     workflow: 'security',
@@ -305,6 +350,7 @@ function buildInstalledWorkflowChecks(files) {
   return [
     buildInstalledPlanChecks(files),
     buildInstalledTddChecks(files),
+    buildInstalledCodeReviewChecks(files),
     buildInstalledVerifyChecks(files),
     buildInstalledSmokeChecks(files),
     buildInstalledSecurityChecks(files),
@@ -326,6 +372,10 @@ function smokeCodexWorkflows(options = {}) {
           path.join('.agents', 'skills', 'tool-setup-verifier', 'SKILL.md')
         ),
         '.agents/skills/tdd-workflow/SKILL.md': readRepoFile(rootDir, path.join('.agents', 'skills', 'tdd-workflow', 'SKILL.md')),
+        '.agents/skills/coding-standards/SKILL.md': readRepoFile(
+          rootDir,
+          path.join('.agents', 'skills', 'coding-standards', 'SKILL.md')
+        ),
         '.agents/skills/verification-loop/SKILL.md': readRepoFile(
           rootDir,
           path.join('.agents', 'skills', 'verification-loop', 'SKILL.md')
@@ -346,6 +396,10 @@ function smokeCodexWorkflows(options = {}) {
         'codex-template/AGENTS.md': readRepoFile(rootDir, path.join('codex-template', 'AGENTS.md')),
         'codex-template/config.toml': readRepoFile(rootDir, path.join('codex-template', 'config.toml')),
         '.agents/skills/tdd-workflow/SKILL.md': readRepoFile(rootDir, path.join('.agents', 'skills', 'tdd-workflow', 'SKILL.md')),
+        '.agents/skills/coding-standards/SKILL.md': readRepoFile(
+          rootDir,
+          path.join('.agents', 'skills', 'coding-standards', 'SKILL.md')
+        ),
         '.agents/skills/verification-loop/SKILL.md': readRepoFile(
           rootDir,
           path.join('.agents', 'skills', 'verification-loop', 'SKILL.md')

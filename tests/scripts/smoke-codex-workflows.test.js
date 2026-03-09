@@ -49,6 +49,7 @@ function createFixtureRoot() {
   );
 
   writeFile(rootDir, path.join('.agents', 'skills', 'tdd-workflow', 'SKILL.md'), '# Test-Driven Development Workflow');
+  writeFile(rootDir, path.join('.agents', 'skills', 'coding-standards', 'SKILL.md'), '# Universal coding standards');
   writeFile(rootDir, path.join('.agents', 'skills', 'verification-loop', 'SKILL.md'), '# Verification Loop Skill');
 
   return rootDir;
@@ -86,6 +87,7 @@ function createInstalledFixtureRoot() {
 
   writeFile(rootDir, path.join('.agents', 'skills', 'tool-setup-verifier', 'SKILL.md'), '# Tool Setup Verifier');
   writeFile(rootDir, path.join('.agents', 'skills', 'tdd-workflow', 'SKILL.md'), '# Test-Driven Development Workflow');
+  writeFile(rootDir, path.join('.agents', 'skills', 'coding-standards', 'SKILL.md'), '# Universal coding standards');
   writeFile(rootDir, path.join('.agents', 'skills', 'verification-loop', 'SKILL.md'), '# Verification Loop Skill');
   writeFile(rootDir, path.join('.agents', 'skills', 'security-review', 'SKILL.md'), '# Security Review Skill');
   writeFile(rootDir, path.join('.agents', 'skills', 'e2e-testing', 'SKILL.md'), '# E2E Testing Patterns');
@@ -113,6 +115,7 @@ function runTests() {
     assert.ok(output.join('\n').includes('Codex workflow smoke (repo-source mode):'));
     assert.ok(output.join('\n').includes('plan: PASS'));
     assert.ok(output.join('\n').includes('tdd: PASS'));
+    assert.ok(output.join('\n').includes('code-review: PASS'));
     assert.ok(output.join('\n').includes('verify: PASS'));
   })) passed++; else failed++;
 
@@ -179,6 +182,7 @@ function runTests() {
       assert.strictEqual(result.exitCode, 0, output.join('\n'));
       assert.ok(output.join('\n').includes('installed-target'));
       assert.ok(output.join('\n').includes('smoke: PASS'));
+      assert.ok(output.join('\n').includes('code-review: PASS'));
       assert.ok(output.join('\n').includes('verify: PASS'));
     } finally {
       cleanupTestDir(rootDir);
