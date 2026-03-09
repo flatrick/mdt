@@ -9,6 +9,8 @@ const { asyncTest, createTestDir, cleanupTestDir, test } = require('../helpers/t
 const { withEnv } = require('../helpers/env-test-utils');
 const { getDateString } = require('../../scripts/lib/utils');
 const { buildHookEnv, getPluginRoot, runExistingHook } = require('../../hooks/cursor/scripts/adapter');
+const { processCursorAfterFileEdit } = require('../../hooks/cursor/scripts/after-file-edit');
+const { processCursorAfterShellExecution } = require('../../hooks/cursor/scripts/after-shell-execution');
 const { processCursorSessionEnd } = require('../../hooks/cursor/scripts/session-end');
 const { processCursorStop } = require('../../hooks/cursor/scripts/stop');
 
@@ -246,6 +248,93 @@ async function runTests() {
         assert.ok(!fs.existsSync(path.join(configDir, 'sessions')), 'Stop should not create session files');
         assert.ok(!combinedStderr.includes('Session has'), 'Stop should not evaluate session length');
         assert.ok(!combinedStderr.includes('Cost tracking'), 'Stop should not run cost tracking');
+      });
+    } finally {
+      cleanupTestDir(testDir);
+    }
+  })) passed++; else failed++;
+
+  if (await asyncTest('after-file-edit records continuous-learning observations from Cursor payloads', async () => {
+    const testDir = createTestDir('cursor-after-file-edit-');
+    try {
+      const configDir = path.join(testDir, 'config');
+      const projectDir = path.join(testDir, 'workspace');
+      fs.mkdirSync(configDir, { recursive: true });
+      fs.mkdirSync(projectDir, { recursive: true });
+
+      const input = {
+        conversation_id: 'cursor-observe-edit-12345678',
+        path: path.join(projectDir, 'src', 'app.ts'),
+        output: 'Formatted src/app.ts',
+        cwd: projectDir,
+        workspace_roots: [projectDir]
+      };
+
+      await withEnv({
+        CONFIG_DIR: configDir,
+        CURSOR_TRACE_ID: 'cursor-observe-edit-12345678'
+      }, async () => {
+        const output = await processCursorAfterFileEdit(JSON.stringify(input));
+        assert.strictEqual(output, JSON.stringify(input), 'Should pass through raw Cursor payload');
+
+        const homunculusRoot = path.join(configDir, 'homunculus');
+        const projectsFile = path.join(homunculusRoot, 'projects.json');
+        assert.ok(fs.existsSync(projectsFile), 'Should create project registry for observed Cursor activity');
+        const projects = JSON.parse(fs.readFileSync(projectsFile, 'utf8'));
+        const [projectId] = Object.keys(projects);
+        assert.ok(projectId, 'Should register a detected project');
+
+        const observationsFile = path.join(homunculusRoot, 'projects', projectId, 'observations.jsonl');
+        assert.ok(fs.existsSync(observationsFile), 'Should append Cursor edit observation');
+        const observations = fs.readFileSync(observationsFile, 'utf8');
+        assert.ok(observations.includes('"event":"tool_complete"'), 'Should record completed-tool observation');
+        assert.ok(observations.includes('"tool":"Edit"'), 'Should classify the edit as Edit tool usage');
+        assert.ok(observations.includes('Formatted src/app.ts'), 'Should include edit output context');
+      });
+    } finally {
+      cleanupTestDir(testDir);
+    }
+  })) passed++; else failed++;
+
+  if (await asyncTest('after-shell-execution records continuous-learning observations from Cursor payloads', async () => {
+    const testDir = createTestDir('cursor-after-shell-');
+    try {
+      const configDir = path.join(testDir, 'config');
+      const projectDir = path.join(testDir, 'workspace');
+      fs.mkdirSync(configDir, { recursive: true });
+      fs.mkdirSync(projectDir, { recursive: true });
+
+      const input = {
+        conversation_id: 'cursor-observe-shell-12345678',
+        command: 'npm run build',
+        output: 'Build succeeded',
+        cwd: projectDir,
+        workspace_roots: [projectDir]
+      };
+
+      await withEnv({
+        CONFIG_DIR: configDir,
+        CURSOR_TRACE_ID: 'cursor-observe-shell-12345678'
+      }, async () => {
+        const stderr = [];
+        const originalError = console.error;
+        try {
+          console.error = (msg) => stderr.push(String(msg));
+          const output = await processCursorAfterShellExecution(JSON.stringify(input));
+          assert.strictEqual(output, JSON.stringify(input), 'Should pass through raw Cursor payload');
+        } finally {
+          console.error = originalError;
+        }
+
+        const combinedStderr = stderr.join('\n');
+        assert.ok(combinedStderr.includes('Build completed'), `Expected build hook log, got: ${combinedStderr}`);
+
+        const projects = JSON.parse(fs.readFileSync(path.join(configDir, 'homunculus', 'projects.json'), 'utf8'));
+        const [projectId] = Object.keys(projects);
+        const observationsFile = path.join(configDir, 'homunculus', 'projects', projectId, 'observations.jsonl');
+        const observations = fs.readFileSync(observationsFile, 'utf8');
+        assert.ok(observations.includes('"tool":"Bash"'), 'Should classify shell execution as Bash tool usage');
+        assert.ok(observations.includes('Build succeeded'), 'Should include shell output context');
       });
     } finally {
       cleanupTestDir(testDir);

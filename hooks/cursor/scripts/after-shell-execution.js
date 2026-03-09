@@ -1,6 +1,15 @@
 #!/usr/bin/env node
-const { readStdin, hookEnabled } = require('./adapter');
-readStdin().then(raw => {
+const path = require('path');
+const { buildHookEnv, getPluginRoot, hookEnabled, readStdin, runExistingHook } = require('./adapter');
+
+function getObserveScriptPath(env = process.env) {
+  const hookEnv = buildHookEnv(env);
+  return path.join(hookEnv.MDT_ROOT || getPluginRoot(), 'skills', 'continuous-learning-v2', 'hooks', 'observe.js');
+}
+
+async function processCursorAfterShellExecution(raw, options = {}) {
+  const runner = options.runner;
+  const env = options.env || process.env;
   try {
     const input = JSON.parse(raw || '{}');
     const cmd = String(input.command || input.args?.command || '');
@@ -19,9 +28,31 @@ readStdin().then(raw => {
     if (hookEnabled('post:bash:build-complete', ['standard', 'strict']) && /(npm run build|pnpm build|yarn build)/.test(cmd)) {
       console.error('[MDT] Build completed');
     }
-  } catch {
-    // noop
-  }
 
-  process.stdout.write(raw);
+    const observePayload = {
+      conversation_id: input.conversation_id || input.session_id || '',
+      tool: input.tool || input.tool_name || 'Bash',
+      input: { command: cmd },
+      output,
+      cwd: input.cwd || input.workspace_roots?.[0] || process.cwd(),
+      workspace_roots: input.workspace_roots
+    };
+    runExistingHook('observe.js', JSON.stringify(observePayload), {
+      runner,
+      env,
+      scriptPath: getObserveScriptPath(env)
+    });
+  } catch {}
+
+  return raw;
+}
+
+readStdin().then(async (raw) => {
+  const output = await processCursorAfterShellExecution(raw);
+  process.stdout.write(output);
 }).catch(() => process.exit(0));
+
+module.exports = {
+  getObserveScriptPath,
+  processCursorAfterShellExecution
+};

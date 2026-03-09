@@ -13,12 +13,17 @@ const https = require('https');
 const http = require('http');
 
 const skillRoot = path.join(__dirname, '..');
-const { detectProject, homunculusDir } = require(path.join(skillRoot, 'scripts', 'detect-project.js'));
+const { detectProject, getHomunculusDir } = require(path.join(skillRoot, 'scripts', 'detect-project.js'));
 
-const PROJECTS_DIR = path.join(homunculusDir, 'projects');
-const REGISTRY_FILE = path.join(homunculusDir, 'projects.json');
-const GLOBAL_PERSONAL = path.join(homunculusDir, 'instincts', 'personal');
-const GLOBAL_INHERITED = path.join(homunculusDir, 'instincts', 'inherited');
+function getCliPaths() {
+  const homunculusDir = getHomunculusDir();
+  return {
+    PROJECTS_DIR: path.join(homunculusDir, 'projects'),
+    REGISTRY_FILE: path.join(homunculusDir, 'projects.json'),
+    GLOBAL_PERSONAL: path.join(homunculusDir, 'instincts', 'personal'),
+    GLOBAL_INHERITED: path.join(homunculusDir, 'instincts', 'inherited')
+  };
+}
 const ALLOWED_EXT = ['.yaml', '.yml', '.md'];
 
 function parseInstinctFile(content) {
@@ -88,6 +93,7 @@ function loadInstinctsFromDir(dirPath, sourceType, scopeLabel) {
 }
 
 function loadAllInstincts(project, includeGlobal = true) {
+  const { GLOBAL_PERSONAL, GLOBAL_INHERITED } = getCliPaths();
   const instincts = [];
 
   if (project.id !== 'global') {
@@ -109,6 +115,7 @@ function loadAllInstincts(project, includeGlobal = true) {
 }
 
 function loadProjectOnlyInstincts(project) {
+  const { GLOBAL_PERSONAL, GLOBAL_INHERITED } = getCliPaths();
   if (project.id === 'global') {
     return [
       ...loadInstinctsFromDir(GLOBAL_PERSONAL, 'personal', 'global'),
@@ -125,6 +132,7 @@ function validateInstinctId(id) {
 }
 
 function cmdStatus() {
+  const { GLOBAL_PERSONAL } = getCliPaths();
   const project = detectProject(process.cwd());
   const instincts = loadAllInstincts(project);
 
@@ -174,6 +182,7 @@ function cmdStatus() {
 }
 
 function cmdProjects() {
+  const { PROJECTS_DIR, REGISTRY_FILE, GLOBAL_PERSONAL, GLOBAL_INHERITED } = getCliPaths();
   let registry = {};
   try {
     if (fs.existsSync(REGISTRY_FILE)) {
@@ -218,6 +227,7 @@ function cmdProjects() {
 }
 
 function cmdExport(args) {
+  const { GLOBAL_PERSONAL, GLOBAL_INHERITED } = getCliPaths();
   const project = detectProject(process.cwd());
   const scope = args.scope || 'all';
   let instincts;
@@ -310,6 +320,7 @@ function cmdEvolve(_args) {
 }
 
 function cmdImport(args) {
+  const { GLOBAL_INHERITED } = getCliPaths();
   const project = detectProject(process.cwd());
   const source = args.source;
   let content;
@@ -374,6 +385,7 @@ function cmdImport(args) {
 }
 
 function cmdPromote(args) {
+  const { GLOBAL_PERSONAL, GLOBAL_INHERITED } = getCliPaths();
   const project = detectProject(process.cwd());
   const instinctId = args.instinct_id;
 

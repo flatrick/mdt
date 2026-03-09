@@ -3,6 +3,15 @@
   "observer": {
     "enabled": false,
     "run_interval_minutes": 5,
-    "min_observations_to_analyze": 20
+    "min_observations_to_analyze": 20,
+    "tool": null,
+    "models": {
+      "claude": "haiku",
+      "cursor": "gpt-5"
+    },
+    "commands": {
+      "claude": "claude",
+      "cursor": "agent"
+    }
   }
 }

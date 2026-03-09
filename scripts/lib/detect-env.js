@@ -112,6 +112,7 @@ function resolveDataDir(ctx) {
   const homeDir = getHomeDir(ctx);
   const configDir = resolveConfigDir(ctx);
   const explicit = getExplicitDirValue(ctx, 'DATA_DIR');
+  const explicitConfigDir = getExplicitDirValue(ctx, 'CONFIG_DIR');
 
   if (explicit && ctx.existsSync(explicit)) {
     ctx.cache.dataDir = explicit;
@@ -121,6 +122,11 @@ function resolveDataDir(ctx) {
     ctx.logWarn(
       `[detect-env] DATA_DIR is set to '${explicit}' but does not exist; falling back based on configDir='${configDir}'`
     );
+  }
+
+  if (explicitConfigDir && ctx.existsSync(explicitConfigDir)) {
+    ctx.cache.dataDir = explicitConfigDir;
+    return ctx.cache.dataDir;
   }
 
   const configHomunculusDir = path.join(configDir, 'homunculus');

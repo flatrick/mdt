@@ -26,17 +26,25 @@ function getScriptRoot() {
 function loadDetectEnv() {
   const root = getScriptRoot();
   try {
-    return require(path.join(root, 'scripts', 'lib', 'detect-env.js')).detectEnv;
+    return require(path.join(root, 'scripts', 'lib', 'detect-env.js')).createDetectEnv;
   } catch {
-    return require(path.join(__dirname, '..', '..', '..', 'scripts', 'lib', 'detect-env.js')).detectEnv;
+    return require(path.join(__dirname, '..', '..', '..', 'scripts', 'lib', 'detect-env.js')).createDetectEnv;
   }
 }
 
-const detectEnv = loadDetectEnv();
-const dataDir = detectEnv.getDataDir();
-const homunculusDir = path.join(dataDir, 'homunculus');
-const projectsDir = path.join(homunculusDir, 'projects');
-const registryFile = path.join(homunculusDir, 'projects.json');
+const createDetectEnv = loadDetectEnv();
+
+function getPathSet() {
+  const detectEnv = createDetectEnv();
+  const dataDir = detectEnv.getDataDir();
+  const homunculusDir = path.join(dataDir, 'homunculus');
+  return {
+    dataDir,
+    homunculusDir,
+    projectsDir: path.join(homunculusDir, 'projects'),
+    registryFile: path.join(homunculusDir, 'projects.json')
+  };
+}
 
 function sha12(input) {
   return crypto.createHash('sha256').update(input, 'utf8').digest('hex').slice(0, 12);
@@ -49,6 +57,7 @@ function ensureDir(dir) {
 }
 
 function updateRegistry(projectId, projectName, projectRoot, remoteUrl) {
+  const { registryFile } = getPathSet();
   ensureDir(path.dirname(registryFile));
   let registry = {};
   try {
@@ -75,6 +84,7 @@ function updateRegistry(projectId, projectName, projectRoot, remoteUrl) {
  *   evolved_dir, observations_file
  */
 function detectProject(cwd) {
+  const { homunculusDir, projectsDir } = getPathSet();
   let projectRoot = null;
 
   if (process.env.CLAUDE_PROJECT_DIR && process.env.CLAUDE_PROJECT_DIR.trim()) {
@@ -87,7 +97,8 @@ function detectProject(cwd) {
       const result = execFileSync('git', ['rev-parse', '--show-toplevel'], {
         encoding: 'utf8',
         cwd: cwd || process.cwd(),
-        timeout: 5000
+        timeout: 5000,
+        stdio: ['ignore', 'pipe', 'ignore']
       });
       const root = (result || '').trim();
       if (root) projectRoot = path.resolve(root);
@@ -115,7 +126,8 @@ function detectProject(cwd) {
   try {
     const result = execFileSync('git', ['-C', projectRoot, 'remote', 'get-url', 'origin'], {
       encoding: 'utf8',
-      timeout: 5000
+      timeout: 5000,
+      stdio: ['ignore', 'pipe', 'ignore']
     });
     remoteUrl = (result || '').trim();
   } catch {
@@ -153,7 +165,33 @@ function detectProject(cwd) {
   };
 }
 
-module.exports = { detectProject, homunculusDir, projectsDir, registryFile };
+function getHomunculusDir() {
+  return getPathSet().homunculusDir;
+}
+
+function getProjectsDir() {
+  return getPathSet().projectsDir;
+}
+
+function getRegistryFile() {
+  return getPathSet().registryFile;
+}
+
+module.exports = {
+  detectProject,
+  getHomunculusDir,
+  getProjectsDir,
+  getRegistryFile,
+  get homunculusDir() {
+    return getHomunculusDir();
+  },
+  get projectsDir() {
+    return getProjectsDir();
+  },
+  get registryFile() {
+    return getRegistryFile();
+  }
+};
 
 if (require.main === module) {
   const cwd = process.argv[2] || process.cwd();

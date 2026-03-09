@@ -16,7 +16,7 @@ const fs = require('fs');
 const path = require('path');
 
 const skillRoot = path.join(__dirname, '..');
-const { detectProject, homunculusDir } = require(path.join(skillRoot, 'scripts', 'detect-project.js'));
+const { detectProject, getHomunculusDir } = require(path.join(skillRoot, 'scripts', 'detect-project.js'));
 
 const HOOK_PHASE = process.argv[2] || 'post';
 const MAX_FILE_SIZE_MB = 10;
@@ -68,7 +68,7 @@ function main() {
 
     const project = detectProject(process.cwd());
 
-    const configDir = homunculusDir;
+    const configDir = getHomunculusDir();
     const observationsFile = project.observations_file;
 
     if (fs.existsSync(path.join(configDir, 'disabled'))) {

@@ -216,6 +216,19 @@ function runTests() {
   else failed++;
 
   if (
+    test('explicit CONFIG_DIR also anchors data dir before legacy Claude fallback', () => {
+      const home = '/home/test';
+      const env = { CONFIG_DIR: '/custom/config' };
+      const existsSync = (p) => p === '/custom/config' || p === path.join(home, '.claude', 'homunculus');
+      const d = createDetectEnv({ env, homedir: () => home, existsSync });
+      assert.strictEqual(d.dataDir, '/custom/config');
+      assert.strictEqual(d.getDataDir(), '/custom/config');
+    })
+  )
+    passed++;
+  else failed++;
+
+  if (
     test('prefers homunculus next to configDir when present', () => {
       const home = '/home/test';
       const configDir = path.join(home, '.cursor');
