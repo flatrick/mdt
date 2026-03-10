@@ -38,11 +38,12 @@ function runTests() {
   let failed = 0;
 
   if (test('parseArgsFrom parses list and dry-run flags', () => {
-    const parsed = parseArgsFrom(['--target', 'cursor', '--global', '--list', '--dry-run', 'typescript']);
+    const parsed = parseArgsFrom(['--target', 'cursor', '--global', '--list', '--dry-run', '--dev', 'typescript']);
     assert.strictEqual(parsed.target, 'cursor');
     assert.strictEqual(parsed.globalScope, true);
     assert.strictEqual(parsed.listMode, true);
     assert.strictEqual(parsed.dryRun, true);
+    assert.strictEqual(parsed.devMode, true);
     assert.deepStrictEqual(parsed.packageNames, ['typescript']);
   })) passed++; else failed++;
 
@@ -242,7 +243,7 @@ function runTests() {
     assert.deepStrictEqual(manifest.tools.cursor.skills, ['frontend-slides']);
     assert.deepStrictEqual(manifest.tools.cursor.commands, ['docs-health.md', 'plan.md', 'tdd.md', 'verify.md', 'code-review.md', 'smoke.md', 'e2e.md', 'security.md', 'build-fix.md', 'refactor-clean.md']);
     assert.deepStrictEqual(manifest.tools.codex.rules, ['common-coding-style.md', 'common-testing.md', 'common-security.md', 'common-git-workflow.md']);
-    assert.deepStrictEqual(manifest.tools.codex.skills, ['tool-setup-verifier']);
+    assert.deepStrictEqual(manifest.tools.codex.skills || [], []);
     assert.deepStrictEqual(manifest.requires, {});
   })) passed++; else failed++;
 
@@ -367,6 +368,13 @@ function runTests() {
     });
   })) passed++; else failed++;
 
+  if (test('installClaudeContentDirs includes dev-only internal doc skill only in dev mode', () => {
+    withTempDir('mdt-install-claude-dev-', (tempDir) => {
+      installClaudeContentDirs(tempDir, resolveSelectedPackages(['typescript']), true);
+      assert.ok(fs.existsSync(path.join(tempDir, 'skills', 'tool-doc-maintainer', 'SKILL.md')));
+    });
+  })) passed++; else failed++;
+
   if (test('installCursorCoreDirs copies selected shared skills and cursor skills only', () => {
     withTempDir('mdt-install-cursor-', (tempDir) => {
       installCursorCoreDirs(tempDir, resolveSelectedPackages(['typescript', 'continuous-learning']));
@@ -382,6 +390,7 @@ function runTests() {
       assert.ok(fs.existsSync(path.join(tempDir, 'commands', 'smoke.md')));
       assert.ok(fs.existsSync(path.join(tempDir, 'skills', 'documentation-steward', 'SKILL.md')));
       assert.ok(fs.existsSync(path.join(tempDir, 'commands', 'learn.md')));
+      assert.ok(!fs.existsSync(path.join(tempDir, 'skills', 'tool-doc-maintainer', 'SKILL.md')));
 
       const planCommand = fs.readFileSync(path.join(tempDir, 'commands', 'plan.md'), 'utf8');
       const docsHealthCommand = fs.readFileSync(path.join(tempDir, 'commands', 'docs-health.md'), 'utf8');
@@ -390,6 +399,13 @@ function runTests() {
       assert.ok(!planCommand.includes('Use Cursor’s custom command UI'));
       assert.ok(docsHealthCommand.includes('DOCS HEALTH: PASS|PARTIAL|FAIL'));
       assert.ok(smokeCommand.includes('SMOKE: PASS|FAIL|PARTIAL'));
+    });
+  })) passed++; else failed++;
+
+  if (test('installCursorCoreDirs adds dev-only internal doc skill in dev mode', () => {
+    withTempDir('mdt-install-cursor-dev-', (tempDir) => {
+      installCursorCoreDirs(tempDir, resolveSelectedPackages(['typescript']), true);
+      assert.ok(fs.existsSync(path.join(tempDir, 'skills', 'tool-doc-maintainer', 'SKILL.md')));
     });
   })) passed++; else failed++;
 
@@ -403,10 +419,20 @@ function runTests() {
       assert.ok(!fs.existsSync(path.join(agentDir, 'workflows', 'python-reviewer.md')));
       assert.ok(fs.existsSync(path.join(agentDir, 'skills', 'documentation-steward', 'SKILL.md')));
       assert.ok(fs.existsSync(path.join(agentDir, 'skills', 'coding-standards', 'SKILL.md')));
+      assert.ok(!fs.existsSync(path.join(agentDir, 'skills', 'tool-doc-maintainer', 'SKILL.md')));
       assert.ok(!fs.existsSync(path.join(agentDir, 'skills', 'python-patterns', 'SKILL.md')));
       assert.ok(fs.existsSync(path.join(geminiDir, 'commands', 'docs-health.toml')));
       assert.ok(fs.existsSync(path.join(geminiDir, 'commands', 'plan.toml')));
       assert.ok(!fs.existsSync(path.join(geminiDir, 'commands', 'python-review.toml')));
+    });
+  })) passed++; else failed++;
+
+  if (test('installGeminiContent adds dev-only internal doc skill in dev mode', () => {
+    withTempDir('mdt-install-gemini-dev-', (tempDir) => {
+      const agentDir = path.join(tempDir, '.agent');
+      const geminiDir = path.join(tempDir, '.gemini');
+      installGeminiContent(agentDir, geminiDir, resolveSelectedPackages(['typescript']), true);
+      assert.ok(fs.existsSync(path.join(agentDir, 'skills', 'tool-doc-maintainer', 'SKILL.md')));
     });
   })) passed++; else failed++;
 
@@ -416,11 +442,20 @@ function runTests() {
 
       assert.ok(fs.existsSync(path.join(tempDir, 'skills', 'coding-standards', 'SKILL.md')));
       assert.ok(fs.existsSync(path.join(tempDir, 'skills', 'documentation-steward', 'SKILL.md')));
-      assert.ok(fs.existsSync(path.join(tempDir, 'skills', 'tool-setup-verifier', 'SKILL.md')));
+      assert.ok(!fs.existsSync(path.join(tempDir, 'skills', 'tool-setup-verifier', 'SKILL.md')));
+      assert.ok(!fs.existsSync(path.join(tempDir, 'skills', 'tool-doc-maintainer', 'SKILL.md')));
       assert.ok(fs.existsSync(path.join(tempDir, 'skills', 'continuous-learning-manual', 'SKILL.md')));
       // continuous-learning-automatic is hooks-only and not part of the Codex contract
       assert.ok(!fs.existsSync(path.join(tempDir, 'skills', 'continuous-learning-automatic', 'SKILL.md')));
       assert.ok(!fs.existsSync(path.join(tempDir, 'skills', 'python-patterns', 'SKILL.md')));
+    });
+  })) passed++; else failed++;
+
+  if (test('installCodexSkills adds verifier and internal doc maintainer only in dev mode', () => {
+    withTempDir('mdt-install-codex-dev-', (tempDir) => {
+      installCodexSkills(resolveSelectedPackages(['typescript', 'continuous-learning']), tempDir, true);
+      assert.ok(fs.existsSync(path.join(tempDir, 'skills', 'tool-setup-verifier', 'SKILL.md')));
+      assert.ok(fs.existsSync(path.join(tempDir, 'skills', 'tool-doc-maintainer', 'SKILL.md')));
     });
   })) passed++; else failed++;
 

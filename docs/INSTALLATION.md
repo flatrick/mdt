@@ -14,7 +14,7 @@ Detailed tool behavior lives in:
 ## CLI
 
 ```bash
-node scripts/install-mdt.js [--target claude|cursor|codex|gemini] [--global] [--project-dir <path>] [--list] [--dry-run] [package ...]
+node scripts/install-mdt.js [--target claude|cursor|codex|gemini] [--global] [--project-dir <path>] [--dev] [--list] [--dry-run] [package ...]
 ```
 
 Notes:
@@ -23,6 +23,7 @@ Notes:
 - default target is `claude`
 - `--project-dir` changes where project-level files are installed
 - `--global` only affects targets that support a user-level install mode
+- `--dev` adds MDT-internal maintenance surfaces meant for MDT development, not normal end-user installs
 
 ## Scope Contract
 
@@ -69,6 +70,7 @@ Codex:
 ```bash
 node scripts/install-mdt.js --target codex --project-dir ../scratch-repo typescript continuous-learning
 node scripts/install-mdt.js --target codex --global typescript continuous-learning
+node scripts/install-mdt.js --target codex --project-dir ../scratch-repo --dev typescript continuous-learning
 ```
 
 Codex note:
@@ -111,6 +113,15 @@ Tool-specific manual checks live under:
 - [docs/testing/manual-verification/claude-code.md](./testing/manual-verification/claude-code.md)
 - [docs/testing/manual-verification/cursor.md](./testing/manual-verification/cursor.md)
 - [docs/testing/manual-verification/codex.md](./testing/manual-verification/codex.md)
+
+Dev-only verification helpers:
+
+- `--dev` installs MDT-internal surfaces such as `tool-setup-verifier`,
+  `tool-doc-maintainer`, and Codex smoke workflow scripts into the target
+  project install
+- normal end-user installs keep `documentation-steward` as the general
+  documentation skill but do not ship MDT-maintainer-specific verifier/audit
+  skills by default
 
 ## Pre-v1 Policy
 

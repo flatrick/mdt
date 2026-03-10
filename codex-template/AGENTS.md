@@ -29,7 +29,10 @@ Available skills:
 - strategic-compact — Context management
 - api-design — REST API design patterns
 - verification-loop — Build, test, lint, typecheck, security
+
+MDT development installs (`--dev`) additionally materialize:
 - tool-setup-verifier — Smoke-check MDT tool adapters and workflow contracts
+- tool-doc-maintainer — Keep MDT's cross-tool capability docs aligned with reality
 
 ## MCP Servers
 

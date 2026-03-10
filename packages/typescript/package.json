@@ -84,9 +84,6 @@
         "common-testing.md",
         "common-security.md",
         "common-git-workflow.md"
-      ],
-      "skills": [
-        "tool-setup-verifier"
       ]
     },
     "gemini": {

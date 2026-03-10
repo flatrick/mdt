@@ -4,7 +4,7 @@
  * Node-only installer for rules, agents, skills, commands, hooks, and configs.
  *
  * Usage:
- *   node scripts/install-mdt.js [--target claude|cursor|codex] [--global] [--project-dir <path>] [package ...]
+ *   node scripts/install-mdt.js [--target claude|cursor|codex] [--global] [--project-dir <path>] [--dev] [package ...]
  *
  * Examples:
  *   node scripts/install-mdt.js typescript
@@ -74,6 +74,7 @@ function parseArgsFrom(args) {
   let globalScope = false;
   let listMode = false;
   let dryRun = false;
+  let devMode = false;
   let projectDir = null;
   const packageNames = [];
 
@@ -89,12 +90,14 @@ function parseArgsFrom(args) {
       listMode = true;
     } else if (args[i] === '--dry-run') {
       dryRun = true;
+    } else if (args[i] === '--dev') {
+      devMode = true;
     } else if (!args[i].startsWith('-')) {
       packageNames.push(args[i]);
     }
   }
 
-  return { target, globalScope, listMode, dryRun, projectDir, packageNames };
+  return { target, globalScope, listMode, dryRun, devMode, projectDir, packageNames };
 }
 
 function assertProjectDir(projectDir) {
@@ -389,7 +392,7 @@ function getDryRunHeader(target, globalScope) {
   return [`[dry-run] Target: ${targetDisplay}`];
 }
 
-function buildCodexInstallPlan(lines, globalScope, selectedPackages, projectDir) {
+function buildCodexInstallPlan(lines, globalScope, selectedPackages, projectDir, devMode) {
   const packages = getSelectedPackageSummary(selectedPackages);
   if (globalScope) {
     const userCodexDir = path.join(os.homedir(), '.codex');
@@ -410,6 +413,7 @@ function buildCodexInstallPlan(lines, globalScope, selectedPackages, projectDir)
     `[dry-run] Would install Codex project skills to ${path.join(projectAgentsDir, 'skills')}`,
     `[dry-run] Would install Codex runtime scripts to ${path.join(projectAgentsDir, 'scripts')}`,
     '[dry-run] Would materialize package-selected Codex skills from codex-template/skills into .agents/skills/',
+    ...(devMode ? [`[dry-run] Would install Codex dev smoke workflow scripts to ${path.join(projectAgentsDir, 'scripts')}`] : []),
     ...(codexScripts.length > 0
       ? [`[dry-run] Would install package-selected Codex workflow scripts to ${path.join(projectAgentsDir, 'scripts')}`]
       : [])
@@ -482,7 +486,7 @@ function buildCursorInstallPlan(lines, globalScope, selectedPackages, projectDir
   return [...nextLines, '[dry-run] Would install Cursor rules and skills declared by the selected packages'];
 }
 
-function buildInstallPlan({ target, globalScope, projectDir, packageNames }) {
+function buildInstallPlan({ target, globalScope, devMode, projectDir, packageNames }) {
   const header = getDryRunHeader(target, globalScope);
   const resolvedProjectDir = assertProjectDir(projectDir || process.cwd());
   const selectedPackages = target === 'codex' && packageNames.length === 0
@@ -492,7 +496,7 @@ function buildInstallPlan({ target, globalScope, projectDir, packageNames }) {
     ? []
     : assertPackageRequirements(target, selectedPackages).map((warning) => `[dry-run] Warning: ${warning}`);
 
-  if (target === 'codex') return [...warnings, ...buildCodexInstallPlan(header, globalScope, selectedPackages, resolvedProjectDir)];
+  if (target === 'codex') return [...warnings, ...buildCodexInstallPlan(header, globalScope, selectedPackages, resolvedProjectDir, devMode)];
   if (target === 'gemini') return [...warnings, ...buildGeminiInstallPlan(header, globalScope, selectedPackages, resolvedProjectDir)];
   if (target === 'claude') return [...warnings, ...buildClaudeInstallPlan(header, globalScope, selectedPackages, resolvedProjectDir)];
 
@@ -677,7 +681,17 @@ function installClaudeRules(selectedPackages, rulesDest) {
   }
 }
 
-function installClaudeContentDirs(claudeBase, selectedPackages) {
+function installDevSharedSkills(destDir) {
+  const skillsSrc = path.join(REPO_ROOT, 'skills');
+  if (!fs.existsSync(skillsSrc)) {
+    return 0;
+  }
+
+  const skillsDest = path.join(destDir, 'skills');
+  return copySelectedDirectories(skillsSrc, skillsDest, ['tool-doc-maintainer'], 'Dev-only shared skill');
+}
+
+function installClaudeContentDirs(claudeBase, selectedPackages, devMode = false) {
   const agentsSrc = path.join(REPO_ROOT, 'agents');
   const agentsDest = path.join(claudeBase, 'agents');
   if (fs.existsSync(agentsSrc) && path.resolve(agentsSrc) !== path.resolve(agentsDest)) {
@@ -707,6 +721,10 @@ function installClaudeContentDirs(claudeBase, selectedPackages) {
     const claudeSkillNames = getToolManifestSelections(selectedPackages, 'claude', 'skills');
     if (copySelectedDirectories(skillsSrc, skillsDest, claudeSkillNames, 'Claude package-selected skill') > 0) {
       console.log('Installing Claude package skills -> ' + skillsDest + '/');
+    }
+
+    if (devMode && installDevSharedSkills(claudeBase) > 0) {
+      console.log('Installing dev-only shared skills -> ' + skillsDest + '/');
     }
   }
 }
@@ -755,7 +773,7 @@ function printWindowsHookNote(prefix) {
   console.log('');
 }
 
-function installClaude(packageNames, globalScope, projectDir) {
+function installClaude(packageNames, globalScope, projectDir, devMode = false) {
   const { claudeBase, rulesDest } = resolveClaudePaths(globalScope, projectDir);
   if (!packageNames.length) usage('claude');
   const selectedPackages = resolveSelectedPackages(packageNames);
@@ -765,7 +783,7 @@ function installClaude(packageNames, globalScope, projectDir) {
 
   warnExistingRulesDir(rulesDest);
   installClaudeRules(selectedPackages, rulesDest);
-  installClaudeContentDirs(claudeBase, selectedPackages);
+  installClaudeContentDirs(claudeBase, selectedPackages, devMode);
   installClaudeHooks(claudeBase, globalScope);
   installClaudeRuntimeScripts(claudeBase);
   printWindowsHookNote('NOTE: Windows — Hook scripts use Node.js; tmux-dependent features are skipped on Windows.');
@@ -858,7 +876,7 @@ function installCursorSkills(destDir, selectedPackages) {
   }
 }
 
-function installCursorCoreDirs(destDir, selectedPackages) {
+function installCursorCoreDirs(destDir, selectedPackages, devMode = false) {
   const agentsSrc = path.join(REPO_ROOT, 'agents');
   const agentsDest = path.join(destDir, 'agents');
   if (fs.existsSync(agentsSrc)) {
@@ -879,6 +897,10 @@ function installCursorCoreDirs(destDir, selectedPackages) {
         console.log('Installing Cursor package commands -> ' + commandsDest + '/');
       }
     }
+  }
+
+  if (devMode && installDevSharedSkills(destDir) > 0) {
+    console.log('Installing dev-only shared skills -> ' + path.join(destDir, 'skills') + '/');
   }
 }
 
@@ -926,7 +948,7 @@ function installCursorMcp(destDir) {
   console.log('Installing MCP config -> ' + mcpDest);
 }
 
-function installCursor(packageNames, globalScope, projectDir) {
+function installCursor(packageNames, globalScope, projectDir, devMode = false) {
   const destDir = resolveCursorDestDir(globalScope, projectDir);
   if (!packageNames.length) usage('cursor');
   const selectedPackages = resolveSelectedPackages(packageNames);
@@ -937,7 +959,7 @@ function installCursor(packageNames, globalScope, projectDir) {
   console.log('Installing Cursor configs to ' + destDir + '/');
   printCursorGlobalRulesNote(globalScope);
   installCursorRules(destDir, selectedPackages, globalScope);
-  installCursorCoreDirs(destDir, selectedPackages);
+  installCursorCoreDirs(destDir, selectedPackages, devMode);
   const skipHooks = String(process.env.MDT_SKIP_CURSOR_HOOKS || '').trim() === '1';
   if (skipHooks) {
     console.log('Skipping Cursor hooks install because MDT_SKIP_CURSOR_HOOKS=1');
@@ -963,7 +985,7 @@ function installCodexRules(selectedPackages, destDir) {
   }
 }
 
-function installCodexSkills(selectedPackages, destDir) {
+function installCodexSkills(selectedPackages, destDir, devMode = false) {
   const skillsDest = path.join(destDir, 'skills');
   const sharedSkillNames = getManifestSelections(selectedPackages, 'skills');
   if (copySelectedDirectories(CODEX_SKILLS_SRC, skillsDest, sharedSkillNames, 'Codex package-selected skill') > 0) {
@@ -974,6 +996,15 @@ function installCodexSkills(selectedPackages, destDir) {
   if (copySelectedDirectories(CODEX_SKILLS_SRC, skillsDest, codexSkillNames, 'Codex tool skill') > 0) {
     console.log('Installing Codex tool skills -> ' + skillsDest + '/');
   }
+
+  if (devMode) {
+    if (copySelectedDirectories(CODEX_SKILLS_SRC, skillsDest, ['tool-setup-verifier'], 'Codex dev skill') > 0) {
+      console.log('Installing Codex dev skills -> ' + skillsDest + '/');
+    }
+    if (installDevSharedSkills(destDir) > 0) {
+      console.log('Installing dev-only shared skills -> ' + skillsDest + '/');
+    }
+  }
 }
 
 function installCodexRuntimeScripts(projectAgentsDir) {
@@ -982,9 +1013,9 @@ function installCodexRuntimeScripts(projectAgentsDir) {
   copyRuntimeScripts(scriptsDest);
 }
 
-function installCodexWorkflowScripts(projectAgentsDir, selectedPackages) {
+function installCodexWorkflowScripts(projectAgentsDir, selectedPackages, devMode = false) {
   const scriptsDest = path.join(projectAgentsDir, 'scripts');
-  const baselineWorkflowScripts = ['smoke-tool-setups.js', 'smoke-codex-workflows.js'];
+  const baselineWorkflowScripts = devMode ? ['smoke-tool-setups.js', 'smoke-codex-workflows.js'] : [];
   const optionalWorkflowScripts = getToolManifestSelections(selectedPackages, 'codex', 'scripts');
   const workflowScripts = mergeUniqueOrdered(baselineWorkflowScripts, optionalWorkflowScripts);
   if (copyExplicitFiles(path.join(REPO_ROOT, 'scripts'), scriptsDest, workflowScripts, 'Codex workflow script') > 0) {
@@ -1028,16 +1059,16 @@ function installCodexGlobal(selectedPackages) {
   console.log('Done. Codex global configs installed to ' + destDir + '/');
 }
 
-function installCodexProject(selectedPackages, projectDir) {
+function installCodexProject(selectedPackages, projectDir, devMode) {
   const projectAgentsDir = path.join(projectDir, '.agents');
   console.log('Installing Codex project files to ' + projectAgentsDir + '/');
-  installCodexSkills(selectedPackages, projectAgentsDir);
+  installCodexSkills(selectedPackages, projectAgentsDir, devMode);
   installCodexRuntimeScripts(projectAgentsDir);
-  installCodexWorkflowScripts(projectAgentsDir, selectedPackages);
+  installCodexWorkflowScripts(projectAgentsDir, selectedPackages, devMode);
   console.log('Done. Codex project files installed to ' + projectAgentsDir + '/');
 }
 
-function installCodex(packageNames, globalScope, projectDir) {
+function installCodex(packageNames, globalScope, projectDir, devMode) {
   if (!fs.existsSync(CODEX_SRC)) {
     console.error('Error: codex-template source directory not found at ' + CODEX_SRC);
     process.exit(1);
@@ -1054,7 +1085,7 @@ function installCodex(packageNames, globalScope, projectDir) {
     return;
   }
 
-  installCodexProject(selectedPackages, projectDir);
+  installCodexProject(selectedPackages, projectDir, devMode);
 }
 
 function convertCommandsToToml(commandsSrc, commandsDest) {
@@ -1163,7 +1194,7 @@ function installGeminiRules(selectedPackages, globalScope, destDirAgent, destDir
   copyGeminiLocalRules(cursorRules, selectedPackages, destDirAgent);
 }
 
-function installGeminiContent(destDirAgent, destDirGemini, selectedPackages) {
+function installGeminiContent(destDirAgent, destDirGemini, selectedPackages, devMode = false) {
   const skillsSrc = path.join(REPO_ROOT, 'skills');
   if (fs.existsSync(skillsSrc)) {
     const skillsDest = path.join(destDirAgent, 'skills');
@@ -1171,6 +1202,10 @@ function installGeminiContent(destDirAgent, destDirGemini, selectedPackages) {
     if (copySelectedDirectories(skillsSrc, skillsDest, skillNames, 'Package-selected skill') > 0) {
       console.log('Installing package-selected skills -> ' + skillsDest + '/');
     }
+  }
+
+  if (devMode && installDevSharedSkills(destDirAgent) > 0) {
+    console.log('Installing dev-only shared skills -> ' + path.join(destDirAgent, 'skills') + '/');
   }
 
   const agentsSrc = path.join(REPO_ROOT, 'agents');
@@ -1199,7 +1234,7 @@ function installGeminiContent(destDirAgent, destDirGemini, selectedPackages) {
   }
 }
 
-function installGemini(packageNames, globalScope, projectDir) {
+function installGemini(packageNames, globalScope, projectDir, devMode = false) {
   console.log('Installing Gemini CLI / Antigravity configs...');
   const { destDirAgent, destDirGemini } = resolveGeminiDestinations(globalScope, projectDir);
   const selectedPackages = resolveSelectedPackages(packageNames);
@@ -1207,12 +1242,12 @@ function installGemini(packageNames, globalScope, projectDir) {
     console.warn('Warning: ' + warning);
   }
   installGeminiRules(selectedPackages, globalScope, destDirAgent, destDirGemini);
-  installGeminiContent(destDirAgent, destDirGemini, selectedPackages);
+  installGeminiContent(destDirAgent, destDirGemini, selectedPackages, devMode);
   console.log('Done. Gemini configs installed.');
 }
 
 function main() {
-  const { target, globalScope, listMode, dryRun, projectDir, packageNames } = parseArgs();
+  const { target, globalScope, listMode, dryRun, devMode, projectDir, packageNames } = parseArgs();
 
   if (!dryRun && !listMode && !globalScope && projectDir === null) {
     console.log('No install scope specified. Nothing was installed.');
@@ -1246,7 +1281,7 @@ function main() {
   }
   if (dryRun) {
     try {
-      const plan = buildInstallPlan({ target, globalScope, projectDir: resolvedProjectDir || process.cwd(), packageNames });
+      const plan = buildInstallPlan({ target, globalScope, devMode, projectDir: resolvedProjectDir || process.cwd(), packageNames });
       plan.forEach((line) => console.log(line));
       process.exit(0);
     } catch (error) {
@@ -1255,10 +1290,10 @@ function main() {
     }
   }
   try {
-    if (target === 'claude') installClaude(packageNames, globalScope, resolvedProjectDir);
-    else if (target === 'cursor') installCursor(packageNames, globalScope, resolvedProjectDir);
-    else if (target === 'gemini') installGemini(packageNames, globalScope, resolvedProjectDir);
-    else installCodex(packageNames, globalScope, resolvedProjectDir);
+    if (target === 'claude') installClaude(packageNames, globalScope, resolvedProjectDir, devMode);
+    else if (target === 'cursor') installCursor(packageNames, globalScope, resolvedProjectDir, devMode);
+    else if (target === 'gemini') installGemini(packageNames, globalScope, resolvedProjectDir, devMode);
+    else installCodex(packageNames, globalScope, resolvedProjectDir, devMode);
   } catch (error) {
     console.error(`Error: ${error.message}`);
     usage(target);

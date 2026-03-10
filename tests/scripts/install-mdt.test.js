@@ -479,7 +479,7 @@ function runTests() {
       }
     },
       {
-        name: 'codex project install copies selected project skills and baseline scripts only',
+      name: 'codex project install copies selected project skills and runtime scripts only',
         run: () => {
         const tmpHome = createTestDir('mdt-install-codex-home-');
         const tmpProject = createTestDir('mdt-install-codex-proj-');
@@ -508,15 +508,16 @@ function runTests() {
           assert.ok(!fs.existsSync(codexRoot), 'project-only Codex install must not touch ~/.codex');
           assert.ok(fs.existsSync(path.join(projectAgentsRoot, 'skills', 'coding-standards', 'SKILL.md')));
           assert.ok(fs.existsSync(path.join(projectAgentsRoot, 'skills', 'documentation-steward', 'SKILL.md')));
-          assert.ok(fs.existsSync(path.join(projectAgentsRoot, 'skills', 'tool-setup-verifier', 'SKILL.md')));
+          assert.ok(!fs.existsSync(path.join(projectAgentsRoot, 'skills', 'tool-setup-verifier', 'SKILL.md')));
+          assert.ok(!fs.existsSync(path.join(projectAgentsRoot, 'skills', 'tool-doc-maintainer', 'SKILL.md')));
           assert.ok(fs.existsSync(path.join(projectAgentsRoot, 'skills', 'continuous-learning-manual', 'SKILL.md')));
           assert.ok(fs.existsSync(path.join(projectAgentsRoot, 'scripts', 'lib', 'detect-env.js')));
           assert.ok(fs.existsSync(path.join(projectAgentsRoot, 'scripts', 'ci', 'validate-markdown-links.js')));
           assert.ok(fs.existsSync(path.join(projectAgentsRoot, 'scripts', 'ci', 'validate-markdown-path-refs.js')));
-            assert.ok(fs.existsSync(path.join(projectAgentsRoot, 'scripts', 'smoke-tool-setups.js')));
-            assert.ok(fs.existsSync(path.join(projectAgentsRoot, 'scripts', 'smoke-codex-workflows.js')));
-            assert.ok(!fs.existsSync(path.join(projectAgentsRoot, 'scripts', 'codex-observer.js')));
-            assert.ok(!fs.existsSync(path.join(projectAgentsRoot, 'skills', 'python-patterns', 'SKILL.md')));
+          assert.ok(!fs.existsSync(path.join(projectAgentsRoot, 'scripts', 'smoke-tool-setups.js')));
+          assert.ok(!fs.existsSync(path.join(projectAgentsRoot, 'scripts', 'smoke-codex-workflows.js')));
+          assert.ok(!fs.existsSync(path.join(projectAgentsRoot, 'scripts', 'codex-observer.js')));
+          assert.ok(!fs.existsSync(path.join(projectAgentsRoot, 'skills', 'python-patterns', 'SKILL.md')));
 
           const learnStatus = spawnSync(
             'node',
@@ -556,6 +557,41 @@ function runTests() {
         } finally {
           cleanupTestDir(tmpHome);
           cleanupTestDir(tmpProject);
+          }
+        }
+      },
+      {
+        name: 'codex project install with --dev copies verifier and dev smoke scripts only then',
+        run: () => {
+          const tmpHome = createTestDir('mdt-install-codex-dev-home-');
+          const tmpProject = createTestDir('mdt-install-codex-dev-proj-');
+
+          try {
+            const gitInit = spawnSync('git', ['init'], {
+              encoding: 'utf8',
+              cwd: tmpProject,
+              stdio: ['pipe', 'pipe', 'pipe']
+            });
+            assert.strictEqual(gitInit.status, 0, `git init should succeed\nstdout:\n${gitInit.stdout}\nstderr:\n${gitInit.stderr}`);
+
+            const result = runInstaller(['--target', 'codex', '--dev', 'typescript', 'continuous-learning'], {
+              cwd: tmpHome,
+              projectDir: tmpProject,
+              env: {
+                HOME: tmpHome,
+                USERPROFILE: tmpHome
+              }
+            });
+            assertSuccess(result, 'codex dev install');
+
+            const projectAgentsRoot = path.join(tmpProject, '.agents');
+            assert.ok(fs.existsSync(path.join(projectAgentsRoot, 'skills', 'tool-setup-verifier', 'SKILL.md')));
+            assert.ok(fs.existsSync(path.join(projectAgentsRoot, 'skills', 'tool-doc-maintainer', 'SKILL.md')));
+            assert.ok(fs.existsSync(path.join(projectAgentsRoot, 'scripts', 'smoke-tool-setups.js')));
+            assert.ok(fs.existsSync(path.join(projectAgentsRoot, 'scripts', 'smoke-codex-workflows.js')));
+          } finally {
+            cleanupTestDir(tmpHome);
+            cleanupTestDir(tmpProject);
           }
         }
       },
