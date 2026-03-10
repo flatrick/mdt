@@ -87,8 +87,11 @@ function buildTddChecks(files) {
       },
       {
         path: 'codex-template/config.toml',
-        ok: files['codex-template/config.toml'].exists && files['codex-template/config.toml'].content.includes('Test-Driven Development (TDD)'),
-        message: 'Codex config should reinforce TDD in persistent instructions'
+        ok:
+          files['codex-template/config.toml'].exists &&
+          files['codex-template/config.toml'].content.includes('approval_policy = "on-request"') &&
+          files['codex-template/config.toml'].content.includes('sandbox_mode = "workspace-write"'),
+        message: 'Codex config should stay minimal and define approval + sandbox defaults'
       }
     ]
   };
@@ -164,9 +167,9 @@ function buildSecurityChecks(files) {
       {
         path: 'codex-template/config.toml',
         ok:
-          files['codex-template/config.toml'].exists &&
-          files['codex-template/config.toml'].content.includes('Security-First'),
-        message: 'Codex config should reinforce Security-First in persistent instructions'
+          files['codex-template/AGENTS.md'].exists &&
+          files['codex-template/AGENTS.md'].content.includes('Since Codex lacks hooks, security enforcement is instruction-based:'),
+        message: 'Codex AGENTS should carry security guidance instead of config.toml'
       }
     ]
   };

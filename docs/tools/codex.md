@@ -131,6 +131,14 @@ node .agents/skills/continuous-learning-manual/scripts/codex-learn.js weekly --w
 
 That writes project-local learning state under `.codex/homunculus/`.
 
+This is an intentional product choice, not a temporary documentation gap:
+
+- Codex is a good fit for project-local learning state and explicit summaries
+- Codex is not treated as having Claude/Cursor-style automatic hook capture
+- the baseline Codex contract is explicit/manual capture plus explicit/manual analysis
+- the optional external observer is only for background analysis after
+  observations already exist
+
 The weekly retrospective path is manual-first and writes one summary per ISO
 week under:
 
@@ -165,6 +173,8 @@ That observer:
 - watches project `.codex/homunculus/projects/<id>/observations.jsonl`
 - runs analysis in a normal shell environment where `codex exec` is allowed
 - does not change Cursor or Claude behavior
+- does not make Codex fully automatic; it supplements manual capture with
+  background analysis
 
 ### Built-in slash commands
 

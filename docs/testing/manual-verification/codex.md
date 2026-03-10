@@ -51,6 +51,13 @@ Then confirm:
 
 Codex currently uses an explicit workflow instead of hooks.
 
+Interpretation rule:
+
+- treat explicit/manual capture as the normal Codex path
+- treat the external observer as optional background analysis only
+- do not treat Codex as having full automatic continuous learning parity with
+  Claude Code or Cursor
+
 1. Check status:
 
 ```bash
@@ -116,6 +123,8 @@ Expected:
 - `watch` polls the same project-local observations file and runs analysis after
   new observations accumulate
 - the explicit/manual flow remains the baseline even if the external observer is running
+- the observer improves convenience and resilience; it does not turn Codex into
+  a hook-driven capture environment
 
 ## Likely Deeper Checks
 
