@@ -16,6 +16,7 @@ const {
   buildInstallPlan,
   resolveSelectedPackages,
   assertPackageRequirements,
+  getSkillRequirementWarnings,
   installClaudeContentDirs,
   installCursorCoreDirs,
   installGeminiContent,
@@ -321,7 +322,8 @@ function runTests() {
 
   if (test('buildInstallPlan warns when package requires experimental Cursor hooks', () => {
     const plan = buildInstallPlan({ target: 'cursor', globalScope: false, projectDir: process.cwd(), packageNames: ['continuous-learning'] });
-    assert.ok(!plan.some((line) => line.includes('requires hooks')));
+    assert.ok(plan.some((line) => line.includes("skill 'continuous-learning-automatic' depends on hooks for target 'cursor'")));
+    assert.ok(!plan.some((line) => line.includes("skill 'continuous-learning-manual'")));
   })) passed++; else failed++;
 
   if (test('buildInstallPlan rejects packages that do not support the selected target', () => {
@@ -362,7 +364,9 @@ function runTests() {
       assert.ok(fs.existsSync(path.join(tempDir, 'commands', 'plan.md')));
       assert.ok(!fs.existsSync(path.join(tempDir, 'commands', 'python-review.md')));
       assert.ok(fs.existsSync(path.join(tempDir, 'skills', 'coding-standards', 'SKILL.md')));
+      assert.ok(fs.existsSync(path.join(tempDir, 'skills', 'coding-standards', 'skill.meta.json')));
       assert.ok(fs.existsSync(path.join(tempDir, 'skills', 'continuous-learning-manual', 'SKILL.md')));
+      assert.ok(fs.existsSync(path.join(tempDir, 'skills', 'continuous-learning-manual', 'skill.meta.json')));
       assert.ok(fs.existsSync(path.join(tempDir, 'skills', 'continuous-learning-automatic', 'SKILL.md')));
       assert.ok(!fs.existsSync(path.join(tempDir, 'skills', 'python-patterns', 'SKILL.md')));
     });
@@ -441,10 +445,12 @@ function runTests() {
       installCodexSkills(resolveSelectedPackages(['typescript', 'continuous-learning']), tempDir);
 
       assert.ok(fs.existsSync(path.join(tempDir, 'skills', 'coding-standards', 'SKILL.md')));
+      assert.ok(fs.existsSync(path.join(tempDir, 'skills', 'coding-standards', 'skill.meta.json')));
       assert.ok(fs.existsSync(path.join(tempDir, 'skills', 'documentation-steward', 'SKILL.md')));
       assert.ok(!fs.existsSync(path.join(tempDir, 'skills', 'tool-setup-verifier', 'SKILL.md')));
       assert.ok(!fs.existsSync(path.join(tempDir, 'skills', 'tool-doc-maintainer', 'SKILL.md')));
       assert.ok(fs.existsSync(path.join(tempDir, 'skills', 'continuous-learning-manual', 'SKILL.md')));
+      assert.ok(fs.existsSync(path.join(tempDir, 'skills', 'continuous-learning-manual', 'skill.meta.json')));
       // continuous-learning-automatic is hooks-only and not part of the Codex contract
       assert.ok(!fs.existsSync(path.join(tempDir, 'skills', 'continuous-learning-automatic', 'SKILL.md')));
       assert.ok(!fs.existsSync(path.join(tempDir, 'skills', 'python-patterns', 'SKILL.md')));
@@ -490,6 +496,47 @@ function runTests() {
     const warnings = assertPackageRequirements('cursor', resolveSelectedPackages(['continuous-learning']));
     assert.deepStrictEqual(warnings, []);
     assert.deepStrictEqual(assertPackageRequirements('codex', resolveSelectedPackages(['continuous-learning'])), []);
+  })) passed++; else failed++;
+
+  if (test('getSkillRequirementWarnings does not warn about hooks for codex manual continuous learning', () => {
+    const warnings = getSkillRequirementWarnings('codex', resolveSelectedPackages(['continuous-learning']));
+    assert.ok(!warnings.some((line) => line.includes('hooks')), `Unexpected hook warning: ${warnings.join('\n')}`);
+  })) passed++; else failed++;
+
+  if (test('getSkillRequirementWarnings warns when automatic continuous learning relies on experimental cursor hooks', () => {
+    const warnings = getSkillRequirementWarnings('cursor', resolveSelectedPackages(['continuous-learning']));
+    assert.ok(
+      warnings.some((line) => line.includes("skill 'continuous-learning-automatic' depends on hooks for target 'cursor'")),
+      `Expected cursor hook warning, got: ${warnings.join('\n')}`
+    );
+  })) passed++; else failed++;
+
+  if (test('getSkillRequirementWarnings does not warn about automatic hooks for claude', () => {
+    const warnings = getSkillRequirementWarnings('claude', resolveSelectedPackages(['continuous-learning']));
+    assert.ok(
+      !warnings.some((line) => line.includes("skill 'continuous-learning-automatic'")),
+      `Unexpected Claude warning: ${warnings.join('\n')}`
+    );
+  })) passed++; else failed++;
+
+  if (test('getSkillRequirementWarnings reports missing companion skill in custom selection', () => {
+    withTempDir('mdt-package-skill-warn-', (tempDir) => {
+      const packagesDir = path.join(tempDir, 'packages');
+      fs.mkdirSync(path.join(packagesDir, 'demo'), { recursive: true });
+      fs.writeFileSync(path.join(packagesDir, 'demo', 'package.json'), JSON.stringify({
+        name: 'demo',
+        description: 'Demo',
+        ruleDirectory: 'typescript',
+        rules: ['common/testing.md'],
+        agents: [],
+        commands: [],
+        skills: ['tdd-workflow'],
+        tools: {}
+      }), 'utf8');
+
+      const warnings = getSkillRequirementWarnings('claude', resolveSelectedPackages(['demo'], { packagesDir }));
+      assert.ok(warnings.some((line) => line.includes("skill 'tdd-workflow' declares companion skill 'coding-standards'")));
+    });
   })) passed++; else failed++;
 
   console.log(`\nResults: Passed: ${passed}, Failed: ${failed}`);

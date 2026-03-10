@@ -23,6 +23,7 @@ const fs = require('fs');
 const path = require('path');
 const os = require('os');
 const { getHookPlatform } = require('./lib/hook-platforms');
+const { loadSkillMetadataByName } = require('./lib/skill-metadata');
 
 const REPO_ROOT = path.join(__dirname, '..');
 const RULES_DIR = path.join(REPO_ROOT, 'rules');
@@ -351,6 +352,90 @@ function getPackageRequirementWarnings(target, selectedPackages) {
   return warnings;
 }
 
+function getSelectedSkillNamesForTarget(target, selectedPackages, devMode = false) {
+  const sharedSkillNames = getManifestSelections(selectedPackages, 'skills');
+  const toolSkillNames = getToolManifestSelections(selectedPackages, target, 'skills');
+  const devSkillNames = devMode ? ['tool-doc-maintainer', 'tool-setup-verifier'] : [];
+  return mergeUniqueOrdered(sharedSkillNames, toolSkillNames, devSkillNames);
+}
+
+function getSelectedRuleNamesForTarget(target, selectedPackages) {
+  if (target === 'cursor') {
+    return mergeUniqueOrdered(
+      getManifestRuleSelections(selectedPackages),
+      getToolManifestSelections(selectedPackages, 'cursor', 'rules')
+    );
+  }
+
+  if (target === 'codex') {
+    return mergeUniqueOrdered(
+      getManifestRuleSelections(selectedPackages),
+      getToolManifestSelections(selectedPackages, 'codex', 'rules')
+    );
+  }
+
+  if (target === 'gemini') {
+    return mergeUniqueOrdered(
+      getManifestRuleSelections(selectedPackages),
+      getToolManifestSelections(selectedPackages, 'gemini', 'rules')
+    );
+  }
+
+  return getManifestRuleSelections(selectedPackages);
+}
+
+function getSkillRequirementWarnings(target, selectedPackages, devMode = false) {
+  const capabilities = TARGET_CAPABILITIES[target];
+  if (!capabilities) {
+    return [];
+  }
+
+  const selectedRuleNames = new Set(getSelectedRuleNamesForTarget(target, selectedPackages));
+  const selectedSkillNames = new Set(getSelectedSkillNamesForTarget(target, selectedPackages, devMode));
+  const warnings = [];
+
+  for (const skillName of selectedSkillNames) {
+    const skillMetadata = loadSkillMetadataByName(skillName);
+    if (!skillMetadata || !skillMetadata.hasMetaFile) {
+      continue;
+    }
+
+    for (const requiredRule of skillMetadata.requires.rules) {
+      if (!selectedRuleNames.has(requiredRule)) {
+        warnings.push(`skill '${skillName}' declares rule dependency '${requiredRule}', but the selected package set does not include it`);
+      }
+    }
+
+    for (const companionSkill of skillMetadata.requires.skills) {
+      if (!selectedSkillNames.has(companionSkill)) {
+        warnings.push(`skill '${skillName}' declares companion skill '${companionSkill}', but it is not part of this install selection`);
+      }
+    }
+
+    if (skillMetadata.requires.runtime.runtimeScripts && !capabilities.runtimeScripts) {
+      warnings.push(`skill '${skillName}' expects runtime scripts, but target '${target}' does not install MDT runtime scripts`);
+    }
+
+    if (skillMetadata.requires.runtime.sessionData && !capabilities.sessionData) {
+      warnings.push(`skill '${skillName}' expects session data support, but target '${target}' does not provide it`);
+    }
+
+    const hookMode = skillMetadata.requires.runtime.hooks.mode;
+    const hookTools = skillMetadata.requires.runtime.hooks.tools;
+    if (!hookTools.includes(target)) {
+      continue;
+    }
+
+    if (hookMode === 'required' && !capabilities.hooks) {
+      warnings.push(`skill '${skillName}' requires hooks for target '${target}', but that target does not support MDT hook installs`);
+    } else if (hookMode === 'required' && capabilities.hooks === 'experimental') {
+      warnings.push(`skill '${skillName}' depends on hooks for target '${target}', but that hook support is experimental in this repo`);
+    }
+  }
+
+  return warnings;
+}
+
 function assertPackageRequirements(target, selectedPackages) {
   const capabilities = TARGET_CAPABILITIES[target];
   if (!capabilities) {
@@ -498,7 +583,10 @@ function buildInstallPlan({ target, globalScope, devMode, projectDir, packageNam
     : resolveSelectedPackages(packageNames);
   const warnings = selectedPackages.length === 0
     ? []
-    : assertPackageRequirements(target, selectedPackages).map((warning) => `[dry-run] Warning: ${warning}`);
+    : [
+      ...assertPackageRequirements(target, selectedPackages).map((warning) => `[dry-run] Warning: ${warning}`),
+      ...getSkillRequirementWarnings(target, selectedPackages, devMode).map((warning) => `[dry-run] Note: ${warning}`)
+    ];
 
   if (target === 'codex') return [...warnings, ...buildCodexInstallPlan(header, globalScope, selectedPackages, resolvedProjectDir, devMode)];
   if (target === 'gemini') return [...warnings, ...buildGeminiInstallPlan(header, globalScope, selectedPackages, resolvedProjectDir)];
@@ -787,6 +875,9 @@ function installClaude(packageNames, globalScope, projectDir, devMode = false) {
   for (const warning of assertPackageRequirements('claude', selectedPackages)) {
     console.warn('Warning: ' + warning);
   }
+  for (const warning of getSkillRequirementWarnings('claude', selectedPackages, devMode)) {
+    console.warn('Note: ' + warning);
+  }
 
   warnExistingRulesDir(rulesDest);
   installClaudeRules(selectedPackages, rulesDest);
@@ -962,6 +1053,9 @@ function installCursor(packageNames, globalScope, projectDir, devMode = false) {
   for (const warning of assertPackageRequirements('cursor', selectedPackages)) {
     console.warn('Warning: ' + warning);
   }
+  for (const warning of getSkillRequirementWarnings('cursor', selectedPackages, devMode)) {
+    console.warn('Note: ' + warning);
+  }
 
   console.log('Installing Cursor configs to ' + destDir + '/');
   printCursorGlobalRulesNote(globalScope);
@@ -1100,6 +1194,9 @@ function installCodex(packageNames, globalScope, projectDir, devMode) {
   const selectedPackages = resolveSelectedPackages(packageNames);
   for (const warning of assertPackageRequirements('codex', selectedPackages)) {
     console.warn('Warning: ' + warning);
+  }
+  for (const warning of getSkillRequirementWarnings('codex', selectedPackages, devMode)) {
+    console.warn('Note: ' + warning);
   }
 
   if (globalScope) {
@@ -1263,6 +1360,9 @@ function installGemini(packageNames, globalScope, projectDir, devMode = false) {
   for (const warning of assertPackageRequirements('gemini', selectedPackages)) {
     console.warn('Warning: ' + warning);
   }
+  for (const warning of getSkillRequirementWarnings('gemini', selectedPackages, devMode)) {
+    console.warn('Note: ' + warning);
+  }
   installGeminiRules(selectedPackages, globalScope, destDirAgent, destDirGemini);
   installGeminiContent(destDirAgent, destDirGemini, selectedPackages, devMode);
   console.log('Done. Gemini configs installed.');
@@ -1333,6 +1433,7 @@ module.exports = {
   resolveSelectedPackages,
   buildInstallPlan,
   assertPackageRequirements,
+  getSkillRequirementWarnings,
   installClaudeContentDirs,
   installCursorCoreDirs,
   installGeminiContent,

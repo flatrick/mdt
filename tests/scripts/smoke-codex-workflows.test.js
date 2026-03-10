@@ -34,7 +34,7 @@ function createFixtureRoot() {
       'verification-loop',
       'security-review',
       'e2e-testing',
-      'Since Codex lacks hooks, security enforcement is instruction-based:'
+      'Codex security enforcement in MDT is instruction-based:'
     ].join('\n')
   );
 

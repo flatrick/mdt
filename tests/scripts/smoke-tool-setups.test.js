@@ -119,7 +119,7 @@ function runTests() {
     assert.ok(output.join('\n').includes('cursor: SKIP'));
     assert.ok(output.join('\n').includes('codex: FAIL'));
     assert.ok(output.join('\n').includes('Passed: 1'));
-    assert.ok(output.join('\n').includes('Failed: 2'));
+    assert.ok(output.join('\n').includes('Failed: 1'));
     assert.ok(output.join('\n').includes('Skipped: 1'));
   })) passed++; else failed++;
 

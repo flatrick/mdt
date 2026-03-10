@@ -6,12 +6,75 @@
 const fs = require('fs');
 const path = require('path');
 const { readMarkdownFile, hasMarkdownHeading } = require('./markdown-utils');
+const {
+  ACTIVE_TOOL_TARGETS,
+  VALID_HOOK_MODES,
+  loadSkillMetadata
+} = require('../lib/skill-metadata');
 
 const DEFAULT_SKILLS_DIR = path.join(__dirname, '../../skills');
+const DEFAULT_RULES_DIR = path.join(__dirname, '../../rules');
 const WHEN_TO_SECTION_REGEX = /^#{1,6}\s+When to (Use|Activate)\b/im;
+
+function validateSkillRequires(skillMetadata, rulesDir, skillsDir, io) {
+  if (!skillMetadata.hasMetaFile) {
+    return false;
+  }
+
+  let hasErrors = false;
+  const { requires, name } = skillMetadata;
+
+  for (const rulePath of requires.rules) {
+    const normalizedRulePath = rulePath.replace(/\\/g, '/');
+    if (normalizedRulePath.startsWith('/') || normalizedRulePath.includes('..')) {
+      io.error(`ERROR: ${name}/skill.meta.json - Invalid rule path '${rulePath}'`);
+      hasErrors = true;
+      continue;
+    }
+    const resolvedRule = path.join(rulesDir, ...normalizedRulePath.split('/'));
+    if (!fs.existsSync(resolvedRule)) {
+      io.error(`ERROR: ${name}/skill.meta.json - Missing referenced rule '${rulePath}'`);
+      hasErrors = true;
+    }
+  }
+
+  for (const requiredSkill of requires.skills) {
+    const requiredSkillDir = path.join(skillsDir, requiredSkill);
+    if (!fs.existsSync(path.join(requiredSkillDir, 'SKILL.md'))) {
+      io.error(`ERROR: ${name}/skill.meta.json - Missing referenced skill '${requiredSkill}'`);
+      hasErrors = true;
+    }
+  }
+
+  const runtime = requires.runtime;
+  if (!VALID_HOOK_MODES.has(runtime.hooks.mode)) {
+    io.error(`ERROR: ${name}/skill.meta.json - Invalid hooks.mode '${runtime.hooks.mode}'`);
+    hasErrors = true;
+  }
+
+  for (const toolName of runtime.hooks.tools) {
+    if (!ACTIVE_TOOL_TARGETS.has(toolName)) {
+      io.error(`ERROR: ${name}/skill.meta.json - hooks.tools contains unsupported target '${toolName}'`);
+      hasErrors = true;
+    }
+  }
+
+  if (runtime.hooks.mode === 'required' && runtime.hooks.tools.length === 0) {
+    io.error(`ERROR: ${name}/skill.meta.json - hooks.tools must be provided when hooks.mode is 'required'`);
+    hasErrors = true;
+  }
+
+  if (runtime.hooks.mode === 'none' && runtime.hooks.tools.length > 0) {
+    io.error(`ERROR: ${name}/skill.meta.json - hooks.tools must be empty when hooks.mode is 'none'`);
+    hasErrors = true;
+  }
+
+  return hasErrors;
+}
 
 function validateSkills(options = {}) {
   const skillsDir = options.skillsDir || DEFAULT_SKILLS_DIR;
+  const rulesDir = options.rulesDir || DEFAULT_RULES_DIR;
   const io = options.io || { log: console.log, error: console.error };
   if (!fs.existsSync(skillsDir)) {
     io.log('No skills directory found, skipping validation');
@@ -51,6 +114,15 @@ function validateSkills(options = {}) {
     }
     if (!WHEN_TO_SECTION_REGEX.test(content)) {
       io.error(`ERROR: ${dir}/SKILL.md - Missing required section: "When to Use" or "When to Activate"`);
+      hasErrors = true;
+      continue;
+    }
+
+    try {
+      const skillMetadata = loadSkillMetadata(path.join(skillsDir, dir));
+      hasErrors = validateSkillRequires(skillMetadata, rulesDir, skillsDir, io) || hasErrors;
+    } catch (err) {
+      io.error(`ERROR: ${dir}/skill.meta.json - ${err.message}`);
       hasErrors = true;
       continue;
     }

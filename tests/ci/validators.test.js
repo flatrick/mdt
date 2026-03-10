@@ -1021,6 +1021,112 @@ function runTests() {
     cleanupTestDir(testDir);
   })) passed++; else failed++;
 
+  if (test('accepts valid skill.meta.json dependencies', () => {
+    const testDir = createTestDir();
+    const rulesDir = createTestDir();
+    fs.mkdirSync(path.join(rulesDir, 'common'), { recursive: true });
+    fs.writeFileSync(path.join(rulesDir, 'common', 'testing.md'), '# Testing');
+
+    const helperSkillDir = path.join(testDir, 'coding-standards');
+    fs.mkdirSync(helperSkillDir, { recursive: true });
+    fs.writeFileSync(path.join(helperSkillDir, 'SKILL.md'), '# Coding Standards\n\n## When to Use\nUse this skill.');
+
+    const skillDir = path.join(testDir, 'meta-skill');
+    fs.mkdirSync(skillDir, { recursive: true });
+    fs.writeFileSync(path.join(skillDir, 'SKILL.md'), '---\nname: meta-skill\ndescription: Example\n---\n# Meta Skill\n\n## When to Use\nUse this skill.');
+    fs.writeFileSync(path.join(skillDir, 'skill.meta.json'), JSON.stringify({
+      requires: {
+        rules: ['common/testing.md'],
+        skills: ['coding-standards'],
+        runtime: {
+          runtimeScripts: true,
+          sessionData: false,
+          hooks: { mode: 'optional', tools: ['claude', 'cursor'] }
+        }
+      }
+    }), 'utf8');
+
+    const result = runValidatorWithDirs('validate-skills', { SKILLS_DIR: testDir, RULES_DIR: rulesDir });
+    assert.strictEqual(result.code, 0, `Should accept valid skill.meta.json, got stderr: ${result.stderr}`);
+    cleanupTestDir(testDir);
+    cleanupTestDir(rulesDir);
+  })) passed++; else failed++;
+
+  if (test('fails on skill.meta.json with missing referenced rule', () => {
+    const testDir = createTestDir();
+    const rulesDir = createTestDir();
+    const skillDir = path.join(testDir, 'meta-skill');
+    fs.mkdirSync(skillDir, { recursive: true });
+    fs.writeFileSync(path.join(skillDir, 'SKILL.md'), '---\nname: meta-skill\ndescription: Example\n---\n# Meta Skill\n\n## When to Use\nUse this skill.');
+    fs.writeFileSync(path.join(skillDir, 'skill.meta.json'), JSON.stringify({
+      requires: {
+        rules: ['common/missing.md'],
+        skills: [],
+        runtime: {
+          runtimeScripts: false,
+          sessionData: false,
+          hooks: { mode: 'none', tools: [] }
+        }
+      }
+    }), 'utf8');
+
+    const result = runValidatorWithDirs('validate-skills', { SKILLS_DIR: testDir, RULES_DIR: rulesDir });
+    assert.strictEqual(result.code, 1, 'Should fail on missing referenced rule');
+    assert.ok(result.stderr.includes("Missing referenced rule 'common/missing.md'"), 'Should report missing rule');
+    cleanupTestDir(testDir);
+    cleanupTestDir(rulesDir);
+  })) passed++; else failed++;
+
+  if (test('fails on skill.meta.json with invalid hooks mode', () => {
+    const testDir = createTestDir();
+    const rulesDir = createTestDir();
+    const skillDir = path.join(testDir, 'meta-skill');
+    fs.mkdirSync(skillDir, { recursive: true });
+    fs.writeFileSync(path.join(skillDir, 'SKILL.md'), '---\nname: meta-skill\ndescription: Example\n---\n# Meta Skill\n\n## When to Use\nUse this skill.');
+    fs.writeFileSync(path.join(skillDir, 'skill.meta.json'), JSON.stringify({
+      requires: {
+        rules: [],
+        skills: [],
+        runtime: {
+          runtimeScripts: false,
+          sessionData: false,
+          hooks: { mode: 'sometimes', tools: ['codex'] }
+        }
+      }
+    }), 'utf8');
+
+    const result = runValidatorWithDirs('validate-skills', { SKILLS_DIR: testDir, RULES_DIR: rulesDir });
+    assert.strictEqual(result.code, 1, 'Should fail on invalid hooks mode');
+    assert.ok(result.stderr.includes("Invalid hooks.mode 'sometimes'"), 'Should report invalid hooks mode');
+    cleanupTestDir(testDir);
+    cleanupTestDir(rulesDir);
+  })) passed++; else failed++;
+
+  if (test('fails on skill.meta.json when hooks are required without tools', () => {
+    const testDir = createTestDir();
+    const rulesDir = createTestDir();
+    const skillDir = path.join(testDir, 'meta-skill');
+    fs.mkdirSync(skillDir, { recursive: true });
+    fs.writeFileSync(path.join(skillDir, 'SKILL.md'), '---\nname: meta-skill\ndescription: Example\n---\n# Meta Skill\n\n## When to Use\nUse this skill.');
+    fs.writeFileSync(path.join(skillDir, 'skill.meta.json'), JSON.stringify({
+      requires: {
+        rules: [],
+        skills: [],
+        runtime: {
+          runtimeScripts: true,
+          sessionData: true,
+          hooks: { mode: 'required', tools: [] }
+        }
+      }
+    }), 'utf8');
+
+    const result = runValidatorWithDirs('validate-skills', { SKILLS_DIR: testDir, RULES_DIR: rulesDir });
+    assert.strictEqual(result.code, 1, 'Should fail when required hooks omit tool targets');
+    assert.ok(result.stderr.includes("hooks.tools must be provided when hooks.mode is 'required'"), 'Should report missing hook tools');
+    cleanupTestDir(testDir);
+    cleanupTestDir(rulesDir);
+  })) passed++; else failed++;
+
   // ==========================================
   // validate-commands.js
   // ==========================================

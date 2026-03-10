@@ -1,0 +1,23 @@
+{
+  "requires": {
+    "rules": [
+      "common/development-workflow.md",
+      "common/security.md",
+      "common/testing.md"
+    ],
+    "skills": [
+      "documentation-steward"
+    ],
+    "runtime": {
+      "runtimeScripts": true,
+      "sessionData": true,
+      "hooks": {
+        "mode": "optional",
+        "tools": [
+          "claude",
+          "cursor"
+        ]
+      }
+    }
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "requires": {
+    "rules": [
+      "common/coding-style.md",
+      "common/patterns.md"
+    ],
+    "skills": [],
+    "runtime": {
+      "runtimeScripts": false,
+      "sessionData": false,
+      "hooks": {
+        "mode": "none",
+        "tools": []
+      }
+    }
+  }
+}

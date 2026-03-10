@@ -168,7 +168,7 @@ function buildSecurityChecks(files) {
         path: 'codex-template/config.toml',
         ok:
           files['codex-template/AGENTS.md'].exists &&
-          files['codex-template/AGENTS.md'].content.includes('Since Codex lacks hooks, security enforcement is instruction-based:'),
+          files['codex-template/AGENTS.md'].content.includes('Codex security enforcement in MDT is instruction-based:'),
         message: 'Codex AGENTS should carry security guidance instead of config.toml'
       }
     ]
