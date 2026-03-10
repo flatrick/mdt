@@ -71,7 +71,11 @@
         "tdd.md",
         "verify.md",
         "code-review.md",
-        "smoke.md"
+        "smoke.md",
+        "e2e.md",
+        "security.md",
+        "build-fix.md",
+        "refactor-clean.md"
       ]
     },
     "codex": {

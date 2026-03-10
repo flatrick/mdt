@@ -241,6 +241,16 @@ function runTests() {
             learnCommand.includes('Session Learning Summary'),
             'Cursor learn command should contain the reusable learning workflow'
           );
+
+          assert.ok(fs.existsSync(path.join(commandsRoot, 'e2e.md')), 'e2e command should be installed');
+          assert.ok(fs.existsSync(path.join(commandsRoot, 'security.md')), 'security command should be installed');
+          assert.ok(fs.existsSync(path.join(commandsRoot, 'build-fix.md')), 'build-fix command should be installed');
+          assert.ok(fs.existsSync(path.join(commandsRoot, 'refactor-clean.md')), 'refactor-clean command should be installed');
+
+          const e2eCommand = fs.readFileSync(path.join(commandsRoot, 'e2e.md'), 'utf8');
+          const securityCommand = fs.readFileSync(path.join(commandsRoot, 'security.md'), 'utf8');
+          assert.ok(e2eCommand.includes('Page Object Model'), 'e2e command should reference Page Object Model');
+          assert.ok(securityCommand.includes('CRITICAL'), 'security command should include severity levels');
         } finally {
           cleanupTestDir(tmpHome);
           cleanupTestDir(tmpProject);

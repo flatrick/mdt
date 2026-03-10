@@ -232,7 +232,8 @@ function runTests() {
     assert.ok(Array.isArray(manifest.tools.gemini.rules));
     assert.ok(manifest.tools.gemini.rules.includes('typescript-coding-style.md'));
     assert.deepStrictEqual(manifest.tools.cursor.skills, ['frontend-slides']);
-    assert.deepStrictEqual(manifest.tools.cursor.commands, ['docs-health.md', 'plan.md', 'tdd.md', 'verify.md', 'code-review.md', 'smoke.md']);
+    assert.deepStrictEqual(manifest.tools.cursor.commands, ['docs-health.md', 'plan.md', 'tdd.md', 'verify.md', 'code-review.md', 'smoke.md', 'e2e.md', 'security.md', 'build-fix.md', 'refactor-clean.md']);
+    assert.deepStrictEqual(manifest.tools.codex.rules, ['common-coding-style.md', 'common-testing.md', 'common-security.md', 'common-git-workflow.md']);
     assert.deepStrictEqual(manifest.tools.codex.skills, ['tool-setup-verifier']);
     assert.deepStrictEqual(manifest.requires, {});
   })) passed++; else failed++;
