@@ -130,6 +130,7 @@ const testFiles = [
   'scripts/run-with-flags.test.js',
   'scripts/setup-package-manager.test.js',
   'scripts/tool-workflow-contract.test.js',
+  'scripts/smoke-claude-workflows.test.js',
   'scripts/smoke-codex-workflows.test.js',
   'scripts/smoke-tool-setups.test.js',
   'scripts/sync-hook-mirrors.test.js',

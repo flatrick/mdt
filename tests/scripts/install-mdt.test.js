@@ -71,6 +71,7 @@ function runTests() {
           assert.ok(fs.existsSync(path.join(claudeBase, 'scripts', 'ci', 'validate-markdown-links.js')));
           assert.ok(fs.existsSync(path.join(claudeBase, 'scripts', 'ci', 'validate-markdown-path-refs.js')));
           assert.ok(fs.existsSync(path.join(claudeBase, 'scripts', 'ci', 'markdown-utils.js')));
+          assert.ok(fs.existsSync(path.join(claudeBase, 'scripts', 'smoke-claude-workflows.js')));
           assert.ok(!fs.existsSync(path.join(claudeBase, 'scripts', 'ci', 'validate-install-packages.js')), 'only selected docs validators should be installed');
           assert.ok(!fs.existsSync(path.join(claudeBase, 'scripts', 'install-mdt.js')), 'top-level installer must not be installed');
         } finally {
@@ -409,6 +410,7 @@ function runTests() {
           const claudeRoot = path.join(tmpProject, '.claude');
           assert.ok(fs.existsSync(path.join(claudeRoot, 'rules', 'common')), 'common rules should exist');
           assert.ok(fs.existsSync(path.join(claudeRoot, 'scripts', 'lib', 'utils.js')), 'runtime scripts should exist');
+          assert.ok(fs.existsSync(path.join(claudeRoot, 'scripts', 'smoke-claude-workflows.js')), 'workflow smoke script should exist');
           assert.ok(fs.existsSync(path.join(claudeRoot, 'settings.json')), 'settings.json should exist');
 
           const settingsRaw = fs.readFileSync(path.join(claudeRoot, 'settings.json'), 'utf8');

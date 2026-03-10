@@ -36,6 +36,26 @@ Expected:
   install exists but no relevant runtime activity has happened yet
 - it points you at the next manual step if runtime behavior still needs proof
 
+Use the deterministic workflow smoke companion when you want a local
+non-session check of the Claude workflow surfaces:
+
+```bash
+node scripts/smoke-claude-workflows.js
+```
+
+If you are validating an installed target repo rather than the MDT source repo:
+
+```bash
+node .claude/scripts/smoke-claude-workflows.js
+```
+
+Expected:
+- repo-source mode reports the 7 core Claude workflows
+- installed-target mode verifies the materialized `.claude/` commands, agents,
+  skills, settings, and workflow smoke script
+- `smoke` may report `SKIP` when local Claude CLI probes are blocked by the
+  environment, but required files still exist
+
 ## Likely Deeper Checks
 
 - fresh install verification under `.claude/`

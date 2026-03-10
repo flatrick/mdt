@@ -236,13 +236,13 @@ function buildSmokeChecks(files, options = {}) {
   };
 }
 
-function buildWorkflowChecks(files) {
+function buildWorkflowChecks(files, options = {}) {
   return [
     buildPlanChecks(files),
     buildTddChecks(files),
     buildCodeReviewChecks(files),
     buildVerifyChecks(files),
-    buildSmokeChecks(files),
+    buildSmokeChecks(files, options),
     buildSecurityChecks(files),
     buildE2eChecks(files)
   ];
@@ -387,7 +387,7 @@ function buildInstalledSmokeChecks(files) {
   };
 }
 
-function buildInstalledWorkflowChecks(files) {
+function buildInstalledWorkflowChecks(files, options = {}) {
   return [
     buildInstalledPlanChecks(files),
     buildInstalledTddChecks(files),
@@ -463,7 +463,7 @@ function smokeCodexWorkflows(options = {}) {
         )
       };
 
-  const workflows = (installedRepoMode ? buildInstalledWorkflowChecks(files) : buildWorkflowChecks(files, options)).map(entry => {
+  const workflows = (installedRepoMode ? buildInstalledWorkflowChecks(files, options) : buildWorkflowChecks(files, options)).map(entry => {
     const failures = entry.checks.filter(check => !check.ok);
     const skips = entry.checks.filter(check => check.statusOverride === 'SKIP');
     return {

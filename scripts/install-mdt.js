@@ -36,6 +36,7 @@ const RUNTIME_CI_FILES = [
   'validate-markdown-links.js',
   'validate-markdown-path-refs.js'
 ];
+const CLAUDE_WORKFLOW_SCRIPTS = ['smoke-claude-workflows.js'];
 const SUPPORTED_PACKAGE_TARGETS = new Set(['claude', 'cursor', 'gemini', 'codex']);
 const TARGET_CAPABILITIES = {
   claude: { hooks: 'official', runtimeScripts: true, sessionData: true },
@@ -764,6 +765,9 @@ function installClaudeRuntimeScripts(claudeBase) {
   const scriptsDest = path.join(claudeBase, 'scripts');
   console.log('Installing runtime scripts -> ' + scriptsDest + '/');
   copyRuntimeScripts(scriptsDest);
+  if (copyExplicitFiles(path.join(REPO_ROOT, 'scripts'), scriptsDest, CLAUDE_WORKFLOW_SCRIPTS, 'Claude workflow script') > 0) {
+    console.log('Installing Claude workflow scripts -> ' + scriptsDest + '/');
+  }
 }
 
 function printWindowsHookNote(prefix) {

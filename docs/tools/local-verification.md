@@ -30,6 +30,7 @@ Use this when you need to refresh or challenge any claim in the MDT tool docs.
 ```bash
 node scripts/verify-tool-setups.js
 node scripts/smoke-tool-setups.js
+node scripts/smoke-claude-workflows.js
 node scripts/smoke-codex-workflows.js
 ```
 
@@ -43,7 +44,13 @@ Use `verify-tool-setups.js` as the deterministic local check for the core MDT wo
 
 Use `smoke-tool-setups.js` as an optional local CLI probe. Missing tools should be recorded as `SKIP`, not guessed as passing or failing.
 
-Use `smoke-codex-workflows.js` when you want a deeper Codex-specific check for MDT's current `plan`, `tdd`, and `verify` workflows without requiring a live model session.
+Use `smoke-claude-workflows.js` when you want a deeper Claude-specific check for
+the current `plan`, `tdd`, `code-review`, `verify`, `smoke`, `security`, and
+`e2e` workflows without requiring a live Claude session.
+
+Use `smoke-codex-workflows.js` when you want a deeper Codex-specific check for
+the current `plan`, `tdd`, `code-review`, `verify`, `smoke`, `security`, and
+`e2e` workflows without requiring a live model session.
 
 ### Claude Code
 

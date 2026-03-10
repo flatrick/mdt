@@ -12,9 +12,10 @@
       "verificationMode": "installer-target",
       "artifactMappings": [
         { "surfaceType": "command", "name": "smoke", "path": "commands/smoke.md", "role": "primary-workflow" },
+        { "surfaceType": "script", "name": "smoke-claude-workflows", "path": "scripts/smoke-claude-workflows.js", "role": "deterministic-local-check" },
         { "surfaceType": "manual-verification", "name": "claude-code", "path": "docs/testing/manual-verification/claude-code.md", "role": "human-checklist" }
       ],
-      "requiredFiles": ["commands/smoke.md", "docs/testing/manual-verification/claude-code.md"]
+      "requiredFiles": ["commands/smoke.md", "scripts/smoke-claude-workflows.js", "docs/testing/manual-verification/claude-code.md"]
     },
     "cursor": {
       "status": "repo-adapter",

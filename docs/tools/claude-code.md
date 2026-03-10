@@ -56,6 +56,20 @@ Claude loads hooks from settings. In this repo, the installer materializes hook 
 
 MDT uses markdown slash-command files under `commands/`.
 
+### Smoke verification
+
+Claude smoke now has two complementary surfaces:
+
+- in-session `/smoke` for fast runtime-aware sanity checks inside Claude Code
+- `node scripts/smoke-claude-workflows.js` for deterministic local verification
+  of the current Claude workflow contract surfaces
+
+For installed project targets, the same deterministic check is materialized to:
+
+```bash
+node .claude/scripts/smoke-claude-workflows.js
+```
+
 ### Agents
 
 MDT uses markdown subagent files under `agents/`.
@@ -76,6 +90,7 @@ claude --version
 claude --help
 claude agents --help
 claude mcp --help
+node scripts/smoke-claude-workflows.js
 ```
 
 Useful local checks:
