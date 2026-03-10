@@ -74,7 +74,7 @@ function parseArgsFrom(args) {
   let globalScope = false;
   let listMode = false;
   let dryRun = false;
-  let projectDir = process.cwd();
+  let projectDir = null;
   const packageNames = [];
 
   for (let i = 0; i < args.length; i++) {
@@ -1182,7 +1182,28 @@ function installGemini(packageNames, globalScope, projectDir) {
 
 function main() {
   const { target, globalScope, listMode, dryRun, projectDir, packageNames } = parseArgs();
-  const resolvedProjectDir = assertProjectDir(projectDir);
+
+  if (!globalScope && projectDir === null) {
+    console.log('No install scope specified. Nothing was installed.');
+    console.log('');
+    console.log('Specify where to install using one of:');
+    console.log('');
+    console.log('  --global');
+    console.log('      Install to your home directory (~/.claude/, ~/.cursor/, etc.).');
+    console.log('      Makes MDT available across all projects for this user.');
+    console.log('');
+    console.log('  --project-dir <path>');
+    console.log('      Install project-level files into the specified repository path.');
+    console.log('      Use this to add MDT to a specific project.');
+    console.log('');
+    console.log('Examples:');
+    console.log('  node scripts/install-mdt.js --global typescript');
+    console.log('  node scripts/install-mdt.js --project-dir /path/to/my-project typescript');
+    console.log('  node scripts/install-mdt.js --target cursor --global typescript');
+    process.exit(0);
+  }
+
+  const resolvedProjectDir = projectDir !== null ? assertProjectDir(projectDir) : null;
 
   if (target !== 'claude' && target !== 'cursor' && target !== 'codex' && target !== 'gemini') {
     console.error("Error: unknown target '" + target + "'. Must be claude, cursor, codex, or gemini.");

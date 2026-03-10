@@ -6,6 +6,7 @@
 - Upstream ECC is now reference material, not an active sync source.
 - v1 is still stabilization work: remove drift, verify real workflows, and avoid guesswork across tools.
 - The intended destination is documented in [docs/V1-TARGET-STATE.md](docs/V1-TARGET-STATE.md); this file should stay focused on active steps, not restate the whole end-state vision.
+- Cross-tool functional parity analysis and implementation plan: [docs/functional-parity-plan.md](docs/functional-parity-plan.md)
 - Until a commit is tagged `v1.0.0`, install layout and package composition are allowed to change.
 - Before `v1.0.0`, assume fresh installs rather than in-place migration: re-run `node scripts/install-mdt.js` instead of preserving upgrade workflows between intermediate layouts.
 
