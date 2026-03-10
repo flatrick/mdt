@@ -73,7 +73,7 @@ function withCodexEnv(fn) {
 }
 
 function getCliPaths() {
-  const homunculusDir = getHomunculusDir();
+  const homunculusDir = withCodexEnv(() => getHomunculusDir());
   return {
     PROJECTS_DIR: path.join(homunculusDir, 'projects'),
     REGISTRY_FILE: path.join(homunculusDir, 'projects.json'),
@@ -524,4 +524,11 @@ function main() {
   process.exit(exitCode);
 }
 
-main();
+if (require.main === module) {
+  main();
+}
+
+module.exports = {
+  buildCodexEnv,
+  getCliPaths
+};

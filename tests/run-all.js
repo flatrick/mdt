@@ -123,6 +123,7 @@ const testFiles = [
   'scripts/codex-observer.test.js',
   'scripts/continuous-learning-observer.test.js',
   'scripts/detect-project.test.js',
+  'scripts/instinct-cli.test.js',
   'scripts/continuous-learning-retrospective.test.js',
   'scripts/install-mdt-unit.test.js',
   'scripts/install-mdt.test.js',
