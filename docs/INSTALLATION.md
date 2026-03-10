@@ -24,13 +24,27 @@ Notes:
 - `--project-dir` changes where project-level files are installed
 - `--global` only affects targets that support a user-level install mode
 
+## Scope Contract
+
+This is the install-scope rule for MDT:
+
+- if `--global` is not supplied, do not write to `~`
+- treat `--global` as: `user/global install is the intended target`
+- `--project-dir` means the named repo is the intended project target
+- only make a user-home exception if there is a hard technical requirement
+- if an exception exists, document it explicitly in this file and the relevant
+  tool page
+
+This rule applies across tools. A project-targeted install should not silently
+touch user-global config just because a tool happens to support a user layer.
+
 ## Target Summary
 
 | Target | User/global layer | Project layer | Notes |
 | --- | --- | --- | --- |
 | `claude` | `~/.claude/` with `--global` | `.claude/` by default | installs rules, agents, commands, skills, hooks, and runtime scripts |
 | `cursor` | `~/.cursor/` with `--global` | `.cursor/` by default | global rules are not file-installable; project install is the primary mode |
-| `codex` | `~/.codex/` always | `.agents/skills/` and `.agents/scripts/` in the target repo | package-driven; use `--project-dir` for clean external repo installs |
+| `codex` | `~/.codex/` with `--global` | `.agents/skills/` and `.agents/scripts/` in the target repo | package-driven; use `--project-dir` for clean external repo installs |
 | `gemini` | `~/.gemini/` with `--global` | `.agent/` and `.gemini/` by default | uses Gemini/Antigravity-specific layout |
 
 ## Examples
@@ -53,15 +67,19 @@ node scripts/install-mdt.js --target cursor --global typescript
 Codex:
 
 ```bash
-node scripts/install-mdt.js --target codex typescript continuous-learning
 node scripts/install-mdt.js --target codex --project-dir ../scratch-repo typescript continuous-learning
+node scripts/install-mdt.js --target codex --global typescript continuous-learning
 ```
 
 Codex note:
 
+- project-targeted Codex installs should stay out of `~`
 - `~/.codex/config.toml` is treated as user-owned
-- if it already exists, the installer preserves it and writes `~/.codex/config.mdt.toml` as an MDT reference file
-- Codex-specific MDT guidance lives primarily in `~/.codex/AGENTS.md`
+- if a global Codex install targets `~/.codex` and `config.toml` already exists,
+  the installer should preserve it and write `~/.codex/config.mdt.toml` as an
+  MDT reference file instead
+- Codex-specific MDT guidance lives primarily in `~/.codex/AGENTS.md` for
+  global installs
 
 Gemini:
 

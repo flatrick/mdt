@@ -17,6 +17,7 @@ This is a multi-tool, Node-first AI coding repository with specialized agents, s
 - When updating cross-tool capability documentation, use `skills/tool-doc-maintainer/SKILL.md` and follow its verification workflow.
 - Prefer the repo's Node-first runtime and adapters. Do not reintroduce Bash-, PowerShell-, or Python-specific runtime assumptions unless the repo already requires them.
 - Do not assume a specific OS or shell. Verify the environment before giving shell-specific instructions, and prefer shell-neutral guidance when possible.
+- Installer scope rule: if `--global` is not supplied to `scripts/install-mdt.js`, do not write to `~` for any tool. Treat `--global` as "user/global install is the intended target". Only violate this rule if there is a hard technical requirement, and document that exception explicitly in `docs/INSTALLATION.md` and the relevant tool page.
 
 ## Available Agents
 

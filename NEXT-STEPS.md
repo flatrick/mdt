@@ -19,6 +19,12 @@ Recently completed:
 - Codex installs are now package-driven and materialize package-selected skills into `.agents/skills/` from `codex-template/skills/`.
 - Codex `continuous-learning` now has an explicit project-local workflow under `.codex/homunculus/...` instead of depending on Claude/Cursor hooks.
 
+Installer scope contract:
+
+- `--global` means `user/global install is the intended target`
+- if `--global` is absent, MDT should not write to `~` for any tool
+- any exception to that rule must be a hard technical requirement and must be documented explicitly
+
 ---
 
 ## Next Practical Steps
@@ -220,6 +226,8 @@ explicit/manual `continuous-learning` path.
 
 Follow-ups for Codex should focus on:
 
+- correcting Codex installer scope so project-targeted installs stop writing to
+  `~/.codex` when `--global` is not present
 - deciding whether Codex gets real package-selected rule files under `codex-template/rules/`
 - reducing remaining source-layout drift between `codex-template/skills/` and the installed `.agents/skills/` tree materialized by the installer
 - deciding whether any Codex app automations are worth using after the explicit path has proven itself

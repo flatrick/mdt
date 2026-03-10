@@ -32,12 +32,14 @@ After the ModelDev Toolkit Node-only migration, skills and hooks run only via No
    ```
    For Codex only:
    ```bash
-   node scripts/install-mdt.js --target codex typescript continuous-learning
-   ```
-   For clean external-repo testing without changing the current workspace:
-   ```bash
    node scripts/install-mdt.js --target codex --project-dir ../scratch-repo typescript continuous-learning
+   node scripts/install-mdt.js --target codex --global typescript continuous-learning
    ```
+
+   Scope rule reminder:
+   - without `--global`, MDT should not write to `~`
+   - use `--project-dir` for project-only installs
+   - use `--global` only when the user/global layer is the intended target
 
 4. **Verify** (optional): run a quick smoke check that env detection works:
    ```bash
