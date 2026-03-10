@@ -196,6 +196,7 @@ Tool-specific overlays. Only fields backed by real repo assets should exist.
 
 Current candidates:
 
+- `tools.claude.skills`
 - `tools.cursor.rules`
 - `tools.cursor.skills`
 - `tools.codex.skills`

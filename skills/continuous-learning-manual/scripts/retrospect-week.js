@@ -244,7 +244,7 @@ function buildWorkflowPairs(entries) {
   return mapToSortedArray(pairCounts, 'sequence');
 }
 
-function buildAutomationCandidates(commandCounts, workflowPairs) {
+function buildAutomationCandidates(commandCounts, fileCounts, workflowPairs) {
   const candidates = [];
 
   for (const { command, count } of commandCounts) {
@@ -289,6 +289,19 @@ function buildAutomationCandidates(commandCounts, workflowPairs) {
     });
   }
 
+  for (const { file_path: filePath, count } of fileCounts) {
+    if (count < 3) {
+      continue;
+    }
+    candidates.push({
+      kind: 'file-hotspot',
+      signal: 'repeated-file-touchpoint',
+      item: filePath,
+      count,
+      rationale: `The same file was touched ${count} times this week; check whether a dedicated helper, command, or MCP-backed workflow could remove repetitive manual steps.`
+    });
+  }
+
   return candidates
     .sort((a, b) => b.count - a.count || a.kind.localeCompare(b.kind))
     .slice(0, 10);
@@ -322,7 +335,7 @@ function summarizeWeeklyObservations(project, collected, window) {
   const topCommands = mapToSortedArray(commandCounts, 'command').slice(0, 10);
   const topFiles = mapToSortedArray(fileCounts, 'file_path').slice(0, 10);
   const repeatedWorkflows = buildWorkflowPairs(collected.entries).slice(0, 10);
-  const automationCandidates = buildAutomationCandidates(topCommands, repeatedWorkflows);
+  const automationCandidates = buildAutomationCandidates(topCommands, topFiles, repeatedWorkflows);
 
   return {
     period: window.week,
@@ -376,6 +389,13 @@ function formatSummaryText(summary) {
     }
   } else {
     lines.push('Automation candidates: none yet');
+  }
+
+  if (summary.top_files.length > 0) {
+    lines.push('Top repeated files:');
+    for (const entry of summary.top_files.slice(0, 3)) {
+      lines.push(`- ${entry.file_path} (${entry.count})`);
+    }
   }
 
   return lines.join('\n');

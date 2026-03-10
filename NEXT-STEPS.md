@@ -226,10 +226,11 @@ explicit/manual `continuous-learning` path.
 
 Follow-ups for Codex should focus on:
 
-- correcting Codex installer scope so project-targeted installs stop writing to
-  `~/.codex` when `--global` is not present
 - deciding whether Codex gets real package-selected rule files under `codex-template/rules/`
 - reducing remaining source-layout drift between `codex-template/skills/` and the installed `.agents/skills/` tree materialized by the installer
+- keeping the `continuous-learning` package truthful for Codex so manual learning
+  stays the baseline and `continuous-learning-automatic` is not treated as a
+  Codex install surface
 - deciding whether any Codex app automations are worth using after the explicit path has proven itself
 - expanding Codex workflow verification beyond smoke into richer manual verification
 - keeping project detection repo-scoped even when the active Codex shell blocks

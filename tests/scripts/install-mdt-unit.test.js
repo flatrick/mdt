@@ -274,6 +274,8 @@ function runTests() {
       sessionData: true,
       tools: ['claude', 'cursor', 'codex']
     });
+    assert.deepStrictEqual(manifest.tools.claude.skills, ['continuous-learning-automatic']);
+    assert.deepStrictEqual(manifest.tools.cursor.skills, ['continuous-learning-automatic']);
     assert.deepStrictEqual(manifest.tools.cursor.commands, ['docs-health.md', 'learn.md', 'skill-create.md']);
   })) passed++; else failed++;
 
@@ -340,13 +342,15 @@ function runTests() {
 
   if (test('installClaudeContentDirs copies only selected shared assets', () => {
     withTempDir('mdt-install-claude-', (tempDir) => {
-      installClaudeContentDirs(tempDir, resolveSelectedPackages(['typescript']));
+      installClaudeContentDirs(tempDir, resolveSelectedPackages(['typescript', 'continuous-learning']));
 
       assert.ok(fs.existsSync(path.join(tempDir, 'agents', 'planner.md')));
       assert.ok(!fs.existsSync(path.join(tempDir, 'agents', 'python-reviewer.md')));
       assert.ok(fs.existsSync(path.join(tempDir, 'commands', 'plan.md')));
       assert.ok(!fs.existsSync(path.join(tempDir, 'commands', 'python-review.md')));
       assert.ok(fs.existsSync(path.join(tempDir, 'skills', 'coding-standards', 'SKILL.md')));
+      assert.ok(fs.existsSync(path.join(tempDir, 'skills', 'continuous-learning-manual', 'SKILL.md')));
+      assert.ok(fs.existsSync(path.join(tempDir, 'skills', 'continuous-learning-automatic', 'SKILL.md')));
       assert.ok(!fs.existsSync(path.join(tempDir, 'skills', 'python-patterns', 'SKILL.md')));
     });
   })) passed++; else failed++;
@@ -359,6 +363,7 @@ function runTests() {
       assert.ok(!fs.existsSync(path.join(tempDir, 'agents', 'python-reviewer.md')));
       assert.ok(fs.existsSync(path.join(tempDir, 'skills', 'frontend-slides', 'SKILL.md')));
       assert.ok(fs.existsSync(path.join(tempDir, 'skills', 'continuous-learning-manual', 'SKILL.md')));
+      assert.ok(fs.existsSync(path.join(tempDir, 'skills', 'continuous-learning-automatic', 'SKILL.md')));
       assert.ok(!fs.existsSync(path.join(tempDir, 'skills', 'rust-patterns', 'SKILL.md')));
       assert.ok(fs.existsSync(path.join(tempDir, 'commands', 'docs-health.md')));
       assert.ok(fs.existsSync(path.join(tempDir, 'commands', 'plan.md')));

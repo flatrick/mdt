@@ -140,6 +140,10 @@ function runTests() {
             'Cursor install should copy selected shared capability skills'
           );
           assert.ok(
+            fs.existsSync(path.join(cursorRoot, 'skills', 'continuous-learning-automatic', 'SKILL.md')),
+            'Cursor install should copy the Cursor-facing automatic learning skill from the shared skills tree'
+          );
+          assert.ok(
             fs.existsSync(path.join(cursorRoot, 'rules', 'typescript-coding-style.md')),
             'Cursor install should copy package-declared TypeScript rules'
           );
@@ -293,7 +297,7 @@ function runTests() {
         const tmpProject = createTestDir('mdt-install-claude-rules-');
 
         try {
-          const result = runInstaller(['typescript'], {
+          const result = runInstaller(['typescript', 'continuous-learning'], {
             cwd: tmpProject,
             projectDir: tmpProject,
             env: {
@@ -308,6 +312,8 @@ function runTests() {
           assert.ok(fs.existsSync(path.join(claudeRoot, 'rules', 'typescript', 'coding-style.md')));
           assert.ok(fs.existsSync(path.join(claudeRoot, 'commands', 'docs-health.md')));
           assert.ok(fs.existsSync(path.join(claudeRoot, 'skills', 'documentation-steward', 'SKILL.md')));
+          assert.ok(fs.existsSync(path.join(claudeRoot, 'skills', 'continuous-learning-manual', 'SKILL.md')));
+          assert.ok(fs.existsSync(path.join(claudeRoot, 'skills', 'continuous-learning-automatic', 'SKILL.md')));
           assert.ok(fs.existsSync(path.join(claudeRoot, 'commands', 'smoke.md')));
           assert.ok(
             !fs.existsSync(path.join(claudeRoot, 'rules', 'python', 'coding-style.md')),

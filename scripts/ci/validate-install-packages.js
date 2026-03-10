@@ -296,7 +296,7 @@ function validateInstallPackages(options = {}) {
           hasErrors = true;
         } else {
           for (const skillName of cursor.skills) {
-            if (!fs.existsSync(path.join(cursorSkillsDir, skillName))) {
+            if (!fs.existsSync(path.join(cursorSkillsDir, skillName)) && !fs.existsSync(path.join(skillsDir, skillName))) {
               io.error(`ERROR: ${packageName}/package.json - missing Cursor skill reference: ${skillName}`);
               hasErrors = true;
             }
@@ -313,6 +313,26 @@ function validateInstallPackages(options = {}) {
                 io.error(`ERROR: ${packageName}/package.json - missing Cursor command reference: ${commandFile}`);
                 hasErrors = true;
               }
+            }
+          }
+        }
+      }
+    }
+
+    const claude = tools.claude;
+    if (claude !== undefined) {
+      if (!claude || typeof claude !== 'object' || Array.isArray(claude)) {
+        io.error(`ERROR: ${packageName}/package.json - tools.claude must be an object when provided`);
+        hasErrors = true;
+      } else if (claude.skills !== undefined) {
+        if (!isStringArray(claude.skills)) {
+          io.error(`ERROR: ${packageName}/package.json - tools.claude.skills must be an array of non-empty strings when provided`);
+          hasErrors = true;
+        } else {
+          for (const skillName of claude.skills) {
+            if (!fs.existsSync(path.join(skillsDir, skillName))) {
+              io.error(`ERROR: ${packageName}/package.json - missing Claude skill reference: ${skillName}`);
+              hasErrors = true;
             }
           }
         }

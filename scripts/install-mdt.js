@@ -699,6 +699,11 @@ function installClaudeContentDirs(claudeBase, selectedPackages) {
     if (copySelectedDirectories(skillsSrc, skillsDest, skillNames, 'Package-selected skill') > 0) {
       console.log('Installing package-selected skills -> ' + skillsDest + '/');
     }
+
+    const claudeSkillNames = getToolManifestSelections(selectedPackages, 'claude', 'skills');
+    if (copySelectedDirectories(skillsSrc, skillsDest, claudeSkillNames, 'Claude package-selected skill') > 0) {
+      console.log('Installing Claude package skills -> ' + skillsDest + '/');
+    }
   }
 }
 
@@ -824,10 +829,6 @@ function installCursorSkills(destDir, selectedPackages) {
   }
 
   const cursorSkillsSrc = path.join(CURSOR_SRC, 'skills');
-  if (!fs.existsSync(cursorSkillsSrc)) {
-    return;
-  }
-
   let copiedCursorSkills = 0;
   for (const selectedPackage of selectedPackages) {
     const cursorSkills = Array.isArray(selectedPackage.tools.cursor?.skills)
@@ -835,7 +836,9 @@ function installCursorSkills(destDir, selectedPackages) {
       : [];
 
     for (const skillName of cursorSkills) {
-      const skillSrc = path.join(cursorSkillsSrc, skillName);
+      const cursorSkillSrc = path.join(cursorSkillsSrc, skillName);
+      const sharedSkillSrc = path.join(sharedSkillsSrc, skillName);
+      const skillSrc = fs.existsSync(cursorSkillSrc) ? cursorSkillSrc : sharedSkillSrc;
       const skillDest = path.join(skillsDest, skillName);
       if (!fs.existsSync(skillSrc)) {
         console.error(`Warning: Cursor skill '${skillName}' for package '${selectedPackage.name}' does not exist, skipping.`);

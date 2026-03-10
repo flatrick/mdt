@@ -32,8 +32,8 @@ It is safe to delete once the work is complete.
    - `skills/continuous-learning-automatic/` — hook-driven observation capture only:
      `hooks/observe.js` + `scripts/detect-project.js`
    - `codex-template/skills/continuous-learning-manual/` — Codex copy (no hooks/, uses openai.yaml)
-   - `packages/continuous-learning/package.json` lists both new skills in `skills[]`
-   - Codex skips `continuous-learning-automatic` with a warning (intentional — hooks not supported)
+   - `packages/continuous-learning/package.json` now treats `continuous-learning-manual` as the shared baseline and maps `continuous-learning-automatic` through tool-specific Claude/Cursor package metadata
+   - Codex does not install `continuous-learning-automatic`; the manual skill plus optional external observer is the Codex-facing contract
    - ~50 references updated across commands, hooks configs, docs, tests, installed copies
 
 ### Phase 2 work (completed this session)
@@ -58,8 +58,8 @@ The installer supports three skill source layers:
 - **`cursor-template/skills/`** — Cursor-specific overrides (listed in `tools.cursor.skills`;
   used when Cursor needs a different version)
 
-When a skill is in the shared `skills[]` array but has NO `codex-template/skills/` copy,
-Codex prints a warning and skips it. This is correct behavior for hook-only skills.
+Codex only installs skills that are explicitly declared for Codex-facing use.
+Hook-only skills should stay out of the shared Codex package surface.
 
 ---
 
@@ -91,7 +91,7 @@ See `docs/functional-parity-plan.md` for the full plan. Outstanding items:
 - **Claude home hardening** — Replicate `codex-template/hardening/` for Claude Code.
   Constraint: do not implement until Claude's sensitive file paths are confirmed.
 
-### Codex global install (user wanted to do this)
+### Codex project install (user wanted to do this)
 
 The user wants to run a Codex global install. The install command would be:
 ```
@@ -99,13 +99,16 @@ node scripts/install-mdt.js --target codex --project-dir <path-to-a-project> typ
 ```
 
 This will:
-- Install `~/.codex/config.toml`, `AGENTS.md`, and the 4 Codex rule files
 - Install skills into `<project>/.agents/skills/`: coding-standards, documentation-steward,
   tool-setup-verifier, continuous-learning-manual
-- Print a warning about continuous-learning-automatic being skipped (expected, not an error)
 - Install runtime scripts into `<project>/.agents/scripts/`
 - Install `codex-observer.js`, `smoke-tool-setups.js`, and `smoke-codex-workflows.js`
   into `<project>/.agents/scripts/`
+
+For a global Codex install, use:
+```
+node scripts/install-mdt.js --target codex --global typescript continuous-learning
+```
 
 ---
 

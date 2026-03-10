@@ -167,19 +167,19 @@ Codex does not rely on Claude/Cursor hook capture in this repo.
 Use the explicit project-local workflow instead:
 
 ```bash
-node .agents/skills/continuous-learning-automatic/scripts/codex-learn.js status
+node .agents/skills/continuous-learning-manual/scripts/codex-learn.js status
 ```
 
 Then have Codex produce a concise session summary and capture it:
 
 ```bash
-node .agents/skills/continuous-learning-automatic/scripts/codex-learn.js capture < summary.txt
+node .agents/skills/continuous-learning-manual/scripts/codex-learn.js capture < summary.txt
 ```
 
 Finally run one explicit analysis pass:
 
 ```bash
-node .agents/skills/continuous-learning-automatic/scripts/codex-learn.js analyze
+node .agents/skills/continuous-learning-manual/scripts/codex-learn.js analyze
 ```
 
 This writes Codex project learning state under `.codex/homunculus/...`.
@@ -201,14 +201,14 @@ Add to your config directory settings file (for Claude Code this is `~/.claude/s
       "matcher": "*",
       "hooks": [{
         "type": "command",
-        "command": "node \"${MDT_ROOT}/skills/continuous-learning-automatic/hooks/observe.js\" pre"
+        "command": "node \"${MDT_ROOT}/skills/continuous-learning-manual/hooks/observe.js\" pre"
       }]
     }],
     "PostToolUse": [{
       "matcher": "*",
       "hooks": [{
         "type": "command",
-        "command": "node \"${MDT_ROOT}/skills/continuous-learning-automatic/hooks/observe.js\" post"
+        "command": "node \"${MDT_ROOT}/skills/continuous-learning-manual/hooks/observe.js\" post"
       }]
     }]
   }
@@ -224,14 +224,14 @@ Add to your config directory settings file (for Claude Code this is `~/.claude/s
       "matcher": "*",
       "hooks": [{
         "type": "command",
-        "command": "node <config>/skills/continuous-learning-automatic/hooks/observe.js pre"
+        "command": "node <config>/skills/continuous-learning-manual/hooks/observe.js pre"
       }]
     }],
     "PostToolUse": [{
       "matcher": "*",
       "hooks": [{
         "type": "command",
-        "command": "node <config>/skills/continuous-learning-automatic/hooks/observe.js post"
+        "command": "node <config>/skills/continuous-learning-manual/hooks/observe.js post"
       }]
     }]
   }
@@ -365,18 +365,18 @@ When the same instinct appears in multiple projects with high confidence, it's a
 
 ```bash
 # Promote a specific instinct
-node "${MDT_ROOT}/skills/continuous-learning-automatic/scripts/instinct-cli.js" promote prefer-explicit-errors
+node "${MDT_ROOT}/skills/continuous-learning-manual/scripts/instinct-cli.js" promote prefer-explicit-errors
 
 # Auto-promote all qualifying instincts
-node "${MDT_ROOT}/skills/continuous-learning-automatic/scripts/instinct-cli.js" promote
+node "${MDT_ROOT}/skills/continuous-learning-manual/scripts/instinct-cli.js" promote
 
 # Preview without changes
-node "${MDT_ROOT}/skills/continuous-learning-automatic/scripts/instinct-cli.js" promote --dry-run
+node "${MDT_ROOT}/skills/continuous-learning-manual/scripts/instinct-cli.js" promote --dry-run
 ```
 
 For manual installs, replace `<config>` with your MDT config directory:
 ```bash
-node "<config>/skills/continuous-learning-automatic/scripts/instinct-cli.js" promote
+node "<config>/skills/continuous-learning-manual/scripts/instinct-cli.js" promote
 ```
 
 The `/evolve` command also suggests promotion candidates.

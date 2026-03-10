@@ -132,11 +132,66 @@ function runTests() {
       assert.ok(result.summary.automation_candidates.some((candidate) =>
         candidate.kind === 'script' && candidate.item === 'npm test' && candidate.count === 3
       ));
+      assert.ok(result.summary.automation_candidates.some((candidate) =>
+        candidate.kind === 'file-hotspot' && candidate.item === 'src/app.ts' && candidate.count === 2
+      ) === false, 'file hotspot threshold should stay above low-noise two-touch edits');
       assert.ok(fs.existsSync(result.outputPath), 'Expected weekly summary file to be written');
 
       const written = JSON.parse(fs.readFileSync(result.outputPath, 'utf8'));
       assert.strictEqual(written.period, '2026-W11');
       assert.strictEqual(written.automation_candidates.length >= 2, true);
+    } finally {
+      cleanupTestDir(tempDir);
+    }
+  })) passed++; else failed++;
+
+  if (test('generateWeeklyRetrospective promotes repeated file hotspots into automation candidates', () => {
+    const tempDir = createTestDir('weekly-retro-files-');
+    try {
+      const projectDir = path.join(tempDir, 'homunculus', 'projects', 'files123');
+      const observationsFile = path.join(projectDir, 'observations.jsonl');
+      const project = {
+        id: 'files123',
+        name: 'file-heavy-project',
+        root: path.join(tempDir, 'repo'),
+        project_dir: projectDir,
+        observations_file: observationsFile
+      };
+
+      appendObservation(observationsFile, {
+        timestamp: '2026-03-10T08:01:00Z',
+        event: 'tool_start',
+        tool: 'Edit',
+        session: 's1',
+        input: '{"file_path":"src/worker.ts"}'
+      });
+      appendObservation(observationsFile, {
+        timestamp: '2026-03-11T08:01:00Z',
+        event: 'tool_start',
+        tool: 'Edit',
+        session: 's2',
+        input: '{"file_path":"src/worker.ts"}'
+      });
+      appendObservation(observationsFile, {
+        timestamp: '2026-03-12T08:01:00Z',
+        event: 'tool_start',
+        tool: 'Edit',
+        session: 's3',
+        input: '{"file_path":"src/worker.ts"}'
+      });
+
+      const result = generateWeeklyRetrospective({
+        project,
+        week: '2026-W11',
+        write: false
+      });
+
+      assert.ok(result.summary.automation_candidates.some((candidate) =>
+        candidate.kind === 'file-hotspot' &&
+        candidate.item === 'src/worker.ts' &&
+        candidate.count === 3
+      ));
+      assert.ok(result.text.includes('Top repeated files:'), 'text summary should surface file hotspots explicitly');
     } finally {
       cleanupTestDir(tempDir);
     }

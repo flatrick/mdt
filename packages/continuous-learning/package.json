@@ -26,10 +26,14 @@
   ],
   "skills": [
     "documentation-steward",
-    "continuous-learning-manual",
-    "continuous-learning-automatic"
+    "continuous-learning-manual"
   ],
   "tools": {
+    "claude": {
+      "skills": [
+        "continuous-learning-automatic"
+      ]
+    },
     "cursor": {
       "rules": [
         "common-agents.md",
@@ -40,7 +44,9 @@
         "common-security.md",
         "common-testing.md"
       ],
-      "skills": [],
+      "skills": [
+        "continuous-learning-automatic"
+      ],
       "commands": [
         "docs-health.md",
         "learn.md",

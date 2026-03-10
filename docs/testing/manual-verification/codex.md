@@ -106,6 +106,8 @@ Expected:
 - a summary file is written under `.codex/homunculus/projects/<id>/retrospectives/weekly/`
 - the summary includes automation-oriented sections such as repeated commands,
   repeated files, repeated workflows, and automation candidates
+- repeated file hotspots should be called out explicitly when the same file is
+  touched 3+ times in the selected ISO week
 - the output stays sparse and reflects only the requested ISO week
 
 ## Optional External Observer

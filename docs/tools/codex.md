@@ -157,6 +157,7 @@ The intended output is low-noise and automation-focused:
 - repeated shell commands that should become scripts or custom commands
 - repeated external CLI workflows that may justify MCP integrations
 - repeated tool sequences that deserve a documented workflow
+- repeated file hotspots that suggest a missing helper, custom command, or MCP-backed integration
 
 Important operational note:
 
