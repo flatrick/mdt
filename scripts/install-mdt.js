@@ -16,7 +16,7 @@
  * Targets:
  *   claude (default) — Install to ./.claude/ or ~/.claude/ with --global
  *   cursor           — Install to ./.cursor/ or ~/.cursor/ with --global
- *   codex            — Install package-selected config to ~/.codex/ plus project .agents/
+ *   codex            — Install to ./.agents/ (or ~/.codex/ with --global)
  */
 
 const fs = require('fs');
@@ -389,19 +389,23 @@ function getDryRunHeader(target, globalScope) {
   return [`[dry-run] Target: ${targetDisplay}`];
 }
 
-function buildCodexInstallPlan(lines) {
-  return lines;
-}
-
-function buildCodexPackageInstallPlan(lines, selectedPackages, projectDir) {
+function buildCodexInstallPlan(lines, globalScope, selectedPackages, projectDir) {
   const packages = getSelectedPackageSummary(selectedPackages);
-  const userCodexDir = path.join(os.homedir(), '.codex');
+  if (globalScope) {
+    const userCodexDir = path.join(os.homedir(), '.codex');
+    return [
+      ...lines,
+      `[dry-run] Packages: ${packages}`,
+      `[dry-run] Would install Codex user config to ${userCodexDir}`,
+      `[dry-run] Would install Codex user rules to ${path.join(userCodexDir, 'rules')}`
+    ];
+  }
+
   const projectAgentsDir = path.join(projectDir, '.agents');
   return [
     ...lines,
     `[dry-run] Packages: ${packages}`,
     `[dry-run] Project directory: ${projectDir}`,
-    `[dry-run] Would install Codex user config to ${userCodexDir}`,
     `[dry-run] Would install Codex project skills to ${path.join(projectAgentsDir, 'skills')}`,
     `[dry-run] Would install Codex runtime scripts to ${path.join(projectAgentsDir, 'scripts')}`,
     '[dry-run] Would materialize package-selected Codex skills from codex-template/skills into .agents/skills/'
@@ -484,7 +488,7 @@ function buildInstallPlan({ target, globalScope, projectDir, packageNames }) {
     ? []
     : assertPackageRequirements(target, selectedPackages).map((warning) => `[dry-run] Warning: ${warning}`);
 
-  if (target === 'codex') return [...warnings, ...buildCodexPackageInstallPlan(buildCodexInstallPlan(header), selectedPackages, resolvedProjectDir)];
+  if (target === 'codex') return [...warnings, ...buildCodexInstallPlan(header, globalScope, selectedPackages, resolvedProjectDir)];
   if (target === 'gemini') return [...warnings, ...buildGeminiInstallPlan(header, globalScope, selectedPackages, resolvedProjectDir)];
   if (target === 'claude') return [...warnings, ...buildClaudeInstallPlan(header, globalScope, selectedPackages, resolvedProjectDir)];
 
@@ -529,7 +533,7 @@ function usage(target) {
   console.error('Targets:');
   console.error('  claude (default) — Install to ./.claude/ (or ~/.claude/ with --global)');
   console.error('  cursor           — Install to ./.cursor/ (or ~/.cursor/ with --global)');
-  console.error('  codex            — Install package-selected Codex config to ~/.codex/ plus project .agents/');
+  console.error('  codex            — Install to ./.agents/ (or ~/.codex/ with --global)');
   console.error('  gemini           — Install Antigravity/Gemini CLI configs to .agent/ and .gemini/ (or ~/.gemini... with --global)');
   console.error('');
   console.error('Options:');
@@ -979,20 +983,8 @@ function installCodexWorkflowScripts(projectAgentsDir) {
   }
 }
 
-function installCodex(packageNames, projectDir) {
-  if (!fs.existsSync(CODEX_SRC)) {
-    console.error('Error: codex-template source directory not found at ' + CODEX_SRC);
-    process.exit(1);
-  }
-  if (!packageNames.length) usage('codex');
-
-  const selectedPackages = resolveSelectedPackages(packageNames);
-  for (const warning of assertPackageRequirements('codex', selectedPackages)) {
-    console.warn('Warning: ' + warning);
-  }
-
+function installCodexGlobal(selectedPackages) {
   const destDir = path.join(os.homedir(), '.codex');
-  const projectAgentsDir = path.join(projectDir, '.agents');
   console.log('Installing Codex CLI configs to ' + destDir + '/');
   fs.mkdirSync(destDir, { recursive: true });
 
@@ -1017,9 +1009,6 @@ function installCodex(packageNames, projectDir) {
   }
 
   installCodexRules(selectedPackages, destDir);
-  installCodexSkills(selectedPackages, projectAgentsDir);
-  installCodexRuntimeScripts(projectAgentsDir);
-  installCodexWorkflowScripts(projectAgentsDir);
 
   if (process.platform === 'win32') {
     console.log('');
@@ -1027,7 +1016,36 @@ function installCodex(packageNames, projectDir) {
     console.log('      MDT writes config.mdt.toml as a reference file instead of overwriting user Codex settings.');
     console.log('');
   }
-  console.log('Done. Codex configs installed to ' + destDir + '/');
+  console.log('Done. Codex global configs installed to ' + destDir + '/');
+}
+
+function installCodexProject(selectedPackages, projectDir) {
+  const projectAgentsDir = path.join(projectDir, '.agents');
+  console.log('Installing Codex project files to ' + projectAgentsDir + '/');
+  installCodexSkills(selectedPackages, projectAgentsDir);
+  installCodexRuntimeScripts(projectAgentsDir);
+  installCodexWorkflowScripts(projectAgentsDir);
+  console.log('Done. Codex project files installed to ' + projectAgentsDir + '/');
+}
+
+function installCodex(packageNames, globalScope, projectDir) {
+  if (!fs.existsSync(CODEX_SRC)) {
+    console.error('Error: codex-template source directory not found at ' + CODEX_SRC);
+    process.exit(1);
+  }
+  if (!packageNames.length) usage('codex');
+
+  const selectedPackages = resolveSelectedPackages(packageNames);
+  for (const warning of assertPackageRequirements('codex', selectedPackages)) {
+    console.warn('Warning: ' + warning);
+  }
+
+  if (globalScope) {
+    installCodexGlobal(selectedPackages);
+    return;
+  }
+
+  installCodexProject(selectedPackages, projectDir);
 }
 
 function convertCommandsToToml(commandsSrc, commandsDest) {
@@ -1227,15 +1245,11 @@ function main() {
       usage(target);
     }
   }
-  if (globalScope && target === 'codex') {
-    console.error("Warning: --global is not supported for codex target. Ignored.");
-  }
-
   try {
     if (target === 'claude') installClaude(packageNames, globalScope, resolvedProjectDir);
     else if (target === 'cursor') installCursor(packageNames, globalScope, resolvedProjectDir);
     else if (target === 'gemini') installGemini(packageNames, globalScope, resolvedProjectDir);
-    else installCodex(packageNames, resolvedProjectDir);
+    else installCodex(packageNames, globalScope, resolvedProjectDir);
   } catch (error) {
     console.error(`Error: ${error.message}`);
     usage(target);

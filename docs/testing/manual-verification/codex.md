@@ -28,7 +28,7 @@ Expected:
 Install Codex with explicit packages:
 
 ```bash
-node scripts/install-mdt.js --target codex typescript continuous-learning
+node scripts/install-mdt.js --target codex --project-dir . typescript continuous-learning
 ```
 
 If you want to test against a different repo without changing the current
@@ -40,12 +40,21 @@ node scripts/install-mdt.js --target codex --project-dir ../scratch-repo typescr
 
 Then confirm:
 
+- `.agents/skills/` contains the selected Codex skills
+- `.agents/scripts/lib/` exists for MDT runtime helpers
+
+For a global Codex install, use:
+
+```bash
+node scripts/install-mdt.js --target codex --global typescript continuous-learning
+```
+
+Then confirm:
+
 - `~/.codex/config.toml` exists
 - if `~/.codex/config.toml` already existed before install, confirm the installer
   preserved it and wrote `~/.codex/config.mdt.toml` instead of overwriting it
 - `~/.codex/AGENTS.md` exists
-- `.agents/skills/` contains the selected Codex skills
-- `.agents/scripts/lib/` exists for MDT runtime helpers
 
 ## Continuous Learning
 

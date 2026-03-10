@@ -15,8 +15,65 @@ const http = require('http');
 const skillRoot = path.join(__dirname, '..');
 const { detectProject, getHomunculusDir } = require(path.join(skillRoot, 'scripts', 'detect-project.js'));
 
+function resolveProjectRoot() {
+  const candidates = [
+    path.resolve(skillRoot, '..', '..'),
+    path.resolve(skillRoot, '..', '..', '..')
+  ];
+
+  for (const candidate of candidates) {
+    if (
+      fs.existsSync(path.join(candidate, '.git')) ||
+      fs.existsSync(path.join(candidate, 'package.json')) ||
+      fs.existsSync(path.join(candidate, 'AGENTS.md'))
+    ) {
+      return candidate;
+    }
+  }
+
+  return candidates[0];
+}
+
+function buildCodexEnv(env = process.env) {
+  const projectRoot = resolveProjectRoot();
+  const nextEnv = { ...env };
+  const configDir = nextEnv.CONFIG_DIR || path.join(projectRoot, '.agents');
+  const dataDir = nextEnv.DATA_DIR || path.join(projectRoot, '.codex');
+  fs.mkdirSync(dataDir, { recursive: true });
+
+  nextEnv.CODEX_AGENT = '1';
+  nextEnv.MDT_OBSERVER_TOOL = 'codex';
+  nextEnv.CONFIG_DIR = configDir;
+  nextEnv.DATA_DIR = dataDir;
+  nextEnv.MDT_PROJECT_ROOT = nextEnv.MDT_PROJECT_ROOT || projectRoot;
+
+  return nextEnv;
+}
+
+function withCodexEnv(fn) {
+  const nextEnv = buildCodexEnv();
+  const previous = {};
+
+  for (const [key, value] of Object.entries(nextEnv)) {
+    previous[key] = process.env[key];
+    process.env[key] = value;
+  }
+
+  try {
+    return fn();
+  } finally {
+    for (const [key, value] of Object.entries(previous)) {
+      if (value === undefined) {
+        delete process.env[key];
+      } else {
+        process.env[key] = value;
+      }
+    }
+  }
+}
+
 function getCliPaths() {
-  const homunculusDir = getHomunculusDir();
+  const homunculusDir = withCodexEnv(() => getHomunculusDir());
   return {
     PROJECTS_DIR: path.join(homunculusDir, 'projects'),
     REGISTRY_FILE: path.join(homunculusDir, 'projects.json'),
@@ -133,7 +190,7 @@ function validateInstinctId(id) {
 
 function cmdStatus() {
   const { GLOBAL_PERSONAL } = getCliPaths();
-  const project = detectProject(process.cwd());
+  const project = withCodexEnv(() => detectProject(process.cwd()));
   const instincts = loadAllInstincts(project);
 
   if (instincts.length === 0) {
@@ -228,7 +285,7 @@ function cmdProjects() {
 
 function cmdExport(args) {
   const { GLOBAL_PERSONAL, GLOBAL_INHERITED } = getCliPaths();
-  const project = detectProject(process.cwd());
+  const project = withCodexEnv(() => detectProject(process.cwd()));
   const scope = args.scope || 'all';
   let instincts;
   if (scope === 'project') instincts = loadProjectOnlyInstincts(project);
@@ -262,7 +319,7 @@ function cmdExport(args) {
 }
 
 function cmdEvolve(_args) {
-  const project = detectProject(process.cwd());
+  const project = withCodexEnv(() => detectProject(process.cwd()));
   const instincts = loadAllInstincts(project);
 
   if (instincts.length < 3) {
@@ -321,7 +378,7 @@ function cmdEvolve(_args) {
 
 function cmdImport(args) {
   const { GLOBAL_INHERITED } = getCliPaths();
-  const project = detectProject(process.cwd());
+  const project = withCodexEnv(() => detectProject(process.cwd()));
   const source = args.source;
   let content;
 
@@ -386,7 +443,7 @@ function cmdImport(args) {
 
 function cmdPromote(args) {
   const { GLOBAL_PERSONAL, GLOBAL_INHERITED } = getCliPaths();
-  const project = detectProject(process.cwd());
+  const project = withCodexEnv(() => detectProject(process.cwd()));
   const instinctId = args.instinct_id;
 
   if (instinctId) {
@@ -467,4 +524,11 @@ function main() {
   process.exit(exitCode);
 }
 
-main();
+if (require.main === module) {
+  main();
+}
+
+module.exports = {
+  buildCodexEnv,
+  getCliPaths
+};

@@ -66,7 +66,7 @@ Guides refer to the upstream project; this fork may differ. For this fork, prefe
    node scripts/install-mdt.js --target cursor typescript
 
    # Codex
-   node scripts/install-mdt.js --target codex typescript continuous-learning
+   node scripts/install-mdt.js --target codex --project-dir . typescript continuous-learning
 
    # Discover available targets/packages
    node scripts/install-mdt.js --list
@@ -109,7 +109,7 @@ Use these as the current source of truth:
 - `claude-template/` — Claude-specific source templates such as hook config rendered into `.claude/`
 - `scripts/` — Node.js only (install-mdt.js, hooks, lib, detect-env, sync-hook-mirrors.js)
 - `cursor-template/` — Cursor source templates (rules, hooks, skills, and config files rendered into `.cursor/` on install)
-- `codex-template/` — Codex source templates (`config.toml`, `AGENTS.md`, `skills/`) rendered into `~/.codex/` and the target repo on install
+- `codex-template/` — Codex source templates (`config.toml`, `AGENTS.md`, `skills/`) rendered into either `~/.codex/` with `--global` or the target repo with `--project-dir`
 - `opencode-template/` — OpenCode source templates (commands, prompts, plugins, tools, config)
 - `tests/` — Test suite
 

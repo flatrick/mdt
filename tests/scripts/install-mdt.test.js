@@ -473,7 +473,7 @@ function runTests() {
       }
     },
     {
-      name: 'codex install copies selected project skills and runtime scripts',
+      name: 'codex project install copies selected project skills and runtime scripts only',
       run: () => {
         const tmpHome = createTestDir('mdt-install-codex-home-');
         const tmpProject = createTestDir('mdt-install-codex-proj-');
@@ -499,13 +499,7 @@ function runTests() {
           const codexRoot = path.join(tmpHome, '.codex');
           const projectAgentsRoot = path.join(tmpProject, '.agents');
 
-          assert.ok(fs.existsSync(path.join(codexRoot, 'config.toml')));
-          assert.ok(fs.existsSync(path.join(codexRoot, 'AGENTS.md')));
-          assert.ok(fs.existsSync(path.join(codexRoot, 'rules', 'common-coding-style.md')));
-          assert.ok(fs.existsSync(path.join(codexRoot, 'rules', 'common-testing.md')));
-          assert.ok(fs.existsSync(path.join(codexRoot, 'rules', 'common-security.md')));
-          assert.ok(fs.existsSync(path.join(codexRoot, 'rules', 'common-git-workflow.md')));
-          assert.ok(!fs.existsSync(path.join(codexRoot, 'rules', 'typescript-coding-style.md')), 'no unrelated rules');
+          assert.ok(!fs.existsSync(codexRoot), 'project-only Codex install must not touch ~/.codex');
           assert.ok(fs.existsSync(path.join(projectAgentsRoot, 'skills', 'coding-standards', 'SKILL.md')));
           assert.ok(fs.existsSync(path.join(projectAgentsRoot, 'skills', 'documentation-steward', 'SKILL.md')));
           assert.ok(fs.existsSync(path.join(projectAgentsRoot, 'skills', 'tool-setup-verifier', 'SKILL.md')));
@@ -560,7 +554,7 @@ function runTests() {
       }
     },
     {
-      name: 'codex install preserves existing user config and writes MDT reference config',
+      name: 'codex global install preserves existing user config and writes MDT reference config only',
       run: () => {
         const tmpHome = createTestDir('mdt-install-codex-existing-home-');
         const tmpProject = createTestDir('mdt-install-codex-existing-proj-');
@@ -577,7 +571,7 @@ function runTests() {
           ].join('\n');
           fs.writeFileSync(path.join(codexRoot, 'config.toml'), existingConfig, 'utf8');
 
-          const result = runInstaller(['--target', 'codex', 'typescript'], {
+          const result = runInstaller(['--target', 'codex', '--global', 'typescript'], {
             cwd: tmpHome,
             projectDir: tmpProject,
             env: {
@@ -595,6 +589,12 @@ function runTests() {
           const referenceConfig = fs.readFileSync(path.join(codexRoot, 'config.mdt.toml'), 'utf8');
           assert.ok(referenceConfig.includes('sandbox_mode = "workspace-write"'));
           assert.ok(referenceConfig.includes('[mcp_servers.github]'));
+          assert.ok(fs.existsSync(path.join(codexRoot, 'AGENTS.md')));
+          assert.ok(fs.existsSync(path.join(codexRoot, 'rules', 'common-coding-style.md')));
+          assert.ok(fs.existsSync(path.join(codexRoot, 'rules', 'common-testing.md')));
+          assert.ok(fs.existsSync(path.join(codexRoot, 'rules', 'common-security.md')));
+          assert.ok(fs.existsSync(path.join(codexRoot, 'rules', 'common-git-workflow.md')));
+          assert.ok(!fs.existsSync(path.join(tmpProject, '.agents')), 'global-only Codex install must not touch project .agents');
         } finally {
           cleanupTestDir(tmpHome);
           cleanupTestDir(tmpProject);

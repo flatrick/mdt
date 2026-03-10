@@ -34,8 +34,42 @@ function loadDetectEnv() {
 
 const createDetectEnv = loadDetectEnv();
 
+function inferInstalledConfigDir(scriptDir = __dirname) {
+  const candidates = [
+    path.resolve(scriptDir, '..', '..'),
+    path.resolve(scriptDir, '..', '..', '..')
+  ];
+
+  for (const candidate of candidates) {
+    const baseName = path.basename(candidate).toLowerCase();
+    if ((baseName === '.cursor' || baseName === '.claude' || baseName === '.agents') && fs.existsSync(candidate)) {
+      return candidate;
+    }
+  }
+
+  return null;
+}
+
 function getPathSet() {
-  const detectEnv = createDetectEnv();
+  const installedConfigDir = inferInstalledConfigDir();
+  const env = { ...process.env };
+  if (installedConfigDir && (!env.CONFIG_DIR || !String(env.CONFIG_DIR).trim())) {
+    env.CONFIG_DIR = installedConfigDir;
+  }
+  if (installedConfigDir) {
+    const inferredTool = path.basename(installedConfigDir).toLowerCase();
+    if (inferredTool === '.cursor' && !env.CURSOR_AGENT) {
+      env.CURSOR_AGENT = '1';
+    }
+    if (inferredTool === '.claude' && !env.CLAUDE_CODE) {
+      env.CLAUDE_CODE = '1';
+    }
+    if (inferredTool === '.agents' && !env.CODEX_AGENT) {
+      env.CODEX_AGENT = '1';
+    }
+  }
+
+  const detectEnv = createDetectEnv({ env });
   const dataDir = detectEnv.getDataDir();
   const homunculusDir = path.join(dataDir, 'homunculus');
   return {
@@ -44,6 +78,30 @@ function getPathSet() {
     projectsDir: path.join(homunculusDir, 'projects'),
     registryFile: path.join(homunculusDir, 'projects.json')
   };
+}
+
+function hasRepoMarker(dirPath) {
+  return (
+    fs.existsSync(path.join(dirPath, '.git')) ||
+    fs.existsSync(path.join(dirPath, 'package.json')) ||
+    fs.existsSync(path.join(dirPath, 'AGENTS.md'))
+  );
+}
+
+function findProjectRootFromFilesystem(startDir) {
+  let current = path.resolve(startDir || process.cwd());
+
+  while (true) {
+    if (hasRepoMarker(current)) {
+      return current;
+    }
+
+    const parent = path.dirname(current);
+    if (parent === current) {
+      return null;
+    }
+    current = parent;
+  }
 }
 
 function sha12(input) {
@@ -86,9 +144,15 @@ function updateRegistry(projectId, projectName, projectRoot, remoteUrl) {
 function detectProject(cwd) {
   const { homunculusDir, projectsDir } = getPathSet();
   let projectRoot = null;
+  const effectiveCwd = cwd || process.cwd();
 
   if (process.env.CLAUDE_PROJECT_DIR && process.env.CLAUDE_PROJECT_DIR.trim()) {
     const p = process.env.CLAUDE_PROJECT_DIR.trim();
+    if (fs.existsSync(p)) projectRoot = path.resolve(p);
+  }
+
+  if (!projectRoot && process.env.MDT_PROJECT_ROOT && process.env.MDT_PROJECT_ROOT.trim()) {
+    const p = process.env.MDT_PROJECT_ROOT.trim();
     if (fs.existsSync(p)) projectRoot = path.resolve(p);
   }
 
@@ -96,7 +160,7 @@ function detectProject(cwd) {
     try {
       const result = execFileSync('git', ['rev-parse', '--show-toplevel'], {
         encoding: 'utf8',
-        cwd: cwd || process.cwd(),
+        cwd: effectiveCwd,
         timeout: 5000,
         stdio: ['ignore', 'pipe', 'ignore']
       });
@@ -105,6 +169,10 @@ function detectProject(cwd) {
     } catch {
       // git not available or not a repo
     }
+  }
+
+  if (!projectRoot) {
+    projectRoot = findProjectRootFromFilesystem(effectiveCwd);
   }
 
   if (!projectRoot) {
@@ -179,9 +247,11 @@ function getRegistryFile() {
 
 module.exports = {
   detectProject,
+  findProjectRootFromFilesystem,
   getHomunculusDir,
   getProjectsDir,
   getRegistryFile,
+  inferInstalledConfigDir,
   get homunculusDir() {
     return getHomunculusDir();
   },

@@ -43,15 +43,21 @@ The repo currently ships:
 - package-driven Codex installs via `node scripts/install-mdt.js --target codex <package...>`
 - optional explicit project targeting via `node scripts/install-mdt.js --target codex --project-dir <repo> <package...>`
 
-The install path now has two layers:
+Codex install scope follows the shared MDT contract:
 
-- user layer: `~/.codex/` for config and Codex-specific global guidance
-- project layer: `.agents/skills/` plus `.agents/scripts/` materialized from `codex-template/` and shared runtime scripts
+- no `--global` => do not touch `~`
+- `--global` => user/global install is the intended target
+- `--project-dir <repo>` => project-local `.agents/` install is the intended target
 
-Codex config policy:
+That means Codex installs are not implicitly two-layer anymore:
+
+- user layer: `~/.codex/` only when `--global` is explicit
+- project layer: `.agents/skills/` plus `.agents/scripts/` when `--project-dir` is used
+
+Codex global-config policy:
 
 - treat `~/.codex/config.toml` as user-owned
-- the installer may create it when missing
+- the installer may create it when missing during a global install
 - if it already exists, MDT preserves it and writes `~/.codex/config.mdt.toml`
   as a reference file instead of overwriting local Codex settings
 - repo guidance belongs in `AGENTS.md`, not in `config.toml`
@@ -117,6 +123,7 @@ When testing against a clean repo, prefer:
 
 ```bash
 node scripts/install-mdt.js --target codex --project-dir ../scratch-repo typescript continuous-learning
+node scripts/install-mdt.js --target codex --global typescript continuous-learning
 ```
 
 For `continuous-learning`, Codex currently uses an explicit manual workflow
