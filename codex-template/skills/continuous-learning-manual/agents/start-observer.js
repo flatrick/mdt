@@ -42,7 +42,7 @@ function inferInstalledConfigDir(skillDir = skillRoot) {
 
   for (const candidate of candidates) {
     const baseName = path.basename(candidate).toLowerCase();
-    if ((baseName === '.cursor' || baseName === '.claude' || baseName === '.agents') && fs.existsSync(candidate)) {
+    if ((baseName === '.cursor' || baseName === '.claude' || baseName === '.codex') && fs.existsSync(candidate)) {
       return candidate;
     }
   }
@@ -63,6 +63,9 @@ function buildObserverEnv(env = process.env, options = {}) {
   }
   if (inferredTool === 'claude' && (!nextEnv.CLAUDE_CODE || !String(nextEnv.CLAUDE_CODE).trim())) {
     nextEnv.CLAUDE_CODE = '1';
+  }
+  if (inferredTool === 'codex' && (!nextEnv.CODEX_AGENT || !String(nextEnv.CODEX_AGENT).trim())) {
+    nextEnv.CODEX_AGENT = '1';
   }
 
   return nextEnv;
@@ -103,7 +106,7 @@ function inferToolFromConfigDir(configDir) {
   const normalized = String(configDir || '').replace(/\\/g, '/').toLowerCase();
   if (normalized.endsWith('/.cursor')) return 'cursor';
   if (normalized.endsWith('/.claude')) return 'claude';
-  if (normalized.endsWith('/.agents')) return 'codex';
+  if (normalized.endsWith('/.codex')) return 'codex';
   return 'unknown';
 }
 

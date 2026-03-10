@@ -47,7 +47,7 @@ It is safe to delete once the work is complete.
      and trigger analysis when the configured threshold is met
    - Reuses the existing `continuous-learning-manual` analyzer path with
      `MDT_OBSERVER_TOOL=codex`
-   - Installed into `<project>/.agents/scripts/codex-observer.js`
+   - Installed into `<project>/.codex/scripts/codex-observer.js`
    - Covered by `tests/scripts/codex-observer.test.js`
 
 ### How the skill install layers work (important context)
@@ -100,11 +100,11 @@ node scripts/install-mdt.js --target codex --project-dir <path-to-a-project> typ
 ```
 
 This will:
-- Install skills into `<project>/.agents/skills/`: coding-standards, documentation-steward,
+- Install skills into `<project>/.codex/skills/`: coding-standards, documentation-steward,
   tool-setup-verifier, continuous-learning-manual
-- Install runtime scripts into `<project>/.agents/scripts/`
+- Install runtime scripts into `<project>/.codex/scripts/`
 - Install `codex-observer.js`, `smoke-tool-setups.js`, and `smoke-codex-workflows.js`
-  into `<project>/.agents/scripts/`
+  into `<project>/.codex/scripts/`
 
 For a global Codex install, use:
 ```

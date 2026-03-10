@@ -13,7 +13,7 @@ This supplements the root `AGENTS.md` with Codex-specific guidance.
 
 ## Skills Discovery
 
-Skills are auto-loaded from `.agents/skills/`. Each skill contains:
+Skills are auto-loaded from `.codex/skills/`. Each skill contains:
 - `SKILL.md` — Detailed instructions and workflow
 - `agents/openai.yaml` — Codex interface metadata
 
@@ -45,7 +45,7 @@ MDT does not enable any Codex MCP servers by default.
 |---------|------------|-----------|
 | Hooks | 8+ event types | Not yet supported |
 | Context file | CLAUDE.md + AGENTS.md | AGENTS.md only |
-| Skills | Skills loaded via plugin | `.agents/skills/` directory |
+| Skills | Skills loaded via plugin | `.codex/skills/` directory |
 | Commands | `/slash` commands | Instruction-based |
 | Agents | Subagent Task tool | Single agent model |
 | Security | Hook-based enforcement | Instruction + sandbox |

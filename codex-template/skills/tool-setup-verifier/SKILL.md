@@ -38,17 +38,17 @@ the machine-readable enforcement surface.
 
 Use this when the current repo only has installed Codex assets such as:
 
-- `.agents/skills/`
-- `.agents/scripts/`
-- optional project `.codex/`
+- `.codex/skills/`
+- `.codex/scripts/`
+- project `.codex/`
 
 and does **not** have the full MDT docs pack at repo root.
 
 In that mode:
 
-1. read `.agents/skills/tool-setup-verifier/SKILL.md`
-2. read `.agents/scripts/lib/tool-workflow-contract.js`
-3. treat `~/.codex/` plus the local `.agents/` tree as the install surface
+1. read `.codex/skills/tool-setup-verifier/SKILL.md`
+2. read `.codex/scripts/lib/tool-workflow-contract.js`
+3. treat `~/.codex/` plus the local `.codex/` tree as the install surface
 4. do **not** fail just because `docs/tools/*` or `scripts/verify-tool-setups.js`
    are absent at repo root
 
@@ -64,8 +64,8 @@ In that mode:
 
 ### Installed target repo mode
 
-1. Run `node .agents/scripts/smoke-tool-setups.js`.
-2. Run `node .agents/scripts/smoke-codex-workflows.js`.
+1. Run `node .codex/scripts/smoke-tool-setups.js`.
+2. Run `node .codex/scripts/smoke-codex-workflows.js`.
 3. Summarize Codex readiness from the installed project/user surfaces only.
 4. If something fails, identify the missing installed skill, missing local script,
    or missing `~/.codex/` file before proposing broader changes.

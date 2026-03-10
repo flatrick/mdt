@@ -47,11 +47,11 @@ function createFixtureRoot() {
     ].join('\n')
   );
 
-  writeFile(rootDir, path.join('.agents', 'skills', 'tdd-workflow', 'SKILL.md'), '# Test-Driven Development Workflow');
-  writeFile(rootDir, path.join('.agents', 'skills', 'coding-standards', 'SKILL.md'), '# Universal coding standards');
-  writeFile(rootDir, path.join('.agents', 'skills', 'verification-loop', 'SKILL.md'), '# Verification Loop Skill');
-  writeFile(rootDir, path.join('.agents', 'skills', 'security-review', 'SKILL.md'), '# Security Review Skill');
-  writeFile(rootDir, path.join('.agents', 'skills', 'e2e-testing', 'SKILL.md'), '# E2E Testing Patterns');
+  writeFile(rootDir, path.join('codex-template', 'skills', 'tdd-workflow', 'SKILL.md'), '# Test-Driven Development Workflow');
+  writeFile(rootDir, path.join('codex-template', 'skills', 'coding-standards', 'SKILL.md'), '# Universal coding standards');
+  writeFile(rootDir, path.join('codex-template', 'skills', 'verification-loop', 'SKILL.md'), '# Verification Loop Skill');
+  writeFile(rootDir, path.join('codex-template', 'skills', 'security-review', 'SKILL.md'), '# Security Review Skill');
+  writeFile(rootDir, path.join('codex-template', 'skills', 'e2e-testing', 'SKILL.md'), '# E2E Testing Patterns');
   writeFile(rootDir, path.join('codex-template', 'skills', 'tool-setup-verifier', 'SKILL.md'), '# Tool Setup Verifier');
   writeFile(rootDir, path.join('docs', 'testing', 'manual-verification', 'codex.md'), '# Codex Manual Verification');
 
@@ -60,10 +60,8 @@ function createFixtureRoot() {
 
 function createInstalledFixtureRoot() {
   const rootDir = createTestDir('codex-installed-workflow-');
-  const fakeHome = createTestDir('codex-installed-home-');
-
   writeFile(
-    fakeHome,
+    rootDir,
     path.join('.codex', 'AGENTS.md'),
     [
       '# Codex',
@@ -75,7 +73,7 @@ function createInstalledFixtureRoot() {
   );
 
   writeFile(
-    fakeHome,
+    rootDir,
     path.join('.codex', 'config.toml'),
     [
       'approval_policy = "on-request"',
@@ -83,16 +81,16 @@ function createInstalledFixtureRoot() {
     ].join('\n')
   );
 
-  writeFile(rootDir, path.join('.agents', 'skills', 'tool-setup-verifier', 'SKILL.md'), '# Tool Setup Verifier');
-  writeFile(rootDir, path.join('.agents', 'skills', 'tdd-workflow', 'SKILL.md'), '# Test-Driven Development Workflow');
-  writeFile(rootDir, path.join('.agents', 'skills', 'coding-standards', 'SKILL.md'), '# Universal coding standards');
-  writeFile(rootDir, path.join('.agents', 'skills', 'verification-loop', 'SKILL.md'), '# Verification Loop Skill');
-  writeFile(rootDir, path.join('.agents', 'skills', 'security-review', 'SKILL.md'), '# Security Review Skill');
-  writeFile(rootDir, path.join('.agents', 'skills', 'e2e-testing', 'SKILL.md'), '# E2E Testing Patterns');
-  writeFile(rootDir, path.join('.agents', 'scripts', 'smoke-tool-setups.js'), '// smoke');
-  writeFile(rootDir, path.join('.agents', 'scripts', 'smoke-codex-workflows.js'), '// smoke');
+  writeFile(rootDir, path.join('.codex', 'skills', 'tool-setup-verifier', 'SKILL.md'), '# Tool Setup Verifier');
+  writeFile(rootDir, path.join('.codex', 'skills', 'tdd-workflow', 'SKILL.md'), '# Test-Driven Development Workflow');
+  writeFile(rootDir, path.join('.codex', 'skills', 'coding-standards', 'SKILL.md'), '# Universal coding standards');
+  writeFile(rootDir, path.join('.codex', 'skills', 'verification-loop', 'SKILL.md'), '# Verification Loop Skill');
+  writeFile(rootDir, path.join('.codex', 'skills', 'security-review', 'SKILL.md'), '# Security Review Skill');
+  writeFile(rootDir, path.join('.codex', 'skills', 'e2e-testing', 'SKILL.md'), '# E2E Testing Patterns');
+  writeFile(rootDir, path.join('.codex', 'scripts', 'smoke-tool-setups.js'), '// smoke');
+  writeFile(rootDir, path.join('.codex', 'scripts', 'smoke-codex-workflows.js'), '// smoke');
 
-  return { rootDir, fakeHome };
+  return { rootDir };
 }
 
 function runTests() {
@@ -122,7 +120,7 @@ function runTests() {
     const rootDir = createFixtureRoot();
 
     try {
-      fs.rmSync(path.join(rootDir, '.agents', 'skills', 'tdd-workflow', 'SKILL.md'));
+      fs.rmSync(path.join(rootDir, 'codex-template', 'skills', 'tdd-workflow', 'SKILL.md'));
       const output = [];
       const result = smokeCodexWorkflows({
         rootDir,
@@ -133,7 +131,7 @@ function runTests() {
 
       assert.strictEqual(result.exitCode, 1, 'Expected missing TDD skill to fail');
       assert.ok(output.join('\n').includes('tdd: FAIL'));
-      assert.ok(output.join('\n').includes('.agents/skills/tdd-workflow/SKILL.md'));
+      assert.ok(output.join('\n').includes('codex-template/skills/tdd-workflow/SKILL.md'));
     } finally {
       cleanupTestDir(rootDir);
     }
@@ -210,14 +208,13 @@ function runTests() {
     }
   })) passed++; else failed++;
 
-  if (test('passes in installed target repo mode using project .agents and ~/.codex', () => {
-    const { rootDir, fakeHome } = createInstalledFixtureRoot();
+  if (test('passes in installed target repo mode using project .codex only', () => {
+    const { rootDir } = createInstalledFixtureRoot();
 
     try {
       const output = [];
       const result = smokeCodexWorkflows({
         rootDir,
-        homeDir: fakeHome,
         io: {
           log: message => output.push(String(message))
         }
@@ -230,7 +227,6 @@ function runTests() {
       assert.ok(output.join('\n').includes('verify: PASS'));
     } finally {
       cleanupTestDir(rootDir);
-      cleanupTestDir(fakeHome);
     }
   })) passed++; else failed++;
 

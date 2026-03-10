@@ -20,12 +20,12 @@ async function runTests() {
   let passed = 0;
   let failed = 0;
 
-  if (test('buildCodexObserverEnv defaults to repo-local .agents and .codex directories', () => {
+  if (test('buildCodexObserverEnv defaults to repo-local .codex directories', () => {
     const testCwd = path.resolve(path.sep, 'tmp', 'demo-project');
     const env = buildCodexObserverEnv({}, { cwd: testCwd });
     assert.strictEqual(env.CODEX_AGENT, '1');
     assert.strictEqual(env.MDT_OBSERVER_TOOL, 'codex');
-    assert.strictEqual(env.CONFIG_DIR, path.join(testCwd, '.agents'));
+    assert.strictEqual(env.CONFIG_DIR, path.join(testCwd, '.codex'));
     assert.strictEqual(env.DATA_DIR, path.join(testCwd, '.codex'));
   })) passed++; else failed++;
 

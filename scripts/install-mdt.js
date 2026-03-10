@@ -16,7 +16,7 @@
  * Targets:
  *   claude (default) — Install to ./.claude/ or ~/.claude/ with --global
  *   cursor           — Install to ./.cursor/ or ~/.cursor/ with --global
- *   codex            — Install to ./.agents/ (or ~/.codex/ with --global)
+ *   codex            — Install to ./.codex/ (or ~/.codex/ with --global)
  */
 
 const fs = require('fs');
@@ -405,18 +405,21 @@ function buildCodexInstallPlan(lines, globalScope, selectedPackages, projectDir,
     ];
   }
 
-  const projectAgentsDir = path.join(projectDir, '.agents');
+  const projectCodexDir = path.join(projectDir, '.codex');
   const codexScripts = getToolManifestSelections(selectedPackages, 'codex', 'scripts');
   return [
     ...lines,
     `[dry-run] Packages: ${packages}`,
     `[dry-run] Project directory: ${projectDir}`,
-    `[dry-run] Would install Codex project skills to ${path.join(projectAgentsDir, 'skills')}`,
-    `[dry-run] Would install Codex runtime scripts to ${path.join(projectAgentsDir, 'scripts')}`,
-    '[dry-run] Would materialize package-selected Codex skills from codex-template/skills into .agents/skills/',
-    ...(devMode ? [`[dry-run] Would install Codex dev smoke workflow scripts to ${path.join(projectAgentsDir, 'scripts')}`] : []),
+    `[dry-run] Would install Codex project config to ${path.join(projectCodexDir, 'config.toml')}`,
+    `[dry-run] Would install Codex project AGENTS.md to ${path.join(projectCodexDir, 'AGENTS.md')}`,
+    `[dry-run] Would install Codex project rules to ${path.join(projectCodexDir, 'rules')}`,
+    `[dry-run] Would install Codex project skills to ${path.join(projectCodexDir, 'skills')}`,
+    `[dry-run] Would install Codex runtime scripts to ${path.join(projectCodexDir, 'scripts')}`,
+    '[dry-run] Would materialize package-selected Codex skills from codex-template/skills into .codex/skills/',
+    ...(devMode ? [`[dry-run] Would install Codex dev smoke workflow scripts to ${path.join(projectCodexDir, 'scripts')}`] : []),
     ...(codexScripts.length > 0
-      ? [`[dry-run] Would install package-selected Codex workflow scripts to ${path.join(projectAgentsDir, 'scripts')}`]
+      ? [`[dry-run] Would install package-selected Codex workflow scripts to ${path.join(projectCodexDir, 'scripts')}`]
       : [])
   ];
 }
@@ -542,7 +545,7 @@ function usage(target) {
   console.error('Targets:');
   console.error('  claude (default) — Install to ./.claude/ (or ~/.claude/ with --global)');
   console.error('  cursor           — Install to ./.cursor/ (or ~/.cursor/ with --global)');
-  console.error('  codex            — Install to ./.agents/ (or ~/.codex/ with --global)');
+  console.error('  codex            — Install to ./.codex/ (or ~/.codex/ with --global)');
   console.error('  gemini           — Install Antigravity/Gemini CLI configs to .agent/ and .gemini/ (or ~/.gemini... with --global)');
   console.error('');
   console.error('Options:');
@@ -1011,14 +1014,14 @@ function installCodexSkills(selectedPackages, destDir, devMode = false) {
   }
 }
 
-function installCodexRuntimeScripts(projectAgentsDir) {
-  const scriptsDest = path.join(projectAgentsDir, 'scripts');
+function installCodexRuntimeScripts(projectCodexDir) {
+  const scriptsDest = path.join(projectCodexDir, 'scripts');
   console.log('Installing Codex runtime scripts -> ' + scriptsDest + '/');
   copyRuntimeScripts(scriptsDest);
 }
 
-function installCodexWorkflowScripts(projectAgentsDir, selectedPackages, devMode = false) {
-  const scriptsDest = path.join(projectAgentsDir, 'scripts');
+function installCodexWorkflowScripts(projectCodexDir, selectedPackages, devMode = false) {
+  const scriptsDest = path.join(projectCodexDir, 'scripts');
   const baselineWorkflowScripts = devMode ? ['smoke-tool-setups.js', 'smoke-codex-workflows.js'] : [];
   const optionalWorkflowScripts = getToolManifestSelections(selectedPackages, 'codex', 'scripts');
   const workflowScripts = mergeUniqueOrdered(baselineWorkflowScripts, optionalWorkflowScripts);
@@ -1064,12 +1067,27 @@ function installCodexGlobal(selectedPackages) {
 }
 
 function installCodexProject(selectedPackages, projectDir, devMode) {
-  const projectAgentsDir = path.join(projectDir, '.agents');
-  console.log('Installing Codex project files to ' + projectAgentsDir + '/');
-  installCodexSkills(selectedPackages, projectAgentsDir, devMode);
-  installCodexRuntimeScripts(projectAgentsDir);
-  installCodexWorkflowScripts(projectAgentsDir, selectedPackages, devMode);
-  console.log('Done. Codex project files installed to ' + projectAgentsDir + '/');
+  const projectCodexDir = path.join(projectDir, '.codex');
+  console.log('Installing Codex project files to ' + projectCodexDir + '/');
+  fs.mkdirSync(projectCodexDir, { recursive: true });
+
+  const configSrc = path.join(CODEX_SRC, 'config.toml');
+  if (fs.existsSync(configSrc)) {
+    fs.copyFileSync(configSrc, path.join(projectCodexDir, 'config.toml'));
+    console.log('Installing Codex project config -> ' + path.join(projectCodexDir, 'config.toml'));
+  }
+
+  const agentsMdSrc = path.join(CODEX_SRC, 'AGENTS.md');
+  if (fs.existsSync(agentsMdSrc)) {
+    fs.copyFileSync(agentsMdSrc, path.join(projectCodexDir, 'AGENTS.md'));
+    console.log('Installing Codex project AGENTS.md -> ' + path.join(projectCodexDir, 'AGENTS.md'));
+  }
+
+  installCodexRules(selectedPackages, projectCodexDir);
+  installCodexSkills(selectedPackages, projectCodexDir, devMode);
+  installCodexRuntimeScripts(projectCodexDir);
+  installCodexWorkflowScripts(projectCodexDir, selectedPackages, devMode);
+  console.log('Done. Codex project files installed to ' + projectCodexDir + '/');
 }
 
 function installCodex(packageNames, globalScope, projectDir, devMode) {

@@ -32,7 +32,7 @@ Desired target surfaces:
 | --- | --- | --- | --- |
 | Claude Code | `~/.claude/` | `.claude/` | stable primary reference implementation |
 | Cursor | `~/.cursor/` where supported | `.cursor/` | stable package-driven install with clear experimental/runtime boundaries |
-| Codex | `~/.codex/` | `.agents/` plus project `.codex/` runtime state | stable package-driven install with native Codex workflow mapping |
+| Codex | `~/.codex/` | project `.codex/` | stable package-driven install with native Codex workflow mapping |
 | Gemini | `~/.gemini/` | `.agent/` and `.gemini/` | supported adapter with explicit limitations |
 
 ## Documentation Target State
@@ -81,7 +81,7 @@ Desired state:
 
 - package-driven installs are first-class
 - Codex uses native guidance, skills, and local scripts instead of fake markdown command clones
-- project-local runtime state under `.codex/` is explicit and documented
+- project-local Codex install and runtime state under `.codex/` is explicit and documented
 - continuous-learning works natively for Codex without Claude or Cursor dependencies
 
 ### OpenCode

@@ -8,7 +8,7 @@ real local Codex session.
 Codex does not use the same markdown command surface as Claude Code or Cursor.
 For Codex, the smoke path is:
 
-- the `tool-setup-verifier` skill under `.agents/skills/` when the target repo
+- the `tool-setup-verifier` skill under `.codex/skills/` when the target repo
   was installed with `--dev`
 - the local smoke scripts for the current repo mode:
   - MDT repo mode:
@@ -16,8 +16,8 @@ For Codex, the smoke path is:
     - `node scripts/smoke-tool-setups.js`
     - `node scripts/smoke-codex-workflows.js`
   - installed target repo mode with `--dev`:
-    - `node .agents/scripts/smoke-tool-setups.js`
-    - `node .agents/scripts/smoke-codex-workflows.js`
+    - `node .codex/scripts/smoke-tool-setups.js`
+    - `node .codex/scripts/smoke-codex-workflows.js`
 
 Expected:
 - in MDT repo mode, `verify-tool-setups.js` passes
@@ -41,10 +41,10 @@ node scripts/install-mdt.js --target codex --project-dir ../scratch-repo typescr
 
 Then confirm:
 
-- `.agents/skills/` contains the selected Codex skills
-- `.agents/scripts/lib/` exists for MDT runtime helpers
-- if you installed with `--dev`, `.agents/skills/tool-setup-verifier/` and
-  `.agents/skills/tool-doc-maintainer/` exist
+- `.codex/skills/` contains the selected Codex skills
+- `.codex/scripts/lib/` exists for MDT runtime helpers
+- if you installed with `--dev`, `.codex/skills/tool-setup-verifier/` and
+  `.codex/skills/tool-doc-maintainer/` exist
 - if you did not install with `--dev`, those MDT-internal verifier/audit skills
   should be absent
 
@@ -76,7 +76,7 @@ Interpretation rule:
 1. Check status:
 
 ```bash
-node .agents/skills/continuous-learning-manual/scripts/codex-learn.js status
+node .codex/skills/continuous-learning-manual/scripts/codex-learn.js status
 ```
 
 Expected:
@@ -86,13 +86,13 @@ Expected:
 2. Capture a concise session summary:
 
 ```bash
-node .agents/skills/continuous-learning-manual/scripts/codex-learn.js capture < summary.txt
+node .codex/skills/continuous-learning-manual/scripts/codex-learn.js capture < summary.txt
 ```
 
 3. Run one explicit analysis pass:
 
 ```bash
-node .agents/skills/continuous-learning-manual/scripts/codex-learn.js analyze
+node .codex/skills/continuous-learning-manual/scripts/codex-learn.js analyze
 ```
 
 Expected:
@@ -105,7 +105,7 @@ Expected:
 4. Generate one weekly retrospective:
 
 ```bash
-node .agents/skills/continuous-learning-manual/scripts/codex-learn.js weekly --week 2026-W11
+node .codex/skills/continuous-learning-manual/scripts/codex-learn.js weekly --week 2026-W11
 ```
 
 Expected:
@@ -129,9 +129,9 @@ node scripts/install-mdt.js --target codex --project-dir <repo> continuous-learn
 Then use:
 
 ```bash
-node .agents/scripts/codex-observer.js status
-node .agents/scripts/codex-observer.js once
-node .agents/scripts/codex-observer.js watch --interval-seconds 15
+node .codex/scripts/codex-observer.js status
+node .codex/scripts/codex-observer.js once
+node .codex/scripts/codex-observer.js watch --interval-seconds 15
 ```
 
 Use it when:

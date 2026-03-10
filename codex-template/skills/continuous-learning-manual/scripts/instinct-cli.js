@@ -22,6 +22,10 @@ function resolveProjectRoot() {
   ];
 
   for (const candidate of candidates) {
+    const baseName = path.basename(candidate).toLowerCase();
+    if (baseName === '.codex' || baseName === '.cursor' || baseName === '.claude' || baseName === '.agents') {
+      continue;
+    }
     if (
       fs.existsSync(path.join(candidate, '.git')) ||
       fs.existsSync(path.join(candidate, 'package.json')) ||
@@ -37,8 +41,8 @@ function resolveProjectRoot() {
 function buildCodexEnv(env = process.env) {
   const projectRoot = resolveProjectRoot();
   const nextEnv = { ...env };
-  const configDir = nextEnv.CONFIG_DIR || path.join(projectRoot, '.agents');
-  const dataDir = nextEnv.DATA_DIR || path.join(projectRoot, '.codex');
+  const configDir = nextEnv.CONFIG_DIR || path.join(projectRoot, '.codex');
+  const dataDir = nextEnv.DATA_DIR || configDir;
   fs.mkdirSync(dataDir, { recursive: true });
 
   nextEnv.CODEX_AGENT = '1';

@@ -23,7 +23,7 @@ ways due to differences in their native surface areas.
 |---|---|---|---|---|
 | Project guidance | `CLAUDE.md` + settings | `.cursor/rules/` + `AGENTS.md` | `AGENTS.md` + `.rules` | `instructions` in config |
 | Rules (file-based) | `~/.claude/rules/` (user+project) | `.cursor/rules/` (project only; user=DB) | `.rules` files in config layers | `instructions` entries |
-| Skills | native `SKILL.md` | native `SKILL.md` | native `.agents/skills/` | via `instructions` pointing at `SKILL.md` |
+| Skills | native `SKILL.md` | native `SKILL.md` | native `.codex/skills/` | via `instructions` pointing at `SKILL.md` |
 | Slash commands | native markdown commands | native custom commands | built-in session commands only | native `command` entries |
 | Subagents | native | custom modes + background agents | `AGENTS.md`; multi-agent=experimental | native `agent` config |
 | Event hooks | native (6 lifecycle types) | **experimental** (MDT adapter) | **unsupported** | native plugins/tools |
@@ -189,10 +189,10 @@ this.
 
 Manual fallback (already exists):
 ```bash
-node .agents/skills/continuous-learning-manual/scripts/codex-learn.js status
-node .agents/skills/continuous-learning-manual/scripts/codex-learn.js capture < summary.txt
-node .agents/skills/continuous-learning-manual/scripts/codex-learn.js analyze
-node .agents/skills/continuous-learning-manual/scripts/codex-learn.js weekly --week YYYY-Www
+node .codex/skills/continuous-learning-manual/scripts/codex-learn.js status
+node .codex/skills/continuous-learning-manual/scripts/codex-learn.js capture < summary.txt
+node .codex/skills/continuous-learning-manual/scripts/codex-learn.js analyze
+node .codex/skills/continuous-learning-manual/scripts/codex-learn.js weekly --week YYYY-Www
 ```
 
 **Effort**: Medium

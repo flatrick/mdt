@@ -14,7 +14,29 @@ const fs = require('fs');
 const path = require('path');
 
 const skillRoot = path.join(__dirname, '..');
-const projectRoot = path.join(skillRoot, '..', '..', '..');
+function resolveProjectRoot() {
+  const candidates = [
+    path.resolve(skillRoot, '..', '..', '..'),
+    path.resolve(skillRoot, '..', '..')
+  ];
+
+  for (const candidate of candidates) {
+    const baseName = path.basename(candidate).toLowerCase();
+    if (baseName === '.codex' || baseName === '.cursor' || baseName === '.claude' || baseName === '.agents') {
+      continue;
+    }
+    if (
+      fs.existsSync(path.join(candidate, '.git')) ||
+      fs.existsSync(path.join(candidate, 'package.json')) ||
+      fs.existsSync(path.join(candidate, 'AGENTS.md'))
+    ) {
+      return candidate;
+    }
+  }
+
+  return candidates[0];
+}
+const projectRoot = resolveProjectRoot();
 const { detectProject } = require(path.join(__dirname, 'detect-project.js'));
 const { analyzeObservations, loadObserverConfig } = require(path.join(skillRoot, 'agents', 'start-observer.js'));
 
@@ -29,8 +51,8 @@ function loadStdin() {
 
 function buildCodexEnv(env = process.env) {
   const nextEnv = { ...env };
-  const configDir = nextEnv.CONFIG_DIR || path.join(projectRoot, '.agents');
-  const dataDir = nextEnv.DATA_DIR || path.join(projectRoot, '.codex');
+  const configDir = nextEnv.CONFIG_DIR || path.join(projectRoot, '.codex');
+  const dataDir = nextEnv.DATA_DIR || configDir;
   fs.mkdirSync(dataDir, { recursive: true });
 
   nextEnv.CODEX_AGENT = '1';

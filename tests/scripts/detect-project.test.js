@@ -41,9 +41,9 @@ function runTests() {
   if (test('inferInstalledConfigDir detects installed Codex config roots', () => {
     const tempDir = createTestDir('detect-project-installed-');
     try {
-      const scriptDir = path.join(tempDir, '.agents', 'skills', 'continuous-learning-manual', 'scripts');
+      const scriptDir = path.join(tempDir, '.codex', 'skills', 'continuous-learning-manual', 'scripts');
       fs.mkdirSync(scriptDir, { recursive: true });
-      assert.strictEqual(inferInstalledConfigDir(scriptDir), path.join(tempDir, '.agents'));
+      assert.strictEqual(inferInstalledConfigDir(scriptDir), path.join(tempDir, '.codex'));
     } finally {
       cleanupTestDir(tempDir);
     }
@@ -67,12 +67,11 @@ function runTests() {
     try {
       const repoRoot = path.join(tempDir, 'repo');
       fs.mkdirSync(path.join(repoRoot, '.git'), { recursive: true });
-      fs.mkdirSync(path.join(repoRoot, '.agents'), { recursive: true });
       fs.mkdirSync(path.join(repoRoot, '.codex'), { recursive: true });
 
       const project = withEnv({
         MDT_PROJECT_ROOT: repoRoot,
-        CONFIG_DIR: path.join(repoRoot, '.agents'),
+        CONFIG_DIR: path.join(repoRoot, '.codex'),
         DATA_DIR: path.join(repoRoot, '.codex'),
         CODEX_AGENT: '1',
         CLAUDE_PROJECT_DIR: undefined
@@ -93,12 +92,11 @@ function runTests() {
       const repoRoot = path.join(tempDir, 'repo');
       const nested = path.join(repoRoot, 'app', 'src');
       fs.mkdirSync(path.join(repoRoot, '.git'), { recursive: true });
-      fs.mkdirSync(path.join(repoRoot, '.agents'), { recursive: true });
       fs.mkdirSync(path.join(repoRoot, '.codex'), { recursive: true });
       fs.mkdirSync(nested, { recursive: true });
 
       const project = withEnv({
-        CONFIG_DIR: path.join(repoRoot, '.agents'),
+        CONFIG_DIR: path.join(repoRoot, '.codex'),
         DATA_DIR: path.join(repoRoot, '.codex'),
         CODEX_AGENT: '1',
         MDT_PROJECT_ROOT: undefined,

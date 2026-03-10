@@ -168,19 +168,19 @@ Codex does not rely on Claude/Cursor hook capture in this repo.
 Use the explicit project-local workflow instead:
 
 ```bash
-node .agents/skills/continuous-learning-manual/scripts/codex-learn.js status
+node .codex/skills/continuous-learning-manual/scripts/codex-learn.js status
 ```
 
 Then have Codex produce a concise session summary and capture it:
 
 ```bash
-node .agents/skills/continuous-learning-manual/scripts/codex-learn.js capture < summary.txt
+node .codex/skills/continuous-learning-manual/scripts/codex-learn.js capture < summary.txt
 ```
 
 Finally run one explicit analysis pass:
 
 ```bash
-node .agents/skills/continuous-learning-manual/scripts/codex-learn.js analyze
+node .codex/skills/continuous-learning-manual/scripts/codex-learn.js analyze
 ```
 
 This writes Codex project learning state under `.codex/homunculus/...`.

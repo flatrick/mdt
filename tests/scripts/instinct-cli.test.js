@@ -37,12 +37,12 @@ function runTests() {
     const tempDir = createTestDir('instinct-cli-codex-');
     try {
       fs.mkdirSync(path.join(tempDir, '.git'), { recursive: true });
-      fs.mkdirSync(path.join(tempDir, '.agents', 'skills', 'continuous-learning-manual', 'scripts'), { recursive: true });
+      fs.mkdirSync(path.join(tempDir, '.codex', 'skills', 'continuous-learning-manual', 'scripts'), { recursive: true });
       fs.mkdirSync(path.join(tempDir, '.codex'), { recursive: true });
-      fs.mkdirSync(path.join(tempDir, '.agents', 'scripts', 'lib'), { recursive: true });
+      fs.mkdirSync(path.join(tempDir, '.codex', 'scripts', 'lib'), { recursive: true });
 
-      const modulePath = path.join(tempDir, '.agents', 'skills', 'continuous-learning-manual', 'scripts', 'instinct-cli.js');
-      const detectProjectPath = path.join(tempDir, '.agents', 'skills', 'continuous-learning-manual', 'scripts', 'detect-project.js');
+      const modulePath = path.join(tempDir, '.codex', 'skills', 'continuous-learning-manual', 'scripts', 'instinct-cli.js');
+      const detectProjectPath = path.join(tempDir, '.codex', 'skills', 'continuous-learning-manual', 'scripts', 'detect-project.js');
       fs.copyFileSync(
         path.join(__dirname, '..', '..', 'skills', 'continuous-learning-manual', 'scripts', 'instinct-cli.js'),
         modulePath
@@ -53,7 +53,7 @@ function runTests() {
       );
       fs.copyFileSync(
         path.join(__dirname, '..', '..', 'scripts', 'lib', 'detect-env.js'),
-        path.join(tempDir, '.agents', 'scripts', 'lib', 'detect-env.js')
+        path.join(tempDir, '.codex', 'scripts', 'lib', 'detect-env.js')
       );
 
       const cli = withEnv({

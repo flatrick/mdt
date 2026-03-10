@@ -14,7 +14,7 @@ Local version seen:
 
 - layered `AGENTS.md`
 - rule files under Codex config layers
-- skills under `.agents/skills` and user/system skill locations
+- skills under project `.codex/skills` and user/system skill locations
 - built-in slash commands for session control
 - optional MCP from CLI/config
 - app automations
@@ -26,7 +26,7 @@ Local version seen:
 |---|---|---|
 | Rules / reusable guidance | `.rules` files under Codex rule layers | official |
 | Project guidance | layered `AGENTS.md` | official |
-| Skills / reusable workflows | `.agents/skills` plus user/system skill locations | official |
+| Skills / reusable workflows | project `.codex/skills` plus user/system skill locations | official |
 | Repo-defined workflow commands | not a Claude-style markdown command surface; use skills and local scripts for smoke-style workflow checks | repo-adapter |
 | Built-in slash commands | session-control slash commands such as `/permissions`, `/agent`, `/status`, `/model` | official |
 | Agents / delegation | `AGENTS.md` is official; local feature flags show `multi_agent` and `child_agents_md` as non-stable | `official` plus `experimental` |
@@ -47,12 +47,12 @@ Codex install scope follows the shared MDT contract:
 
 - no `--global` => do not touch `~`
 - `--global` => user/global install is the intended target
-- `--project-dir <repo>` => project-local `.agents/` install is the intended target
+- `--project-dir <repo>` => project-local `.codex/` install is the intended target
 
 That means Codex installs are not implicitly two-layer anymore:
 
 - user layer: `~/.codex/` only when `--global` is explicit
-- project layer: `.agents/skills/` plus `.agents/scripts/` when `--project-dir` is used
+- project layer: `.codex/skills/`, `.codex/scripts/`, and `.codex/rules/` when `--project-dir` is used
 
 Codex global-config policy:
 
@@ -62,7 +62,7 @@ Codex global-config policy:
   as a reference file instead of overwriting local Codex settings
 - repo guidance belongs in `AGENTS.md`, not in `config.toml`
 
-For Codex, `codex-template/` is the install-source tree. `.agents/skills/` is the
+For Codex, `codex-template/` is the install-source tree. `.codex/` is the
 materialized project-facing surface after install.
 
 Important implication:
@@ -95,8 +95,8 @@ Rule files use the Codex rules language and can be tested with Codex policy tool
 ### Skills
 
 Official docs describe skill discovery in:
-- repository `.agents/skills`
-- user `~/.agents/skills`
+- repository `.codex/skills`
+- user `~/.codex/skills`
 - admin/system skill locations
 
 Optional UI metadata can live in:
@@ -118,11 +118,11 @@ Smoke paths:
   - `node scripts/smoke-tool-setups.js`
   - `node scripts/smoke-codex-workflows.js`
 - installed target repo mode with `--dev`:
-  - `node .agents/scripts/smoke-tool-setups.js`
-  - `node .agents/scripts/smoke-codex-workflows.js`
+  - `node .codex/scripts/smoke-tool-setups.js`
+  - `node .codex/scripts/smoke-codex-workflows.js`
 
 For package-driven Codex installs, the installer materializes selected skills
-from `codex-template/skills/` into `.agents/skills/`.
+from `codex-template/skills/` into `.codex/skills/`.
 
 Normal Codex installs keep the general `documentation-steward` skill but do not
 ship MDT-internal verifier/audit skills by default. Use `--dev` when you want
@@ -140,10 +140,10 @@ For `continuous-learning`, Codex currently uses an explicit manual workflow
 instead of hooks:
 
 ```bash
-node .agents/skills/continuous-learning-manual/scripts/codex-learn.js status
-node .agents/skills/continuous-learning-manual/scripts/codex-learn.js capture < summary.txt
-node .agents/skills/continuous-learning-manual/scripts/codex-learn.js analyze
-node .agents/skills/continuous-learning-manual/scripts/codex-learn.js weekly --week 2026-W11
+node .codex/skills/continuous-learning-manual/scripts/codex-learn.js status
+node .codex/skills/continuous-learning-manual/scripts/codex-learn.js capture < summary.txt
+node .codex/skills/continuous-learning-manual/scripts/codex-learn.js analyze
+node .codex/skills/continuous-learning-manual/scripts/codex-learn.js weekly --week 2026-W11
 ```
 
 That writes project-local learning state under `.codex/homunculus/`.
@@ -190,9 +190,9 @@ node scripts/install-mdt.js --target codex --project-dir ../scratch-repo continu
 Then use:
 
 ```bash
-node .agents/scripts/codex-observer.js status
-node .agents/scripts/codex-observer.js once
-node .agents/scripts/codex-observer.js watch --interval-seconds 15
+node .codex/scripts/codex-observer.js status
+node .codex/scripts/codex-observer.js once
+node .codex/scripts/codex-observer.js watch --interval-seconds 15
 ```
 
 That observer:

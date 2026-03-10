@@ -52,7 +52,7 @@ function runTests() {
   if (test('inferToolFromConfigDir maps tool config roots correctly', () => {
     assert.strictEqual(inferToolFromConfigDir('/tmp/project/.cursor'), 'cursor');
     assert.strictEqual(inferToolFromConfigDir('/tmp/project/.claude'), 'claude');
-    assert.strictEqual(inferToolFromConfigDir('/tmp/project/.agents'), 'codex');
+    assert.strictEqual(inferToolFromConfigDir('/tmp/project/.codex'), 'codex');
     assert.strictEqual(inferToolFromConfigDir('/tmp/project/.unknown'), 'unknown');
   })) passed++; else failed++;
 
@@ -73,11 +73,11 @@ function runTests() {
   if (test('inferInstalledConfigDir detects installed project-local Codex config roots', () => {
     const tempDir = createTestDir('observer-installed-codex-config-');
     try {
-      const skillDir = path.join(tempDir, '.agents', 'skills', 'continuous-learning-manual');
+      const skillDir = path.join(tempDir, '.codex', 'skills', 'continuous-learning-manual');
       fs.mkdirSync(skillDir, { recursive: true });
       assert.strictEqual(
         inferInstalledConfigDir(skillDir),
-        path.join(tempDir, '.agents')
+        path.join(tempDir, '.codex')
       );
     } finally {
       cleanupTestDir(tempDir);

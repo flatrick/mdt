@@ -7,7 +7,7 @@ const { summarizeTool } = require('./smoke-tool-setups');
 
 function resolveWorkspaceRoot(scriptDir) {
   const installedRepoRoot = path.join(scriptDir, '..', '..');
-  if (fs.existsSync(path.join(installedRepoRoot, '.agents'))) {
+  if (fs.existsSync(path.join(installedRepoRoot, '.codex'))) {
     return installedRepoRoot;
   }
   return path.join(scriptDir, '..');
@@ -83,8 +83,8 @@ function buildTddChecks(files) {
         message: 'Codex AGENTS should advertise the tdd-workflow skill'
       },
       {
-        path: '.agents/skills/tdd-workflow/SKILL.md',
-        ok: files['.agents/skills/tdd-workflow/SKILL.md'].exists && files['.agents/skills/tdd-workflow/SKILL.md'].content.includes('Test-Driven Development Workflow'),
+        path: 'codex-template/skills/tdd-workflow/SKILL.md',
+        ok: files['codex-template/skills/tdd-workflow/SKILL.md'].exists && files['codex-template/skills/tdd-workflow/SKILL.md'].content.includes('Test-Driven Development Workflow'),
         message: 'Codex TDD skill should exist and describe the workflow'
       },
       {
@@ -109,8 +109,8 @@ function buildVerifyChecks(files) {
         message: 'Codex AGENTS should advertise the verification-loop skill'
       },
       {
-        path: '.agents/skills/verification-loop/SKILL.md',
-        ok: files['.agents/skills/verification-loop/SKILL.md'].exists && files['.agents/skills/verification-loop/SKILL.md'].content.includes('Verification Loop Skill'),
+        path: 'codex-template/skills/verification-loop/SKILL.md',
+        ok: files['codex-template/skills/verification-loop/SKILL.md'].exists && files['codex-template/skills/verification-loop/SKILL.md'].content.includes('Verification Loop Skill'),
         message: 'Codex verification skill should exist and describe the verification loop'
       },
       {
@@ -136,10 +136,10 @@ function buildCodeReviewChecks(files) {
         message: 'Codex AGENTS should recommend the higher-reasoning review path for complex changes'
       },
       {
-        path: '.agents/skills/coding-standards/SKILL.md',
+        path: 'codex-template/skills/coding-standards/SKILL.md',
         ok:
-          files['.agents/skills/coding-standards/SKILL.md'].exists &&
-          files['.agents/skills/coding-standards/SKILL.md'].content.includes('Universal coding standards'),
+          files['codex-template/skills/coding-standards/SKILL.md'].exists &&
+          files['codex-template/skills/coding-standards/SKILL.md'].content.includes('Universal coding standards'),
         message: 'Codex coding-standards skill should exist to support review-quality guidance'
       }
     ]
@@ -158,10 +158,10 @@ function buildSecurityChecks(files) {
         message: 'Codex AGENTS should advertise the security-review skill'
       },
       {
-        path: '.agents/skills/security-review/SKILL.md',
+        path: 'codex-template/skills/security-review/SKILL.md',
         ok:
-          files['.agents/skills/security-review/SKILL.md'].exists &&
-          files['.agents/skills/security-review/SKILL.md'].content.includes('Security Review Skill'),
+          files['codex-template/skills/security-review/SKILL.md'].exists &&
+          files['codex-template/skills/security-review/SKILL.md'].content.includes('Security Review Skill'),
         message: 'Codex security-review skill should exist and describe the security review workflow'
       },
       {
@@ -187,10 +187,10 @@ function buildE2eChecks(files) {
         message: 'Codex AGENTS should advertise the e2e-testing skill'
       },
       {
-        path: '.agents/skills/e2e-testing/SKILL.md',
+        path: 'codex-template/skills/e2e-testing/SKILL.md',
         ok:
-          files['.agents/skills/e2e-testing/SKILL.md'].exists &&
-          files['.agents/skills/e2e-testing/SKILL.md'].content.includes('E2E Testing Patterns'),
+          files['codex-template/skills/e2e-testing/SKILL.md'].exists &&
+          files['codex-template/skills/e2e-testing/SKILL.md'].content.includes('E2E Testing Patterns'),
         message: 'Codex e2e-testing skill should exist and describe the E2E testing patterns'
       }
     ]
@@ -253,16 +253,16 @@ function buildInstalledPlanChecks(files) {
     workflow: 'plan',
     checks: [
       {
-        path: '~/.codex/AGENTS.md',
+        path: '.codex/AGENTS.md',
         ok:
-          files['~/.codex/AGENTS.md'].exists &&
-          files['~/.codex/AGENTS.md'].content.includes('Complex features, architecture'),
-        message: 'Codex global AGENTS should recommend the planning model path for complex work'
+          files['.codex/AGENTS.md'].exists &&
+          files['.codex/AGENTS.md'].content.includes('Complex features, architecture'),
+        message: 'Codex project AGENTS should recommend the planning model path for complex work'
       },
       {
-        path: '~/.codex/config.toml',
-        ok: files['~/.codex/config.toml'].exists,
-        message: 'Codex global config.toml should be installed'
+        path: '.codex/config.toml',
+        ok: files['.codex/config.toml'].exists,
+        message: 'Codex project config.toml should be installed'
       }
     ]
   };
@@ -273,13 +273,13 @@ function buildInstalledTddChecks(files) {
     workflow: 'tdd',
     checks: [
       {
-        path: '~/.codex/AGENTS.md',
-        ok: files['~/.codex/AGENTS.md'].exists && files['~/.codex/AGENTS.md'].content.includes('tdd-workflow'),
-        message: 'Codex global AGENTS should advertise the tdd-workflow skill'
+        path: '.codex/AGENTS.md',
+        ok: files['.codex/AGENTS.md'].exists && files['.codex/AGENTS.md'].content.includes('tdd-workflow'),
+        message: 'Codex project AGENTS should advertise the tdd-workflow skill'
       },
       {
-        path: '.agents/skills/tdd-workflow/SKILL.md',
-        ok: files['.agents/skills/tdd-workflow/SKILL.md'].exists && files['.agents/skills/tdd-workflow/SKILL.md'].content.includes('Test-Driven Development Workflow'),
+        path: '.codex/skills/tdd-workflow/SKILL.md',
+        ok: files['.codex/skills/tdd-workflow/SKILL.md'].exists && files['.codex/skills/tdd-workflow/SKILL.md'].content.includes('Test-Driven Development Workflow'),
         message: 'Installed Codex TDD skill should exist and describe the workflow'
       }
     ]
@@ -291,21 +291,21 @@ function buildInstalledVerifyChecks(files) {
     workflow: 'verify',
     checks: [
       {
-        path: '~/.codex/AGENTS.md',
-        ok: files['~/.codex/AGENTS.md'].exists && files['~/.codex/AGENTS.md'].content.includes('verification-loop'),
-        message: 'Codex global AGENTS should advertise the verification-loop skill'
+        path: '.codex/AGENTS.md',
+        ok: files['.codex/AGENTS.md'].exists && files['.codex/AGENTS.md'].content.includes('verification-loop'),
+        message: 'Codex project AGENTS should advertise the verification-loop skill'
       },
       {
-        path: '.agents/skills/verification-loop/SKILL.md',
-        ok: files['.agents/skills/verification-loop/SKILL.md'].exists && files['.agents/skills/verification-loop/SKILL.md'].content.includes('Verification Loop Skill'),
+        path: '.codex/skills/verification-loop/SKILL.md',
+        ok: files['.codex/skills/verification-loop/SKILL.md'].exists && files['.codex/skills/verification-loop/SKILL.md'].content.includes('Verification Loop Skill'),
         message: 'Installed Codex verification skill should exist and describe the verification loop'
       },
       {
-        path: '~/.codex/config.toml',
+        path: '.codex/config.toml',
         ok:
-          files['~/.codex/config.toml'].exists &&
-          files['~/.codex/config.toml'].content.includes('sandbox_mode = "workspace-write"'),
-        message: 'Codex global config should provide the expected verification sandbox defaults'
+          files['.codex/config.toml'].exists &&
+          files['.codex/config.toml'].content.includes('sandbox_mode = "workspace-write"'),
+        message: 'Codex project config should provide the expected verification sandbox defaults'
       }
     ]
   };
@@ -316,17 +316,17 @@ function buildInstalledCodeReviewChecks(files) {
     workflow: 'code-review',
     checks: [
       {
-        path: '~/.codex/AGENTS.md',
+        path: '.codex/AGENTS.md',
         ok:
-          files['~/.codex/AGENTS.md'].exists &&
-          files['~/.codex/AGENTS.md'].content.includes('Complex features, architecture'),
-        message: 'Codex global AGENTS should recommend the higher-reasoning review path for complex changes'
+          files['.codex/AGENTS.md'].exists &&
+          files['.codex/AGENTS.md'].content.includes('Complex features, architecture'),
+        message: 'Codex project AGENTS should recommend the higher-reasoning review path for complex changes'
       },
       {
-        path: '.agents/skills/coding-standards/SKILL.md',
+        path: '.codex/skills/coding-standards/SKILL.md',
         ok:
-          files['.agents/skills/coding-standards/SKILL.md'].exists &&
-          files['.agents/skills/coding-standards/SKILL.md'].content.includes('Universal coding standards'),
+          files['.codex/skills/coding-standards/SKILL.md'].exists &&
+          files['.codex/skills/coding-standards/SKILL.md'].content.includes('Universal coding standards'),
         message: 'Installed Codex coding-standards skill should exist to support review-quality guidance'
       }
     ]
@@ -338,13 +338,13 @@ function buildInstalledSecurityChecks(files) {
     workflow: 'security',
     checks: [
       {
-        path: '~/.codex/AGENTS.md',
-        ok: files['~/.codex/AGENTS.md'].exists && files['~/.codex/AGENTS.md'].content.includes('security-review'),
-        message: 'Codex global AGENTS should advertise the security-review skill'
+        path: '.codex/AGENTS.md',
+        ok: files['.codex/AGENTS.md'].exists && files['.codex/AGENTS.md'].content.includes('security-review'),
+        message: 'Codex project AGENTS should advertise the security-review skill'
       },
       {
-        path: '.agents/skills/security-review/SKILL.md',
-        ok: files['.agents/skills/security-review/SKILL.md'].exists && files['.agents/skills/security-review/SKILL.md'].content.includes('Security Review Skill'),
+        path: '.codex/skills/security-review/SKILL.md',
+        ok: files['.codex/skills/security-review/SKILL.md'].exists && files['.codex/skills/security-review/SKILL.md'].content.includes('Security Review Skill'),
         message: 'Installed Codex security-review skill should exist and describe the security workflow'
       }
     ]
@@ -356,8 +356,8 @@ function buildInstalledE2eChecks(files) {
     workflow: 'e2e',
     checks: [
       {
-        path: '.agents/skills/e2e-testing/SKILL.md',
-        ok: files['.agents/skills/e2e-testing/SKILL.md'].exists && files['.agents/skills/e2e-testing/SKILL.md'].content.includes('E2E Testing Patterns'),
+        path: '.codex/skills/e2e-testing/SKILL.md',
+        ok: files['.codex/skills/e2e-testing/SKILL.md'].exists && files['.codex/skills/e2e-testing/SKILL.md'].content.includes('E2E Testing Patterns'),
         message: 'Installed Codex e2e-testing skill should exist and describe the E2E testing patterns'
       }
     ]
@@ -369,18 +369,18 @@ function buildInstalledSmokeChecks(files) {
     workflow: 'smoke',
     checks: [
       {
-        path: '.agents/skills/tool-setup-verifier/SKILL.md',
-        ok: files['.agents/skills/tool-setup-verifier/SKILL.md'].exists,
+        path: '.codex/skills/tool-setup-verifier/SKILL.md',
+        ok: files['.codex/skills/tool-setup-verifier/SKILL.md'].exists,
         message: 'Installed Codex smoke verifier skill should exist'
       },
       {
-        path: '.agents/scripts/smoke-tool-setups.js',
-        ok: files['.agents/scripts/smoke-tool-setups.js'].exists,
+        path: '.codex/scripts/smoke-tool-setups.js',
+        ok: files['.codex/scripts/smoke-tool-setups.js'].exists,
         message: 'Installed Codex smoke CLI probe script should exist'
       },
       {
-        path: '.agents/scripts/smoke-codex-workflows.js',
-        ok: files['.agents/scripts/smoke-codex-workflows.js'].exists,
+        path: '.codex/scripts/smoke-codex-workflows.js',
+        ok: files['.codex/scripts/smoke-codex-workflows.js'].exists,
         message: 'Installed Codex workflow smoke script should exist'
       }
     ]
@@ -403,34 +403,34 @@ function smokeCodexWorkflows(options = {}) {
   const rootDir = options.rootDir || resolveWorkspaceRoot(__dirname);
   const io = options.io || console;
   const installedRepoMode = !fs.existsSync(path.join(rootDir, 'codex-template', 'AGENTS.md'))
-    && fs.existsSync(path.join(rootDir, '.agents', 'skills'));
+    && fs.existsSync(path.join(rootDir, '.codex', 'skills'));
   const files = installedRepoMode
     ? {
-        '~/.codex/AGENTS.md': readUserCodexFile('AGENTS.md', options.homeDir),
-        '~/.codex/config.toml': readUserCodexFile('config.toml', options.homeDir),
-        '.agents/skills/tool-setup-verifier/SKILL.md': readRepoFile(
+        '.codex/AGENTS.md': readRepoFile(rootDir, path.join('.codex', 'AGENTS.md')),
+        '.codex/config.toml': readRepoFile(rootDir, path.join('.codex', 'config.toml')),
+        '.codex/skills/tool-setup-verifier/SKILL.md': readRepoFile(
           rootDir,
-          path.join('.agents', 'skills', 'tool-setup-verifier', 'SKILL.md')
+          path.join('.codex', 'skills', 'tool-setup-verifier', 'SKILL.md')
         ),
-        '.agents/skills/tdd-workflow/SKILL.md': readRepoFile(rootDir, path.join('.agents', 'skills', 'tdd-workflow', 'SKILL.md')),
-        '.agents/skills/coding-standards/SKILL.md': readRepoFile(
+        '.codex/skills/tdd-workflow/SKILL.md': readRepoFile(rootDir, path.join('.codex', 'skills', 'tdd-workflow', 'SKILL.md')),
+        '.codex/skills/coding-standards/SKILL.md': readRepoFile(
           rootDir,
-          path.join('.agents', 'skills', 'coding-standards', 'SKILL.md')
+          path.join('.codex', 'skills', 'coding-standards', 'SKILL.md')
         ),
-        '.agents/skills/verification-loop/SKILL.md': readRepoFile(
+        '.codex/skills/verification-loop/SKILL.md': readRepoFile(
           rootDir,
-          path.join('.agents', 'skills', 'verification-loop', 'SKILL.md')
+          path.join('.codex', 'skills', 'verification-loop', 'SKILL.md')
         ),
-        '.agents/skills/security-review/SKILL.md': readRepoFile(
+        '.codex/skills/security-review/SKILL.md': readRepoFile(
           rootDir,
-          path.join('.agents', 'skills', 'security-review', 'SKILL.md')
+          path.join('.codex', 'skills', 'security-review', 'SKILL.md')
         ),
-        '.agents/skills/e2e-testing/SKILL.md': readRepoFile(
+        '.codex/skills/e2e-testing/SKILL.md': readRepoFile(
           rootDir,
-          path.join('.agents', 'skills', 'e2e-testing', 'SKILL.md')
+          path.join('.codex', 'skills', 'e2e-testing', 'SKILL.md')
         ),
-        '.agents/scripts/smoke-tool-setups.js': readRepoFile(rootDir, path.join('.agents', 'scripts', 'smoke-tool-setups.js')),
-        '.agents/scripts/smoke-codex-workflows.js': readRepoFile(rootDir, path.join('.agents', 'scripts', 'smoke-codex-workflows.js'))
+        '.codex/scripts/smoke-tool-setups.js': readRepoFile(rootDir, path.join('.codex', 'scripts', 'smoke-tool-setups.js')),
+        '.codex/scripts/smoke-codex-workflows.js': readRepoFile(rootDir, path.join('.codex', 'scripts', 'smoke-codex-workflows.js'))
       }
     : {
         'AGENTS.md': readRepoFile(rootDir, 'AGENTS.md'),
@@ -444,22 +444,22 @@ function smokeCodexWorkflows(options = {}) {
           rootDir,
           path.join('docs', 'testing', 'manual-verification', 'codex.md')
         ),
-        '.agents/skills/tdd-workflow/SKILL.md': readRepoFile(rootDir, path.join('.agents', 'skills', 'tdd-workflow', 'SKILL.md')),
-        '.agents/skills/coding-standards/SKILL.md': readRepoFile(
+        'codex-template/skills/tdd-workflow/SKILL.md': readRepoFile(rootDir, path.join('codex-template', 'skills', 'tdd-workflow', 'SKILL.md')),
+        'codex-template/skills/coding-standards/SKILL.md': readRepoFile(
           rootDir,
-          path.join('.agents', 'skills', 'coding-standards', 'SKILL.md')
+          path.join('codex-template', 'skills', 'coding-standards', 'SKILL.md')
         ),
-        '.agents/skills/verification-loop/SKILL.md': readRepoFile(
+        'codex-template/skills/verification-loop/SKILL.md': readRepoFile(
           rootDir,
-          path.join('.agents', 'skills', 'verification-loop', 'SKILL.md')
+          path.join('codex-template', 'skills', 'verification-loop', 'SKILL.md')
         ),
-        '.agents/skills/security-review/SKILL.md': readRepoFile(
+        'codex-template/skills/security-review/SKILL.md': readRepoFile(
           rootDir,
-          path.join('.agents', 'skills', 'security-review', 'SKILL.md')
+          path.join('codex-template', 'skills', 'security-review', 'SKILL.md')
         ),
-        '.agents/skills/e2e-testing/SKILL.md': readRepoFile(
+        'codex-template/skills/e2e-testing/SKILL.md': readRepoFile(
           rootDir,
-          path.join('.agents', 'skills', 'e2e-testing', 'SKILL.md')
+          path.join('codex-template', 'skills', 'e2e-testing', 'SKILL.md')
         )
       };
 

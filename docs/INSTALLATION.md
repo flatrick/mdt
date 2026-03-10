@@ -45,7 +45,7 @@ touch user-global config just because a tool happens to support a user layer.
 | --- | --- | --- | --- |
 | `claude` | `~/.claude/` with `--global` | `.claude/` by default | installs rules, agents, commands, skills, hooks, and runtime scripts |
 | `cursor` | `~/.cursor/` with `--global` | `.cursor/` by default | global rules are not file-installable; project install is the primary mode |
-| `codex` | `~/.codex/` with `--global` | `.agents/skills/` and `.agents/scripts/` in the target repo | package-driven; use `--project-dir` for clean external repo installs |
+| `codex` | `~/.codex/` with `--global` | `.codex/skills/`, `.codex/scripts/`, and `.codex/rules/` in the target repo | package-driven; use `--project-dir` for clean external repo installs |
 | `gemini` | `~/.gemini/` with `--global` | `.agent/` and `.gemini/` by default | uses Gemini/Antigravity-specific layout |
 
 ## Examples

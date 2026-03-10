@@ -66,7 +66,7 @@ present at repo root, use the installed local copies instead:
 
 - Claude Code: `.claude/scripts/ci/`
 - Cursor: `.cursor/scripts/ci/`
-- Codex: `.agents/scripts/ci/`
+- Codex: `.codex/scripts/ci/`
 
 Treat these validator checks as baseline gates, not optional extras.
 

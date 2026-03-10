@@ -78,10 +78,10 @@ function buildCodexObserverEnv(env = process.env, options = {}) {
   const nextEnv = { ...env };
 
   if (!nextEnv.CONFIG_DIR || !String(nextEnv.CONFIG_DIR).trim()) {
-    nextEnv.CONFIG_DIR = path.join(cwd, '.agents');
+    nextEnv.CONFIG_DIR = path.join(cwd, '.codex');
   }
   if (!nextEnv.DATA_DIR || !String(nextEnv.DATA_DIR).trim()) {
-    nextEnv.DATA_DIR = path.join(cwd, '.codex');
+    nextEnv.DATA_DIR = nextEnv.CONFIG_DIR;
   }
 
   nextEnv.CODEX_AGENT = '1';

@@ -42,7 +42,7 @@ function inferInstalledConfigDir(scriptDir = __dirname) {
 
   for (const candidate of candidates) {
     const baseName = path.basename(candidate).toLowerCase();
-    if ((baseName === '.cursor' || baseName === '.claude' || baseName === '.agents') && fs.existsSync(candidate)) {
+    if ((baseName === '.cursor' || baseName === '.claude' || baseName === '.codex') && fs.existsSync(candidate)) {
       return candidate;
     }
   }
@@ -64,7 +64,7 @@ function getPathSet() {
     if (inferredTool === '.claude' && !env.CLAUDE_CODE) {
       env.CLAUDE_CODE = '1';
     }
-    if (inferredTool === '.agents' && !env.CODEX_AGENT) {
+    if (inferredTool === '.codex' && !env.CODEX_AGENT) {
       env.CODEX_AGENT = '1';
     }
   }

@@ -288,10 +288,10 @@ Codex currently uses an explicit workflow instead of hooks. In a Codex-installed
 repo, the main entrypoint is:
 
 ```bash
-node .agents/skills/continuous-learning-manual/scripts/codex-learn.js status
-node .agents/skills/continuous-learning-manual/scripts/codex-learn.js capture < summary.txt
-node .agents/skills/continuous-learning-manual/scripts/codex-learn.js analyze
-node .agents/skills/continuous-learning-manual/scripts/codex-learn.js weekly --week 2026-W11
+node .codex/skills/continuous-learning-manual/scripts/codex-learn.js status
+node .codex/skills/continuous-learning-manual/scripts/codex-learn.js capture < summary.txt
+node .codex/skills/continuous-learning-manual/scripts/codex-learn.js analyze
+node .codex/skills/continuous-learning-manual/scripts/codex-learn.js weekly --week 2026-W11
 ```
 
 The weekly retrospective is intentionally manual-first. It reads the current

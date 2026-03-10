@@ -481,7 +481,7 @@ function runTests() {
       }
     },
       {
-      name: 'codex project install copies selected project skills and runtime scripts only',
+      name: 'codex project install copies selected project files into .codex only',
         run: () => {
         const tmpHome = createTestDir('mdt-install-codex-home-');
         const tmpProject = createTestDir('mdt-install-codex-proj-');
@@ -505,25 +505,28 @@ function runTests() {
           assertSuccess(result, 'codex install');
 
           const codexRoot = path.join(tmpHome, '.codex');
-          const projectAgentsRoot = path.join(tmpProject, '.agents');
+          const projectCodexRoot = path.join(tmpProject, '.codex');
 
           assert.ok(!fs.existsSync(codexRoot), 'project-only Codex install must not touch ~/.codex');
-          assert.ok(fs.existsSync(path.join(projectAgentsRoot, 'skills', 'coding-standards', 'SKILL.md')));
-          assert.ok(fs.existsSync(path.join(projectAgentsRoot, 'skills', 'documentation-steward', 'SKILL.md')));
-          assert.ok(!fs.existsSync(path.join(projectAgentsRoot, 'skills', 'tool-setup-verifier', 'SKILL.md')));
-          assert.ok(!fs.existsSync(path.join(projectAgentsRoot, 'skills', 'tool-doc-maintainer', 'SKILL.md')));
-          assert.ok(fs.existsSync(path.join(projectAgentsRoot, 'skills', 'continuous-learning-manual', 'SKILL.md')));
-          assert.ok(fs.existsSync(path.join(projectAgentsRoot, 'scripts', 'lib', 'detect-env.js')));
-          assert.ok(fs.existsSync(path.join(projectAgentsRoot, 'scripts', 'ci', 'validate-markdown-links.js')));
-          assert.ok(fs.existsSync(path.join(projectAgentsRoot, 'scripts', 'ci', 'validate-markdown-path-refs.js')));
-          assert.ok(!fs.existsSync(path.join(projectAgentsRoot, 'scripts', 'smoke-tool-setups.js')));
-          assert.ok(!fs.existsSync(path.join(projectAgentsRoot, 'scripts', 'smoke-codex-workflows.js')));
-          assert.ok(!fs.existsSync(path.join(projectAgentsRoot, 'scripts', 'codex-observer.js')));
-          assert.ok(!fs.existsSync(path.join(projectAgentsRoot, 'skills', 'python-patterns', 'SKILL.md')));
+          assert.ok(fs.existsSync(path.join(projectCodexRoot, 'config.toml')));
+          assert.ok(fs.existsSync(path.join(projectCodexRoot, 'AGENTS.md')));
+          assert.ok(fs.existsSync(path.join(projectCodexRoot, 'rules', 'common-coding-style.md')));
+          assert.ok(fs.existsSync(path.join(projectCodexRoot, 'skills', 'coding-standards', 'SKILL.md')));
+          assert.ok(fs.existsSync(path.join(projectCodexRoot, 'skills', 'documentation-steward', 'SKILL.md')));
+          assert.ok(!fs.existsSync(path.join(projectCodexRoot, 'skills', 'tool-setup-verifier', 'SKILL.md')));
+          assert.ok(!fs.existsSync(path.join(projectCodexRoot, 'skills', 'tool-doc-maintainer', 'SKILL.md')));
+          assert.ok(fs.existsSync(path.join(projectCodexRoot, 'skills', 'continuous-learning-manual', 'SKILL.md')));
+          assert.ok(fs.existsSync(path.join(projectCodexRoot, 'scripts', 'lib', 'detect-env.js')));
+          assert.ok(fs.existsSync(path.join(projectCodexRoot, 'scripts', 'ci', 'validate-markdown-links.js')));
+          assert.ok(fs.existsSync(path.join(projectCodexRoot, 'scripts', 'ci', 'validate-markdown-path-refs.js')));
+          assert.ok(!fs.existsSync(path.join(projectCodexRoot, 'scripts', 'smoke-tool-setups.js')));
+          assert.ok(!fs.existsSync(path.join(projectCodexRoot, 'scripts', 'smoke-codex-workflows.js')));
+          assert.ok(!fs.existsSync(path.join(projectCodexRoot, 'scripts', 'codex-observer.js')));
+          assert.ok(!fs.existsSync(path.join(projectCodexRoot, 'skills', 'python-patterns', 'SKILL.md')));
 
           const learnStatus = spawnSync(
             'node',
-            [path.join(projectAgentsRoot, 'skills', 'continuous-learning-manual', 'scripts', 'codex-learn.js'), 'status'],
+            [path.join(projectCodexRoot, 'skills', 'continuous-learning-manual', 'scripts', 'codex-learn.js'), 'status'],
             {
               encoding: 'utf8',
               cwd: tmpProject,
@@ -541,7 +544,7 @@ function runTests() {
 
           const instinctStatus = spawnSync(
             'node',
-            [path.join(projectAgentsRoot, 'skills', 'continuous-learning-manual', 'scripts', 'instinct-cli.js'), 'status'],
+            [path.join(projectCodexRoot, 'skills', 'continuous-learning-manual', 'scripts', 'instinct-cli.js'), 'status'],
             {
               encoding: 'utf8',
               cwd: tmpProject,
@@ -563,7 +566,7 @@ function runTests() {
         }
       },
       {
-        name: 'codex project install with --dev copies verifier and dev smoke scripts only then',
+      name: 'codex project install with --dev copies verifier and dev smoke scripts into .codex only',
         run: () => {
           const tmpHome = createTestDir('mdt-install-codex-dev-home-');
           const tmpProject = createTestDir('mdt-install-codex-dev-proj-');
@@ -586,11 +589,11 @@ function runTests() {
             });
             assertSuccess(result, 'codex dev install');
 
-            const projectAgentsRoot = path.join(tmpProject, '.agents');
-            assert.ok(fs.existsSync(path.join(projectAgentsRoot, 'skills', 'tool-setup-verifier', 'SKILL.md')));
-            assert.ok(fs.existsSync(path.join(projectAgentsRoot, 'skills', 'tool-doc-maintainer', 'SKILL.md')));
-            assert.ok(fs.existsSync(path.join(projectAgentsRoot, 'scripts', 'smoke-tool-setups.js')));
-            assert.ok(fs.existsSync(path.join(projectAgentsRoot, 'scripts', 'smoke-codex-workflows.js')));
+            const projectCodexRoot = path.join(tmpProject, '.codex');
+            assert.ok(fs.existsSync(path.join(projectCodexRoot, 'skills', 'tool-setup-verifier', 'SKILL.md')));
+            assert.ok(fs.existsSync(path.join(projectCodexRoot, 'skills', 'tool-doc-maintainer', 'SKILL.md')));
+            assert.ok(fs.existsSync(path.join(projectCodexRoot, 'scripts', 'smoke-tool-setups.js')));
+            assert.ok(fs.existsSync(path.join(projectCodexRoot, 'scripts', 'smoke-codex-workflows.js')));
           } finally {
             cleanupTestDir(tmpHome);
             cleanupTestDir(tmpProject);
@@ -625,9 +628,9 @@ function runTests() {
 
             assert.strictEqual(result.status, 0, `install should succeed\nstdout:\n${result.stdout}\nstderr:\n${result.stderr}`);
 
-            const projectAgentsRoot = path.join(tmpProject, '.agents');
-            assert.ok(fs.existsSync(path.join(projectAgentsRoot, 'scripts', 'codex-observer.js')));
-            assert.ok(fs.existsSync(path.join(projectAgentsRoot, 'skills', 'continuous-learning-manual', 'SKILL.md')));
+            const projectCodexRoot = path.join(tmpProject, '.codex');
+            assert.ok(fs.existsSync(path.join(projectCodexRoot, 'scripts', 'codex-observer.js')));
+            assert.ok(fs.existsSync(path.join(projectCodexRoot, 'skills', 'continuous-learning-manual', 'SKILL.md')));
           } finally {
             cleanupTestDir(tmpHome);
             cleanupTestDir(tmpProject);
@@ -675,7 +678,7 @@ function runTests() {
           assert.ok(fs.existsSync(path.join(codexRoot, 'rules', 'common-testing.md')));
           assert.ok(fs.existsSync(path.join(codexRoot, 'rules', 'common-security.md')));
           assert.ok(fs.existsSync(path.join(codexRoot, 'rules', 'common-git-workflow.md')));
-          assert.ok(!fs.existsSync(path.join(tmpProject, '.agents')), 'global-only Codex install must not touch project .agents');
+          assert.ok(!fs.existsSync(path.join(tmpProject, '.codex')), 'global-only Codex install must not touch project .codex');
         } finally {
           cleanupTestDir(tmpHome);
           cleanupTestDir(tmpProject);

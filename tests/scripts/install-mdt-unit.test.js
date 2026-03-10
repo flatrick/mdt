@@ -67,7 +67,7 @@ function runTests() {
     const plan = buildInstallPlan({ target: 'codex', globalScope: false, projectDir: process.cwd(), packageNames: ['typescript', 'continuous-learning'] });
     assert.ok(plan.some((line) => line.includes('[dry-run] Target: codex')));
     assert.ok(plan.some((line) => line.includes('Packages: typescript, continuous-learning')));
-    assert.ok(plan.some((line) => line.includes('.agents')));
+    assert.ok(plan.some((line) => line.includes('.codex')));
     assert.ok(!plan.some((line) => line.includes(path.join(os.homedir(), '.codex'))));
   })) passed++; else failed++;
 
@@ -75,7 +75,7 @@ function runTests() {
     const plan = buildInstallPlan({ target: 'codex', globalScope: true, projectDir: process.cwd(), packageNames: ['typescript'] });
     assert.ok(plan.some((line) => line.includes('[dry-run] Target: codex (global)')));
     assert.ok(plan.some((line) => line.includes(path.join(os.homedir(), '.codex'))));
-    assert.ok(!plan.some((line) => line.includes('.agents')));
+    assert.ok(!plan.some((line) => line.includes(path.join(process.cwd(), '.codex'))));
   })) passed++; else failed++;
 
   if (test('buildInstallPlan uses explicit project dir for project-level targets', () => {
