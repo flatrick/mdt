@@ -986,14 +986,40 @@ function installCursorCoreDirs(destDir, selectedPackages, devMode = false) {
 
   installCursorSkills(destDir, selectedPackages);
 
-  const commandsSrc = path.join(CURSOR_SRC, 'commands');
   const commandsDest = path.join(destDir, 'commands');
+  const sharedCommandsSrc = path.join(REPO_ROOT, 'commands');
+  if (fs.existsSync(sharedCommandsSrc)) {
+    const sharedCommandFiles = getManifestSelections(selectedPackages, 'commands');
+    if (copySelectedMarkdownFiles(sharedCommandsSrc, commandsDest, sharedCommandFiles, 'Package-selected command') > 0) {
+      console.log('Installing package-selected commands -> ' + commandsDest + '/');
+    }
+  }
+
+  const commandsSrc = path.join(CURSOR_SRC, 'commands');
   if (fs.existsSync(commandsSrc)) {
-    const cursorCommandFiles = getToolManifestSelections(selectedPackages, 'cursor', 'commands');
-    if (cursorCommandFiles.length > 0) {
-      if (copySelectedMarkdownFiles(commandsSrc, commandsDest, cursorCommandFiles, 'Cursor package-selected command') > 0) {
-        console.log('Installing Cursor package commands -> ' + commandsDest + '/');
+    let copiedCursorCommands = 0;
+    for (const selectedPackage of selectedPackages) {
+      const cursorCommands = Array.isArray(selectedPackage.tools.cursor?.commands)
+        ? selectedPackage.tools.cursor.commands
+        : [];
+
+      for (const commandFile of cursorCommands) {
+        const cursorCommandSrc = path.join(commandsSrc, commandFile);
+        const sharedCommandSrc = path.join(sharedCommandsSrc, commandFile);
+        const commandSrc = fs.existsSync(cursorCommandSrc) ? cursorCommandSrc : sharedCommandSrc;
+        const commandDest = path.join(commandsDest, commandFile);
+        if (!fs.existsSync(commandSrc)) {
+          console.error(`Warning: Cursor command '${commandFile}' for package '${selectedPackage.name}' does not exist, skipping.`);
+          continue;
+        }
+        fs.mkdirSync(path.dirname(commandDest), { recursive: true });
+        fs.copyFileSync(commandSrc, commandDest);
+        copiedCursorCommands++;
       }
+    }
+
+    if (copiedCursorCommands > 0) {
+      console.log('Installing Cursor package commands -> ' + commandsDest + '/');
     }
   }
 

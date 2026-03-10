@@ -35,6 +35,34 @@ Expected:
   exist but no continuous-learning activity has happened yet
 - it tells you what to test next if runtime behavior is not yet proven
 
+## Command Cache Troubleshooting
+
+If Cursor keeps behaving as though an old custom command definition still exists
+even after you update or remove files under:
+
+- project `.cursor/commands/`
+- user/global `~/.cursor/commands/`
+
+then check Cursor's workspace cache before assuming the installer is still wrong.
+
+Observed local evidence:
+- Cursor can retain stale command/retrieval state under
+  `C:\Users\<user>\AppData\Roaming\Cursor\User\workspaceStorage\...`
+- that cache may continue to surface older command behavior even when the live
+  `.cursor/commands/*.md` file on disk is already correct
+
+Recommended reset flow:
+1. Fully quit Cursor.
+2. Inspect or clear the relevant workspace directory under:
+   `C:\Users\<user>\AppData\Roaming\Cursor\User\workspaceStorage\`
+3. Reopen the repo in Cursor.
+4. Retry the command in a fresh Agent session.
+
+Use this when:
+- the on-disk `.cursor/commands/*.md` file is correct
+- `~/.cursor/commands/` no longer contains the old command
+- Cursor still behaves as if an older command definition exists
+
 ## Continuous Learning
 
 ### Observation Capture

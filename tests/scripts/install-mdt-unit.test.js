@@ -278,7 +278,16 @@ function runTests() {
     });
     assert.deepStrictEqual(manifest.tools.claude.skills, ['continuous-learning-automatic']);
     assert.deepStrictEqual(manifest.tools.cursor.skills, ['continuous-learning-automatic']);
-    assert.deepStrictEqual(manifest.tools.cursor.commands, ['docs-health.md', 'learn.md', 'skill-create.md']);
+    assert.deepStrictEqual(manifest.tools.cursor.commands, [
+      'docs-health.md',
+      'instinct-export.md',
+      'instinct-import.md',
+      'instinct-status.md',
+      'learn.md',
+      'projects.md',
+      'promote.md',
+      'skill-create.md'
+    ]);
   })) passed++; else failed++;
 
   if (test('loadPackageManifest loads codex observer package as separate opt-in layer', () => {
@@ -390,7 +399,12 @@ function runTests() {
       assert.ok(fs.existsSync(path.join(tempDir, 'skills', 'continuous-learning-automatic', 'SKILL.md')));
       assert.ok(!fs.existsSync(path.join(tempDir, 'skills', 'rust-patterns', 'SKILL.md')));
       assert.ok(fs.existsSync(path.join(tempDir, 'commands', 'docs-health.md')));
+      assert.ok(fs.existsSync(path.join(tempDir, 'commands', 'instinct-status.md')));
+      assert.ok(fs.existsSync(path.join(tempDir, 'commands', 'instinct-export.md')));
+      assert.ok(fs.existsSync(path.join(tempDir, 'commands', 'instinct-import.md')));
       assert.ok(fs.existsSync(path.join(tempDir, 'commands', 'plan.md')));
+      assert.ok(fs.existsSync(path.join(tempDir, 'commands', 'projects.md')));
+      assert.ok(fs.existsSync(path.join(tempDir, 'commands', 'promote.md')));
       assert.ok(fs.existsSync(path.join(tempDir, 'commands', 'smoke.md')));
       assert.ok(fs.existsSync(path.join(tempDir, 'skills', 'documentation-steward', 'SKILL.md')));
       assert.ok(fs.existsSync(path.join(tempDir, 'commands', 'learn.md')));

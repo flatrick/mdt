@@ -94,6 +94,7 @@ That makes Cursor a viable official target for planning, Q&A, MCP, and rule-gene
 - Skills are a first-class Cursor concept. Use `.cursor/skills/` with `SKILL.md` files — same format as Claude Code and Codex. Do not convert skills to rules when the skill format is the right fit.
 - Do not attempt to file-install user-level rules into `~/.cursor/rules/`. Cursor stores user rules in a database; only project-level rules (`.cursor/rules/`) are file-based and installable by MDT.
 - Do not force Claude hook semantics onto Cursor when rules, memories, background agents, or commands achieve the same MDT outcome more cleanly.
+- Do not assume live `.cursor/commands/*.md` files are the only source Cursor is consulting. Local troubleshooting showed Cursor can retain stale command/retrieval state under `AppData\\Roaming\\Cursor\\User\\workspaceStorage`, so command-path bugs should be checked against workspace cache as well as installed files.
 
 ## Hooks Adapter Scope and Opt-In
 

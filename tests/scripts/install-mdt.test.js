@@ -215,6 +215,26 @@ function runTests() {
             'Cursor install should copy the learn command template from cursor-template/commands for continuous-learning'
           );
           assert.ok(
+            fs.existsSync(path.join(commandsRoot, 'instinct-status.md')),
+            'Cursor install should copy the instinct-status command prompt from the shared commands set for continuous-learning'
+          );
+          assert.ok(
+            fs.existsSync(path.join(commandsRoot, 'instinct-export.md')),
+            'Cursor install should copy the instinct-export command prompt from the shared commands set for continuous-learning'
+          );
+          assert.ok(
+            fs.existsSync(path.join(commandsRoot, 'instinct-import.md')),
+            'Cursor install should copy the instinct-import command prompt from the shared commands set for continuous-learning'
+          );
+          assert.ok(
+            fs.existsSync(path.join(commandsRoot, 'projects.md')),
+            'Cursor install should copy the projects command prompt from the shared commands set for continuous-learning'
+          );
+          assert.ok(
+            fs.existsSync(path.join(commandsRoot, 'promote.md')),
+            'Cursor install should copy the promote command prompt from the shared commands set for continuous-learning'
+          );
+          assert.ok(
             fs.existsSync(path.join(commandsRoot, 'skill-create.md')),
             'Cursor install should copy the skill-create command prompt from cursor-template/commands for continuous-learning'
           );
@@ -224,6 +244,7 @@ function runTests() {
           const smokeCommand = fs.readFileSync(path.join(commandsRoot, 'smoke.md'), 'utf8');
           const verifyCommand = fs.readFileSync(path.join(commandsRoot, 'verify.md'), 'utf8');
           const learnCommand = fs.readFileSync(path.join(commandsRoot, 'learn.md'), 'utf8');
+          const instinctStatusCommand = fs.readFileSync(path.join(commandsRoot, 'instinct-status.md'), 'utf8');
 
           assert.ok(
             docsHealthCommand.includes('DOCS HEALTH: PASS|PARTIAL|FAIL'),
@@ -248,6 +269,22 @@ function runTests() {
           assert.ok(
             learnCommand.includes('Session Learning Summary'),
             'Cursor learn command should contain the reusable learning workflow'
+          );
+          assert.ok(
+            instinctStatusCommand.includes('node ".cursor/skills/continuous-learning-manual/scripts/instinct-cli.js" status'),
+            'Cursor instinct-status command should target the project-installed .cursor skill path'
+          );
+          assert.ok(
+            !instinctStatusCommand.includes('node "${MDT_ROOT}/skills/continuous-learning-manual/scripts/instinct-cli.js" status'),
+            'Cursor instinct-status command should not prefer MDT_ROOT/source-repo execution'
+          );
+          assert.ok(
+            instinctStatusCommand.includes('Do not fall back to:'),
+            'Cursor instinct-status command should explicitly forbid falling back to other tool paths'
+          );
+          assert.ok(
+            instinctStatusCommand.includes('~/.claude'),
+            'Cursor instinct-status command should explicitly forbid using Claude paths'
           );
 
           assert.ok(fs.existsSync(path.join(commandsRoot, 'e2e.md')), 'e2e command should be installed');

@@ -113,6 +113,45 @@ requested.
 
 ---
 
+## Cursor duplicate command-name precedence between `~/.cursor/` and project `.cursor/`
+
+**Status:** Open.
+
+**Observed behavior:**
+
+When the same command name exists in both:
+
+- `~/.cursor/commands/`
+- project `.cursor/commands/`
+
+Cursor slash-command selection appears to prefer the user/global copy, even when
+the project-local copy also exists and is visible when listing commands or
+opening files manually.
+
+**Why it matters:**
+
+MDT currently supports both user/global and project-local Cursor installs. If
+command names collide across those scopes, Cursor may hide the intended
+project-local behavior in the picker even though the project copy is present.
+
+**Potential follow-up options:**
+
+- avoid installing duplicate command names in both scopes
+- document Cursor precedence if it proves stable and unavoidable
+- introduce a naming convention such as `u-<name>` and `p-<name>` for
+  user/global vs project-local commands if Cursor cannot distinguish scopes
+  cleanly
+
+**Related troubleshooting note:**
+
+Cursor may also retain stale command/retrieval state under
+`AppData\Roaming\Cursor\User\workspaceStorage\...`, so command bugs should not
+be diagnosed from `.cursor/commands/` alone. If the on-disk command file is
+correct but Cursor still behaves as if an older command exists, clear the
+relevant workspace cache and retry in a fresh session before changing MDT.
+
+---
+
 ## Migrate Node runtime scripts to `.mjs` after v1.0.0 stabilization
 
 **Status:** Deferred until MDT is considered "gold" / ready for `v1.0.0`.

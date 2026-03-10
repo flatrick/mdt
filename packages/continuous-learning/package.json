@@ -49,7 +49,12 @@
       ],
       "commands": [
         "docs-health.md",
+        "instinct-export.md",
+        "instinct-import.md",
+        "instinct-status.md",
         "learn.md",
+        "projects.md",
+        "promote.md",
         "skill-create.md"
       ]
     }
