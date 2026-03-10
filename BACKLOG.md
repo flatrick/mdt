@@ -113,3 +113,32 @@ not silently install unrelated language skills when only `typescript` was
 requested.
 
 ---
+
+## Migrate Node runtime scripts to `.mjs` after v1.0.0 stabilization
+
+**Status:** Deferred until MDT is considered "gold" / ready for `v1.0.0`.
+
+Current MDT runtime scripts intentionally stay on `.js` because the repo still
+has a large CommonJS-based Node script surface shared across source, tests,
+installer mirrors, and installed tool runtime paths.
+
+**Planned timing:**
+
+- do not start a repo-wide `.mjs` migration before `v1.0.0`
+- only begin once MDT is stable enough that broad runtime churn will not hide
+  higher-priority product/workflow issues
+
+**Why defer it:**
+
+- the current benefit is mostly module-format explicitness, not urgent product value
+- the migration would touch source scripts, tests, installer behavior, docs, and
+  per-tool installed runtime copies
+- doing it too early would create avoidable churn while MDT is still stabilizing
+
+**When the time comes:**
+
+- treat it as a deliberate runtime policy change
+- plan it repo-wide rather than file-by-file
+- verify Claude, Cursor, Codex, and Gemini installed script behavior after the change
+
+---
