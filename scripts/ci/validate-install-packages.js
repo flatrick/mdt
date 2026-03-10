@@ -390,6 +390,20 @@ function validateInstallPackages(options = {}) {
             }
           }
         }
+
+        if (codex.scripts !== undefined) {
+          if (!isStringArray(codex.scripts)) {
+            io.error(`ERROR: ${packageName}/package.json - tools.codex.scripts must be an array of non-empty strings when provided`);
+            hasErrors = true;
+          } else {
+            for (const scriptName of codex.scripts) {
+              if (!fs.existsSync(path.join(REPO_ROOT, 'scripts', scriptName))) {
+                io.error(`ERROR: ${packageName}/package.json - missing Codex script reference: ${scriptName}`);
+                hasErrors = true;
+              }
+            }
+          }
+        }
       }
     }
 

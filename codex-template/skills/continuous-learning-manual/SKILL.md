@@ -1,6 +1,6 @@
 ---
 name: continuous-learning-manual
-description: Instinct-based learning system that observes sessions via hooks, creates atomic instincts with confidence scoring, and evolves them into skills/commands/agents. v2.1 adds project-scoped instincts to prevent cross-project contamination.
+description: Instinct-based learning system that turns explicit session summaries, optional tool observations, and retrospectives into reusable instincts, skills, commands, and agents. v2.1 adds project-scoped instincts to prevent cross-project contamination.
 version: 2.1.0
 ---
 
@@ -27,6 +27,7 @@ For Codex specifically:
 - do not assume Claude/Cursor-style hook automation exists
 - treat the optional external observer as a background analysis helper, not as
   full automatic capture parity
+- install the observer separately when wanted; it is not part of the Codex baseline
 
 ## What's New in v2.1
 
@@ -307,7 +308,7 @@ Edit `config.json` to control the background observer:
 
 All scripts are Node.js (`.js`); no shell or PowerShell variants. Same commands work on Windows, macOS, and Linux.
 
-The observer must use the active tool's native CLI. Cursor setups must not depend on the `claude` binary, and Claude setups must not depend on Cursor.
+The observer must use the active tool's native CLI. Cursor setups must not depend on the `claude` binary, Claude setups must not depend on Cursor, and Codex observer support is an explicit opt-in instead of a baseline install.
 
 Other behavior (observation capture, instinct thresholds, project scoping, promotion criteria) is configured via code defaults in `instinct-cli.js` and the observe hook script.
 

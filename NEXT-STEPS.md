@@ -229,8 +229,9 @@ Follow-ups for Codex should focus on:
 - deciding whether Codex gets real package-selected rule files under `codex-template/rules/`
 - reducing remaining source-layout drift between `codex-template/skills/` and the installed `.agents/skills/` tree materialized by the installer
 - keeping the `continuous-learning` package truthful for Codex so manual learning
-  stays the baseline and `continuous-learning-automatic` is not treated as a
-  Codex install surface
+  stays the baseline, `continuous-learning-automatic` is not treated as a
+  Codex install surface, and the optional observer remains a separate
+  `continuous-learning-observer` enhancement
 - deciding whether any Codex app automations are worth using after the explicit path has proven itself
 - expanding Codex workflow verification beyond smoke into richer manual verification
 - keeping project detection repo-scoped even when the active Codex shell blocks

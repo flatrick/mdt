@@ -98,7 +98,7 @@ Tips:
 - Run `/mcp` to see active servers and their context cost
 - Prefer CLI tools when available (`gh` instead of GitHub MCP, `aws` instead of AWS MCP)
 - Use `disabledMcpServers` in project config to disable servers per-project
-- The `memory` MCP server is configured by default but not used by any skill, agent, or hook — consider disabling it
+- Do not enable MCP servers by default unless a concrete workflow needs them
 
 ---
 

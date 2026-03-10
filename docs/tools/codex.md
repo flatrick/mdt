@@ -16,7 +16,7 @@ Local version seen:
 - rule files under Codex config layers
 - skills under `.agents/skills` and user/system skill locations
 - built-in slash commands for session control
-- MCP from CLI/config
+- optional MCP from CLI/config
 - app automations
 - experimental feature flags, including multi-agent related flags visible locally
 
@@ -32,7 +32,7 @@ Local version seen:
 | Agents / delegation | `AGENTS.md` is official; local feature flags show `multi_agent` and `child_agents_md` as non-stable | `official` plus `experimental` |
 | Event hooks | no Claude-style hooks surface verified | unsupported |
 | Automations | Codex app automations exist, but they are not the same as Claude hooks | official, separate concept |
-| MCP | `config.toml` plus `codex mcp` | official |
+| MCP | `config.toml` plus `codex mcp` | official, opt-in |
 
 ## What MDT Currently Ships
 
@@ -145,6 +145,8 @@ This is an intentional product choice, not a temporary documentation gap:
 - the baseline Codex contract is explicit/manual capture plus explicit/manual analysis
 - the optional external observer is only for background analysis after
   observations already exist
+- the observer is a separate opt-in install layer, not part of baseline
+  `continuous-learning`
 
 The weekly retrospective path is manual-first and writes one summary per ISO
 week under:
@@ -168,7 +170,14 @@ Important operational note:
   Codex CLI from inside that session
 
 Codex also has an optional external observer entrypoint for the cases where the
-active Codex shell cannot spawn `codex exec`:
+active Codex shell cannot spawn `codex exec`. Install it explicitly when
+needed:
+
+```bash
+node scripts/install-mdt.js --target codex --project-dir ../scratch-repo continuous-learning-observer
+```
+
+Then use:
 
 ```bash
 node .agents/scripts/codex-observer.js status
@@ -220,6 +229,9 @@ Look for:
 - `mcp` support in `codex --help`
 - `config.toml` references in help text
 - feature stages in `codex features list`
+
+MDT does not enable any Codex MCP servers by default. Treat MCP as an explicit
+opt-in layer when a concrete workflow needs it.
 
 ## Source Links
 

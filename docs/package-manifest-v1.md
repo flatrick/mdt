@@ -200,6 +200,7 @@ Current candidates:
 - `tools.cursor.rules`
 - `tools.cursor.skills`
 - `tools.codex.skills`
+- `tools.codex.scripts`
 - `tools.gemini.rules`
 
 Not yet justified:

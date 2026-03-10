@@ -33,7 +33,8 @@ Available skills:
 
 ## MCP Servers
 
-Configure in `~/.codex/config.toml` under `[mcp_servers]`. See `.codex/config.toml` for reference configuration with GitHub, Context7, Memory, and Sequential Thinking servers.
+Configure optional MCP servers in `~/.codex/config.toml` under `[mcp_servers]`.
+MDT does not enable any Codex MCP servers by default.
 
 ## Key Differences from Claude Code
 
@@ -45,7 +46,7 @@ Configure in `~/.codex/config.toml` under `[mcp_servers]`. See `.codex/config.to
 | Commands | `/slash` commands | Instruction-based |
 | Agents | Subagent Task tool | Single agent model |
 | Security | Hook-based enforcement | Instruction + sandbox |
-| MCP | Full support | Command-based only |
+| MCP | Full support | Official but opt-in |
 
 ## Security Without Hooks
 

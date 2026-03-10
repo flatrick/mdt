@@ -40,9 +40,7 @@ function createFixtureRoot() {
     path.join('codex-template', 'config.toml'),
     [
       'approval_policy = "on-request"',
-      'sandbox_mode = "workspace-write"',
-      '[mcp_servers.github]',
-      '[mcp_servers.sequential-thinking]'
+      'sandbox_mode = "workspace-write"'
     ].join('\n')
   );
 
@@ -74,9 +72,7 @@ function createInstalledFixtureRoot() {
     path.join('.codex', 'config.toml'),
     [
       'approval_policy = "on-request"',
-      'sandbox_mode = "workspace-write"',
-      '[mcp_servers.github]',
-      '[mcp_servers.sequential-thinking]'
+      'sandbox_mode = "workspace-write"'
     ].join('\n')
   );
 
@@ -135,7 +131,7 @@ function runTests() {
     }
   })) passed++; else failed++;
 
-  if (test('fails when Codex config loses verification scaffolding', () => {
+  if (test('fails when Codex config loses verification sandbox defaults', () => {
     const rootDir = createFixtureRoot();
 
     try {
@@ -153,7 +149,7 @@ function runTests() {
         }
       });
 
-      assert.strictEqual(result.exitCode, 1, 'Expected missing verification scaffolding to fail');
+      assert.strictEqual(result.exitCode, 1, 'Expected missing verification sandbox defaults to fail');
       assert.ok(output.join('\n').includes('verify: FAIL'));
       assert.ok(output.join('\n').includes('codex-template/config.toml'));
     } finally {

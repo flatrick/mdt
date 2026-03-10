@@ -32,8 +32,9 @@ It is safe to delete once the work is complete.
    - `skills/continuous-learning-automatic/` — hook-driven observation capture only:
      `hooks/observe.js` + `scripts/detect-project.js`
    - `codex-template/skills/continuous-learning-manual/` — Codex copy (no hooks/, uses openai.yaml)
-   - `packages/continuous-learning/package.json` now treats `continuous-learning-manual` as the shared baseline and maps `continuous-learning-automatic` through tool-specific Claude/Cursor package metadata
-   - Codex does not install `continuous-learning-automatic`; the manual skill plus optional external observer is the Codex-facing contract
+    - `packages/continuous-learning/package.json` now treats `continuous-learning-manual` as the shared baseline and maps `continuous-learning-automatic` through tool-specific Claude/Cursor package metadata
+    - `packages/continuous-learning-observer/package.json` is the separate Codex opt-in layer for the external observer script
+    - Codex does not install `continuous-learning-automatic`; the manual skill plus optional external observer is the Codex-facing contract
    - ~50 references updated across commands, hooks configs, docs, tests, installed copies
 
 ### Phase 2 work (completed this session)

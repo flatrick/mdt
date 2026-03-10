@@ -115,10 +115,8 @@ function buildVerifyChecks(files) {
         path: 'codex-template/config.toml',
         ok:
           files['codex-template/config.toml'].exists &&
-          files['codex-template/config.toml'].content.includes('sandbox_mode = "workspace-write"') &&
-          files['codex-template/config.toml'].content.includes('[mcp_servers.github]') &&
-          files['codex-template/config.toml'].content.includes('[mcp_servers.sequential-thinking]'),
-        message: 'Codex config should provide the expected verification sandbox and MCP scaffolding'
+          files['codex-template/config.toml'].content.includes('sandbox_mode = "workspace-write"'),
+        message: 'Codex config should stay minimal and provide the expected verification sandbox defaults'
       }
     ]
   };
@@ -264,10 +262,8 @@ function buildInstalledVerifyChecks(files) {
         path: '~/.codex/config.toml',
         ok:
           files['~/.codex/config.toml'].exists &&
-          files['~/.codex/config.toml'].content.includes('sandbox_mode = "workspace-write"') &&
-          files['~/.codex/config.toml'].content.includes('[mcp_servers.github]') &&
-          files['~/.codex/config.toml'].content.includes('[mcp_servers.sequential-thinking]'),
-        message: 'Codex global config should provide the expected verification sandbox and MCP scaffolding'
+          files['~/.codex/config.toml'].content.includes('sandbox_mode = "workspace-write"'),
+        message: 'Codex global config should provide the expected verification sandbox defaults'
       }
     ]
   };

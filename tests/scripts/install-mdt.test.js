@@ -478,9 +478,9 @@ function runTests() {
         assert.ok(!result.stdout.includes('requires hooks'));
       }
     },
-    {
-      name: 'codex project install copies selected project skills and runtime scripts only',
-      run: () => {
+      {
+        name: 'codex project install copies selected project skills and baseline scripts only',
+        run: () => {
         const tmpHome = createTestDir('mdt-install-codex-home-');
         const tmpProject = createTestDir('mdt-install-codex-proj-');
 
@@ -513,10 +513,10 @@ function runTests() {
           assert.ok(fs.existsSync(path.join(projectAgentsRoot, 'scripts', 'lib', 'detect-env.js')));
           assert.ok(fs.existsSync(path.join(projectAgentsRoot, 'scripts', 'ci', 'validate-markdown-links.js')));
           assert.ok(fs.existsSync(path.join(projectAgentsRoot, 'scripts', 'ci', 'validate-markdown-path-refs.js')));
-          assert.ok(fs.existsSync(path.join(projectAgentsRoot, 'scripts', 'codex-observer.js')));
-          assert.ok(fs.existsSync(path.join(projectAgentsRoot, 'scripts', 'smoke-tool-setups.js')));
-          assert.ok(fs.existsSync(path.join(projectAgentsRoot, 'scripts', 'smoke-codex-workflows.js')));
-          assert.ok(!fs.existsSync(path.join(projectAgentsRoot, 'skills', 'python-patterns', 'SKILL.md')));
+            assert.ok(fs.existsSync(path.join(projectAgentsRoot, 'scripts', 'smoke-tool-setups.js')));
+            assert.ok(fs.existsSync(path.join(projectAgentsRoot, 'scripts', 'smoke-codex-workflows.js')));
+            assert.ok(!fs.existsSync(path.join(projectAgentsRoot, 'scripts', 'codex-observer.js')));
+            assert.ok(!fs.existsSync(path.join(projectAgentsRoot, 'skills', 'python-patterns', 'SKILL.md')));
 
           const learnStatus = spawnSync(
             'node',
@@ -556,9 +556,46 @@ function runTests() {
         } finally {
           cleanupTestDir(tmpHome);
           cleanupTestDir(tmpProject);
+          }
         }
-      }
-    },
+      },
+      {
+        name: 'codex observer package installs optional observer script explicitly',
+        run: () => {
+          const tmpHome = createTestDir('mdt-install-codex-observer-home-');
+          const tmpProject = createTestDir('mdt-install-codex-observer-proj-');
+
+          try {
+            const gitInit = spawnSync('git', ['init'], {
+              encoding: 'utf8',
+              cwd: tmpProject,
+              stdio: ['pipe', 'pipe', 'pipe']
+            });
+            assert.strictEqual(gitInit.status, 0, `git init should succeed\nstdout:\n${gitInit.stdout}\nstderr:\n${gitInit.stderr}`);
+
+            const result = runInstaller(
+              ['--target', 'codex', 'typescript', 'continuous-learning-observer'],
+              {
+                cwd: tmpHome,
+                projectDir: tmpProject,
+                env: {
+                  HOME: tmpHome,
+                  USERPROFILE: tmpHome
+                }
+              }
+            );
+
+            assert.strictEqual(result.status, 0, `install should succeed\nstdout:\n${result.stdout}\nstderr:\n${result.stderr}`);
+
+            const projectAgentsRoot = path.join(tmpProject, '.agents');
+            assert.ok(fs.existsSync(path.join(projectAgentsRoot, 'scripts', 'codex-observer.js')));
+            assert.ok(fs.existsSync(path.join(projectAgentsRoot, 'skills', 'continuous-learning-manual', 'SKILL.md')));
+          } finally {
+            cleanupTestDir(tmpHome);
+            cleanupTestDir(tmpProject);
+          }
+        }
+      },
     {
       name: 'codex global install preserves existing user config and writes MDT reference config only',
       run: () => {
@@ -594,7 +631,7 @@ function runTests() {
           );
           const referenceConfig = fs.readFileSync(path.join(codexRoot, 'config.mdt.toml'), 'utf8');
           assert.ok(referenceConfig.includes('sandbox_mode = "workspace-write"'));
-          assert.ok(referenceConfig.includes('[mcp_servers.github]'));
+          assert.ok(!referenceConfig.includes('[mcp_servers.'), 'reference config should not enable MCP by default');
           assert.ok(fs.existsSync(path.join(codexRoot, 'AGENTS.md')));
           assert.ok(fs.existsSync(path.join(codexRoot, 'rules', 'common-coding-style.md')));
           assert.ok(fs.existsSync(path.join(codexRoot, 'rules', 'common-testing.md')));

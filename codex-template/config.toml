@@ -9,23 +9,4 @@ model_provider = "openai"
 approval_policy = "on-request"
 sandbox_mode = "workspace-write"
 
-# MCP servers
-[mcp_servers.github]
-command = "npx"
-args = ["-y", "@modelcontextprotocol/server-github"]
-startup_timeout_sec = 60
-
-[mcp_servers.context7]
-command = "npx"
-args = ["-y", "@upstash/context7-mcp@latest"]
-startup_timeout_sec = 60
-
-[mcp_servers.memory]
-command = "npx"
-args = ["-y", "@modelcontextprotocol/server-memory"]
-startup_timeout_sec = 60
-
-[mcp_servers.sequential-thinking]
-command = "npx"
-args = ["-y", "@modelcontextprotocol/server-sequential-thinking"]
-startup_timeout_sec = 60
+# MCP is opt-in. MDT does not enable any MCP servers by default for Codex.

@@ -80,6 +80,8 @@ Codex note:
   MDT reference file instead
 - Codex-specific MDT guidance lives primarily in `~/.codex/AGENTS.md` for
   global installs
+- MDT does not enable any Codex MCP servers by default; add them manually only
+  when a concrete workflow needs them
 
 Gemini:
 

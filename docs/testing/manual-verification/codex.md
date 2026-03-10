@@ -64,6 +64,7 @@ Interpretation rule:
 
 - treat explicit/manual capture as the normal Codex path
 - treat the external observer as optional background analysis only
+- treat the observer as a separate install layer, not part of baseline Codex learning
 - do not treat Codex as having full automatic continuous learning parity with
   Claude Code or Cursor
 
@@ -113,7 +114,14 @@ Expected:
 ## Optional External Observer
 
 Codex now has an optional external observer for running background analysis from
-a normal terminal outside the active Codex shell:
+a normal terminal outside the active Codex shell. Install it explicitly when
+needed:
+
+```bash
+node scripts/install-mdt.js --target codex --project-dir <repo> continuous-learning-observer
+```
+
+Then use:
 
 ```bash
 node .agents/scripts/codex-observer.js status

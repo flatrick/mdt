@@ -257,29 +257,10 @@ All scripts are Node.js (`.js`); no shell or PowerShell variants. Same commands 
 
 The observer must use the active tool's native CLI. Cursor setups must not depend on the `claude` binary, and Claude setups must not depend on Cursor.
 
-Codex currently uses an explicit workflow instead of hooks. In a Codex-installed
-repo, the main entrypoint is:
-
-```bash
-node .agents/skills/continuous-learning-automatic/scripts/codex-learn.js status
-node .agents/skills/continuous-learning-automatic/scripts/codex-learn.js capture < summary.txt
-node .agents/skills/continuous-learning-automatic/scripts/codex-learn.js analyze
-node .agents/skills/continuous-learning-automatic/scripts/codex-learn.js weekly --week 2026-W11
-```
-
-The weekly retrospective is intentionally manual-first. It reads the current
-project's `observations.jsonl` plus matching archived batches for one ISO week
-and writes a structured summary under:
-
-```text
-.codex/homunculus/projects/<project-id>/retrospectives/weekly/YYYY-Www.json
-```
-
-Its goal is not to log more activity. It should stay sparse and highlight:
-
-- repeated shell commands that deserve a dedicated script or custom command
-- repeated external CLI usage that may deserve an MCP integration
-- repeated multi-step workflows that should be documented or automated
+Codex does not use this automatic skill as its baseline continuous-learning
+surface. For Codex, use `continuous-learning-manual` for explicit/manual
+capture and analysis, and treat the optional external observer as a separate
+background-analysis enhancement layer.
 
 Other behavior (observation capture, instinct thresholds, project scoping, promotion criteria) is configured via code defaults in `instinct-cli.js` and the observe hook script.
 

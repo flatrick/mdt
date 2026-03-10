@@ -279,6 +279,18 @@ function runTests() {
     assert.deepStrictEqual(manifest.tools.cursor.commands, ['docs-health.md', 'learn.md', 'skill-create.md']);
   })) passed++; else failed++;
 
+  if (test('loadPackageManifest loads codex observer package as separate opt-in layer', () => {
+    const manifest = loadPackageManifest('continuous-learning-observer');
+    assert.strictEqual(manifest.name, 'continuous-learning-observer');
+    assert.deepStrictEqual(manifest.extends, ['continuous-learning']);
+    assert.deepStrictEqual(manifest.tools.codex.scripts, ['codex-observer.js']);
+    assert.deepStrictEqual(manifest.requires, {
+      runtimeScripts: true,
+      sessionData: true,
+      tools: ['codex']
+    });
+  })) passed++; else failed++;
+
   if (test('buildInstallPlan includes global cursor rule-skip note and packages', () => {
     const plan = buildInstallPlan({ target: 'cursor', globalScope: true, projectDir: process.cwd(), packageNames: ['typescript'] });
     assert.ok(plan.some((line) => line.includes('Target: cursor (global)')));
@@ -406,7 +418,7 @@ function runTests() {
       assert.ok(fs.existsSync(path.join(tempDir, 'skills', 'documentation-steward', 'SKILL.md')));
       assert.ok(fs.existsSync(path.join(tempDir, 'skills', 'tool-setup-verifier', 'SKILL.md')));
       assert.ok(fs.existsSync(path.join(tempDir, 'skills', 'continuous-learning-manual', 'SKILL.md')));
-      // continuous-learning-automatic is hooks-only — no codex-template copy, so Codex skips it
+      // continuous-learning-automatic is hooks-only and not part of the Codex contract
       assert.ok(!fs.existsSync(path.join(tempDir, 'skills', 'continuous-learning-automatic', 'SKILL.md')));
       assert.ok(!fs.existsSync(path.join(tempDir, 'skills', 'python-patterns', 'SKILL.md')));
     });

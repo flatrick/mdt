@@ -402,13 +402,17 @@ function buildCodexInstallPlan(lines, globalScope, selectedPackages, projectDir)
   }
 
   const projectAgentsDir = path.join(projectDir, '.agents');
+  const codexScripts = getToolManifestSelections(selectedPackages, 'codex', 'scripts');
   return [
     ...lines,
     `[dry-run] Packages: ${packages}`,
     `[dry-run] Project directory: ${projectDir}`,
     `[dry-run] Would install Codex project skills to ${path.join(projectAgentsDir, 'skills')}`,
     `[dry-run] Would install Codex runtime scripts to ${path.join(projectAgentsDir, 'scripts')}`,
-    '[dry-run] Would materialize package-selected Codex skills from codex-template/skills into .agents/skills/'
+    '[dry-run] Would materialize package-selected Codex skills from codex-template/skills into .agents/skills/',
+    ...(codexScripts.length > 0
+      ? [`[dry-run] Would install package-selected Codex workflow scripts to ${path.join(projectAgentsDir, 'scripts')}`]
+      : [])
   ];
 }
 
@@ -978,9 +982,11 @@ function installCodexRuntimeScripts(projectAgentsDir) {
   copyRuntimeScripts(scriptsDest);
 }
 
-function installCodexWorkflowScripts(projectAgentsDir) {
+function installCodexWorkflowScripts(projectAgentsDir, selectedPackages) {
   const scriptsDest = path.join(projectAgentsDir, 'scripts');
-  const workflowScripts = ['codex-observer.js', 'smoke-tool-setups.js', 'smoke-codex-workflows.js'];
+  const baselineWorkflowScripts = ['smoke-tool-setups.js', 'smoke-codex-workflows.js'];
+  const optionalWorkflowScripts = getToolManifestSelections(selectedPackages, 'codex', 'scripts');
+  const workflowScripts = mergeUniqueOrdered(baselineWorkflowScripts, optionalWorkflowScripts);
   if (copyExplicitFiles(path.join(REPO_ROOT, 'scripts'), scriptsDest, workflowScripts, 'Codex workflow script') > 0) {
     console.log('Installing Codex workflow scripts -> ' + scriptsDest + '/');
   }
@@ -1027,7 +1033,7 @@ function installCodexProject(selectedPackages, projectDir) {
   console.log('Installing Codex project files to ' + projectAgentsDir + '/');
   installCodexSkills(selectedPackages, projectAgentsDir);
   installCodexRuntimeScripts(projectAgentsDir);
-  installCodexWorkflowScripts(projectAgentsDir);
+  installCodexWorkflowScripts(projectAgentsDir, selectedPackages);
   console.log('Done. Codex project files installed to ' + projectAgentsDir + '/');
 }
 
