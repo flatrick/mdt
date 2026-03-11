@@ -10,6 +10,10 @@ function readIfExists(filePath) {
 }
 
 function validatePlatformMirror(platform) {
+  if (!platform.mirrorConfig) {
+    return { name: platform.name, valid: true, issues: [] };
+  }
+
   const issues = [];
   const source = readIfExists(platform.sourceConfig);
   const mirror = readIfExists(platform.mirrorConfig);

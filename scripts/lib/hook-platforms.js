@@ -15,9 +15,9 @@ const HOOK_PLATFORMS = Object.freeze({
   cursor: Object.freeze({
     name: 'cursor',
     sourceConfig: path.join(REPO_ROOT, 'hooks', 'cursor', 'hooks.json'),
-    mirrorConfig: path.join(REPO_ROOT, 'cursor-template', 'hooks.json'),
+    mirrorConfig: null,
     sourceScriptsDir: path.join(REPO_ROOT, 'hooks', 'cursor', 'scripts'),
-    mirrorScriptsDir: path.join(REPO_ROOT, 'cursor-template', 'hooks')
+    mirrorScriptsDir: null
   })
 });
 

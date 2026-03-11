@@ -35,8 +35,6 @@ function runTests() {
   const repoRoot = path.join(__dirname, '..', '..');
   const claudeSource = path.join(repoRoot, 'claude-template', 'hooks.json');
   const claudeMirror = path.join(repoRoot, 'hooks', 'hooks.json');
-  const cursorSource = path.join(repoRoot, 'hooks', 'cursor', 'hooks.json');
-  const cursorMirror = path.join(repoRoot, 'cursor-template', 'hooks.json');
   const cursorSourceScripts = path.join(repoRoot, 'hooks', 'cursor', 'scripts');
   const cursorMirrorScripts = path.join(repoRoot, 'cursor-template', 'hooks');
 
@@ -47,26 +45,12 @@ function runTests() {
     );
   })) passed++; else failed++;
 
-  if (test('Cursor hook source matches native Cursor mirror config', () => {
-    assert.strictEqual(
-      fs.readFileSync(cursorSource, 'utf8'),
-      fs.readFileSync(cursorMirror, 'utf8')
-    );
+  if (test('Cursor hook source scripts directory exists', () => {
+    assert.ok(fs.existsSync(cursorSourceScripts), `Missing cursor hook source scripts: ${cursorSourceScripts}`);
   })) passed++; else failed++;
 
-  if (test('Cursor hook source scripts match native Cursor mirror scripts', () => {
-    const sourceFiles = listRelativeFiles(cursorSourceScripts);
-    const mirrorFiles = listRelativeFiles(cursorMirrorScripts);
-
-    assert.deepStrictEqual(mirrorFiles, sourceFiles);
-
-    for (const relPath of sourceFiles) {
-      assert.strictEqual(
-        fs.readFileSync(path.join(cursorSourceScripts, relPath), 'utf8'),
-        fs.readFileSync(path.join(cursorMirrorScripts, relPath), 'utf8'),
-        `Content mismatch for ${relPath}`
-      );
-    }
+  if (test('Cursor hook mirror scripts directory does not exist (installer reads from source directly)', () => {
+    assert.ok(!fs.existsSync(cursorMirrorScripts), `Unexpected cursor hook mirror found at: ${cursorMirrorScripts}`);
   })) passed++; else failed++;
 
   console.log(`\nResults: Passed: ${passed}, Failed: ${failed}`);
