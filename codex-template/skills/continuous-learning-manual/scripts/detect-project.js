@@ -6,11 +6,18 @@
  * Used by observe.js and start-observer.js.
  *
  * Detection priority:
- *   1. CLAUDE_PROJECT_DIR env var
- *   2. git rev-parse --show-toplevel
- *   3. "global" (no project context)
+ *   1. CLAUDE_PROJECT_DIR / MDT_PROJECT_ROOT env var (git-backed dirs only)
+ *   2. git rev-parse --show-toplevel (auto-detect from cwd)
+ *   3. cwd-scoped project (non-git fallback)
  *
- * Project ID: first 12 chars of SHA-256(remote URL or project root path).
+ * Project ID format:
+ *   - Git remote available : <repo-name>-git   (e.g. "mdt-git")
+ *   - Git repo, no remote  : <basename>-<md5>  (e.g. "my-tool-9f8e7d6c")
+ *   - No VCS               : <basename>-<md5>  (e.g. "scripts-3a4b5c6d")
+ *
+ * The MD5 suffix (first 8 hex chars of the absolute path) prevents collisions
+ * between unrelated directories that share the same folder name.
+ * Only git is detected today; other VCS types are in BACKLOG.md.
  */
 
 const fs = require('fs');
@@ -25,11 +32,20 @@ function getScriptRoot() {
 
 function loadDetectEnv() {
   const root = getScriptRoot();
-  try {
-    return require(path.join(root, 'scripts', 'lib', 'detect-env.js')).createDetectEnv;
-  } catch {
-    return require(path.join(__dirname, '..', '..', '..', 'scripts', 'lib', 'detect-env.js')).createDetectEnv;
+  const candidates = [
+    path.join(root, 'scripts', 'lib', 'detect-env.js'),
+    path.join(root, 'mdt', 'scripts', 'lib', 'detect-env.js'),
+  ];
+  for (const candidate of candidates) {
+    try {
+      return require(candidate).createDetectEnv;
+    } catch {
+      // try next candidate
+    }
   }
+  throw new Error(
+    `Cannot find detect-env.js. Searched:\n${candidates.map(c => '  - ' + c).join('\n')}`
+  );
 }
 
 const createDetectEnv = loadDetectEnv();
@@ -75,7 +91,7 @@ function getPathSet() {
   return {
     dataDir,
     homunculusDir,
-    projectsDir: path.join(homunculusDir, 'projects'),
+    projectsDir: homunculusDir,
     registryFile: path.join(homunculusDir, 'projects.json')
   };
 }
@@ -104,8 +120,18 @@ function findProjectRootFromFilesystem(startDir) {
   }
 }
 
-function sha12(input) {
-  return crypto.createHash('sha256').update(input, 'utf8').digest('hex').slice(0, 12);
+function md5_8(input) {
+  return crypto.createHash('md5').update(input, 'utf8').digest('hex').slice(0, 8);
+}
+
+/**
+ * Extract the repository name from a git remote URL.
+ * Handles both SSH (git@host:owner/repo.git) and HTTPS (https://host/owner/repo.git).
+ */
+function repoNameFromUrl(url) {
+  const base = url.trim().replace(/\/$/, '').replace(/\.git$/, '');
+  const segment = base.split('/').pop();
+  return segment.split(':').pop();
 }
 
 function ensureDir(dir) {
@@ -137,73 +163,45 @@ function updateRegistry(projectId, projectName, projectRoot, remoteUrl) {
 }
 
 /**
- * Detect project context. Returns object with:
- *   id, name, root, remote, project_dir, instincts_personal, instincts_inherited,
- *   evolved_dir, observations_file
+ * Find the git repo root for a given directory.
+ * Returns { root, remote } or null if not inside a git repo.
  */
-function detectProject(cwd) {
-  const { homunculusDir, projectsDir } = getPathSet();
-  let projectRoot = null;
-  const effectiveCwd = cwd || process.cwd();
-
-  if (process.env.CLAUDE_PROJECT_DIR && process.env.CLAUDE_PROJECT_DIR.trim()) {
-    const p = process.env.CLAUDE_PROJECT_DIR.trim();
-    if (fs.existsSync(p)) projectRoot = path.resolve(p);
-  }
-
-  if (!projectRoot && process.env.MDT_PROJECT_ROOT && process.env.MDT_PROJECT_ROOT.trim()) {
-    const p = process.env.MDT_PROJECT_ROOT.trim();
-    if (fs.existsSync(p)) projectRoot = path.resolve(p);
-  }
-
-  if (!projectRoot) {
-    try {
-      const result = execFileSync('git', ['rev-parse', '--show-toplevel'], {
-        encoding: 'utf8',
-        cwd: effectiveCwd,
-        timeout: 5000,
-        stdio: ['ignore', 'pipe', 'ignore']
-      });
-      const root = (result || '').trim();
-      if (root) projectRoot = path.resolve(root);
-    } catch {
-      // git not available or not a repo
-    }
-  }
-
-  if (!projectRoot) {
-    projectRoot = findProjectRootFromFilesystem(effectiveCwd);
-  }
-
-  if (!projectRoot) {
-    return {
-      id: 'global',
-      name: 'global',
-      root: '',
-      remote: '',
-      project_dir: homunculusDir,
-      instincts_personal: path.join(homunculusDir, 'instincts', 'personal'),
-      instincts_inherited: path.join(homunculusDir, 'instincts', 'inherited'),
-      evolved_dir: path.join(homunculusDir, 'evolved'),
-      observations_file: path.join(homunculusDir, 'observations.jsonl')
-    };
-  }
-
-  const projectName = path.basename(projectRoot);
-  let remoteUrl = '';
+function findGitRepo(startDir) {
+  let root = null;
   try {
-    const result = execFileSync('git', ['-C', projectRoot, 'remote', 'get-url', 'origin'], {
+    const result = execFileSync('git', ['rev-parse', '--show-toplevel'], {
+      encoding: 'utf8',
+      cwd: startDir,
+      timeout: 5000,
+      stdio: ['ignore', 'pipe', 'ignore']
+    });
+    root = (result || '').trim();
+  } catch {
+    return null;
+  }
+  if (!root) return null;
+  root = path.resolve(root);
+
+  let remote = '';
+  try {
+    const result = execFileSync('git', ['-C', root, 'remote', 'get-url', 'origin'], {
       encoding: 'utf8',
       timeout: 5000,
       stdio: ['ignore', 'pipe', 'ignore']
     });
-    remoteUrl = (result || '').trim();
+    remote = (result || '').trim();
   } catch {
-    // no remote or git error
+    // local-only repo, no remote
   }
 
-  const hashInput = remoteUrl || projectRoot;
-  const projectId = sha12(hashInput);
+  return { root, remote };
+}
+
+function buildProjectResult(projectsDir, projectRoot, remoteUrl) {
+  const projectName = path.basename(projectRoot);
+  const projectId = remoteUrl
+    ? `${repoNameFromUrl(remoteUrl)}-git`
+    : `${projectName}-${md5_8(projectRoot)}`;
   const projectDir = path.join(projectsDir, projectId);
 
   const subdirs = [
@@ -231,6 +229,41 @@ function detectProject(cwd) {
     evolved_dir: path.join(projectDir, 'evolved'),
     observations_file: path.join(projectDir, 'observations.jsonl')
   };
+}
+
+/**
+ * Detect project context. Returns object with:
+ *   id, name, root, remote, project_dir, instincts_personal, instincts_inherited,
+ *   evolved_dir, observations_file
+ *
+ * Project identity is VCS-based when possible; falls back to cwd-scoped project.
+ * Non-git directories get a path-anchored project ID (<basename>-<md5>) rather
+ * than collapsing into the global scope.
+ */
+function detectProject(cwd) {
+  const { projectsDir } = getPathSet();
+  const effectiveCwd = path.resolve(cwd || process.cwd());
+
+  // Explicit env overrides: trust them if they point to a git-backed directory
+  for (const envKey of ['CLAUDE_PROJECT_DIR', 'MDT_PROJECT_ROOT']) {
+    const val = (process.env[envKey] || '').trim();
+    if (!val || !fs.existsSync(val)) continue;
+    const resolved = path.resolve(val);
+    const repo = findGitRepo(resolved);
+    if (repo) return buildProjectResult(projectsDir, repo.root, repo.remote);
+    // Honour the override even when git binary is unavailable,
+    // as long as the directory looks like a repo (.git present).
+    if (fs.existsSync(path.join(resolved, '.git'))) {
+      return buildProjectResult(projectsDir, resolved, '');
+    }
+  }
+
+  // Auto-detect from cwd via git
+  const repo = findGitRepo(effectiveCwd);
+  if (repo) return buildProjectResult(projectsDir, repo.root, repo.remote);
+
+  // No VCS detected — use cwd as path-anchored project scope
+  return buildProjectResult(projectsDir, effectiveCwd, '');
 }
 
 function getHomunculusDir() {

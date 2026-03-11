@@ -8,6 +8,40 @@ Completed backlog items have been moved to:
 
 ---
 
+## Homunculus .self/ scope for MDT meta-learnings (dev installs only)
+
+**Status:** Open — not yet implemented.
+
+When MDT is installed with `--dev`, create a reserved `~/.{tool}/mdt/homunculus/.self/` scope for instincts and observations that are *about MDT itself* — its conventions, install layout, skill structure, and design decisions — rather than about the user's projects.
+
+This prevents MDT meta-learnings from contaminating project-scoped instincts in `mdt-git/` when the active project happens to be MDT.
+
+Scope of work:
+- Only created/activated when `--dev` was used at install time
+- Same internal structure as any project scope (`instincts/`, `evolved/`, `observations.jsonl`, etc.)
+- Detection: check for a `--dev` install marker (e.g. a flag in `~/.{tool}/mdt/install.json`)
+- `detect-project.js` should route to `.self/` when cwd is the MDT repo and dev mode is active
+- Document the `.self/` scope in the continuous-learning SKILL.md and NEXT-STEPS.md when implemented
+
+---
+
+## Homunculus project detection: non-git VCS support
+
+**Status:** Open — git only is implemented.
+
+Project IDs for VCS-tracked projects use a `<repo-name>-<VCS>` suffix (e.g., `mdt-git`). Only git remote URL detection is implemented today.
+
+When support for other VCS systems is added, extend `detect-project.js` to detect and emit the appropriate suffix:
+
+- Mercurial: detect `.hg/` → suffix `-hg`
+- SVN: detect `.svn/` → suffix `-svn`
+- Fossil: detect `.fossil` / `_FOSSIL_` → suffix `-fossil`
+- Jujutsu: detect `.jj/` → suffix `-jj`
+
+Projects without any detectable VCS remote continue to use `<basename>-<8-char-md5>` (path-anchored, no VCS suffix).
+
+---
+
 ## Harden tool home directories for all supported tools
 
 **Status:** Open — Codex only.

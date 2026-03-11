@@ -313,7 +313,7 @@ async function runTests() {
       const configDir = path.join(testDir, 'config');
       const projectDir = path.join(testDir, 'workspace');
       fs.mkdirSync(configDir, { recursive: true });
-      fs.mkdirSync(projectDir, { recursive: true });
+      fs.mkdirSync(path.join(projectDir, '.git'), { recursive: true });
 
       const input = {
         conversation_id: 'cursor-observe-edit-12345678',
@@ -337,7 +337,7 @@ async function runTests() {
         const [projectId] = Object.keys(projects);
         assert.ok(projectId, 'Should register a detected project');
 
-        const observationsFile = path.join(homunculusRoot, 'projects', projectId, 'observations.jsonl');
+        const observationsFile = path.join(homunculusRoot, projectId, 'observations.jsonl');
         assert.ok(fs.existsSync(observationsFile), 'Should append Cursor edit observation');
         const observations = fs.readFileSync(observationsFile, 'utf8');
         assert.ok(observations.includes('"event":"tool_complete"'), 'Should record completed-tool observation');
@@ -355,7 +355,7 @@ async function runTests() {
       const configDir = path.join(testDir, 'config');
       const projectDir = path.join(testDir, 'workspace');
       fs.mkdirSync(configDir, { recursive: true });
-      fs.mkdirSync(projectDir, { recursive: true });
+      fs.mkdirSync(path.join(projectDir, '.git'), { recursive: true });
 
       const input = {
         conversation_id: 'cursor-observe-shell-12345678',
@@ -384,7 +384,7 @@ async function runTests() {
 
         const projects = JSON.parse(fs.readFileSync(path.join(configDir, 'mdt', 'homunculus', 'projects.json'), 'utf8'));
         const [projectId] = Object.keys(projects);
-        const observationsFile = path.join(configDir, 'mdt', 'homunculus', 'projects', projectId, 'observations.jsonl');
+        const observationsFile = path.join(configDir, 'mdt', 'homunculus', projectId, 'observations.jsonl');
         const observations = fs.readFileSync(observationsFile, 'utf8');
         assert.ok(observations.includes('"tool":"Bash"'), 'Should classify shell execution as Bash tool usage');
         assert.ok(observations.includes('Build succeeded'), 'Should include shell output context');

@@ -80,32 +80,33 @@ function runTests() {
       assert.notStrictEqual(project.id, 'global');
       assert.strictEqual(project.name, 'repo');
       assert.strictEqual(project.root, repoRoot);
-      assert.ok(project.project_dir.includes(path.join(repoRoot, '.codex', 'homunculus', 'projects')));
+      assert.ok(project.project_dir.includes(path.join(repoRoot, '.codex', 'homunculus')));
     } finally {
       cleanupTestDir(tempDir);
     }
   })) passed++; else failed++;
 
-  if (test('detectProject falls back to filesystem repo markers when git spawn is unavailable', () => {
-    const tempDir = createTestDir('detect-project-fs-fallback-');
+  if (test('detectProject returns cwd-scoped project for non-git dirs without explicit env override', () => {
+    const tempDir = createTestDir('detect-project-no-git-');
     try {
-      const repoRoot = path.join(tempDir, 'repo');
-      const nested = path.join(repoRoot, 'app', 'src');
-      fs.mkdirSync(path.join(repoRoot, '.git'), { recursive: true });
-      fs.mkdirSync(path.join(repoRoot, '.codex'), { recursive: true });
-      fs.mkdirSync(nested, { recursive: true });
+      const nonGitDir = path.join(tempDir, 'scripts');
+      fs.mkdirSync(nonGitDir, { recursive: true });
+      const configDir = path.join(tempDir, '.codex');
+      fs.mkdirSync(configDir, { recursive: true });
 
       const project = withEnv({
-        CONFIG_DIR: path.join(repoRoot, '.codex'),
-        DATA_DIR: path.join(repoRoot, '.codex'),
+        CONFIG_DIR: configDir,
+        DATA_DIR: configDir,
         CODEX_AGENT: '1',
         MDT_PROJECT_ROOT: undefined,
         CLAUDE_PROJECT_DIR: undefined
-      }, () => detectProject(nested));
+      }, () => detectProject(nonGitDir));
 
+      // Non-git dirs get a path-anchored project ID, not global
       assert.notStrictEqual(project.id, 'global');
-      assert.strictEqual(project.root, repoRoot);
-      assert.strictEqual(project.name, 'repo');
+      assert.ok(/^scripts-[0-9a-f]{8}$/.test(project.id), `expected scripts-<md5> but got: ${project.id}`);
+      assert.strictEqual(project.name, 'scripts');
+      assert.strictEqual(project.root, nonGitDir);
     } finally {
       cleanupTestDir(tempDir);
     }

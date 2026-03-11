@@ -174,7 +174,7 @@ Current shipped surface:
 - Codex weekly retrospectives run through:
   `node ~/.codex/skills/continuous-learning-manual/scripts/codex-learn.js weekly --week YYYY-Www`
 - structured output lands under:
-  `~/.codex/mdt/homunculus/projects/<id>/retrospectives/weekly/YYYY-Www.json`
+  `~/.codex/mdt/homunculus/<project-id>/retrospectives/weekly/YYYY-Www.json`
 
 Follow-ups:
 
@@ -206,6 +206,34 @@ If support is resumed later:
 - rebuild the adapter from current vendor reality
 - add fresh local smoke coverage
 - reintroduce it through packages, workflow contracts, and tool docs together
+
+---
+
+## Design Principle for Homunculus Project Detection
+
+Project IDs under `~/.{tool}/mdt/homunculus/` encode both the project name and how it was identified, making the storage layout self-describing when browsing the filesystem.
+
+**Format by detection case:**
+
+1. **VCS remote URL available** → `<repo-name>-<vcs>` — remote-anchored, stable across re-clones
+   - `git@github.com:flatrick/mdt.git` → `mdt-git`
+   - `https://github.com/flatrick/mdt.git` → `mdt-git`
+   - *(future: Mercurial → `-hg`, SVN → `-svn`, etc. — see BACKLOG.md)*
+2. **VCS repo, no remote** → `<basename>-<8-char-md5>` — path-anchored, hash prevents collisions
+   - `/home/user/projects/my-tool` (git, no remote) → `my-tool-9f8e7d6c`
+3. **No VCS** → `<basename>-<8-char-md5>` — path-anchored
+   - `/home/alice/scripts` → `scripts-3a4b5c6d`
+   - `/home/bob/scripts` → `scripts-7e6f5a4b` (same name, different path, no collision)
+
+The MD5 hash (first 8 hex chars of the absolute project root path) is only needed when there is no remote URL to anchor the identity. When a remote exists the repo name alone is globally unique.
+
+```js
+const crypto = require('crypto');
+const hash = crypto.createHash('md5').update(absolutePath).digest('hex').slice(0, 8);
+// used only for cases 2 and 3 above
+```
+
+A registry file at `<data>/homunculus/projects.json` maps IDs to absolute paths and human-readable names for display.
 
 ---
 

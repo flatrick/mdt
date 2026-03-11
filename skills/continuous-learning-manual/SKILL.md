@@ -56,7 +56,7 @@ The observer is an enhancement layer, not the baseline.
 
 | Feature | v2.0 | v2.1 |
 |---------|------|------|
-| Storage | Global (`<data>/homunculus/`) | Project-scoped (`projects/<hash>/`) |
+| Storage | Global (`<data>/homunculus/`) | Project-scoped (`<project-id>/` under homunculus) |
 | Scope | All instincts apply everywhere | Project-scoped + global |
 | Detection | None | git remote URL / repo path |
 | Promotion | N/A | Project -> global when seen in 2+ projects |
@@ -95,7 +95,7 @@ confidence: 0.7
 domain: "code-style"
 source: "session-observation"
 scope: project
-project_id: "a1b2c3d4e5f6"
+project_id: "my-react-app-a1b2c3d4"
 project_name: "my-react-app"
 ---
 
@@ -128,7 +128,7 @@ Session activity
       | - Codex: explicit/manual capture
       | - Claude/Cursor: hook-capable capture
       v
-projects/<project-hash>/observations.jsonl
+<project-id>/observations.jsonl
       |
       | optional observer or explicit analysis
       v
@@ -136,12 +136,12 @@ pattern detection
       |
       | creates / updates
       v
-projects/<project-hash>/instincts/personal/
+<project-id>/instincts/personal/
 instincts/personal/ (global)
       |
       | evolve / promote
       v
-projects/<hash>/evolved/
+<project-id>/evolved/
 evolved/ (global)
 ```
 
@@ -154,7 +154,13 @@ The system detects project context in this order:
 3. repo path / repo markers
 4. global fallback when no project can be identified
 
-Each project gets a 12-character hash ID. A registry file at `<data>/homunculus/projects.json` maps IDs to human-readable names.
+Project IDs encode both name and detection method, making the storage layout self-describing:
+
+- **VCS remote available** → `<repo-name>-<vcs>` (e.g., `mdt-git`) — remote-anchored, no hash needed
+- **VCS repo, no remote** → `<basename>-<8-char-md5>` — path-anchored to prevent collisions
+- **No VCS** → `<basename>-<8-char-md5>` — path-anchored
+
+Only git is currently detected; other VCS systems are in the backlog. A registry file at `<data>/homunculus/projects.json` maps IDs to absolute paths and human-readable names.
 
 ## Quick Start
 
@@ -186,7 +192,7 @@ Run a weekly retrospective for one ISO week:
 node ~/.codex/skills/continuous-learning-manual/scripts/codex-learn.js weekly --week 2026-W11
 ```
 
-This writes Codex project learning state under `~/.codex/mdt/homunculus/projects/<project-id>/...`.
+This writes Codex project learning state under `~/.codex/mdt/homunculus/<project-id>/...`.
 
 Codex baseline:
 
@@ -327,7 +333,7 @@ Weekly retrospectives are intentionally low-noise.
 For Codex they are part of the recommended baseline:
 
 ```text
-~/.codex/mdt/homunculus/projects/<project-id>/retrospectives/weekly/YYYY-Www.json
+~/.codex/mdt/homunculus/<project-id>/retrospectives/weekly/YYYY-Www.json
 ```
 
 The goal is not to log more activity. The goal is to highlight:
@@ -352,17 +358,16 @@ The goal is not to log more activity. The goal is to highlight:
 |   |   +-- agents/
 |   |   +-- skills/
 |   |   +-- commands/
-|   +-- projects/
-|       +-- <project-hash>/
-|           +-- observations.jsonl
-|           +-- observations.archive/
-|           +-- instincts/
-|           |   +-- personal/
-|           |   +-- inherited/
-|           +-- evolved/
-|               +-- skills/
-|               +-- commands/
-|               +-- agents/
+|   +-- <project-id>/
+|       +-- observations.jsonl
+|       +-- observations.archive/
+|       +-- instincts/
+|       |   +-- personal/
+|       |   +-- inherited/
+|       +-- evolved/
+|           +-- skills/
+|           +-- commands/
+|           +-- agents/
 +-- generated/
     +-- skills/
         +-- learned/
