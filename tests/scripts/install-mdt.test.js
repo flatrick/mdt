@@ -147,6 +147,74 @@ function runTests() {
       }
     },
     {
+      name: 'claude install writes Edit and Write permissions for mdt root into settings.json',
+      run: () => {
+        const tmpHome = createTestDir('mdt-install-permissions-');
+        const claudeBase = path.join(tmpHome, '.claude');
+
+        try {
+          const result = runInstaller(['typescript'], {
+            overrideDir: claudeBase,
+            env: {
+              HOME: tmpHome,
+              USERPROFILE: tmpHome,
+              CLAUDE_BASE_DIR: claudeBase
+            }
+          });
+          assertSuccess(result, 'claude install permissions');
+
+          const settingsPath = path.join(claudeBase, 'settings.json');
+          const settings = JSON.parse(fs.readFileSync(settingsPath, 'utf8'));
+          const allow = settings.permissions && settings.permissions.allow;
+          const mdtRoot = path.join(claudeBase, 'mdt').replace(/\\/g, '/');
+
+          assert.ok(Array.isArray(allow), 'permissions.allow should be an array');
+          assert.ok(allow.includes(`Edit(${mdtRoot}/**)`), `permissions.allow should contain Edit(${mdtRoot}/**)`);
+          assert.ok(allow.includes(`Write(${mdtRoot}/**)`), `permissions.allow should contain Write(${mdtRoot}/**)`);
+        } finally {
+          cleanupTestDir(tmpHome);
+        }
+      }
+    },
+    {
+      name: 'claude install merges mdt permissions without duplicating existing allow entries',
+      run: () => {
+        const tmpHome = createTestDir('mdt-install-permissions-merge-');
+        const claudeBase = path.join(tmpHome, '.claude');
+        const mdtRoot = path.join(claudeBase, 'mdt').replace(/\\/g, '/');
+
+        try {
+          fs.mkdirSync(claudeBase, { recursive: true });
+          fs.writeFileSync(
+            path.join(claudeBase, 'settings.json'),
+            JSON.stringify({
+              permissions: { allow: [`Edit(${mdtRoot}/**)`, 'Bash(npm run *)'] }
+            }, null, 2),
+            'utf8'
+          );
+
+          const result = runInstaller(['typescript'], {
+            overrideDir: claudeBase,
+            env: {
+              HOME: tmpHome,
+              USERPROFILE: tmpHome,
+              CLAUDE_BASE_DIR: claudeBase
+            }
+          });
+          assertSuccess(result, 'claude install permissions merge');
+
+          const settings = JSON.parse(fs.readFileSync(path.join(claudeBase, 'settings.json'), 'utf8'));
+          const allow = settings.permissions.allow;
+
+          assert.strictEqual(allow.filter((e) => e === `Edit(${mdtRoot}/**)`).length, 1, 'Edit entry should not be duplicated');
+          assert.ok(allow.includes(`Write(${mdtRoot}/**)`), 'Write entry should be added');
+          assert.ok(allow.includes('Bash(npm run *)'), 'pre-existing allow entry should be preserved');
+        } finally {
+          cleanupTestDir(tmpHome);
+        }
+      }
+    },
+    {
       name: 'cursor install copies selected rules skills commands and runtime scripts globally',
       run: () => {
         const tmpHome = createTestDir('mdt-install-cursor-home-');
