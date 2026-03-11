@@ -15,34 +15,9 @@ const fs = require('fs');
 const path = require('path');
 
 const skillRoot = path.join(__dirname, '..');
-const { detectProject } = require(path.join(__dirname, 'detect-project.js'));
+const { detectProject, inferInstalledConfigDir } = require(path.join(__dirname, 'detect-project.js'));
 const { analyzeObservations, loadObserverConfig } = require(path.join(skillRoot, 'agents', 'start-observer.js'));
 const { generateWeeklyRetrospective } = require(path.join(__dirname, 'retrospect-week.js'));
-
-function resolveProjectRoot() {
-  const candidates = [
-    path.resolve(skillRoot, '..', '..', '..'),
-    path.resolve(skillRoot, '..', '..')
-  ];
-
-  for (const candidate of candidates) {
-    const baseName = path.basename(candidate).toLowerCase();
-    if (baseName === '.codex' || baseName === '.cursor' || baseName === '.claude' || baseName === '.agents') {
-      continue;
-    }
-    if (
-      fs.existsSync(path.join(candidate, '.git')) ||
-      fs.existsSync(path.join(candidate, 'package.json')) ||
-      fs.existsSync(path.join(candidate, 'AGENTS.md'))
-    ) {
-      return candidate;
-    }
-  }
-
-  return candidates[0];
-}
-
-const projectRoot = resolveProjectRoot();
 
 function loadStdin() {
   return new Promise((resolve) => {
@@ -53,14 +28,26 @@ function loadStdin() {
   });
 }
 
+const TOOL_ENV_MAP = {
+  '.cursor': { envKey: 'CURSOR_AGENT', observerTool: 'cursor' },
+  '.claude': { envKey: 'CLAUDE_CODE', observerTool: 'claude' },
+  '.codex': { envKey: 'CODEX_AGENT', observerTool: 'codex' },
+};
+
 function buildCodexEnv(env = process.env) {
   const nextEnv = { ...env };
-  const configDir = nextEnv.CONFIG_DIR || path.join(projectRoot, '.codex');
-  const dataDir = nextEnv.DATA_DIR || configDir;
+  const homeDir = nextEnv.HOME || nextEnv.USERPROFILE || process.env.HOME || process.env.USERPROFILE || '';
+
+  const installedDir = inferInstalledConfigDir(__dirname);
+  const toolName = installedDir ? path.basename(installedDir).toLowerCase() : '.codex';
+  const toolInfo = TOOL_ENV_MAP[toolName] || TOOL_ENV_MAP['.codex'];
+
+  const configDir = nextEnv.CONFIG_DIR || (installedDir || path.join(homeDir, '.codex'));
+  const dataDir = nextEnv.DATA_DIR || path.join(configDir, 'mdt');
   fs.mkdirSync(dataDir, { recursive: true });
 
-  nextEnv.CODEX_AGENT = '1';
-  nextEnv.MDT_OBSERVER_TOOL = 'codex';
+  nextEnv[toolInfo.envKey] = '1';
+  nextEnv.MDT_OBSERVER_TOOL = toolInfo.observerTool;
   nextEnv.CONFIG_DIR = configDir;
   nextEnv.DATA_DIR = dataDir;
 
@@ -75,11 +62,12 @@ function countLines(filePath) {
 }
 
 function appendSummaryObservation(summaryText, project, env) {
+  const tool = env.MDT_OBSERVER_TOOL || 'codex';
   const observation = {
     timestamp: new Date().toISOString().replace(/\.\d{3}Z$/, 'Z'),
     event: 'session_summary',
-    tool: 'codex',
-    session: env.CODEX_SESSION_ID || env.CLAUDE_SESSION_ID || `codex-${Date.now()}`,
+    tool,
+    session: env.CODEX_SESSION_ID || env.CLAUDE_SESSION_ID || env.CURSOR_SESSION_ID || `${tool}-${Date.now()}`,
     project_id: project.id,
     project_name: project.name,
     input: summaryText.trim()
@@ -102,7 +90,7 @@ async function run() {
   if (cmd === 'status') {
     console.log(`Project: ${project.name} (${project.id})`);
     console.log(`Storage: ${project.project_dir}`);
-    console.log('Tool: codex');
+    console.log(`Tool: ${env.MDT_OBSERVER_TOOL || 'unknown'}`);
     console.log(`Observations: ${countLines(project.observations_file)}`);
     return;
   }

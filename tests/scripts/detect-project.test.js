@@ -86,8 +86,8 @@ function runTests() {
     }
   })) passed++; else failed++;
 
-  if (test('detectProject falls back to filesystem repo markers when git spawn is unavailable', () => {
-    const tempDir = createTestDir('detect-project-fs-fallback-');
+  if (test('detectProject returns global for non-git dirs without explicit env override', () => {
+    const tempDir = createTestDir('detect-project-no-git-');
     try {
       const repoRoot = path.join(tempDir, 'repo');
       const nested = path.join(repoRoot, 'app', 'src');
@@ -103,9 +103,8 @@ function runTests() {
         CLAUDE_PROJECT_DIR: undefined
       }, () => detectProject(nested));
 
-      assert.notStrictEqual(project.id, 'global');
-      assert.strictEqual(project.root, repoRoot);
-      assert.strictEqual(project.name, 'repo');
+      // Without a real git repo or explicit env override, falls back to global
+      assert.strictEqual(project.id, 'global');
     } finally {
       cleanupTestDir(tempDir);
     }

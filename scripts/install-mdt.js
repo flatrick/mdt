@@ -625,6 +625,7 @@ function buildClaudeInstallPlan(lines, selectedPackages, overrideDir, devMode = 
     `[dry-run] Packages: ${packages}`,
     `[dry-run] Would install into ${claudeBase}`,
     `[dry-run] Would copy rules, package-selected agents/commands/skills, hooks, and runtime scripts to ${mdtRoot}`,
+    `[dry-run] Would grant Edit/Write permissions for ${mdtRoot}/ in settings.json`,
     ...(devMode ? [
       `[dry-run] Would install Claude dev smoke command to ${path.join(claudeBase, 'commands')}`,
       `[dry-run] Would install Claude dev smoke scripts to ${path.join(mdtRoot, 'scripts')}`
@@ -931,6 +932,30 @@ function installClaudeHooks(claudeBase) {
   console.log('Installing hooks -> ' + settingsPath + ' (merged into settings.json)');
 }
 
+function installClaudePermissions(claudeBase) {
+  const settingsPath = path.join(claudeBase, 'settings.json');
+  const mdtRoot = resolveMdtRoot(claudeBase).replace(/\\/g, '/');
+  const entriesToAdd = [`Edit(${mdtRoot}/**)`, `Write(${mdtRoot}/**)`];
+
+  let settings = fs.existsSync(settingsPath) ? readJsonFile(settingsPath, {}) : {};
+  if (!settings.permissions) settings.permissions = {};
+  if (!Array.isArray(settings.permissions.allow)) settings.permissions.allow = [];
+
+  let added = 0;
+  for (const entry of entriesToAdd) {
+    if (!settings.permissions.allow.includes(entry)) {
+      settings.permissions.allow.push(entry);
+      added++;
+    }
+  }
+
+  if (added > 0) {
+    fs.mkdirSync(path.dirname(settingsPath), { recursive: true });
+    fs.writeFileSync(settingsPath, JSON.stringify(settings, null, 2), 'utf8');
+    console.log(`Granting Edit/Write permissions for ${mdtRoot}/ -> ${settingsPath}`);
+  }
+}
+
 function installClaudeRuntimeScripts(claudeBase) {
   const scriptsDest = copyRuntimeScriptsToMdtRoot(claudeBase);
   console.log('Installing runtime scripts -> ' + scriptsDest + '/');
@@ -965,6 +990,7 @@ function installClaude(packageNames, overrideDir, devMode = false) {
   installClaudeRules(selectedPackages, rulesDest);
   installClaudeContentDirs(claudeBase, selectedPackages, devMode);
   installClaudeHooks(claudeBase);
+  installClaudePermissions(claudeBase);
   installClaudeRuntimeScripts(claudeBase);
   if (devMode) {
     installDevSmokeScripts(claudeBase, DEV_SMOKE_SCRIPT_FILES, 'Claude dev');
@@ -1503,6 +1529,7 @@ module.exports = {
   assertSkillRequirements,
   assertInstallRequirements,
   getSkillRequirementWarnings,
+  installClaudePermissions,
   installClaudeContentDirs,
   installCursorCoreDirs,
   installGeminiContent,

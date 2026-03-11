@@ -209,6 +209,24 @@ If support is resumed later:
 
 ---
 
+## Design Principle for Homunculus Project Detection
+
+Project storage under `~/.{tool}/mdt/homunculus/projects/` uses the **git repository name** as the project ID, not a branch name or local clone directory name.
+
+Detection order:
+
+1. **Git remote URL available** → extract repo name from the remote URL, strip `.git`
+   - `git@github.com:flatrick/mdt.git` → `mdt`
+   - `https://github.com/flatrick/mdt.git` → `mdt`
+2. **Git repo, no remote** → use the repo root directory basename
+   - `/home/user/projects/my-tool` → `my-tool`
+3. **No git repo** → use the current working directory basename
+   - `/home/user/scripts` → `scripts`
+
+This keeps project IDs stable across re-clones, renames of the local working directory, and branch switches. The ID always reflects what the project *is*, not where it happens to live locally.
+
+---
+
 ## Design Principle for Cursor Hooks
 
 > Never fake Claude format in Cursor hooks. `transformToClaude()` works for hooks

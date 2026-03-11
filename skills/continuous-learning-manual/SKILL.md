@@ -56,7 +56,7 @@ The observer is an enhancement layer, not the baseline.
 
 | Feature | v2.0 | v2.1 |
 |---------|------|------|
-| Storage | Global (`<data>/homunculus/`) | Project-scoped (`projects/<hash>/`) |
+| Storage | Global (`<data>/homunculus/`) | Project-scoped (`projects/<repo-name>/`) |
 | Scope | All instincts apply everywhere | Project-scoped + global |
 | Detection | None | git remote URL / repo path |
 | Promotion | N/A | Project -> global when seen in 2+ projects |
@@ -95,7 +95,7 @@ confidence: 0.7
 domain: "code-style"
 source: "session-observation"
 scope: project
-project_id: "a1b2c3d4e5f6"
+project_id: "my-react-app"
 project_name: "my-react-app"
 ---
 
@@ -128,7 +128,7 @@ Session activity
       | - Codex: explicit/manual capture
       | - Claude/Cursor: hook-capable capture
       v
-projects/<project-hash>/observations.jsonl
+projects/<repo-name>/observations.jsonl
       |
       | optional observer or explicit analysis
       v
@@ -136,12 +136,12 @@ pattern detection
       |
       | creates / updates
       v
-projects/<project-hash>/instincts/personal/
+projects/<repo-name>/instincts/personal/
 instincts/personal/ (global)
       |
       | evolve / promote
       v
-projects/<hash>/evolved/
+projects/<repo-name>/evolved/
 evolved/ (global)
 ```
 
@@ -154,7 +154,7 @@ The system detects project context in this order:
 3. repo path / repo markers
 4. global fallback when no project can be identified
 
-Each project gets a 12-character hash ID. A registry file at `<data>/homunculus/projects.json` maps IDs to human-readable names.
+Each project gets an ID derived from its git repo name (extracted from the remote URL, stripping `.git`). When no remote exists the repo root basename is used; when no git repo exists the cwd basename is used. A registry file at `<data>/homunculus/projects.json` maps IDs to absolute paths for disambiguation.
 
 ## Quick Start
 
@@ -353,7 +353,7 @@ The goal is not to log more activity. The goal is to highlight:
 |   |   +-- skills/
 |   |   +-- commands/
 |   +-- projects/
-|       +-- <project-hash>/
+|       +-- <repo-name>/
 |           +-- observations.jsonl
 |           +-- observations.archive/
 |           +-- instincts/

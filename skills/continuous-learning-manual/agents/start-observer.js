@@ -15,7 +15,20 @@ const { execFileSync } = require('child_process');
 
 const skillRoot = path.join(__dirname, '..');
 const { detectProject } = require(path.join(skillRoot, 'scripts', 'detect-project.js'));
-const { createDetectEnv } = require(path.join(skillRoot, '..', '..', 'scripts', 'lib', 'detect-env.js'));
+
+function loadDetectEnvModule() {
+  const candidates = [
+    path.join(skillRoot, '..', '..', 'scripts', 'lib', 'detect-env.js'),
+    path.join(skillRoot, '..', '..', 'mdt', 'scripts', 'lib', 'detect-env.js'),
+  ];
+  for (const candidate of candidates) {
+    try { return require(candidate); } catch { /* try next */ }
+  }
+  throw new Error(
+    `Cannot find detect-env.js. Searched:\n${candidates.map(c => '  - ' + c).join('\n')}`
+  );
+}
+const { createDetectEnv } = loadDetectEnvModule();
 
 const DEFAULT_CONFIG = {
   run_interval_minutes: 5,

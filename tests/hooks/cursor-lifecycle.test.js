@@ -313,7 +313,7 @@ async function runTests() {
       const configDir = path.join(testDir, 'config');
       const projectDir = path.join(testDir, 'workspace');
       fs.mkdirSync(configDir, { recursive: true });
-      fs.mkdirSync(projectDir, { recursive: true });
+      fs.mkdirSync(path.join(projectDir, '.git'), { recursive: true });
 
       const input = {
         conversation_id: 'cursor-observe-edit-12345678',
@@ -355,7 +355,7 @@ async function runTests() {
       const configDir = path.join(testDir, 'config');
       const projectDir = path.join(testDir, 'workspace');
       fs.mkdirSync(configDir, { recursive: true });
-      fs.mkdirSync(projectDir, { recursive: true });
+      fs.mkdirSync(path.join(projectDir, '.git'), { recursive: true });
 
       const input = {
         conversation_id: 'cursor-observe-shell-12345678',
