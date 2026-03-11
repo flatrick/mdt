@@ -780,6 +780,40 @@ function copySelectedDirectories(srcDir, destDir, dirNames, missingContext = '')
   return copied;
 }
 
+function installMergedSkillDirectories(baseSkillsDir, overlaySkillsDir, destDir, skillNames, missingContext = '') {
+  if (!Array.isArray(skillNames) || skillNames.length === 0) {
+    return 0;
+  }
+
+  const uniqueSkillNames = mergeUniqueOrdered(skillNames);
+  let installed = 0;
+
+  for (const skillName of uniqueSkillNames) {
+    const baseSkillDir = path.join(baseSkillsDir, skillName);
+    const overlaySkillDir = path.join(overlaySkillsDir, skillName);
+    const hasBase = fs.existsSync(baseSkillDir);
+    const hasOverlay = fs.existsSync(overlaySkillDir);
+
+    if (!hasBase && !hasOverlay) {
+      if (missingContext) {
+        console.error(`Warning: ${missingContext} '${skillName}' does not exist, skipping.`);
+      }
+      continue;
+    }
+
+    const skillDest = path.join(destDir, skillName);
+    if (hasBase) {
+      copyRecursiveSync(baseSkillDir, skillDest);
+    }
+    if (hasOverlay) {
+      copyRecursiveSync(overlaySkillDir, skillDest);
+    }
+    installed += 1;
+  }
+
+  return installed;
+}
+
 function copyExplicitFiles(srcDir, destDir, fileNames, missingContext = '') {
   if (!fs.existsSync(srcDir) || !Array.isArray(fileNames) || fileNames.length === 0) {
     return 0;
@@ -1232,12 +1266,12 @@ function installCodexRules(selectedPackages, destDir) {
 function installCodexSkills(selectedPackages, destDir, devMode = false) {
   const skillsDest = path.join(destDir, 'skills');
   const codexSkillNames = getToolManifestSelections(selectedPackages, 'codex', 'skills');
-  if (copySelectedDirectories(CODEX_SKILLS_SRC, skillsDest, codexSkillNames, 'Codex tool skill') > 0) {
+  if (installMergedSkillDirectories(SHARED_SKILLS_SRC, CODEX_SKILLS_SRC, skillsDest, codexSkillNames, 'Codex tool skill') > 0) {
     console.log('Installing Codex tool skills -> ' + skillsDest + '/');
   }
 
   if (devMode) {
-    if (copySelectedDirectories(CODEX_SKILLS_SRC, skillsDest, CODEX_DEV_SKILL_NAMES, 'Codex dev skill') > 0) {
+    if (installMergedSkillDirectories(SHARED_SKILLS_SRC, CODEX_SKILLS_SRC, skillsDest, CODEX_DEV_SKILL_NAMES, 'Codex dev skill') > 0) {
       console.log('Installing Codex dev skills -> ' + skillsDest + '/');
     }
     if (installDevSharedSkills(destDir) > 0) {

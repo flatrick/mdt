@@ -405,12 +405,16 @@ function validateInstallPackages(options = {}) {
             hasErrors = true;
           } else {
             for (const skillName of codex.skills) {
-              const skillDir = path.join(codexSkillsDir, skillName);
-              if (!fs.existsSync(skillDir)) {
+              const codexSkillDir = path.join(codexSkillsDir, skillName);
+              const sharedSkillDir = path.join(skillsDir, skillName);
+              if (!fs.existsSync(codexSkillDir) && !fs.existsSync(sharedSkillDir)) {
                 io.error(`ERROR: ${packageName}/package.json - missing Codex skill reference: ${skillName}`);
                 hasErrors = true;
-              } else if (validateSkillMetadata(skillDir, packageName, `Codex skill '${skillName}'`, io)) {
-                hasErrors = true;
+              } else {
+                const resolvedSkillDir = fs.existsSync(codexSkillDir) ? codexSkillDir : sharedSkillDir;
+                if (validateSkillMetadata(resolvedSkillDir, packageName, `Codex skill '${skillName}'`, io)) {
+                  hasErrors = true;
+                }
               }
             }
           }

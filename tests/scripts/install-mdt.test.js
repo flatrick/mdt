@@ -319,6 +319,8 @@ function runTests() {
           assert.ok(fs.existsSync(path.join(codexRoot, 'skills', 'coding-standards', 'SKILL.md')));
           assert.ok(fs.existsSync(path.join(codexRoot, 'skills', 'documentation-steward', 'SKILL.md')));
           assert.ok(fs.existsSync(path.join(codexRoot, 'skills', 'continuous-learning-manual', 'SKILL.md')));
+          assert.ok(fs.existsSync(path.join(codexRoot, 'skills', 'continuous-learning-manual', 'scripts', 'retrospect-week.js')));
+          assert.ok(fs.existsSync(path.join(codexRoot, 'skills', 'continuous-learning-manual', 'agents', 'openai.yaml')));
           assert.ok(!fs.existsSync(path.join(codexRoot, 'skills', 'continuous-learning-automatic', 'SKILL.md')));
           assert.ok(!fs.existsSync(path.join(codexRoot, 'skills', 'python-patterns', 'SKILL.md')));
           assert.ok(fs.existsSync(path.join(codexRoot, 'mdt', 'scripts', 'lib', 'detect-env.js')));

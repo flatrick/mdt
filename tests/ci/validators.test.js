@@ -949,6 +949,74 @@ function runTests() {
     cleanupTestDir(cursorSkillsDir);
   })) passed++; else failed++;
 
+  if (test('passes when a Codex skill is provided only by shared skills and not codex-template', () => {
+    const packagesDir = createTestDir();
+    const rulesDir = createTestDir();
+    const agentsDir = createTestDir();
+    const commandsDir = createTestDir();
+    const skillsDir = createTestDir();
+    const cursorRulesDir = createTestDir();
+    const cursorSkillsDir = createTestDir();
+    const codexSkillsDir = createTestDir();
+
+    fs.writeFileSync(path.join(agentsDir, 'planner.md'), '---\nmodel: sonnet\ntools: Read\n---\n# Planner');
+    fs.writeFileSync(path.join(commandsDir, 'plan.md'), '# Plan\nBody');
+    fs.mkdirSync(path.join(skillsDir, 'verification-loop'));
+    fs.writeFileSync(
+      path.join(skillsDir, 'verification-loop', 'SKILL.md'),
+      '---\nname: verification-loop\ndescription: Verification Loop Skill\nversion: 1.0.0\n---\n# Verification Loop\n\n## When to Use\nUse this skill for verification.',
+      'utf8'
+    );
+    fs.writeFileSync(
+      path.join(skillsDir, 'verification-loop', 'skill.meta.json'),
+      JSON.stringify({ requires: {} }),
+      'utf8'
+    );
+    fs.mkdirSync(path.join(rulesDir, 'common'));
+    fs.writeFileSync(path.join(rulesDir, 'common', 'coding-style.md'), '# Common\nBody');
+
+    for (const packageName of ['typescript', 'sql', 'dotnet', 'rust', 'python', 'bash', 'powershell']) {
+      fs.mkdirSync(path.join(packagesDir, packageName));
+      fs.mkdirSync(path.join(rulesDir, packageName));
+      fs.writeFileSync(path.join(rulesDir, packageName, 'coding-style.md'), `# ${packageName}\nBody`);
+      fs.writeFileSync(
+        path.join(packagesDir, packageName, 'package.json'),
+        JSON.stringify(
+          buildValidPackageManifest(packageName, {
+            tools: {
+              cursor: { rules: [], skills: [] },
+              gemini: { rules: [] },
+              codex: packageName === 'typescript'
+                ? { skills: ['verification-loop'] }
+                : undefined
+            }
+          })
+        ),
+        'utf8'
+      );
+    }
+
+    const result = runValidatorWithDirs('validate-install-packages', {
+      PACKAGES_DIR: packagesDir,
+      RULES_DIR: rulesDir,
+      AGENTS_DIR: agentsDir,
+      COMMANDS_DIR: commandsDir,
+      SKILLS_DIR: skillsDir,
+      CURSOR_RULES_DIR: cursorRulesDir,
+      CURSOR_SKILLS_DIR: cursorSkillsDir,
+      CODEX_SKILLS_DIR: codexSkillsDir
+    });
+    assert.strictEqual(result.code, 0, `Should pass when Codex skill is sourced from shared skills, got stderr: ${result.stderr}`);
+    cleanupTestDir(packagesDir);
+    cleanupTestDir(rulesDir);
+    cleanupTestDir(agentsDir);
+    cleanupTestDir(commandsDir);
+    cleanupTestDir(skillsDir);
+    cleanupTestDir(cursorRulesDir);
+    cleanupTestDir(cursorSkillsDir);
+    cleanupTestDir(codexSkillsDir);
+  })) passed++; else failed++;
+
   // ==========================================
   // validate-skills.js
   // ==========================================
