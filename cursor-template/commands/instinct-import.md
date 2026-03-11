@@ -8,13 +8,13 @@ command: true
 
 ## Implementation
 
-Run the project-installed Cursor instinct CLI:
+Run the globally installed Cursor instinct CLI:
 
 ```bash
-node ".cursor/skills/continuous-learning-manual/scripts/instinct-cli.js" import <file-or-url> [--dry-run] [--force] [--min-confidence 0.7] [--scope project|global]
+node "<config>/skills/continuous-learning-manual/scripts/instinct-cli.js" import <file-or-url> [--dry-run] [--force] [--min-confidence 0.7] [--scope project|global]
 ```
 
-For a user/global Cursor install, replace `.cursor` with `~/.cursor`.
+Default `<config>` is `~/.cursor`. If your Cursor config root is overridden, use that instead.
 
 Do not fall back to other tool directories such as `~/.claude`, `~/.codex`,
 repo `skills/...`, or `${MDT_ROOT}/...`. If the Cursor-installed path is

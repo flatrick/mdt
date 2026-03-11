@@ -22,7 +22,7 @@ An instinct-based learning system for MDT that turns repeated behavior into smal
 
 Codex is manual-first in this repo.
 
-- project-local state lives under `.codex/homunculus/`
+- global MDT state lives under `~/.codex/mdt/homunculus/`
 - explicit/manual capture is the baseline
 - explicit/manual analysis is the baseline
 - weekly retrospectives are part of the baseline
@@ -33,7 +33,7 @@ Codex is manual-first in this repo.
 
 | Feature | v2.0 | v2.1 |
 |---------|------|------|
-| Storage | Global (`~/.codex/homunculus/`) | Project-scoped (`.codex/homunculus/projects/<hash>/`) |
+| Storage | Global (`<data>/homunculus/`) | Project-scoped (`projects/<hash>/`) |
 | Scope | All instincts apply everywhere | Project-scoped + global |
 | Detection | None | git remote URL / repo path |
 | Promotion | N/A | Project -> global when seen in 2+ projects |
@@ -112,37 +112,37 @@ The system detects project context in this order:
 3. repo path / repo markers
 4. global fallback when no project can be identified
 
-Each project gets a 12-character hash ID. A registry file at `.codex/homunculus/projects.json` maps IDs to human-readable names for project installs, and `~/.codex/homunculus/projects.json` does the same for global installs.
+Each project gets a 12-character hash ID. A registry file at `~/.codex/mdt/homunculus/projects.json` maps IDs to human-readable names.
 
 ## Quick Start
 
 ### Codex Explicit Workflow
 
-Use the explicit project-local workflow:
+Use the explicit global-install workflow:
 
 ```bash
-node .codex/skills/continuous-learning-manual/scripts/codex-learn.js status
+node ~/.codex/skills/continuous-learning-manual/scripts/codex-learn.js status
 ```
 
 Then capture a concise session summary:
 
 ```bash
-node .codex/skills/continuous-learning-manual/scripts/codex-learn.js capture < summary.txt
+node ~/.codex/skills/continuous-learning-manual/scripts/codex-learn.js capture < summary.txt
 ```
 
 Run an explicit analysis pass:
 
 ```bash
-node .codex/skills/continuous-learning-manual/scripts/codex-learn.js analyze
+node ~/.codex/skills/continuous-learning-manual/scripts/codex-learn.js analyze
 ```
 
 Run a weekly retrospective for one ISO week:
 
 ```bash
-node .codex/skills/continuous-learning-manual/scripts/codex-learn.js weekly --week 2026-W11
+node ~/.codex/skills/continuous-learning-manual/scripts/codex-learn.js weekly --week 2026-W11
 ```
 
-This writes Codex project learning state under `.codex/homunculus/...`.
+This writes Codex project learning state under `~/.codex/mdt/homunculus/projects/<project-id>/...`.
 
 Codex baseline:
 
@@ -201,8 +201,7 @@ Notes:
 
 - all scripts are Node.js `.js`
 - Codex observer support is a separate opt-in layer, not the baseline
-- for project installs, the observer reads and writes under `.codex/`
-- for global installs, the observer reads and writes under `~/.codex/`
+- the observer reads and writes under `~/.codex/mdt/`
 
 ## Weekly Retrospectives
 
@@ -211,7 +210,7 @@ Weekly retrospectives are intentionally low-noise.
 For Codex they are part of the recommended baseline:
 
 ```text
-.codex/homunculus/projects/<project-id>/retrospectives/weekly/YYYY-Www.json
+~/.codex/mdt/homunculus/projects/<project-id>/retrospectives/weekly/YYYY-Www.json
 ```
 
 The goal is not to log more activity. The goal is to highlight:
@@ -224,42 +223,34 @@ The goal is not to log more activity. The goal is to highlight:
 ## File Structure
 
 ```text
-Project install
-.codex/
-+-- AGENTS.md
-+-- config.toml
-+-- rules/
-+-- skills/
-+-- scripts/
-+-- homunculus/
-    +-- identity.json
-    +-- projects.json
-    +-- observations.jsonl
-    +-- instincts/
-    |   +-- personal/
-    |   +-- inherited/
-    +-- evolved/
-    |   +-- agents/
-    |   +-- skills/
-    |   +-- commands/
-    +-- projects/
-        +-- <project-hash>/
-            +-- observations.jsonl
-            +-- observations.archive/
-            +-- instincts/
-            |   +-- personal/
-            |   +-- inherited/
-            +-- evolved/
-                +-- skills/
-                +-- commands/
-                +-- agents/
-
-Global install
 ~/.codex/
 +-- AGENTS.md
 +-- config.toml
 +-- rules/
-+-- homunculus/
++-- mdt/
+    +-- scripts/
+    +-- homunculus/
+        +-- identity.json
+        +-- projects.json
+        +-- observations.jsonl
+        +-- instincts/
+        |   +-- personal/
+        |   +-- inherited/
+        +-- evolved/
+        |   +-- agents/
+        |   +-- skills/
+        |   +-- commands/
+        +-- projects/
+            +-- <project-hash>/
+                +-- observations.jsonl
+                +-- observations.archive/
+                +-- instincts/
+                |   +-- personal/
+                |   +-- inherited/
+                +-- evolved/
+                    +-- skills/
+                    +-- commands/
+                    +-- agents/
 ```
 
 ## Scope Decision Guide
@@ -282,11 +273,9 @@ Project instincts can be promoted to global scope when the same pattern is seen 
 Example:
 
 ```bash
-node .codex/skills/continuous-learning-manual/scripts/instinct-cli.js promote
-node .codex/skills/continuous-learning-manual/scripts/instinct-cli.js promote --dry-run
+node ~/.codex/skills/continuous-learning-manual/scripts/instinct-cli.js promote
+node ~/.codex/skills/continuous-learning-manual/scripts/instinct-cli.js promote --dry-run
 ```
-
-For global installs, use the matching `~/.codex/skills/continuous-learning-manual/scripts/instinct-cli.js` path instead.
 
 ## Confidence Scoring
 

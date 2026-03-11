@@ -262,7 +262,7 @@ surface. For Codex, use `continuous-learning-manual` for explicit/manual
 capture and analysis, and treat the optional external observer as a separate
 background-analysis enhancement layer.
 
-Other behavior (observation capture, instinct thresholds, project scoping, promotion criteria) is configured via code defaults in `instinct-cli.js` and the observe hook script.
+Other behavior (observation capture, instinct thresholds, project scoping, promotion criteria) is configured via the manual instinct CLI plus the observe hook script.
 
 ## File Structure
 
@@ -318,18 +318,18 @@ When the same instinct appears in multiple projects with high confidence, it's a
 
 ```bash
 # Promote a specific instinct
-node "${MDT_ROOT}/skills/continuous-learning-automatic/scripts/instinct-cli.js" promote prefer-explicit-errors
+node "${MDT_ROOT}/skills/continuous-learning-manual/scripts/instinct-cli.js" promote prefer-explicit-errors
 
 # Auto-promote all qualifying instincts
-node "${MDT_ROOT}/skills/continuous-learning-automatic/scripts/instinct-cli.js" promote
+node "${MDT_ROOT}/skills/continuous-learning-manual/scripts/instinct-cli.js" promote
 
 # Preview without changes
-node "${MDT_ROOT}/skills/continuous-learning-automatic/scripts/instinct-cli.js" promote --dry-run
+node "${MDT_ROOT}/skills/continuous-learning-manual/scripts/instinct-cli.js" promote --dry-run
 ```
 
 For manual installs, replace `<config>` with your MDT config directory:
 ```bash
-node "<config>/skills/continuous-learning-automatic/scripts/instinct-cli.js" promote
+node "<config>/skills/continuous-learning-manual/scripts/instinct-cli.js" promote
 ```
 
 The `/evolve` command also suggests promotion candidates.

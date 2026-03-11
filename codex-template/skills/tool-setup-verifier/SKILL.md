@@ -34,21 +34,21 @@ Read these first:
 Treat the docs pack as the human-readable source of truth and the JS contract as
 the machine-readable enforcement surface for Codex workflow checks.
 
-### Installed target repo mode
+### Installed global tool mode
 
 Use this when the current repo only has installed Codex assets such as:
 
-- `.codex/skills/`
-- `.codex/scripts/`
-- project `.codex/`
+- `~/.codex/skills/`
+- `~/.codex/mdt/scripts/`
+- user-global `~/.codex/`
 
 and does **not** have the full MDT docs pack at repo root.
 
 In that mode:
 
-1. read `.codex/skills/tool-setup-verifier/SKILL.md`
-2. read `.codex/scripts/lib/tool-workflow-contract.js`
-3. treat `~/.codex/` plus the local `.codex/` tree as the install surface
+1. read `~/.codex/skills/tool-setup-verifier/SKILL.md`
+2. read `~/.codex/mdt/scripts/lib/tool-workflow-contract.js`
+3. treat `~/.codex/` plus `~/.codex/mdt/` as the install surface
 4. do **not** fail just because `docs/tools/*` or `scripts/verify-tool-setups.js`
    are absent at repo root
 
@@ -62,11 +62,11 @@ In that mode:
 4. Summarize results by workflow and by Codex readiness.
 5. If something fails, identify the missing file, stale doc claim, or broken local probe before proposing broader changes.
 
-### Installed target repo mode
+### Installed global tool mode
 
-1. Run `node .codex/scripts/smoke-tool-setups.js`.
-2. Run `node .codex/scripts/smoke-codex-workflows.js`.
-3. Summarize Codex readiness from the installed project/user surfaces only.
+1. Run `node ~/.codex/mdt/scripts/smoke-tool-setups.js`.
+2. Run `node ~/.codex/mdt/scripts/smoke-codex-workflows.js`.
+3. Summarize Codex readiness from the installed global surfaces only.
 4. If something fails, identify the missing installed skill, missing local script,
    or missing `~/.codex/` file before proposing broader changes.
 
@@ -103,5 +103,5 @@ Also include:
 - If the Codex CLI is not installed locally, mark its smoke status as `SKIP`.
 - Do not promote a workflow claim to `official` unless the docs pack already supports that classification.
 - If the docs and the contract disagree, fix the disagreement before expanding scope.
-- In installed target repo mode, do not report false failures just because the
+- In installed global tool mode, do not report false failures just because the
   full MDT repo docs pack is not present.

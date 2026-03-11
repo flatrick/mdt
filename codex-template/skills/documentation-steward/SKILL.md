@@ -64,7 +64,7 @@ node scripts/ci/validate-markdown-path-refs.js
 If the current repo is an installed MDT Codex target repo and `scripts/ci/` is
 not present at repo root, use the installed local copies under:
 
-- `.codex/scripts/ci/`
+- `~/.codex/mdt/scripts/ci/`
 
 Treat these validator checks as baseline gates, not optional extras.
 

@@ -56,7 +56,7 @@ packages are applied.
 | Gap | Impact | Fixable? | How |
 |---|---|---|---|
 | **Skills**: only 1 Cursor-specific skill in template; shared skills arrive via package install | Users who install without packages get almost nothing | Yes | Add more skills to `cursor-template/skills/` or rely fully on package-driven install (current direction) |
-| **User-level rules**: DB-backed, not file-installable | Cannot automate user-rule install | **No** (vendor limitation) | Document clearly; target project-level only |
+| **User-level rules**: official docs still describe DB-backed/user-managed behavior while local `cursor-agent` accepts file-installed `~/.cursor/rules/*.mdc` | Install behavior differs by Cursor surface | Partially | Use global `~/.cursor/rules/*.mdc` as the MDT default, and treat repo-local rules only as an explicit bridge |
 | **Hooks**: experimental adapter, not vendor-documented | Could break in any Cursor update | Partially | Keep hooks optional; core workflows must work without them |
 | **Commands**: 8 shipped vs Claude's full 33-command catalog | Missing: e2e, build-fix, security, refactor-clean, eval, loop, checkpoint, instinct-\*, etc. | Yes | Add to `cursor-template/commands/` and package manifests |
 | **Continuous learning**: depends on experimental hooks | If hooks break, learning stops silently | Partially | Add a manual CLI fallback like Codex has |
@@ -99,9 +99,10 @@ watcher (higher fidelity, requires a second terminal).
 
 ### Cursor: User-Level Rules (Vendor Limitation)
 
-Cursor stores user-level rules in a database, not files. MDT can only install
-project-level rules to `.cursor/rules/`. This cannot be changed without Cursor
-exposing a file-based user-rule surface.
+Cursor's official docs still describe user-level rules as database-backed, but
+local `cursor-agent` also accepts file-installed `~/.cursor/rules/*.mdc`.
+MDT should treat global `.mdc` rules as the default install surface and use
+repo-local `.cursor/rules/` only as an explicit bridge when needed.
 
 ## Implementation Plan
 
@@ -159,7 +160,7 @@ Add these to package manifests under `tools.cursor.commands`.
 #### 2a. Codex External Observer
 
 Create an optional `scripts/codex-observer.js` that runs as a background Node
-process outside the Codex session, watching `.codex/homunculus/` for changes
+process outside the Codex session, watching `~/.codex/mdt/homunculus/` for changes
 and triggering analysis.
 
 Why external: Codex's sandboxed shell blocks subprocess spawning
@@ -169,10 +170,10 @@ this.
 
 Manual fallback (already exists):
 ```bash
-node .codex/skills/continuous-learning-manual/scripts/codex-learn.js status
-node .codex/skills/continuous-learning-manual/scripts/codex-learn.js capture < summary.txt
-node .codex/skills/continuous-learning-manual/scripts/codex-learn.js analyze
-node .codex/skills/continuous-learning-manual/scripts/codex-learn.js weekly --week YYYY-Www
+node ~/.codex/skills/continuous-learning-manual/scripts/codex-learn.js status
+node ~/.codex/skills/continuous-learning-manual/scripts/codex-learn.js capture < summary.txt
+node ~/.codex/skills/continuous-learning-manual/scripts/codex-learn.js analyze
+node ~/.codex/skills/continuous-learning-manual/scripts/codex-learn.js weekly --week YYYY-Www
 ```
 
 **Effort**: Medium

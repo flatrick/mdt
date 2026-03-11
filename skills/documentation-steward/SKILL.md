@@ -64,9 +64,9 @@ node scripts/ci/validate-markdown-path-refs.js
 If the current repo is an installed MDT target repo and `scripts/ci/` is not
 present at repo root, use the installed local copies instead:
 
-- Claude Code: `.claude/scripts/ci/`
-- Cursor: `.cursor/scripts/ci/`
-- Codex: `.codex/scripts/ci/`
+- Claude Code: `~/.claude/mdt/scripts/ci/`
+- Cursor: `~/.cursor/mdt/scripts/ci/`
+- Codex: `~/.codex/mdt/scripts/ci/`
 
 Treat these validator checks as baseline gates, not optional extras.
 

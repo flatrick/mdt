@@ -17,24 +17,24 @@ Do not guess from prior context.
 
 ## What To Check
 
-1. `.cursor/` install exists
+1. `~/.cursor/` install exists
 2. core project guidance is present:
-   - `.cursor/rules/`
-   - `.cursor/skills/`
-   - `.cursor/commands/`
+   - `~/.cursor/rules/`
+   - `~/.cursor/skills/`
+   - `~/.cursor/commands/`
    - repo-root `AGENTS.md`
 3. one runtime-specific signal:
-   - `.cursor/hooks.json` exists, or hook install was intentionally skipped
-   - continuous-learning storage resolves under `.cursor/`
+   - `~/.cursor/hooks.json` exists, or hook install was intentionally skipped
+   - continuous-learning storage resolves under `~/.cursor/mdt/`
    - session/runtime paths are described correctly
 
 Important runtime rule:
 
-- `.cursor/homunculus/` is created lazily after relevant continuous-learning
+- `~/.cursor/mdt/homunculus/` is created lazily after relevant continuous-learning
   activity
-- if install paths such as `.cursor/`, `.cursor/rules/`, `.cursor/skills/`, or
-  `.cursor/commands/` exist on disk, do not report them as `MISSING`
-- if `.cursor/homunculus/` does not exist yet but the install is otherwise
+- if install paths such as `~/.cursor/`, `~/.cursor/rules/`, `~/.cursor/skills/`, or
+  `~/.cursor/commands/` exist on disk, do not report them as `MISSING`
+- if `~/.cursor/mdt/homunculus/` does not exist yet but the install is otherwise
   present, report runtime as `PARTIAL`, not `FAIL`, and tell the user to trigger
   an edit or shell command before checking again
 
@@ -58,7 +58,7 @@ Next step: ...
 - prefer concrete file/path evidence
 - cite the path you inspected when reporting `MISSING` or `FAIL`
 - do not claim hook runtime behavior is working unless the current session proves it
-- if `.cursor/` is missing or stale, recommend a fresh install command
+- if `~/.cursor/` is missing or stale, recommend a fresh install command
 - if hooks are absent, distinguish between `skipped intentionally` and `not installed`
 
 ## Useful Follow-Up

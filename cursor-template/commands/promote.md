@@ -10,13 +10,13 @@ Promote instincts from project scope to global scope in continuous-learning-manu
 
 ## Implementation
 
-Run the project-installed Cursor instinct CLI:
+Run the globally installed Cursor instinct CLI:
 
 ```bash
-node ".cursor/skills/continuous-learning-manual/scripts/instinct-cli.js" promote [instinct-id] [--force] [--dry-run]
+node "<config>/skills/continuous-learning-manual/scripts/instinct-cli.js" promote [instinct-id] [--force] [--dry-run]
 ```
 
-For a user/global Cursor install, replace `.cursor` with `~/.cursor`.
+Default `<config>` is `~/.cursor`. If your Cursor config root is overridden, use that instead.
 
 Do not fall back to other tool directories such as `~/.claude`, `~/.codex`,
 repo `skills/...`, or `${MDT_ROOT}/...`. If the Cursor-installed path is
