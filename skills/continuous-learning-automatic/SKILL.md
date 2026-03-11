@@ -127,18 +127,18 @@ Session Activity (in a git repo)
 
 The system automatically detects your current project:
 
-1. **`CLAUDE_PROJECT_DIR` env var** (highest priority)
-2. **`git remote get-url origin`** — yields `<repo-name>-git` (e.g., `my-react-app-git`)
-3. **`git rev-parse --show-toplevel`** — fallback using repo path, yields `<basename>-<md5_8(path)>`
-4. **No VCS** — `<basename>-<md5_8(path)>` (path-anchored to prevent collisions)
+1. **Explicit project env vars** such as `CLAUDE_PROJECT_DIR` or tool-agnostic `MDT_PROJECT_ROOT` (highest priority when they point to a git-backed directory)
+2. **`git remote get-url origin`** when available — the remote URL becomes the stable project identity anchor
+3. **`git rev-parse --show-toplevel`** — fallback using the local git repo root when no remote is available
+4. **Global fallback** — if no git-backed project can be identified, observations stay in the global scope
 
-Project IDs encode both the name and detection method:
+Project IDs are stable 12-character hashes derived from:
 
-- **VCS remote available** → `<repo-name>-<vcs>` (e.g., `mdt-git`) — remote-anchored, portable
-- **VCS repo, no remote** → `<basename>-<8-char-md5>` — path-anchored
-- **No VCS** → `<basename>-<8-char-md5>` — path-anchored
+- **Remote available** → `sha256(remoteUrl).slice(0, 12)` — stable across re-clones
+- **Git repo, no remote** → `sha256(repoRoot).slice(0, 12)` — path-anchored local fallback
+- **No git project** → use the global homunculus scope instead of creating a project-specific folder
 
-Only git is currently detected; other VCS systems are in the backlog. A registry file at `<data>/homunculus/projects.json` maps IDs to human-readable names.
+Only git is currently detected; other VCS systems are in the backlog. A registry file at `<data>/homunculus/projects.json` maps project IDs to human-readable names, roots, and remotes.
 
 ## Quick Start
 

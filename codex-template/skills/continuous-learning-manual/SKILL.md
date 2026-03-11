@@ -112,13 +112,13 @@ The system detects project context in this order:
 3. repo path / repo markers
 4. global fallback when no project can be identified
 
-Project IDs encode both name and detection method, making the storage layout self-describing:
+Project IDs are stable 12-character hashes derived from the best available git identity:
 
-- **VCS remote available** → `<repo-name>-<vcs>` (e.g., `mdt-git`) — remote-anchored, no hash needed
-- **VCS repo, no remote** → `<basename>-<8-char-md5>` — path-anchored to prevent collisions
-- **No VCS** → `<basename>-<8-char-md5>` — path-anchored
+- **Remote available** → `sha256(remoteUrl).slice(0, 12)` — stable across re-clones
+- **Git repo, no remote** → `sha256(repoRoot).slice(0, 12)` — path-anchored local fallback
+- **No git project** → use the global homunculus scope instead of creating a project-specific folder
 
-Only git is currently detected; other VCS systems are in the backlog. A registry file at `~/.codex/mdt/homunculus/projects.json` maps IDs to absolute paths and human-readable names.
+Only git is currently detected; other VCS systems are in the backlog. A registry file at `~/.codex/mdt/homunculus/projects.json` maps IDs to absolute paths, remotes, and human-readable names.
 
 ## Quick Start
 
