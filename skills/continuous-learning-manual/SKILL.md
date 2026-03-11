@@ -77,6 +77,12 @@ The exact observation path is tool-specific:
 - Claude Code / Cursor: hook-capable observation
 - Codex: explicit/manual capture by default
 
+Generated skill artifacts should be treated as a separate concern from instincts.
+
+- candidate/generated skills belong under `<data>/generated/skills/learned/`
+- live/promoted skills belong under the tool-facing skill surface such as `<config>/skills/`
+- do not treat MDT-owned generated candidates as already-promoted live skills
+
 ## The Instinct Model
 
 An instinct is a small learned behavior:
@@ -299,6 +305,21 @@ Notes:
 - Cursor setups must not depend on Claude
 - Codex observer support is a separate opt-in layer, not the baseline
 
+## Generated Candidates vs Live Skills
+
+Continuous learning can eventually produce skill-like artifacts, but they are not all equal.
+
+- `homunculus/` stores instincts, evidence, evolution outputs, and project-scoped learning state
+- `<data>/generated/skills/learned/` is MDT-owned staging for candidate/generated skills
+- `<config>/skills/` is the live tool-facing skill directory
+
+Promotion/materialization is the boundary between MDT-owned state and the live tool-facing skill surface. Until a generated skill is explicitly approved and materialized, it should stay under MDT-owned state.
+
+Codex example:
+
+- candidate/generated skills: `~/.codex/mdt/generated/skills/learned/`
+- live/promoted skills: `~/.codex/skills/`
+
 ## Weekly Retrospectives
 
 Weekly retrospectives are intentionally low-noise.
@@ -319,28 +340,32 @@ The goal is not to log more activity. The goal is to highlight:
 ## File Structure
 
 ```text
-<data>/homunculus/
-+-- identity.json
-+-- projects.json
-+-- observations.jsonl
-+-- instincts/
-|   +-- personal/
-|   +-- inherited/
-+-- evolved/
-|   +-- agents/
-|   +-- skills/
-|   +-- commands/
-+-- projects/
-    +-- <project-hash>/
-        +-- observations.jsonl
-        +-- observations.archive/
-        +-- instincts/
-        |   +-- personal/
-        |   +-- inherited/
-        +-- evolved/
-            +-- skills/
-            +-- commands/
-            +-- agents/
+<data>/
++-- homunculus/
+|   +-- identity.json
+|   +-- projects.json
+|   +-- observations.jsonl
+|   +-- instincts/
+|   |   +-- personal/
+|   |   +-- inherited/
+|   +-- evolved/
+|   |   +-- agents/
+|   |   +-- skills/
+|   |   +-- commands/
+|   +-- projects/
+|       +-- <project-hash>/
+|           +-- observations.jsonl
+|           +-- observations.archive/
+|           +-- instincts/
+|           |   +-- personal/
+|           |   +-- inherited/
+|           +-- evolved/
+|               +-- skills/
+|               +-- commands/
+|               +-- agents/
++-- generated/
+    +-- skills/
+        +-- learned/
 ```
 
 ## Scope Decision Guide
@@ -393,6 +418,8 @@ Codex is intentionally different:
 ## Backward Compatibility
 
 v2.1 remains compatible with existing instinct storage and evolved assets. Legacy hook-oriented flows remain relevant for Claude Code and Cursor, but they are not the Codex baseline in this repo.
+
+Generated candidate skills should now be treated as MDT-owned staging artifacts under `<data>/generated/skills/learned/`. Live tool-facing skills should remain in `<config>/skills/` and only receive explicitly promoted/materialized outputs.
 
 ## Privacy
 

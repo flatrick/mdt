@@ -203,6 +203,16 @@ Notes:
 - Codex observer support is a separate opt-in layer, not the baseline
 - the observer reads and writes under `~/.codex/mdt/`
 
+## Generated Candidates vs Live Skills
+
+Continuous learning can eventually produce skill-like artifacts, but they are not all equal.
+
+- `~/.codex/mdt/homunculus/` stores instincts, evidence, evolution outputs, and project-scoped learning state
+- `~/.codex/mdt/generated/skills/learned/` is MDT-owned staging for candidate/generated skills
+- `~/.codex/skills/` is the live tool-facing skill directory
+
+Promotion/materialization is the boundary between MDT-owned state and the live tool-facing skill surface. Until a generated skill is explicitly approved and materialized, it should stay under MDT-owned state.
+
 ## Weekly Retrospectives
 
 Weekly retrospectives are intentionally low-noise.
@@ -227,30 +237,34 @@ The goal is not to log more activity. The goal is to highlight:
 +-- AGENTS.md
 +-- config.toml
 +-- rules/
++-- skills/                 # live/promoted tool-facing skills
 +-- mdt/
     +-- scripts/
     +-- homunculus/
-        +-- identity.json
-        +-- projects.json
-        +-- observations.jsonl
-        +-- instincts/
-        |   +-- personal/
-        |   +-- inherited/
-        +-- evolved/
-        |   +-- agents/
-        |   +-- skills/
-        |   +-- commands/
-        +-- projects/
-            +-- <project-hash>/
-                +-- observations.jsonl
-                +-- observations.archive/
-                +-- instincts/
-                |   +-- personal/
-                |   +-- inherited/
-                +-- evolved/
-                    +-- skills/
-                    +-- commands/
-                    +-- agents/
+    |   +-- identity.json
+    |   +-- projects.json
+    |   +-- observations.jsonl
+    |   +-- instincts/
+    |   |   +-- personal/
+    |   |   +-- inherited/
+    |   +-- evolved/
+    |   |   +-- agents/
+    |   |   +-- skills/
+    |   |   +-- commands/
+    |   +-- projects/
+    |       +-- <project-hash>/
+    |           +-- observations.jsonl
+    |           +-- observations.archive/
+    |           +-- instincts/
+    |           |   +-- personal/
+    |           |   +-- inherited/
+    |           +-- evolved/
+    |               +-- skills/
+    |               +-- commands/
+    |               +-- agents/
+    +-- generated/
+        +-- skills/
+            +-- learned/   # candidate/generated skills awaiting promotion
 ```
 
 ## Scope Decision Guide
@@ -298,7 +312,7 @@ Codex is intentionally explicit and manual:
 
 ## Backward Compatibility
 
-v2.1 remains compatible with existing instinct storage and evolved assets.
+v2.1 remains compatible with existing instinct storage and evolved assets. Generated candidate skills should be treated as MDT-owned staging artifacts under `~/.codex/mdt/generated/skills/learned/`. Live tool-facing skills should remain in `~/.codex/skills/` and only receive explicitly promoted/materialized outputs.
 
 ## Privacy
 
