@@ -32,6 +32,8 @@ function runTests() {
       ensureFile(path.join(fixture.overrideRoot, 'skills', 'tdd-workflow', 'SKILL.md'));
       ensureFile(path.join(fixture.overrideRoot, 'mdt', 'scripts', 'smoke-codex-workflows.js'));
       ensureFile(path.join(fixture.overrideRoot, 'mdt', 'scripts', 'smoke-tool-setups.js'));
+      ensureFile(path.join(fixture.overrideRoot, 'mdt', 'workflow-contracts', 'metadata.json'));
+      ensureFile(path.join(fixture.overrideRoot, 'mdt', 'workflow-contracts', 'workflows', 'smoke.json'));
 
       const output = [];
       const result = smokeToolSetups({

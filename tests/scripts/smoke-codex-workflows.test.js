@@ -95,6 +95,52 @@ function createInstalledFixtureRoot() {
   return path.join(rootDir, '.codex');
 }
 
+function createInstalledPreservedConfigFixtureRoot() {
+  const rootDir = createTestDir('codex-installed-preserved-config-');
+  writeFile(
+    rootDir,
+    path.join('.codex', 'AGENTS.md'),
+    [
+      '# Codex',
+      'Complex features, architecture',
+      'tdd-workflow',
+      'verification-loop',
+      'security-review'
+    ].join('\n')
+  );
+
+  writeFile(
+    rootDir,
+    path.join('.codex', 'config.toml'),
+    [
+      'model = "gpt-5.4"',
+      '[windows]',
+      'sandbox = "elevated"'
+    ].join('\n')
+  );
+
+  writeFile(
+    rootDir,
+    path.join('.codex', 'config.mdt.toml'),
+    [
+      'approval_policy = "on-request"',
+      'sandbox_mode = "workspace-write"'
+    ].join('\n')
+  );
+
+  writeFile(rootDir, path.join('.codex', 'skills', 'smoke', 'SKILL.md'), '# Smoke');
+  writeFile(rootDir, path.join('.codex', 'skills', 'tool-setup-verifier', 'SKILL.md'), '# Tool Setup Verifier');
+  writeFile(rootDir, path.join('.codex', 'skills', 'tdd-workflow', 'SKILL.md'), '# Test-Driven Development Workflow');
+  writeFile(rootDir, path.join('.codex', 'skills', 'coding-standards', 'SKILL.md'), '# Universal coding standards');
+  writeFile(rootDir, path.join('.codex', 'skills', 'verification-loop', 'SKILL.md'), '# Verification Loop Skill');
+  writeFile(rootDir, path.join('.codex', 'skills', 'security-review', 'SKILL.md'), '# Security Review Skill');
+  writeFile(rootDir, path.join('.codex', 'skills', 'e2e-testing', 'SKILL.md'), '# E2E Testing Patterns');
+  writeFile(rootDir, path.join('.codex', 'mdt', 'scripts', 'smoke-tool-setups.js'), '// smoke');
+  writeFile(rootDir, path.join('.codex', 'mdt', 'scripts', 'smoke-codex-workflows.js'), '// smoke');
+
+  return path.join(rootDir, '.codex');
+}
+
 function runTests() {
   console.log('\n=== Testing smoke-codex-workflows.js ===\n');
 
@@ -227,6 +273,26 @@ function runTests() {
       assert.ok(output.join('\n').includes('~/.codex/skills/smoke/SKILL.md') || output.join('\n').includes('smoke: PASS'));
       assert.ok(output.join('\n').includes('smoke: PASS'));
       assert.ok(output.join('\n').includes('code-review: PASS'));
+      assert.ok(output.join('\n').includes('verify: PASS'));
+    } finally {
+      cleanupTestDir(rootDir);
+    }
+  })) passed++; else failed++;
+
+  if (test('passes in installed target mode when the user config is preserved and MDT writes config.mdt.toml', () => {
+    const rootDir = createInstalledPreservedConfigFixtureRoot();
+
+    try {
+      const output = [];
+      const result = smokeCodexWorkflows({
+        rootDir,
+        io: {
+          log: message => output.push(String(message))
+        }
+      });
+
+      assert.strictEqual(result.exitCode, 0, output.join('\n'));
+      assert.ok(output.join('\n').includes('installed-target'));
       assert.ok(output.join('\n').includes('verify: PASS'));
     } finally {
       cleanupTestDir(rootDir);

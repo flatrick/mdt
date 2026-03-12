@@ -12,6 +12,17 @@ const { ensureSubprocessCapability } = require('../helpers/subprocess-capability
 const { test, createTestDir, cleanupTestDir } = require('../helpers/test-runner');
 const { buildTestEnv } = require('../helpers/test-env-profiles');
 
+const REPRESENTATIVE_BASELINE_SKILLS = [
+  'api-design',
+  'backend-patterns',
+  'eval-harness',
+  'search-first',
+  'security-review',
+  'strategic-compact',
+  'tdd-workflow',
+  'verification-loop'
+];
+
 function runInstaller(args, options = {}) {
   const repoRoot = path.join(__dirname, '..', '..');
   const installerPath = path.join(repoRoot, 'scripts', 'install-mdt.js');
@@ -103,6 +114,7 @@ function runTests() {
           assert.ok(fs.existsSync(path.join(claudeBase, 'commands', 'smoke.md')));
           assert.ok(fs.existsSync(path.join(claudeBase, 'mdt', 'scripts', 'smoke-tool-setups.js')));
           assert.ok(fs.existsSync(path.join(claudeBase, 'mdt', 'scripts', 'smoke-claude-workflows.js')));
+          assert.ok(fs.existsSync(path.join(claudeBase, 'mdt', 'workflow-contracts', 'metadata.json')));
         } finally {
           cleanupTestDir(tmpHome);
         }
@@ -266,6 +278,7 @@ function runTests() {
 
           assert.ok(fs.existsSync(path.join(cursorRoot, 'commands', 'smoke.md')));
           assert.ok(fs.existsSync(path.join(cursorRoot, 'mdt', 'scripts', 'smoke-tool-setups.js')));
+          assert.ok(fs.existsSync(path.join(cursorRoot, 'mdt', 'workflow-contracts', 'metadata.json')));
         } finally {
           cleanupTestDir(tmpHome);
         }
@@ -353,6 +366,66 @@ function runTests() {
           assert.ok(fs.existsSync(path.join(codexRoot, 'skills', 'tool-setup-verifier', 'SKILL.md')));
           assert.ok(fs.existsSync(path.join(codexRoot, 'mdt', 'scripts', 'smoke-tool-setups.js')));
           assert.ok(fs.existsSync(path.join(codexRoot, 'mdt', 'scripts', 'smoke-codex-workflows.js')));
+          assert.ok(fs.existsSync(path.join(codexRoot, 'mdt', 'workflow-contracts', 'metadata.json')));
+          assert.ok(fs.existsSync(path.join(codexRoot, 'mdt', 'workflow-contracts', 'workflows', 'smoke.json')));
+        } finally {
+          cleanupTestDir(tmpHome);
+        }
+      }
+    },
+    {
+      name: 'codex install always includes baseline tdd-workflow skill',
+      run: () => {
+        const tmpHome = createTestDir('mdt-install-codex-baseline-home-');
+        const codexRoot = path.join(tmpHome, '.codex');
+
+        try {
+          const result = runInstaller(['--target', 'codex', 'continuous-learning'], {
+            overrideDir: codexRoot,
+            env: {
+              HOME: tmpHome,
+              USERPROFILE: tmpHome
+            }
+          });
+          assertSuccess(result, 'codex baseline skill install');
+
+          for (const skillName of REPRESENTATIVE_BASELINE_SKILLS) {
+            assert.ok(fs.existsSync(path.join(codexRoot, 'skills', skillName, 'SKILL.md')));
+          }
+        } finally {
+          cleanupTestDir(tmpHome);
+        }
+      }
+    },
+    {
+      name: 'codex reinstall keeps skill frontmatter intact',
+      run: () => {
+        const tmpHome = createTestDir('mdt-install-codex-reinstall-home-');
+        const codexRoot = path.join(tmpHome, '.codex');
+
+        try {
+          const first = runInstaller(['--target', 'codex', '--dev', 'typescript', 'continuous-learning'], {
+            overrideDir: codexRoot,
+            env: {
+              HOME: tmpHome,
+              USERPROFILE: tmpHome
+            }
+          });
+          assertSuccess(first, 'codex first install');
+
+          const second = runInstaller(['--target', 'codex', '--dev', 'typescript', 'continuous-learning'], {
+            overrideDir: codexRoot,
+            env: {
+              HOME: tmpHome,
+              USERPROFILE: tmpHome
+            }
+          });
+          assertSuccess(second, 'codex second install');
+
+          const skillPath = path.join(codexRoot, 'skills', 'tdd-workflow', 'SKILL.md');
+          const skillContent = fs.readFileSync(skillPath, 'utf8');
+          assert.ok(skillContent.startsWith('---\n') || skillContent.startsWith('---\r\n'));
+          assert.ok(!fs.existsSync(skillPath + '.tmp'));
         } finally {
           cleanupTestDir(tmpHome);
         }
@@ -440,6 +513,31 @@ function runTests() {
         } finally {
           cleanupTestDir(tmpHome);
           cleanupTestDir(tmpProject);
+        }
+      }
+    },
+    {
+      name: 'claude install always includes baseline tdd-workflow skill',
+      run: () => {
+        const tmpHome = createTestDir('mdt-install-claude-baseline-');
+        const claudeBase = path.join(tmpHome, '.claude');
+
+        try {
+          const result = runInstaller(['continuous-learning'], {
+            overrideDir: claudeBase,
+            env: {
+              HOME: tmpHome,
+              USERPROFILE: tmpHome,
+              CLAUDE_BASE_DIR: claudeBase
+            }
+          });
+          assertSuccess(result, 'claude baseline skill install');
+
+          for (const skillName of REPRESENTATIVE_BASELINE_SKILLS) {
+            assert.ok(fs.existsSync(path.join(claudeBase, 'skills', skillName, 'SKILL.md')));
+          }
+        } finally {
+          cleanupTestDir(tmpHome);
         }
       }
     },

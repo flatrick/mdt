@@ -516,7 +516,7 @@ function runTests() {
         rules: [],
         agents: [],
         commands: [],
-        skills: ['coding-standards'],
+        skills: ['continuous-learning-manual'],
         tools: {
           codex: {
             skills: ['documentation-steward']
@@ -527,7 +527,7 @@ function runTests() {
       installCodexSkills(resolveSelectedPackages(['explicit-codex'], { packagesDir }), tempDir);
 
       assert.ok(fs.existsSync(path.join(tempDir, 'skills', 'documentation-steward', 'SKILL.md')));
-      assert.ok(!fs.existsSync(path.join(tempDir, 'skills', 'coding-standards', 'SKILL.md')));
+      assert.ok(!fs.existsSync(path.join(tempDir, 'skills', 'continuous-learning-manual', 'SKILL.md')));
     });
   })) passed++; else failed++;
 

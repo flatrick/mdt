@@ -290,6 +290,12 @@ function buildInstalledTddChecks(files) {
 }
 
 function buildInstalledVerifyChecks(files) {
+  const primaryConfig = files['.codex/config.toml'];
+  const referenceConfig = files['.codex/config.mdt.toml'];
+  const hasVerificationDefaults =
+    (primaryConfig.exists && primaryConfig.content.includes('sandbox_mode = "workspace-write"'))
+    || (referenceConfig.exists && referenceConfig.content.includes('sandbox_mode = "workspace-write"'));
+
   return {
     workflow: 'verify',
     checks: [
@@ -305,10 +311,8 @@ function buildInstalledVerifyChecks(files) {
       },
       {
         path: '.codex/config.toml',
-        ok:
-          files['.codex/config.toml'].exists &&
-          files['.codex/config.toml'].content.includes('sandbox_mode = "workspace-write"'),
-        message: 'Codex project config should provide the expected verification sandbox defaults'
+        ok: hasVerificationDefaults,
+        message: 'Codex install should expose the expected verification sandbox defaults via config.toml or config.mdt.toml'
       }
     ]
   };
@@ -411,6 +415,7 @@ function smokeCodexWorkflows(options = {}) {
     ? {
         '.codex/AGENTS.md': readRepoFile(rootDir, 'AGENTS.md'),
         '.codex/config.toml': readRepoFile(rootDir, 'config.toml'),
+        '.codex/config.mdt.toml': readRepoFile(rootDir, 'config.mdt.toml'),
         '~/.codex/skills/smoke/SKILL.md': readRepoFile(
           rootDir,
           path.join('skills', 'smoke', 'SKILL.md')

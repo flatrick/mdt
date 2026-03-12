@@ -44,6 +44,28 @@ const CLAUDE_WORKFLOW_SCRIPTS = ['smoke-claude-workflows.js'];
 const DEV_SMOKE_SCRIPT_FILES = ['smoke-tool-setups.js'];
 const CURSOR_WORKFLOW_SCRIPT_FILES = ['materialize-mdt-local.js'];
 const CODEX_DEV_SKILL_NAMES = ['tool-setup-verifier', 'smoke'];
+const BASELINE_SHARED_SKILL_NAMES = [
+  'api-design',
+  'autonomous-loops',
+  'backend-patterns',
+  'coding-standards',
+  'content-hash-cache-pattern',
+  'database-migrations',
+  'deployment-patterns',
+  'eval-harness',
+  'frontend-patterns',
+  'iterative-retrieval',
+  'project-guidelines-example',
+  'regex-vs-llm-structured-text',
+  'search-first',
+  'security-review',
+  'security-scan',
+  'skill-stocktake',
+  'strategic-compact',
+  'tdd-workflow',
+  'verification-loop'
+];
+const WORKFLOW_CONTRACTS_DIR = path.join(REPO_ROOT, 'workflow-contracts');
 const SUPPORTED_PACKAGE_TARGETS = new Set(['claude', 'cursor', 'gemini', 'codex']);
 const TARGET_CAPABILITIES = {
   claude: { hooks: 'official', runtimeScripts: true, sessionData: true },
@@ -676,9 +698,21 @@ function copyRecursiveSync(srcDir, destDir, filter = () => true) {
     if (e.isDirectory()) {
       copyRecursiveSync(srcPath, destPath, filter);
     } else if (e.isFile() && filter(e.name)) {
-      fs.copyFileSync(srcPath, destPath);
+      copyFileAtomicSync(srcPath, destPath);
     }
   }
+}
+
+function copyFileAtomicSync(srcPath, destPath) {
+  fs.mkdirSync(path.dirname(destPath), { recursive: true });
+  const tempPath = `${destPath}.tmp-${process.pid}-${Date.now()}`;
+  fs.copyFileSync(srcPath, tempPath);
+
+  if (process.platform === 'win32' && fs.existsSync(destPath)) {
+    fs.unlinkSync(destPath);
+  }
+
+  fs.renameSync(tempPath, destPath);
 }
 
 function copyRuntimeScripts(destScriptsDir) {
@@ -739,7 +773,7 @@ function copyMarkdownFiles(srcDir, destDir) {
   fs.mkdirSync(destDir, { recursive: true });
   fs.readdirSync(srcDir).forEach(fileName => {
     if (fileName.endsWith('.md')) {
-      fs.copyFileSync(path.join(srcDir, fileName), path.join(destDir, fileName));
+      copyFileAtomicSync(path.join(srcDir, fileName), path.join(destDir, fileName));
     }
   });
 }
@@ -757,7 +791,7 @@ function copySelectedMarkdownFiles(srcDir, destDir, fileNames, missingContext = 
       }
       continue;
     }
-    fs.copyFileSync(srcPath, destPath);
+    copyFileAtomicSync(srcPath, destPath);
     copied++;
   }
   return copied;
@@ -832,7 +866,7 @@ function copyExplicitFiles(srcDir, destDir, fileNames, missingContext = '') {
       continue;
     }
 
-    fs.copyFileSync(srcPath, destPath);
+    copyFileAtomicSync(srcPath, destPath);
     copied += 1;
   }
 
@@ -874,7 +908,7 @@ function installClaudeRules(selectedPackages, rulesDest) {
 
     const destPath = path.join(rulesDest, ...normalizedRulePath.split('/'));
     fs.mkdirSync(path.dirname(destPath), { recursive: true });
-    fs.copyFileSync(srcPath, destPath);
+    copyFileAtomicSync(srcPath, destPath);
     const ruleDir = normalizedRulePath.split('/')[0];
     if (ruleDir) {
       installedDirectories.add(ruleDir);
@@ -893,6 +927,15 @@ function installDevSharedSkills(destDir) {
 
   const skillsDest = path.join(destDir, 'skills');
   return copySelectedDirectories(SHARED_SKILLS_SRC, skillsDest, ['tool-doc-maintainer'], 'Dev-only shared skill');
+}
+
+function installBaselineSharedSkills(destDir) {
+  if (!fs.existsSync(SHARED_SKILLS_SRC)) {
+    return 0;
+  }
+
+  const skillsDest = path.join(destDir, 'skills');
+  return copySelectedDirectories(SHARED_SKILLS_SRC, skillsDest, BASELINE_SHARED_SKILL_NAMES, 'Baseline shared skill');
 }
 
 function installClaudeContentDirs(claudeBase, selectedPackages, devMode = false) {
@@ -920,6 +963,10 @@ function installClaudeContentDirs(claudeBase, selectedPackages, devMode = false)
   const skillsSrc = SHARED_SKILLS_SRC;
   const skillsDest = path.join(claudeBase, 'skills');
   if (fs.existsSync(skillsSrc) && path.resolve(skillsSrc) !== path.resolve(skillsDest)) {
+    if (installBaselineSharedSkills(claudeBase) > 0) {
+      console.log('Installing baseline shared skills -> ' + skillsDest + '/');
+    }
+
     const skillNames = getManifestSelections(selectedPackages, 'skills');
     if (copySelectedDirectories(skillsSrc, skillsDest, skillNames, 'Package-selected skill') > 0) {
       console.log('Installing package-selected skills -> ' + skillsDest + '/');
@@ -1003,6 +1050,12 @@ function installDevSmokeScripts(installRoot, fileNames, logLabel) {
   const scriptsDest = path.join(ensureMdtRoot(installRoot), 'scripts');
   if (copyExplicitFiles(path.join(REPO_ROOT, 'scripts'), scriptsDest, fileNames, `${logLabel} smoke script`) > 0) {
     console.log(`Installing ${logLabel} smoke scripts -> ${scriptsDest}/`);
+  }
+
+  const workflowContractsDest = path.join(resolveMdtRoot(installRoot), 'workflow-contracts');
+  if (fs.existsSync(WORKFLOW_CONTRACTS_DIR)) {
+    copyRecursiveSync(WORKFLOW_CONTRACTS_DIR, workflowContractsDest);
+    console.log(`Installing ${logLabel} workflow contracts -> ${workflowContractsDest}/`);
   }
 }
 
@@ -1096,6 +1149,9 @@ function installCursorRules(destDir, selectedPackages) {
 function installCursorSkills(destDir, selectedPackages) {
   const skillsDest = path.join(destDir, 'skills');
   const sharedSkillsSrc = SHARED_SKILLS_SRC;
+  if (installBaselineSharedSkills(destDir) > 0) {
+    console.log('Installing baseline shared skills -> ' + skillsDest + '/');
+  }
   const sharedSkillNames = getManifestSelections(selectedPackages, 'skills');
   if (copySelectedDirectories(sharedSkillsSrc, skillsDest, sharedSkillNames, 'Package-selected skill') > 0) {
     console.log('Installing package-selected skills -> ' + skillsDest + '/');
@@ -1274,6 +1330,9 @@ function installCodexRules(selectedPackages, destDir) {
 
 function installCodexSkills(selectedPackages, destDir, devMode = false) {
   const skillsDest = path.join(destDir, 'skills');
+  if (installBaselineSharedSkills(destDir) > 0) {
+    console.log('Installing baseline shared skills -> ' + skillsDest + '/');
+  }
   const codexSkillNames = getToolManifestSelections(selectedPackages, 'codex', 'skills');
   if (installMergedSkillDirectories(SHARED_SKILLS_SRC, CODEX_SKILLS_SRC, skillsDest, codexSkillNames, 'Codex tool skill') > 0) {
     console.log('Installing Codex tool skills -> ' + skillsDest + '/');
@@ -1301,6 +1360,11 @@ function installCodexWorkflowScripts(codexDir, selectedPackages, devMode = false
   const workflowScripts = mergeUniqueOrdered(baselineWorkflowScripts, optionalWorkflowScripts);
   if (copyExplicitFiles(path.join(REPO_ROOT, 'scripts'), scriptsDest, workflowScripts, 'Codex workflow script') > 0) {
     console.log('Installing Codex workflow scripts -> ' + scriptsDest + '/');
+  }
+  if (devMode && fs.existsSync(WORKFLOW_CONTRACTS_DIR)) {
+    const workflowContractsDest = path.join(resolveMdtRoot(codexDir), 'workflow-contracts');
+    copyRecursiveSync(WORKFLOW_CONTRACTS_DIR, workflowContractsDest);
+    console.log('Installing Codex workflow contracts -> ' + workflowContractsDest + '/');
   }
 }
 
@@ -1464,6 +1528,9 @@ function installGeminiContent(destDirAgent, destDirGemini, selectedPackages, dev
   const skillsSrc = path.join(REPO_ROOT, 'skills');
   if (fs.existsSync(skillsSrc)) {
     const skillsDest = path.join(destDirAgent, 'skills');
+    if (installBaselineSharedSkills(destDirAgent) > 0) {
+      console.log('Installing baseline shared skills -> ' + skillsDest + '/');
+    }
     const skillNames = getManifestSelections(selectedPackages, 'skills');
     if (copySelectedDirectories(skillsSrc, skillsDest, skillNames, 'Package-selected skill') > 0) {
       console.log('Installing package-selected skills -> ' + skillsDest + '/');

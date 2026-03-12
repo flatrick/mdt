@@ -159,3 +159,24 @@ installer mirrors, and installed tool runtime paths.
 - verify Claude, Cursor, Codex, and Gemini installed script behavior after the change
 
 ---
+
+## Make baseline shared skills tool-agnostic where they still reference Claude Code
+
+**Status:** Open.
+
+These skills are part of the baseline "always install with MDT" set, but some of
+their wording is still Claude Code-specific rather than tool-agnostic MDT
+guidance.
+
+**Needed follow-ups:**
+
+- `autonomous-loops` — rewrite current Claude Code wording so the skill reads as tool-agnostic MDT guidance
+- `eval-harness` — remove Claude Code-specific wording and make the skill tool-agnostic
+- `security-scan` — remove Claude Code-specific wording and make the skill tool-agnostic
+- `skill-stocktake` — rework from Claude Code-only wording into tool-agnostic MDT guidance
+- `verification-loop` — remove Claude Code-specific wording and make the skill tool-agnostic
+
+**Constraint:** keep the install baseline in place now; this backlog item is about
+content normalization, not whether the skills should ship by default.
+
+---
