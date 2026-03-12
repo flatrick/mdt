@@ -11,7 +11,7 @@ const path = require('path');
 const {
   ensureDir,
   appendFile,
-  getConfigDir,
+  getDataDir,
 } = require('../lib/utils');
 
 const MAX_STDIN = 1024 * 1024;
@@ -80,7 +80,7 @@ function buildMetricsRow(input) {
 }
 
 function appendMetricsRow(row) {
-  const metricsDir = path.join(getConfigDir(), 'metrics');
+  const metricsDir = path.join(getDataDir(), 'metrics');
   ensureDir(metricsDir);
   appendFile(path.join(metricsDir, 'costs.jsonl'), `${JSON.stringify(row)}\n`);
 }

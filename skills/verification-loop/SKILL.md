@@ -1,12 +1,13 @@
 ---
 name: verification-loop
-description: "A comprehensive verification system for Claude Code sessions."
+description: "A comprehensive verification system for MDT coding workflows."
+
 
 ---
 
 # Verification Loop Skill
 
-A comprehensive verification system for Claude Code sessions.
+A comprehensive verification system for MDT coding workflows.
 
 ## When to Use
 
@@ -117,10 +118,10 @@ Set a mental checkpoint:
 - After finishing a component
 - Before moving to next task
 
-Run: /verify
+Run the tool surface that triggers your verification workflow
 ```
 
 ## Integration with Hooks
 
-This skill complements PostToolUse hooks but provides deeper verification.
+This skill complements tool hooks or lightweight inline checks but provides deeper verification.
 Hooks catch issues immediately; this skill provides comprehensive review.

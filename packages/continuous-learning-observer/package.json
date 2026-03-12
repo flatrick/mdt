@@ -1,0 +1,27 @@
+{
+  "name": "continuous-learning-observer",
+  "description": "Optional Codex background-analysis observer for continuous learning",
+  "kind": "capability",
+  "ruleDirectory": "common",
+  "extends": [
+    "continuous-learning"
+  ],
+  "rules": [],
+  "agents": [],
+  "commands": [],
+  "skills": [],
+  "tools": {
+    "codex": {
+      "scripts": [
+        "codex-observer.js"
+      ]
+    }
+  },
+  "requires": {
+    "runtimeScripts": true,
+    "sessionData": true,
+    "tools": [
+      "codex"
+    ]
+  }
+}

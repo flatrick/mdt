@@ -96,7 +96,7 @@ function handleSpawnError(error, commandText) {
     return {
       status: 'SKIP',
       command: commandText,
-      detail: `probe blocked by local environment (${error.code})`
+      detail: `probe blocked by local environment (${error.code}); rerun in a shell/session that allows local process spawn`
     };
   }
 
@@ -105,6 +105,20 @@ function handleSpawnError(error, commandText) {
     command: commandText,
     detail: error.message
   };
+}
+
+function summarizeProbeDetail(rawDetail) {
+  const detail = String(rawDetail || '').trim();
+  if (!detail) {
+    return 'ok';
+  }
+
+  const firstLine = detail.split(/\r?\n/, 1)[0].trim();
+  if (firstLine.length <= 160) {
+    return firstLine;
+  }
+
+  return `${firstLine.slice(0, 157)}...`;
 }
 
 function runProbe(probe, options = {}) {
@@ -125,14 +139,14 @@ function runProbe(probe, options = {}) {
     return {
       status: 'FAIL',
       command: commandText,
-      detail: (result.stderr || result.stdout || `exit ${result.status}`).trim()
+      detail: summarizeProbeDetail(result.stderr || result.stdout || `exit ${result.status}`)
     };
   }
 
   return {
     status: 'PASS',
     command: commandText,
-    detail: (result.stdout || result.stderr || 'ok').trim()
+    detail: summarizeProbeDetail(result.stdout || result.stderr || 'ok')
   };
 }
 
@@ -195,5 +209,7 @@ if (require.main === module) {
 module.exports = {
   resolveWindowsShim,
   runProbe,
+  summarizeTool,
+  summarizeProbeDetail,
   smokeToolSetups
 };

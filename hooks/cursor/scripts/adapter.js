@@ -6,7 +6,7 @@
  */
 
 const fs = require('fs');
-const { execFileSync } = require('child_process');
+const { spawnSync } = require('child_process');
 const path = require('path');
 
 const MAX_STDIN = 1024 * 1024;
@@ -27,18 +27,28 @@ function getCursorRoot() {
 }
 
 function getPluginRoot() {
-  // Legacy fallback used when running from repo checkout.
-  return path.resolve(__dirname, '..', '..');
+  const candidates = [
+    // Repo source layout: <repo>/hooks/cursor/scripts
+    path.resolve(__dirname, '..', '..', '..'),
+    // Installed Cursor layout: <project>/.cursor/hooks
+    path.resolve(__dirname, '..', '..'),
+    process.cwd(),
+  ];
+
+  for (const candidate of candidates) {
+    if (fs.existsSync(path.join(candidate, 'scripts', 'hooks'))) {
+      return candidate;
+    }
+  }
+
+  return candidates[0];
 }
 
-function resolveDelegatedHook(scriptName) {
+function resolveRuntimeModule(...segments) {
   const candidates = [
-    // Installed layout: ~/.cursor/scripts/hooks/*.js
-    path.join(getCursorRoot(), 'scripts', 'hooks', scriptName),
-    // Repo layout: <repo>/scripts/hooks/*.js
-    path.join(getPluginRoot(), 'scripts', 'hooks', scriptName),
-    // Last-resort runtime cwd
-    path.join(process.cwd(), 'scripts', 'hooks', scriptName),
+    path.join(getCursorRoot(), 'scripts', ...segments),
+    path.join(getPluginRoot(), 'scripts', ...segments),
+    path.join(process.cwd(), 'scripts', ...segments),
   ];
 
   for (const candidate of candidates) {
@@ -48,6 +58,10 @@ function resolveDelegatedHook(scriptName) {
   }
 
   return candidates[0];
+}
+
+function resolveDelegatedHook(scriptName) {
+  return resolveRuntimeModule('hooks', scriptName);
 }
 
 function transformToClaude(cursorInput, overrides = {}) {
@@ -89,31 +103,78 @@ function hookEnabled(hookId, allowedProfiles = ['standard', 'strict']) {
   return allowedProfiles.includes(profile);
 }
 
-function runExistingHook(scriptName, stdinData) {
-  const scriptPath = resolveDelegatedHook(scriptName);
+function buildHookEnv(env = process.env) {
+  const nextEnv = { ...env };
+  if (!nextEnv.MDT_ROOT || !String(nextEnv.MDT_ROOT).trim()) {
+    nextEnv.MDT_ROOT = getPluginRoot();
+  }
+  if (!nextEnv.CURSOR_AGENT || !String(nextEnv.CURSOR_AGENT).trim()) {
+    nextEnv.CURSOR_AGENT = '1';
+  }
+  if (!nextEnv.CONFIG_DIR || !String(nextEnv.CONFIG_DIR).trim()) {
+    const cursorRoot = getCursorRoot();
+    if (path.basename(cursorRoot).toLowerCase() === '.cursor' && fs.existsSync(cursorRoot)) {
+      nextEnv.CONFIG_DIR = cursorRoot;
+    }
+  }
+  return nextEnv;
+}
+
+function runExistingHook(scriptName, stdinData, options = {}) {
+  const io = options.io || { stderr: process.stderr };
+  const runner = options.runner || spawnSync;
+  const scriptPath = options.scriptPath || resolveDelegatedHook(scriptName);
   if (!fs.existsSync(scriptPath)) {
     console.error(`[MDT] Delegated hook missing: ${scriptName}`);
     console.error(`[MDT] Expected script path: ${scriptPath}`);
     return;
   }
 
-  try {
-    execFileSync('node', [scriptPath], {
-      input: typeof stdinData === 'string' ? stdinData : JSON.stringify(stdinData),
-      stdio: ['pipe', 'pipe', 'pipe'],
-      timeout: 15000,
-      cwd: process.cwd(),
-    });
-  } catch (e) {
-    const detail = String((e.stderr || e.message || '')).trim();
+  const result = runner('node', [scriptPath], {
+    input: typeof stdinData === 'string' ? stdinData : JSON.stringify(stdinData),
+    stdio: ['pipe', 'pipe', 'pipe'],
+    timeout: 15000,
+    cwd: process.cwd(),
+    env: buildHookEnv(options.env || process.env),
+    encoding: 'utf8'
+  });
+
+  if (result.stderr) {
+    io.stderr.write(result.stderr);
+  }
+
+  if (result.error) {
+    const detail = String(result.error.message || '').trim();
     console.error(`[MDT] Delegated hook failed: ${scriptName}`);
     console.error(`[MDT] Script path: ${scriptPath}`);
     if (detail) {
-      const lastLine = detail.split(/\r?\n/).slice(-1)[0];
-      console.error(`[MDT] ${lastLine}`);
+      console.error(`[MDT] ${detail}`);
     }
-    if (e.status === 2) process.exit(2); // Forward blocking exit code
+    return;
+  }
+
+  if (result.status === 2) {
+    process.exit(2);
+  }
+
+  if (result.status !== 0) {
+    const detail = String(result.stderr || result.stdout || '').trim();
+    console.error(`[MDT] Delegated hook failed: ${scriptName}`);
+    console.error(`[MDT] Script path: ${scriptPath}`);
+    if (detail) {
+      console.error(`[MDT] ${detail.split(/\r?\n/).slice(-1)[0]}`);
+    }
   }
 }
 
-module.exports = { readStdin, getCursorRoot, getPluginRoot, resolveDelegatedHook, transformToClaude, runExistingHook, hookEnabled };
+module.exports = {
+  buildHookEnv,
+  getCursorRoot,
+  getPluginRoot,
+  hookEnabled,
+  readStdin,
+  resolveDelegatedHook,
+  resolveRuntimeModule,
+  runExistingHook,
+  transformToClaude
+};

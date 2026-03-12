@@ -1,6 +1,7 @@
 ---
 name: iterative-retrieval
 description: Pattern for progressively refining context retrieval to solve the subagent context problem
+
 ---
 
 # Iterative Retrieval Pattern
@@ -206,5 +207,5 @@ When retrieving context for this task:
 ## Related
 
 - [The Longform Guide](https://x.com/affaanmustafa/status/2014040193557471352) - Subagent orchestration section
-- `continuous-learning` skill - For patterns that improve over time
+- `continuous-learning-manual` skill - For patterns that improve over time
 - Agent definitions in `<config>/agents/`

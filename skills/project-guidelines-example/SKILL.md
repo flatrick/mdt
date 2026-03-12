@@ -2,6 +2,7 @@
 name: project-guidelines-example
 description: "Example project-specific skill template based on a real production application."
 
+
 ---
 
 # Project Guidelines Skill (Example)

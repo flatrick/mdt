@@ -1,0 +1,17 @@
+{
+  "version": "2.1",
+  "observer": {
+    "enabled": false,
+    "run_interval_minutes": 5,
+    "min_observations_to_analyze": 20,
+    "tool": null,
+    "models": {
+      "claude": "haiku",
+      "cursor": "auto"
+    },
+    "commands": {
+      "claude": "claude",
+      "cursor": "agent"
+    }
+  }
+}

@@ -6,7 +6,7 @@
  *
  * Runs when a new Claude session starts. Loads the most recent session
  * summary into Claude's context via stdout, and reports available
- * sessions and learned skills.
+ * sessions and learned candidate skills.
  */
 
 const {
@@ -46,11 +46,11 @@ async function main() {
     }
   }
 
-  // Check for learned skills
+  // Check for learned candidate skills
   const learnedSkills = findFiles(learnedDir, '*.md');
 
   if (learnedSkills.length > 0) {
-    log(`[SessionStart] ${learnedSkills.length} learned skill(s) available in ${learnedDir}`);
+    log(`[SessionStart] ${learnedSkills.length} learned candidate skill(s) available in ${learnedDir}`);
   }
 
   // Check for available session aliases

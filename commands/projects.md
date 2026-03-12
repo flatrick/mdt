@@ -2,24 +2,25 @@
 name: projects
 description: List known projects and their instinct statistics
 command: true
+
 ---
 
 # Projects Command
 
-List project registry entries and per-project instinct/observation counts for continuous-learning-v2.
+List project registry entries and per-project instinct/observation counts for continuous-learning-manual.
 
 ## Implementation
 
 Run the instinct CLI using `MDT_ROOT` when available:
 
 ```bash
-node "${MDT_ROOT}/skills/continuous-learning-v2/scripts/instinct-cli.js" projects
+node "${MDT_ROOT}/skills/continuous-learning-manual/scripts/instinct-cli.js" projects
 ```
 
 For manual installs, replace `<config>` with your MDT config directory (for example `~/.claude` or `~/.cursor`):
 
 ```bash
-node "<config>/skills/continuous-learning-v2/scripts/instinct-cli.js" projects
+node "<config>/skills/continuous-learning-manual/scripts/instinct-cli.js" projects
 ```
 
 ## Usage

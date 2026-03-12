@@ -16,8 +16,7 @@ function getManifestPaths(repoRoot) {
   return {
     packageJson: path.join(repoRoot, 'package.json'),
     pluginJson: path.join(repoRoot, '.claude-plugin', 'plugin.json'),
-    marketplaceJson: path.join(repoRoot, '.claude-plugin', 'marketplace.json'),
-    openCodePackageJson: path.join(repoRoot, '.opencode', 'package.json')
+    marketplaceJson: path.join(repoRoot, '.claude-plugin', 'marketplace.json')
   };
 }
 
@@ -89,15 +88,6 @@ function compareMarketplaceMetadata(marketplaceJson, expected, io) {
   return hasErrors;
 }
 
-function compareOpenCodeMetadata(openCodePackageJson, expected, io) {
-  let hasErrors = false;
-  hasErrors = compareValue('.opencode/package.json name', openCodePackageJson.name, expected.name, io) || hasErrors;
-  hasErrors = compareValue('.opencode/package.json version', openCodePackageJson.version, expected.version, io) || hasErrors;
-  hasErrors = compareValue('.opencode/package.json repository', normalizeUrl(openCodePackageJson.repository), expected.repository, io) || hasErrors;
-  hasErrors = compareValue('.opencode/package.json homepage', normalizeUrl(openCodePackageJson.homepage), expected.homepage, io) || hasErrors;
-  return hasErrors;
-}
-
 function validateMetadata(options = {}) {
   const repoRoot = options.repoRoot || REPO_ROOT;
   const io = options.io || DEFAULT_IO;
@@ -106,9 +96,8 @@ function validateMetadata(options = {}) {
   const packageJson = readJsonFile(manifestPaths.packageJson, 'package.json', io);
   const pluginJson = readJsonFile(manifestPaths.pluginJson, '.claude-plugin/plugin.json', io);
   const marketplaceJson = readJsonFile(manifestPaths.marketplaceJson, '.claude-plugin/marketplace.json', io);
-  const openCodePackageJson = readJsonFile(manifestPaths.openCodePackageJson, '.opencode/package.json', io);
 
-  if (!packageJson || !pluginJson || !marketplaceJson || !openCodePackageJson) {
+  if (!packageJson || !pluginJson || !marketplaceJson) {
     return { exitCode: 1, hasErrors: true };
   }
 
@@ -122,13 +111,12 @@ function validateMetadata(options = {}) {
   let hasErrors = false;
   hasErrors = comparePluginMetadata(pluginJson, expected, io) || hasErrors;
   hasErrors = compareMarketplaceMetadata(marketplaceJson, expected, io) || hasErrors;
-  hasErrors = compareOpenCodeMetadata(openCodePackageJson, expected, io) || hasErrors;
 
   if (hasErrors) {
     return { exitCode: 1, hasErrors: true };
   }
 
-  io.log('Validated metadata consistency across package, plugin, marketplace, and OpenCode manifests');
+  io.log('Validated metadata consistency across package, plugin, and marketplace manifests');
   return { exitCode: 0, hasErrors: false };
 }
 

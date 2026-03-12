@@ -1,0 +1,7 @@
+interface:
+  display_name: "Smoke"
+  short_description: "Run the installed MDT Codex smoke checks"
+  brand_color: "#10B981"
+  default_prompt: "Run the installed Codex MDT smoke checks. Use ~/.codex/mdt/scripts/smoke-tool-setups.js and ~/.codex/mdt/scripts/smoke-codex-workflows.js, then summarize PASS/FAIL/SKIP with the next remediation step."
+policy:
+  allow_implicit_invocation: true

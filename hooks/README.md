@@ -4,18 +4,48 @@ Hooks are event-driven automations that fire before or after Claude Code tool ex
 
 ## Source Layout
 
-MDT now keeps hook sources under platform-specific directories:
+MDT now keeps tool-specific hook sources under explicit template or platform directories:
 
-- `hooks/claude/hooks.json` — Source of truth for Claude hook config
+- `claude-template/hooks.json` — Source of truth for Claude hook config
 - `hooks/cursor/hooks.json` — Source of truth for Cursor hook config
 - `hooks/cursor/scripts/` — Source of truth for Cursor-specific hook wrapper scripts
 
 Native tool-facing files remain checked in as synced mirrors so this repo still self-hosts cleanly when opened in Claude or Cursor:
 
 - `hooks/hooks.json` — Claude mirror loaded by Claude Code
-- `.cursor/hooks.json` and `.cursor/hooks/` — Cursor mirrors loaded by Cursor
+- `cursor-template/hooks.json` and `cursor-template/hooks/` — Cursor install templates rendered into `.cursor/`
 
 Update the platform-scoped source files first, then run `node scripts/sync-hook-mirrors.js` to refresh the native mirrors.
+
+## Cursor Hook Adapter
+
+MDT's Cursor hook support is an experimental adapter layer, not a vendor-documented
+Cursor surface. Treat it as optional safety rails that must fail open without
+breaking the repo's core workflows.
+
+Architecture:
+
+- `hooks/cursor/hooks.json` is the source of truth for Cursor event wiring
+- `hooks/cursor/scripts/*.js` are thin Cursor-native wrapper scripts
+- `scripts/hooks/*.js` and `scripts/lib/*` contain the shared business logic
+
+Design constraints for Cursor wrappers:
+
+- keep wrappers small and event-specific
+- read stdin once, parse once, and avoid mutating the parsed payload
+- pass through original payloads unless the wrapper must return a transformed result
+- prefer shared helpers in `hooks/cursor/scripts/adapter.js` over duplicated logic
+- log concise `[MDT]`-prefixed warnings or errors to `stderr`
+- avoid uncaught exceptions; fail open and preserve the original input
+- use `buildHookEnv()` so `MDT_ROOT`, `CONFIG_DIR`, and tool identity stay consistent
+- resolve runtime writes under the active config/data dir, not hardcoded tool paths
+
+Extension guidance:
+
+- do not assume Cursor needs Claude-shaped payloads; consume Cursor-native JSON where possible
+- keep blocking behavior in the shared logic layer unless the wrapper has a strong reason otherwise
+- gate expensive behavior behind hook/profile flags where appropriate
+- test each new wrapper under `tests/hooks/` with pass-through, error-handling, and side-effect coverage
 
 ## How Hooks Work
 

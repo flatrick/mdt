@@ -18,8 +18,18 @@ function stripFrontmatter(content) {
   return content.replace(/^---\r?\n[\s\S]*?\r?\n---\r?\n?/, '');
 }
 
+function hasNormalizedFrontmatterSpacing(content) {
+  const match = content.match(/^---\r?\n([\s\S]*?)\r?\n---(?:\r?\n|$)/);
+  if (!match) {
+    return true;
+  }
+
+  return /\r?\n\s*$/.test(match[1]);
+}
+
 module.exports = {
   readMarkdownFile,
   hasMarkdownHeading,
-  stripFrontmatter
+  stripFrontmatter,
+  hasNormalizedFrontmatterSpacing
 };

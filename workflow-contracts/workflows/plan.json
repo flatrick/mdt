@@ -1,0 +1,39 @@
+{
+  "id": "plan",
+  "title": "Plan",
+  "outcome": "Break work into phases, risks, and concrete implementation steps before execution.",
+  "successCriteria": [
+    "The workflow surfaces a deliberate implementation plan before changes are made.",
+    "The workflow identifies concrete next steps, dependencies, and risk areas."
+  ],
+  "tools": {
+    "claude": {
+      "status": "official",
+      "verificationMode": "installer-target",
+      "artifactMappings": [
+        { "surfaceType": "command", "name": "plan", "path": "commands/plan.md", "role": "primary-workflow" },
+        { "surfaceType": "agent", "name": "planner", "path": "agents/planner.md", "role": "specialized-planner" }
+      ],
+      "requiredFiles": ["commands/plan.md", "agents/planner.md"]
+    },
+    "cursor": {
+      "status": "repo-adapter",
+      "verificationMode": "installer-target",
+      "artifactMappings": [
+        { "surfaceType": "command", "name": "plan", "path": "cursor-template/commands/plan.md", "role": "custom-command" },
+        { "surfaceType": "guidance", "name": "workspace-guidance", "path": "AGENTS.md", "role": "shared-guidance" },
+        { "surfaceType": "rule", "name": "common-development-workflow", "path": "cursor-template/rules/common-development-workflow.md", "role": "planning-behavior" }
+      ],
+      "requiredFiles": ["AGENTS.md", "cursor-template/rules/common-development-workflow.md"]
+    },
+    "codex": {
+      "status": "repo-adapter",
+      "verificationMode": "installer-target",
+      "artifactMappings": [
+        { "surfaceType": "guidance", "name": "codex-agents", "path": "codex-template/AGENTS.md", "role": "planning-guidance" },
+        { "surfaceType": "config", "name": "codex-config", "path": "codex-template/config.toml", "role": "codex-runtime-config" }
+      ],
+      "requiredFiles": ["codex-template/config.toml", "codex-template/AGENTS.md"]
+    }
+  }
+}

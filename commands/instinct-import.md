@@ -2,6 +2,7 @@
 name: instinct-import
 description: Import instincts from file or URL into project/global scope
 command: true
+
 ---
 
 # Instinct Import Command
@@ -11,13 +12,13 @@ command: true
 Run the instinct CLI using `MDT_ROOT` when available:
 
 ```bash
-node "${MDT_ROOT}/skills/continuous-learning-v2/scripts/instinct-cli.js" import <file-or-url> [--dry-run] [--force] [--min-confidence 0.7] [--scope project|global]
+node "${MDT_ROOT}/skills/continuous-learning-manual/scripts/instinct-cli.js" import <file-or-url> [--dry-run] [--force] [--min-confidence 0.7] [--scope project|global]
 ```
 
 For manual installs, replace `<config>` with your MDT config directory (for example `~/.claude` or `~/.cursor`):
 
 ```bash
-node "<config>/skills/continuous-learning-v2/scripts/instinct-cli.js" import <file-or-url>
+node "<config>/skills/continuous-learning-manual/scripts/instinct-cli.js" import <file-or-url>
 ```
 
 Import instincts from local file paths or HTTP(S) URLs.
@@ -38,7 +39,7 @@ Import instincts from local file paths or HTTP(S) URLs.
 3. Check for duplicates with existing instincts
 4. Merge or add new instincts
 5. Save to inherited instincts directory:
-   - Project scope: `<data>/homunculus/projects/<project-id>/instincts/inherited/`
+   - Project scope: `<data>/homunculus/<project-id>/instincts/inherited/`
    - Global scope: `<data>/homunculus/instincts/inherited/`
 
 ## Import Process

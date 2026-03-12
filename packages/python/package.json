@@ -1,0 +1,86 @@
+{
+  "name": "python",
+  "description": "Base Python workflow package",
+  "ruleDirectory": "python",
+  "rules": [
+    "common/agents.md",
+    "common/coding-style.md",
+    "common/development-workflow.md",
+    "common/git-workflow.md",
+    "common/hooks.md",
+    "common/patterns.md",
+    "common/performance.md",
+    "common/security.md",
+    "common/testing.md",
+    "python/coding-style.md",
+    "python/hooks.md",
+    "python/patterns.md",
+    "python/security.md",
+    "python/testing.md"
+  ],
+  "agents": [
+    "planner.md",
+    "code-reviewer.md",
+    "security-reviewer.md",
+    "tdd-guide.md",
+    "python-reviewer.md"
+  ],
+  "commands": [
+    "docs-health.md",
+    "plan.md",
+    "tdd.md",
+    "verify.md",
+    "code-review.md",
+    "python-review.md"
+  ],
+  "skills": [
+    "documentation-steward",
+    "python-patterns",
+    "python-testing",
+    "tdd-workflow",
+    "verification-loop",
+    "security-review"
+  ],
+  "tools": {
+    "cursor": {
+      "rules": [
+        "common-agents.md",
+        "common-coding-style.md",
+        "common-development-workflow.md",
+        "common-git-workflow.md",
+        "common-hooks.md",
+        "common-patterns.md",
+        "common-performance.md",
+        "common-security.md",
+        "common-testing.md",
+        "python-coding-style.md",
+        "python-hooks.md",
+        "python-patterns.md",
+        "python-security.md",
+        "python-testing.md"
+      ],
+      "skills": [],
+      "commands": [
+        "docs-health.md"
+      ]
+    },
+    "gemini": {
+      "rules": [
+        "common-agents.md",
+        "common-coding-style.md",
+        "common-development-workflow.md",
+        "common-git-workflow.md",
+        "common-hooks.md",
+        "common-patterns.md",
+        "common-performance.md",
+        "common-security.md",
+        "common-testing.md",
+        "python-coding-style.md",
+        "python-hooks.md",
+        "python-patterns.md",
+        "python-security.md",
+        "python-testing.md"
+      ]
+    }
+  }
+}

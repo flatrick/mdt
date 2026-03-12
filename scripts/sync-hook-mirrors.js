@@ -32,7 +32,9 @@ function syncPlatformHookMirror(platform) {
     throw new Error(`Missing hook source config: ${platform.sourceConfig}`);
   }
 
-  copyFileSync(platform.sourceConfig, platform.mirrorConfig);
+  if (platform.mirrorConfig) {
+    copyFileSync(platform.sourceConfig, platform.mirrorConfig);
+  }
 
   if (platform.sourceScriptsDir && platform.mirrorScriptsDir) {
     if (!fs.existsSync(platform.sourceScriptsDir)) {

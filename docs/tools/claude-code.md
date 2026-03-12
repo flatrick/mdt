@@ -1,13 +1,13 @@
 # Claude Code
 
-Audit date: `2026-03-08`
+Audit date: `2026-03-11`
 
 Status:
 - `official`
 - `locally-verified`
 
 Local version seen:
-- `claude --version` -> `2.1.71 (Claude Code)`
+- `claude --version` -> `2.1.72 (Claude Code)`
 
 ## MDT-Relevant Native Surfaces
 
@@ -38,7 +38,7 @@ This is the tool that most directly matches MDT's current repo structure.
 
 MDT's Claude hook source of truth is:
 
-- `hooks/claude/hooks.json`
+- `claude-template/hooks.json`
 - mirrored to `hooks/hooks.json`
 
 The commands in that file use the `MDT_ROOT` placeholder, for example:
@@ -55,6 +55,20 @@ Claude loads hooks from settings. In this repo, the installer materializes hook 
 ### Commands
 
 MDT uses markdown slash-command files under `commands/`.
+
+### Smoke verification
+
+Claude smoke now has two complementary surfaces:
+
+- in-session `/smoke` for fast runtime-aware sanity checks inside Claude Code
+- `node scripts/smoke-claude-workflows.js` for deterministic local verification
+  of the current Claude workflow contract surfaces
+
+For installed Claude homes, the same deterministic check is materialized to:
+
+```bash
+node ~/.claude/mdt/scripts/smoke-claude-workflows.js
+```
 
 ### Agents
 
@@ -76,6 +90,7 @@ claude --version
 claude --help
 claude agents --help
 claude mcp --help
+node scripts/smoke-claude-workflows.js
 ```
 
 Useful local checks:

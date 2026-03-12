@@ -15,7 +15,7 @@ Usage:
 
 Options:
   --detect        Detect and show current package manager
-  --global <pm>   Set global preference (saves to your config dir/package-manager.json)
+  --global <pm>   Set global preference (saves to your config dir/mdt/package-manager.json)
   --project <pm>  Set project preference (saves to .claude/package-manager.json)
   --list          List available package managers
   --help          Show this help message
@@ -130,7 +130,7 @@ function setGlobal(pmName, io, deps) {
   try {
     deps.setPreferredPackageManager(pmName);
     io.log(`\n✓ Global preference set to: ${pmName}`);
-    io.log('  Saved to: <config>/package-manager.json');
+    io.log('  Saved to: <config>/mdt/package-manager.json');
     io.log('');
     return 0;
   } catch (err) {

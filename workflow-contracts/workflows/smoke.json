@@ -1,0 +1,39 @@
+{
+  "id": "smoke",
+  "title": "Smoke",
+  "outcome": "Run a quick sanity check that MDT is installed and the tool-specific workflow surfaces are present.",
+  "successCriteria": [
+    "The workflow confirms the expected MDT install surfaces exist for the current tool.",
+    "The workflow reports PASS, FAIL, or SKIP with a concrete next remediation step."
+  ],
+  "tools": {
+    "claude": {
+      "status": "official",
+      "verificationMode": "installer-target",
+      "artifactMappings": [
+        { "surfaceType": "command", "name": "smoke", "path": "commands/smoke.md", "role": "primary-workflow" },
+        { "surfaceType": "script", "name": "smoke-claude-workflows", "path": "scripts/smoke-claude-workflows.js", "role": "deterministic-local-check" },
+        { "surfaceType": "manual-verification", "name": "claude-code", "path": "docs/testing/manual-verification/claude-code.md", "role": "human-checklist" }
+      ],
+      "requiredFiles": ["commands/smoke.md", "scripts/smoke-claude-workflows.js", "docs/testing/manual-verification/claude-code.md"]
+    },
+    "cursor": {
+      "status": "repo-adapter",
+      "verificationMode": "installer-target",
+      "artifactMappings": [
+        { "surfaceType": "command", "name": "smoke", "path": "cursor-template/commands/smoke.md", "role": "custom-command" },
+        { "surfaceType": "manual-verification", "name": "cursor", "path": "docs/testing/manual-verification/cursor.md", "role": "human-checklist" }
+      ],
+      "requiredFiles": ["cursor-template/commands/smoke.md", "docs/testing/manual-verification/cursor.md"]
+    },
+    "codex": {
+      "status": "repo-adapter",
+      "verificationMode": "installer-target",
+      "artifactMappings": [
+        { "surfaceType": "skill", "name": "smoke", "path": "codex-template/skills/smoke/SKILL.md", "role": "smoke-entrypoint" },
+        { "surfaceType": "manual-verification", "name": "codex", "path": "docs/testing/manual-verification/codex.md", "role": "human-checklist" }
+      ],
+      "requiredFiles": ["codex-template/skills/smoke/SKILL.md", "docs/testing/manual-verification/codex.md"]
+    }
+  }
+}

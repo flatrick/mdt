@@ -30,10 +30,11 @@ function runTests() {
 
   const repoRoot = path.join(__dirname, '..', '..');
   const scripts = [
-    'skills/continuous-learning/evaluate-session.js',
+    'scripts/codex-observer.js',
+    'scripts/hooks/evaluate-session.js',
     'skills/strategic-compact/suggest-compact.js',
-    'skills/continuous-learning-v2/scripts/detect-project.js',
-    'skills/continuous-learning-v2/agents/start-observer.js',
+    'skills/continuous-learning-manual/scripts/detect-project.js',
+    'skills/continuous-learning-manual/agents/start-observer.js',
     'skills/skill-stocktake/scripts/scan.js',
     'skills/skill-stocktake/scripts/quick-diff.js',
     'skills/skill-stocktake/scripts/save-results.js',
@@ -49,7 +50,7 @@ function runTests() {
 
   console.log('\nScript Smoke Tests:');
   if (test('evaluate-session.js exits 0 with empty stdin', () => {
-    const result = runNode(path.join(repoRoot, 'skills/continuous-learning/evaluate-session.js'), '', { cwd: repoRoot });
+    const result = runNode(path.join(repoRoot, 'scripts/hooks/evaluate-session.js'), '', { cwd: repoRoot });
     assert.strictEqual(result.status, 0, `Expected 0, got ${result.status} stderr=${result.stderr}`);
   })) passed++; else failed++;
 
@@ -66,7 +67,7 @@ function runTests() {
   })) passed++; else failed++;
 
   if (test('detect-project.js returns JSON payload', () => {
-    const result = runNode(path.join(repoRoot, 'skills/continuous-learning-v2/scripts/detect-project.js'), '', { cwd: repoRoot });
+    const result = runNode(path.join(repoRoot, 'skills/continuous-learning-manual/scripts/detect-project.js'), '', { cwd: repoRoot });
     assert.strictEqual(result.status, 0, `Expected 0, got ${result.status}`);
     const payload = JSON.parse((result.stdout || '').trim());
     assert.ok(payload.id, 'Expected id in payload');

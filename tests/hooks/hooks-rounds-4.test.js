@@ -352,7 +352,7 @@ async function runTests() {
     fs.mkdirSync(skillsDir, { recursive: true });
     const configPath = path.join(skillsDir, 'config.json');
     fs.writeFileSync(configPath, JSON.stringify({
-      learned_skills_path: '<config>/skills/learned'
+      learned_skills_path: '<data>/generated/skills/learned'
     }));
 
     const configDir = path.join(testDir, '.cursor');
@@ -367,8 +367,8 @@ async function runTests() {
     });
     assert.strictEqual(result.code, 0);
     assert.ok(
-      fs.existsSync(path.join(configDir, 'skills', 'learned')),
-      'Should create learned skills dir under the active config dir'
+      fs.existsSync(path.join(configDir, 'mdt', 'generated', 'skills', 'learned')),
+      'Should create learned skills dir under the active MDT data dir'
     );
     cleanupTestDir(testDir);
   })) passed++; else failed++;

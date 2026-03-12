@@ -1,8 +1,9 @@
 # ModelDev Toolkit
 
+<!-- Current tool: Cursor -->
+
 Generic model toolkit for software development workflows and scaffolding.
-Not just configs. A complete system: skills, agents, hooks, rules, and MCP configurations.
-Works with **Claude Code**, **Cursor**, **Codex**, and other AI agent harnesses.
+Not just configs. MDT ships skills, agents, hooks, rules, commands, and per-tool install adapters.
 
 ## READ ME FIRST!
 
@@ -13,18 +14,20 @@ The original is, at the time of writing this (2026-03-07), using NodeJS, Bash-sc
 
 The second goal is to steer away from being all about Claude Code as the primary LLM-tool, and instead aim for a generic toolkit that will hopefully work well for all/most alternatives.
 
-**2026-03-07 status:** the runtime migration is complete, and v1 stabilization is focused on contracts, metadata consistency, and tool-agnostic docs.
+**2026-03-09 status:** the template-source/runtime-dir migration is complete. Current work is v1 stabilization: installer contracts, package manifests, tool parity, and verified docs.
 
 ### This fork
 
 - **Node-only:** No Bash or PowerShell scripts. All install and hook logic is JavaScript run with Node.js.
-- **Single installer:** `node scripts/install-mdt.js` installs to Claude Code, Cursor, or Codex (see Installation).
-- **Per-tool installs:** Each tool gets its own directory — Claude → `~/.claude/`, Codex → `~/.codex/`, Cursor → project `.cursor/` or `~/.cursor/` with `--global`. Nothing points Cursor or Codex at `~/.claude/`.
-- **Cursor:** Default is project-local (full rules, agents, skills, commands, hooks, MCP). Use `--global` to install to `~/.cursor/` (rules skipped there; Cursor does not support file-based rules globally).
+- **Single installer:** `node scripts/install-mdt.js` installs to Claude Code, Cursor, Codex, or Gemini.
+- **Per-tool installs:** each tool has its own install surfaces; see [Installation](docs/INSTALLATION.md).
+- **Docs-first:** detailed capability and install claims live under [docs/](docs/), especially [docs/supported-tools.md](docs/supported-tools.md) and [docs/tools/](docs/tools/).
 - **Fork v1 direction:** Backwards compatibility with legacy passthrough behavior is not a goal; this fork prioritizes explicit, security-first defaults.
 
-Reset or reinstall: [docs/MIGRATION.md](docs/MIGRATION.md).
-Rename tracking for upstream sync: [docs/upstream-rename-map.md](docs/upstream-rename-map.md).
+Reset or reinstall: [docs/MIGRATION.md](docs/MIGRATION.md)  
+Install reference: [docs/INSTALLATION.md](docs/INSTALLATION.md)  
+Supported tools: [docs/supported-tools.md](docs/supported-tools.md)  
+Rename tracking for upstream sync: [docs/upstream-rename-map.md](docs/upstream-rename-map.md)
 
 ---
 
@@ -54,87 +57,78 @@ Guides refer to the upstream project; this fork may differ. For this fork, prefe
    cd modeldev-toolkit
    ```
 
-2. **Install** (pick target and language)
+2. **Install** (pick target and package set)
    ```bash
-   # Claude Code (default) — installs to ~/.claude/
+   # Claude Code
    node scripts/install-mdt.js typescript
 
-   # Cursor — project .cursor/ (or ~/.cursor/ with --global)
+   # Cursor global install (always install to ~/.cursor/)
    node scripts/install-mdt.js --target cursor typescript
 
-   # Codex — installs to ~/.codex/
-   node scripts/install-mdt.js --target codex
+   # Cursor IDE repo-local rules bridge (additional step when needed)
+   # Preferred inside Cursor after install: /install-rules
+   node scripts/materialize-mdt-local.js --target cursor --surface rules
 
-   # Discover available targets/languages
+   # Codex
+   node scripts/install-mdt.js --target codex typescript continuous-learning
+
+   # Discover available targets/packages
    node scripts/install-mdt.js --list
 
    # Preview install without writing files
-   node scripts/install-mdt.js --target cursor --global --dry-run typescript
+   node scripts/install-mdt.js --target cursor --dry-run typescript
    ```
 
-3. **Use** commands and agents in your tool (e.g. `/plan`, `/tdd`, `/code-review`). Full layout: [CLAUDE.md](CLAUDE.md), [AGENTS.md](AGENTS.md).
+3. **Verify** with:
+   ```bash
+   node scripts/verify-tool-setups.js
+   node scripts/smoke-tool-setups.js
+   ```
 
 Marketplace/plugin support remains secondary in this fork for now. For the official upstream Claude Code plugin flow, use the [original repo](https://github.com/affaan-m/modeldev-toolkit).
 
+Cursor note, last locally true `2026-03-12`: always install MDT for Cursor into the global `~/.cursor/` directory, even if the user only plans to use Cursor IDE today. That global install remains the shared MDT install surface and may be consumed by more Cursor surfaces in the future. If the user also wants repo-local `.cursor/rules/` files for Cursor IDE, use the installed Cursor custom command `/install-rules` or run `materialize-mdt-local.js --target cursor --surface rules` as an additional bridge step. The bridge command copies the rules currently installed under `~/.cursor/rules/` into the opened repo's `.cursor/rules/`.
+
 ---
 
-## Installation
+## Documentation
 
-One installer for all targets:
+Use these as the current source of truth:
 
-```bash
-node scripts/install-mdt.js [--target claude|cursor|codex] [--global] [--list] [--dry-run] [language ...]
-```
-
-```bash
-npx mdt-install typescript
-```
-
-| Target | Destination | Notes |
-|--------|-------------|--------|
-| `claude` (default) | `~/.claude/` | Rules, agents, commands, skills, hooks, scripts |
-| `cursor` | `./.cursor/` or `~/.cursor/` | Use `--global` for user-level; then rules are skipped |
-| `codex` | `~/.codex/` | config.toml + AGENTS.md (no language args) |
-
-Examples:
-
-```bash
-node scripts/install-mdt.js typescript
-node scripts/install-mdt.js --target cursor typescript python
-node scripts/install-mdt.js --target cursor --global typescript
-node scripts/install-mdt.js --target codex
-node scripts/install-mdt.js --list
-node scripts/install-mdt.js --target claude --dry-run typescript
-```
-
-- **Reset/reinstall:** [docs/MIGRATION.md](docs/MIGRATION.md)
-- **Manual copy (rules only):** [rules/README.md](rules/README.md)
+- [docs/INSTALLATION.md](docs/INSTALLATION.md) for install targets, package examples, and the global-only install contract
+- [docs/supported-tools.md](docs/supported-tools.md) for audited tool capability status
+- [docs/tools/README.md](docs/tools/README.md) for the tool docs pack
+- [docs/V1-TARGET-STATE.md](docs/V1-TARGET-STATE.md) for the intended end state by `v1.0.0`
+- [docs/testing/manual-verification/README.md](docs/testing/manual-verification/README.md) for manual runtime checks
+- [docs/MIGRATION.md](docs/MIGRATION.md) for reset/reinstall policy
+- [NEXT-STEPS.md](NEXT-STEPS.md) for active roadmap items
+- [BACKLOG.md](BACKLOG.md) for deferred future work tracked in-repo until `v1.0.0`
+- [docs/history/](docs/history/) for completed work that has been moved out of the backlog
 
 ---
 
 ## What's inside
 
 - `agents/` — Subagents (planner, code-reviewer, tdd-guide, security-reviewer, etc.)
-- `skills/` — Workflow definitions (TDD, security-review, continuous-learning, etc.)
+- `skills/` — Workflow definitions (TDD, security-review, continuous-learning-manual, etc.)
 - `commands/` — Slash commands (/plan, /tdd, /e2e, /code-review, …)
 - `rules/` — Common + language-specific rules (TypeScript, Python, …)
-- `hooks/` — Platform-scoped hook sources (`hooks/claude/`, `hooks/cursor/`) plus Claude mirror `hooks/hooks.json`
+- `hooks/` — Hook mirrors and shared hook docs; `hooks/hooks.json` remains the Claude-facing mirror
+- `claude-template/` — Claude-specific source templates such as hook config rendered into `.claude/`
 - `scripts/` — Node.js only (install-mdt.js, hooks, lib, detect-env, sync-hook-mirrors.js)
-- `.cursor/` — Cursor-ready config (rules, commands, mcp.json) plus synced hook mirrors
-- `.codex/` — Codex config (config.toml, AGENTS.md)
+- `cursor-template/` — Cursor source templates (rules, hooks, skills, and config files rendered into `.cursor/` on install)
+- `codex-template/` — Codex source templates (`config.toml`, `AGENTS.md`, `skills/`) rendered into `~/.codex/`, with MDT-owned runtime/state under `~/.codex/mdt/`
 - `tests/` — Test suite
 
-Full layout and details: [CLAUDE.md](CLAUDE.md), [AGENTS.md](AGENTS.md).
+Full layout and detailed tool behavior: [docs/](docs/), [CLAUDE.md](CLAUDE.md), [AGENTS.md](AGENTS.md).
 
 ---
 
-## Cursor / Codex / OpenCode
+## Tool Notes
 
-**Cursor:** Configs in `.cursor/`. Quick start: `node scripts/install-mdt.js --target cursor typescript`. Local install gets rules, agents, skills, commands, hooks, and MCP. Use `--global` for `~/.cursor/` (rules not supported there by Cursor).
-
-**Codex:** Config in `.codex/`. Quick start: `node scripts/install-mdt.js --target codex`. Installs config.toml and AGENTS.md to `~/.codex/`.
-
-**OpenCode:** Config in `.opencode/`. See [.opencode/README.md](.opencode/README.md) for plugin install and feature parity in this fork.
+- Cursor details: [docs/tools/cursor.md](docs/tools/cursor.md)
+- Codex details: [docs/tools/codex.md](docs/tools/codex.md)
+- Claude Code details: [docs/tools/claude-code.md](docs/tools/claude-code.md)
 
 ---
 
@@ -175,22 +169,23 @@ See [AGENTS.md](AGENTS.md) and [CLAUDE.md](CLAUDE.md).
 
 ### How do I install?
 
-Use `node scripts/install-mdt.js` with your language(s).
-Default target is Claude (`~/.claude/`).
-Use `--target cursor` or `--target codex` for the others.
+Use `node scripts/install-mdt.js` with package names such as `typescript` or `continuous-learning`.
 
-See [Installation](#installation).
+See [docs/INSTALLATION.md](docs/INSTALLATION.md).
 
 ### Does this work with Cursor / Codex?
 
-Yes, use `--target cursor` or `--target codex`.
+Yes, but the install surfaces differ by tool.
 
-Each tool gets its own install directory; see [Cursor / Codex / OpenCode](#cursor-codex-opencode).
+See:
+- [docs/tools/cursor.md](docs/tools/cursor.md)
+- [docs/tools/codex.md](docs/tools/codex.md)
+- [docs/supported-tools.md](docs/supported-tools.md)
 
 ### Duplicate hooks / plugin.json?
 
 Do not add a `"hooks"` field to `.claude-plugin/plugin.json`.
-Claude Code loads `hooks/hooks.json` by convention. Edit `hooks/claude/hooks.json` and sync mirrors with `node scripts/sync-hook-mirrors.js`.
+Claude Code loads `hooks/hooks.json` by convention. Edit `claude-template/hooks.json` and sync mirrors with `node scripts/sync-hook-mirrors.js`.
 See [upstream repo](https://github.com/affaan-m/modeldev-toolkit) for history (#29, #52, #103).
 
 More: [CLAUDE.md](CLAUDE.md), [AGENTS.md](AGENTS.md), and `docs/`.
@@ -247,7 +242,7 @@ See [docs/token-optimization.md](docs/token-optimization.md) for recommended set
 
 ## Links
 
-- **Original project:** [Everything Claude Code](https://github.com/affaan-m/modeldev-toolkit) — plugin, guides, community
+- **Original project:** [Everything Claude Code](https://github.com/affaan-m/everything-claude-code) — plugin, guides, community
 - **Upstream shorthand guide:** [Affaan's shorthand guide for Everything Claude Code](https://x.com/affaanmustafa/status/2012378465664745795)
 - **Upstream longform guide:** [Affaan's longform guide for Everything Claude Code](https://x.com/affaanmustafa/status/2014040193557471352)
 

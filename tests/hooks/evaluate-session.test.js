@@ -35,6 +35,7 @@ function runTests() {
     try {
       const result = evaluateSession({
         input: { transcript_path: transcript },
+        env: { ...process.env, DATA_DIR: path.join(testDir, '.cursor', 'mdt') },
         logger: msg => logs.push(msg)
       });
       assert.strictEqual(result.shouldEvaluate, false);
@@ -53,6 +54,7 @@ function runTests() {
     try {
       const result = evaluateSession({
         input: { transcript_path: transcript },
+        env: { ...process.env, DATA_DIR: path.join(testDir, '.cursor', 'mdt') },
         logger: msg => logs.push(msg)
       });
       assert.strictEqual(result.shouldEvaluate, true);
@@ -65,9 +67,14 @@ function runTests() {
   })) passed++; else failed++;
 
   if (test('returns missing-transcript when transcript path is absent', () => {
-    const result = evaluateSession({ input: {} });
-    assert.strictEqual(result.shouldEvaluate, false);
-    assert.strictEqual(result.reason, 'missing-transcript');
+    const testDir = createTestDir('eval-session-test-');
+    try {
+      const result = evaluateSession({ input: {}, env: { ...process.env, DATA_DIR: path.join(testDir, '.cursor', 'mdt') } });
+      assert.strictEqual(result.shouldEvaluate, false);
+      assert.strictEqual(result.reason, 'missing-transcript');
+    } finally {
+      cleanupTestDir(testDir);
+    }
   })) passed++; else failed++;
 
   if (test('falls back to CLAUDE_TRANSCRIPT_PATH env var', () => {
@@ -76,7 +83,7 @@ function runTests() {
     try {
       const result = evaluateSession({
         input: {},
-        env: { ...process.env, CLAUDE_TRANSCRIPT_PATH: transcript }
+        env: { ...process.env, CLAUDE_TRANSCRIPT_PATH: transcript, DATA_DIR: path.join(testDir, '.cursor', 'mdt') }
       });
       assert.strictEqual(result.shouldEvaluate, true);
       assert.strictEqual(result.messageCount, 15);
@@ -95,7 +102,7 @@ function runTests() {
     }
     fs.writeFileSync(filePath, lines.join('\n') + '\n');
     try {
-      const result = evaluateSession({ input: { transcript_path: filePath } });
+      const result = evaluateSession({ input: { transcript_path: filePath }, env: { ...process.env, DATA_DIR: path.join(testDir, '.cursor', 'mdt') } });
       assert.strictEqual(result.shouldEvaluate, true);
       assert.strictEqual(result.messageCount, 12);
     } finally {
@@ -112,7 +119,7 @@ function runTests() {
     try {
       const result = evaluateSession({
         input: { transcript_path: transcript },
-        env: { ...process.env, MDT_CONTINUOUS_LEARNING_CONFIG: configPath },
+        env: { ...process.env, MDT_CONTINUOUS_LEARNING_CONFIG: configPath, DATA_DIR: path.join(testDir, '.cursor', 'mdt') },
         logger: msg => logs.push(msg)
       });
       assert.strictEqual(result.shouldEvaluate, true);
@@ -143,23 +150,23 @@ function runTests() {
     }
   })) passed++; else failed++;
 
-  if (test('expands <config> placeholder in learned_skills_path config', () => {
+  if (test('expands <data> placeholder in learned_skills_path config', () => {
     const testDir = createTestDir('eval-session-test-');
     const configPath = path.join(testDir, 'config.json');
     const transcript = createTranscript(testDir, 12);
-    const configDir = path.join(testDir, '.cursor');
-    fs.mkdirSync(configDir, { recursive: true });
+    const dataDir = path.join(testDir, '.cursor', 'mdt');
+    fs.mkdirSync(dataDir, { recursive: true });
     fs.writeFileSync(configPath, JSON.stringify({
       min_session_length: 10,
-      learned_skills_path: '<config>/skills/learned'
+      learned_skills_path: '<data>/generated/skills/learned'
     }));
     try {
       const result = evaluateSession({
         input: { transcript_path: transcript },
-        env: { ...process.env, CONFIG_DIR: configDir, MDT_CONTINUOUS_LEARNING_CONFIG: configPath }
+        env: { ...process.env, DATA_DIR: dataDir, MDT_CONTINUOUS_LEARNING_CONFIG: configPath }
       });
       assert.strictEqual(result.shouldEvaluate, true);
-      assert.strictEqual(result.learnedSkillsPath, path.join(configDir, 'skills', 'learned'));
+      assert.strictEqual(result.learnedSkillsPath, path.join(dataDir, 'generated', 'skills', 'learned'));
     } finally {
       cleanupTestDir(testDir);
     }

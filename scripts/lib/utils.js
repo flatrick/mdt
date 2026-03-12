@@ -64,14 +64,15 @@ function getClaudeDir() {
  * Get the sessions directory
  */
 function getSessionsDir() {
-  return path.join(getConfigDir(), 'sessions');
+  return path.join(getDataDir(), 'sessions');
 }
 
 /**
- * Get the learned skills directory
+ * Get the MDT-managed generated skills staging directory.
  */
-function getLearnedSkillsDir() {
-  return path.join(getConfigDir(), 'skills', 'learned');
+function getLearnedSkillsDir(env = process.env) {
+  const dataDir = env.DATA_DIR || getDataDir();
+  return path.join(dataDir, 'generated', 'skills', 'learned');
 }
 
 /**

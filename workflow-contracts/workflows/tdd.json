@@ -1,0 +1,41 @@
+{
+  "id": "tdd",
+  "title": "TDD",
+  "outcome": "Write failing tests first, implement the minimum change, then refactor with verification.",
+  "successCriteria": [
+    "The workflow starts by specifying a failing test or explicit test-first plan.",
+    "The workflow guides implementation toward a passing test and follow-up refactor."
+  ],
+  "tools": {
+    "claude": {
+      "status": "official",
+      "verificationMode": "installer-target",
+      "artifactMappings": [
+        { "surfaceType": "command", "name": "tdd", "path": "commands/tdd.md", "role": "primary-workflow" },
+        { "surfaceType": "agent", "name": "tdd-guide", "path": "agents/tdd-guide.md", "role": "specialized-tdd" },
+        { "surfaceType": "skill", "name": "tdd-workflow", "path": "skills/tdd-workflow/SKILL.md", "role": "detailed-playbook" }
+      ],
+      "requiredFiles": ["commands/tdd.md", "agents/tdd-guide.md", "skills/tdd-workflow/SKILL.md"]
+    },
+    "cursor": {
+      "status": "repo-adapter",
+      "verificationMode": "installer-target",
+      "artifactMappings": [
+        { "surfaceType": "command", "name": "tdd", "path": "cursor-template/commands/tdd.md", "role": "custom-command" },
+        { "surfaceType": "guidance", "name": "workspace-guidance", "path": "AGENTS.md", "role": "shared-guidance" },
+        { "surfaceType": "rule", "name": "common-testing", "path": "cursor-template/rules/common-testing.md", "role": "testing-behavior" }
+      ],
+      "requiredFiles": ["AGENTS.md", "cursor-template/rules/common-testing.md"]
+    },
+    "codex": {
+      "status": "repo-adapter",
+      "verificationMode": "installer-target",
+      "artifactMappings": [
+        { "surfaceType": "guidance", "name": "codex-agents", "path": "codex-template/AGENTS.md", "role": "tdd-guidance" },
+        { "surfaceType": "config", "name": "codex-config", "path": "codex-template/config.toml", "role": "codex-runtime-config" },
+        { "surfaceType": "skill", "name": "tdd-workflow", "path": "codex-template/skills/tdd-workflow/SKILL.md", "role": "installed-skill" }
+      ],
+      "requiredFiles": ["codex-template/config.toml", "codex-template/AGENTS.md", "codex-template/skills/tdd-workflow/SKILL.md"]
+    }
+  }
+}

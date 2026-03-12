@@ -12,6 +12,7 @@ This document tracks naming changes from upstream `affaan-m/everything-claude-co
 | `npm run install-ecc` | `npm run install-mdt` | Old npm script alias removed |
 | `install-ecc` tests | `install-mdt` tests | `tests/scripts/install-mdt*.test.js` |
 | `CLAUDE_PLUGIN_ROOT` | `MDT_ROOT` | Runtime placeholder renamed; legacy alias removed in this fork |
+| `skills/continuous-learning/` | package `continuous-learning` -> `skills/continuous-learning-manual/` | Legacy v1 skill removed; upstream references to `continuous-learning` map to the v2 skill directory in this fork |
 
 ## Upstream sync checklist
 

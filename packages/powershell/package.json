@@ -1,0 +1,61 @@
+{
+  "name": "powershell",
+  "description": "Base PowerShell 7+ workflow package",
+  "ruleDirectory": "powershell",
+  "rules": [
+    "common/agents.md",
+    "common/coding-style.md",
+    "common/development-workflow.md",
+    "common/git-workflow.md",
+    "common/hooks.md",
+    "common/patterns.md",
+    "common/performance.md",
+    "common/security.md",
+    "common/testing.md",
+    "powershell/coding-style.md",
+    "powershell/hooks.md",
+    "powershell/patterns.md",
+    "powershell/security.md",
+    "powershell/testing.md"
+  ],
+  "agents": [
+    "planner.md",
+    "code-reviewer.md",
+    "security-reviewer.md",
+    "powershell-reviewer.md"
+  ],
+  "commands": [
+    "docs-health.md",
+    "plan.md",
+    "verify.md",
+    "code-review.md"
+  ],
+  "skills": [
+    "documentation-steward",
+    "powershell-patterns",
+    "verification-loop",
+    "security-review"
+  ],
+  "tools": {
+    "cursor": {
+      "rules": [],
+      "skills": [],
+      "commands": [
+        "docs-health.md"
+      ]
+    },
+    "gemini": {
+      "rules": [
+        "common-agents.md",
+        "common-coding-style.md",
+        "common-development-workflow.md",
+        "common-git-workflow.md",
+        "common-hooks.md",
+        "common-patterns.md",
+        "common-performance.md",
+        "common-security.md",
+        "common-testing.md"
+      ]
+    }
+  }
+}

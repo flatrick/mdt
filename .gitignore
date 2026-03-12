@@ -68,3 +68,10 @@ verify-tool-setups.js.txt
 
 # Local Cursor config installation
 .cursor/
+
+# Local Codex config installation
+.codex/
+
+
+# Local Codex agent install surface (generated, not committed)
+.agents/

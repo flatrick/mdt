@@ -21,8 +21,8 @@ export function getClaudeDir(): string;
 /** Get the sessions directory under the active config dir */
 export function getSessionsDir(): string;
 
-/** Get the learned skills directory under the active config dir */
-export function getLearnedSkillsDir(): string;
+/** Get the MDT-managed generated skills staging directory under the active data dir */
+export function getLearnedSkillsDir(env?: NodeJS.ProcessEnv): string;
 
 /** Get the temp directory (cross-platform) */
 export function getTempDir(): string;

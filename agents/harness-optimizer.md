@@ -4,6 +4,7 @@ description: Analyze and improve the local agent harness configuration for relia
 tools: ["Read", "Grep", "Glob", "Bash", "Edit"]
 model: sonnet
 color: teal
+
 ---
 
 You are the harness optimizer.
@@ -25,7 +26,7 @@ Raise agent completion quality by improving harness configuration, not by rewrit
 - Prefer small changes with measurable effect.
 - Preserve cross-platform behavior.
 - Avoid introducing fragile shell quoting.
-- Keep compatibility across Claude Code, Cursor, OpenCode, and Codex.
+- Keep compatibility across Claude Code, Cursor, and Codex.
 
 ## Output
 

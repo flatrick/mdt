@@ -1,0 +1,41 @@
+{
+  "name": "context-compaction",
+  "description": "MDT capability package for strategic manual compaction and compaction-time state handling",
+  "kind": "capability",
+  "ruleDirectory": "common",
+  "rules": [
+    "common/development-workflow.md",
+    "common/hooks.md",
+    "common/performance.md"
+  ],
+  "agents": [],
+  "commands": [
+    "docs-health.md"
+  ],
+  "skills": [
+    "documentation-steward",
+    "strategic-compact"
+  ],
+  "tools": {
+    "cursor": {
+      "rules": [
+        "common-development-workflow.md",
+        "common-hooks.md",
+        "common-performance.md"
+      ],
+      "skills": [],
+      "commands": [
+        "docs-health.md"
+      ]
+    }
+  },
+  "requires": {
+    "hooks": true,
+    "runtimeScripts": true,
+    "sessionData": true,
+    "tools": [
+      "claude",
+      "cursor"
+    ]
+  }
+}

@@ -45,7 +45,7 @@ async function runTests() {
     const isoHome = path.join(os.tmpdir(), `MDT-iso-start-${Date.now()}`);
     const sessionsDir = getSessionsDirForHome(isoHome);
     fs.mkdirSync(sessionsDir, { recursive: true });
-    fs.mkdirSync(path.join(path.dirname(sessionsDir), 'skills', 'learned'), { recursive: true });
+    fs.mkdirSync(path.join(path.dirname(sessionsDir), 'generated', 'skills', 'learned'), { recursive: true });
     try {
       const result = await runScript(path.join(scriptsDir, 'session-start.js'), '', {
         HOME: isoHome, USERPROFILE: isoHome
@@ -68,7 +68,7 @@ async function runTests() {
     const isoHome = path.join(os.tmpdir(), `MDT-tpl-start-${Date.now()}`);
     const sessionsDir = getSessionsDirForHome(isoHome);
     fs.mkdirSync(sessionsDir, { recursive: true });
-    fs.mkdirSync(path.join(path.dirname(sessionsDir), 'skills', 'learned'), { recursive: true });
+    fs.mkdirSync(path.join(path.dirname(sessionsDir), 'generated', 'skills', 'learned'), { recursive: true });
 
     // Create a session file with template placeholder
     const sessionFile = path.join(sessionsDir, '2026-02-11-abcd1234-session.tmp');
@@ -93,7 +93,7 @@ async function runTests() {
     const isoHome = path.join(os.tmpdir(), `MDT-real-start-${Date.now()}`);
     const sessionsDir = getSessionsDirForHome(isoHome);
     fs.mkdirSync(sessionsDir, { recursive: true });
-    fs.mkdirSync(path.join(path.dirname(sessionsDir), 'skills', 'learned'), { recursive: true });
+    fs.mkdirSync(path.join(path.dirname(sessionsDir), 'generated', 'skills', 'learned'), { recursive: true });
 
     // Create a real session file
     const sessionFile = path.join(sessionsDir, '2026-02-11-efgh5678-session.tmp');
@@ -117,10 +117,10 @@ async function runTests() {
     }
   })) passed++; else failed++;
 
-  if (await asyncTest('reports learned skills count', async () => {
+  if (await asyncTest('reports learned candidate skills count', async () => {
     const isoHome = path.join(os.tmpdir(), `MDT-skills-start-${Date.now()}`);
     const sessionsDir = getSessionsDirForHome(isoHome);
-    const learnedDir = path.join(path.dirname(sessionsDir), 'skills', 'learned');
+    const learnedDir = path.join(path.dirname(sessionsDir), 'generated', 'skills', 'learned');
     fs.mkdirSync(learnedDir, { recursive: true });
     fs.mkdirSync(sessionsDir, { recursive: true });
 
@@ -134,8 +134,8 @@ async function runTests() {
       });
       assert.strictEqual(result.code, 0);
       assert.ok(
-        result.stderr.includes('2 learned skill(s)'),
-        `Should report 2 learned skills, stderr: ${result.stderr}`
+        result.stderr.includes('2 learned candidate skill(s)'),
+        `Should report 2 learned candidate skills, stderr: ${result.stderr}`
       );
     } finally {
       fs.rmSync(isoHome, { recursive: true, force: true });

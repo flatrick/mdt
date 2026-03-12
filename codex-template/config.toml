@@ -1,0 +1,12 @@
+# ModelDev Toolkit — Codex CLI reference config
+#
+# This file is intentionally minimal. Repo guidance belongs in AGENTS.md, not in
+# config.toml. The installer should not overwrite an existing ~/.codex/config.toml
+# with repo assumptions.
+
+model = "gpt-5.3-codex"
+model_provider = "openai"
+approval_policy = "on-request"
+sandbox_mode = "workspace-write"
+
+# MCP is opt-in. MDT does not enable any MCP servers by default for Codex.

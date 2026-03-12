@@ -1,0 +1,118 @@
+{
+  "name": "typescript",
+  "description": "Base TypeScript workflow package",
+  "ruleDirectory": "typescript",
+  "rules": [
+    "common/agents.md",
+    "common/coding-style.md",
+    "common/development-workflow.md",
+    "common/git-workflow.md",
+    "common/hooks.md",
+    "common/patterns.md",
+    "common/performance.md",
+    "common/security.md",
+    "common/testing.md",
+    "typescript/coding-style.md",
+    "typescript/hooks.md",
+    "typescript/patterns.md",
+    "typescript/security.md",
+    "typescript/testing.md"
+  ],
+  "agents": [
+    "planner.md",
+    "code-reviewer.md",
+    "security-reviewer.md",
+    "tdd-guide.md",
+    "e2e-runner.md"
+  ],
+  "commands": [
+    "docs-health.md",
+    "plan.md",
+    "tdd.md",
+    "verify.md",
+    "code-review.md",
+    "smoke.md",
+    "e2e.md"
+  ],
+  "skills": [
+    "documentation-steward",
+    "coding-standards",
+    "tdd-workflow",
+    "verification-loop",
+    "security-review",
+    "backend-patterns",
+    "frontend-patterns",
+    "e2e-testing"
+  ],
+  "tools": {
+    "cursor": {
+      "rules": [
+        "common-agents.md",
+        "common-coding-style.md",
+        "common-development-workflow.md",
+        "common-git-workflow.md",
+        "common-hooks.md",
+        "common-patterns.md",
+        "common-performance.md",
+        "common-security.md",
+        "common-testing.md",
+        "typescript-coding-style.md",
+        "typescript-hooks.md",
+        "typescript-patterns.md",
+        "typescript-security.md",
+        "typescript-testing.md"
+      ],
+      "skills": [
+        "frontend-slides"
+      ],
+      "commands": [
+        "docs-health.md",
+        "plan.md",
+        "tdd.md",
+        "verify.md",
+        "code-review.md",
+        "smoke.md",
+        "e2e.md",
+        "security.md",
+        "build-fix.md",
+        "refactor-clean.md"
+      ]
+    },
+    "codex": {
+      "rules": [
+        "common-coding-style.md",
+        "common-testing.md",
+        "common-security.md",
+        "common-git-workflow.md"
+      ],
+      "skills": [
+        "documentation-steward",
+        "coding-standards",
+        "tdd-workflow",
+        "verification-loop",
+        "security-review",
+        "backend-patterns",
+        "frontend-patterns",
+        "e2e-testing"
+      ]
+    },
+    "gemini": {
+      "rules": [
+        "common-agents.md",
+        "common-coding-style.md",
+        "common-development-workflow.md",
+        "common-git-workflow.md",
+        "common-hooks.md",
+        "common-patterns.md",
+        "common-performance.md",
+        "common-security.md",
+        "common-testing.md",
+        "typescript-coding-style.md",
+        "typescript-hooks.md",
+        "typescript-patterns.md",
+        "typescript-security.md",
+        "typescript-testing.md"
+      ]
+    }
+  }
+}

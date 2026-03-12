@@ -1,0 +1,40 @@
+{
+  "id": "e2e",
+  "title": "E2E",
+  "outcome": "Exercise critical end-to-end user flows when the change affects workflow behavior.",
+  "successCriteria": [
+    "The workflow identifies when end-to-end coverage is needed for a change.",
+    "The workflow drives or prescribes realistic end-to-end user flow validation."
+  ],
+  "tools": {
+    "claude": {
+      "status": "official",
+      "verificationMode": "installer-target",
+      "artifactMappings": [
+        { "surfaceType": "command", "name": "e2e", "path": "commands/e2e.md", "role": "primary-workflow" },
+        { "surfaceType": "agent", "name": "e2e-runner", "path": "agents/e2e-runner.md", "role": "specialized-runner" },
+        { "surfaceType": "skill", "name": "e2e-testing", "path": "skills/e2e-testing/SKILL.md", "role": "detailed-playbook" }
+      ],
+      "requiredFiles": ["commands/e2e.md", "agents/e2e-runner.md", "skills/e2e-testing/SKILL.md"]
+    },
+    "cursor": {
+      "status": "repo-adapter",
+      "verificationMode": "installer-target",
+      "artifactMappings": [
+        { "surfaceType": "guidance", "name": "workspace-guidance", "path": "AGENTS.md", "role": "shared-guidance" },
+        { "surfaceType": "rule", "name": "common-testing", "path": "cursor-template/rules/common-testing.md", "role": "testing-behavior" }
+      ],
+      "requiredFiles": ["AGENTS.md", "cursor-template/rules/common-testing.md"]
+    },
+    "codex": {
+      "status": "repo-adapter",
+      "verificationMode": "installer-target",
+      "artifactMappings": [
+        { "surfaceType": "guidance", "name": "codex-agents", "path": "codex-template/AGENTS.md", "role": "e2e-guidance" },
+        { "surfaceType": "config", "name": "codex-config", "path": "codex-template/config.toml", "role": "codex-runtime-config" },
+        { "surfaceType": "skill", "name": "e2e-testing", "path": "codex-template/skills/e2e-testing/SKILL.md", "role": "installed-skill" }
+      ],
+      "requiredFiles": ["codex-template/config.toml", "codex-template/AGENTS.md", "codex-template/skills/e2e-testing/SKILL.md"]
+    }
+  }
+}

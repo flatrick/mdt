@@ -2,6 +2,7 @@
 name: evolve
 description: Analyze instincts and suggest or generate evolved structures
 command: true
+
 ---
 
 # Evolve Command
@@ -11,13 +12,13 @@ command: true
 Run the instinct CLI using `MDT_ROOT` when available:
 
 ```bash
-node "${MDT_ROOT}/skills/continuous-learning-v2/scripts/instinct-cli.js" evolve [--generate]
+node "${MDT_ROOT}/skills/continuous-learning-manual/scripts/instinct-cli.js" evolve [--generate]
 ```
 
 For manual installs, replace `<config>` with your MDT config directory (for example `~/.claude` or `~/.cursor`):
 
 ```bash
-node "<config>/skills/continuous-learning-v2/scripts/instinct-cli.js" evolve [--generate]
+node "<config>/skills/continuous-learning-manual/scripts/instinct-cli.js" evolve [--generate]
 ```
 
 Analyzes instincts and clusters related ones into higher-level structures:
@@ -85,7 +86,7 @@ Example:
    - Agent candidates (larger, high-confidence clusters)
 5. Show promotion candidates (project -> global) when applicable
 6. If `--generate` is passed, write files to:
-   - Project scope: `<data>/homunculus/projects/<project-id>/evolved/`
+   - Project scope: `<data>/homunculus/<project-id>/evolved/`
    - Global fallback: `<data>/homunculus/evolved/`
 
 ## Output Format

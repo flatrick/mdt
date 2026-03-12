@@ -30,6 +30,7 @@ Use this when you need to refresh or challenge any claim in the MDT tool docs.
 ```bash
 node scripts/verify-tool-setups.js
 node scripts/smoke-tool-setups.js
+node scripts/smoke-claude-workflows.js
 node scripts/smoke-codex-workflows.js
 ```
 
@@ -43,7 +44,13 @@ Use `verify-tool-setups.js` as the deterministic local check for the core MDT wo
 
 Use `smoke-tool-setups.js` as an optional local CLI probe. Missing tools should be recorded as `SKIP`, not guessed as passing or failing.
 
-Use `smoke-codex-workflows.js` when you want a deeper Codex-specific check for MDT's current `plan`, `tdd`, and `verify` workflows without requiring a live model session.
+Use `smoke-claude-workflows.js` when you want a deeper Claude-specific check for
+the current `plan`, `tdd`, `code-review`, `verify`, `smoke`, `security`, and
+`e2e` workflows without requiring a live Claude session.
+
+Use `smoke-codex-workflows.js` when you want a deeper Codex-specific check for
+the current `plan`, `tdd`, `code-review`, `verify`, `smoke`, `security`, and
+`e2e` workflows without requiring a live model session.
 
 ### Claude Code
 
@@ -57,16 +64,15 @@ claude mcp --help
 ### Cursor
 
 ```bash
-cursor --version
-cursor --help
 agent --help
-cursor agent --help
 cursor-agent --help
 ```
 
 Cursor desktop should currently be treated as a manual verification surface.
 Prefer `agent` or `cursor-agent` for automated local smoke checks, and use the
 desktop app only for manual workflow confirmation inside Cursor itself.
+
+Manual tool checklists live under [docs/testing/manual-verification/](../testing/manual-verification/README.md), including prepared pages for Claude Code, Cursor, and Codex.
 
 ### Codex
 
@@ -77,26 +83,35 @@ codex exec --help
 codex features list
 ```
 
-### OpenCode
+Default local Codex sessions should stay on `workspace-write`.
+
+When verification work needs nested subprocesses, broader temp-dir access, or
+other behavior blocked by the default sandbox, use an explicit per-invocation
+Codex command instead of loosening your global Codex config.
+
+Examples:
 
 ```bash
-opencode --version
-opencode --help
+codex --sandbox danger-full-access --ask-for-approval on-request
 ```
 
-If `opencode` is not installed:
-- inspect `.opencode/opencode.json`
-- inspect `.opencode/plugins/`
+```powershell
+codex --sandbox danger-full-access --ask-for-approval on-request
+```
+
+Use this only for trusted local verification inside this repository.
+This keeps the relaxation scoped to the current Codex launch instead of
+changing `~/.codex/config.toml`.
+
 - keep status as `not-locally-verified`
 
 ## Repo Adapter Checks
 
 Use these files to confirm what MDT actually ships:
 
-- Claude: `hooks/claude/hooks.json`, `commands/`, `agents/`, `skills/`
-- Cursor: `.cursor/rules/`, `.cursor/hooks.json`, `.cursor/hooks/`
-- Codex: `.codex/config.toml`, `.codex/AGENTS.md`
-- OpenCode: `.opencode/opencode.json`, `.opencode/plugins/`, `.opencode/commands/`, `.opencode/prompts/agents/`
+- Claude: `claude-template/hooks.json`, `commands/`, `agents/`, `skills/`
+- Cursor: `cursor-template/rules/`, `cursor-template/hooks.json`, `cursor-template/hooks/`
+- Codex: `codex-template/config.toml`, `codex-template/AGENTS.md`
 
 ## Minimum Evidence Required Per Claim
 
@@ -122,4 +137,3 @@ Every page in `docs/tools/` should keep:
 - Cursor installed: yes
 - Cursor terminal agent installed: yes
 - Codex installed: yes
-- OpenCode installed: no

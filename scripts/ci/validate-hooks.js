@@ -8,7 +8,7 @@ const path = require('path');
 const vm = require('vm');
 const { safeJsonParse } = require('../lib/runtime-utils');
 
-const DEFAULT_HOOKS_FILE = path.join(__dirname, '../../hooks/claude/hooks.json');
+const DEFAULT_HOOKS_FILE = path.join(__dirname, '../../claude-template/hooks.json');
 const VALID_EVENTS = ['PreToolUse', 'PostToolUse', 'PreCompact', 'SessionStart', 'SessionEnd', 'Stop', 'Notification', 'SubagentStop'];
 const DEFAULT_IO = { log: console.log, error: console.error };
 

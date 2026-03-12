@@ -1,0 +1,39 @@
+{
+  "id": "code-review",
+  "title": "Code Review",
+  "outcome": "Review changes for correctness, regressions, and missing tests before sign-off.",
+  "successCriteria": [
+    "The workflow checks for behavioral regressions and obvious implementation risks.",
+    "The workflow highlights missing verification or tests before sign-off."
+  ],
+  "tools": {
+    "claude": {
+      "status": "official",
+      "verificationMode": "installer-target",
+      "artifactMappings": [
+        { "surfaceType": "command", "name": "code-review", "path": "commands/code-review.md", "role": "primary-workflow" },
+        { "surfaceType": "agent", "name": "code-reviewer", "path": "agents/code-reviewer.md", "role": "specialized-reviewer" }
+      ],
+      "requiredFiles": ["commands/code-review.md", "agents/code-reviewer.md"]
+    },
+    "cursor": {
+      "status": "repo-adapter",
+      "verificationMode": "installer-target",
+      "artifactMappings": [
+        { "surfaceType": "command", "name": "code-review", "path": "cursor-template/commands/code-review.md", "role": "custom-command" },
+        { "surfaceType": "guidance", "name": "workspace-guidance", "path": "AGENTS.md", "role": "shared-guidance" },
+        { "surfaceType": "rule", "name": "common-coding-style", "path": "cursor-template/rules/common-coding-style.md", "role": "review-criteria" }
+      ],
+      "requiredFiles": ["AGENTS.md", "cursor-template/rules/common-coding-style.md"]
+    },
+    "codex": {
+      "status": "repo-adapter",
+      "verificationMode": "installer-target",
+      "artifactMappings": [
+        { "surfaceType": "guidance", "name": "codex-agents", "path": "codex-template/AGENTS.md", "role": "review-guidance" },
+        { "surfaceType": "config", "name": "codex-config", "path": "codex-template/config.toml", "role": "codex-runtime-config" }
+      ],
+      "requiredFiles": ["codex-template/config.toml", "codex-template/AGENTS.md"]
+    }
+  }
+}

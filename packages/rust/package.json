@@ -1,0 +1,64 @@
+{
+  "name": "rust",
+  "description": "Base Rust workflow package",
+  "ruleDirectory": "rust",
+  "rules": [
+    "common/agents.md",
+    "common/coding-style.md",
+    "common/development-workflow.md",
+    "common/git-workflow.md",
+    "common/hooks.md",
+    "common/patterns.md",
+    "common/performance.md",
+    "common/security.md",
+    "common/testing.md",
+    "rust/coding-style.md",
+    "rust/hooks.md",
+    "rust/patterns.md",
+    "rust/security.md",
+    "rust/testing.md"
+  ],
+  "agents": [
+    "planner.md",
+    "code-reviewer.md",
+    "security-reviewer.md",
+    "tdd-guide.md",
+    "rust-reviewer.md"
+  ],
+  "commands": [
+    "docs-health.md",
+    "plan.md",
+    "tdd.md",
+    "verify.md",
+    "code-review.md"
+  ],
+  "skills": [
+    "documentation-steward",
+    "rust-patterns",
+    "tdd-workflow",
+    "verification-loop",
+    "security-review"
+  ],
+  "tools": {
+    "cursor": {
+      "rules": [],
+      "skills": [],
+      "commands": [
+        "docs-health.md"
+      ]
+    },
+    "gemini": {
+      "rules": [
+        "common-agents.md",
+        "common-coding-style.md",
+        "common-development-workflow.md",
+        "common-git-workflow.md",
+        "common-hooks.md",
+        "common-patterns.md",
+        "common-performance.md",
+        "common-security.md",
+        "common-testing.md"
+      ]
+    }
+  }
+}

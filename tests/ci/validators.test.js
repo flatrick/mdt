@@ -19,6 +19,28 @@ function runTests() {
   let passed = 0;
   let failed = 0;
 
+  function buildValidPackageManifest(packageName, overrides = {}) {
+    return {
+      name: packageName,
+      description: `${packageName} package`,
+      ruleDirectory: packageName,
+      rules: ['common/coding-style.md', `${packageName}/coding-style.md`],
+      agents: ['planner.md'],
+      commands: ['plan.md'],
+      skills: ['verification-loop'],
+      tools: {
+        cursor: {
+          rules: [],
+          skills: []
+        },
+        gemini: {
+          rules: []
+        }
+      },
+      ...overrides
+    };
+  }
+
   // ==========================================
   // validate-agents.js
   // ==========================================
@@ -296,6 +318,706 @@ function runTests() {
   })) passed++; else failed++;
 
   // ==========================================
+  // validate-hook-mirrors.js
+  // ==========================================
+  console.log('\nvalidate-hook-mirrors.js:');
+
+  if (test('passes on real project hook mirrors', () => {
+    const result = runValidator('validate-hook-mirrors');
+    assert.strictEqual(result.code, 0, `Should pass, got stderr: ${result.stderr}`);
+    assert.ok(result.stdout.includes('Validated 2 hook mirror platform'), 'Should report validation success');
+  })) passed++; else failed++;
+
+  // ==========================================
+  // validate-runtime-ignores.js
+  // ==========================================
+  console.log('\nvalidate-runtime-ignores.js:');
+
+  if (test('passes on real project runtime ignores', () => {
+    const result = runValidator('validate-runtime-ignores');
+    assert.strictEqual(result.code, 0, `Should pass, got stderr: ${result.stderr}`);
+    assert.ok(result.stdout.includes('Validated runtime-dir ignores'), 'Should report validation success');
+  })) passed++; else failed++;
+
+  if (test('fails when required runtime ignore entries are missing', () => {
+    const testDir = createTestDir();
+    const gitignoreFile = path.join(testDir, '.gitignore');
+    fs.writeFileSync(gitignoreFile, '.claude/\n.cursor/\n');
+
+    const result = runValidatorWithDir('validate-runtime-ignores', 'GITIGNORE_FILE', gitignoreFile);
+    assert.strictEqual(result.code, 1, 'Should fail when runtime ignore entries are missing');
+    assert.ok(result.stderr.includes('.codex/'), 'Should report missing .codex/');
+    cleanupTestDir(testDir);
+  })) passed++; else failed++;
+
+  if (test('ignores comments and blank lines in .gitignore', () => {
+    const testDir = createTestDir();
+    const gitignoreFile = path.join(testDir, '.gitignore');
+    fs.writeFileSync(
+      gitignoreFile,
+      '# Runtime dirs\n\n.claude/\n.cursor/\n.codex/\n'
+    );
+
+    const result = runValidatorWithDir('validate-runtime-ignores', 'GITIGNORE_FILE', gitignoreFile);
+    assert.strictEqual(result.code, 0, 'Should accept required entries with comments and blank lines');
+    cleanupTestDir(testDir);
+  })) passed++; else failed++;
+
+  if (test('accepts rooted runtime ignore entries', () => {
+    const testDir = createTestDir();
+    const gitignoreFile = path.join(testDir, '.gitignore');
+    fs.writeFileSync(gitignoreFile, '/.claude/\n/.cursor/\n/.codex/\n');
+
+    const result = runValidatorWithDir('validate-runtime-ignores', 'GITIGNORE_FILE', gitignoreFile);
+    assert.strictEqual(result.code, 0, 'Should accept rooted runtime ignore entries');
+    cleanupTestDir(testDir);
+  })) passed++; else failed++;
+
+  if (test('fails when a runtime dir is partially unignored later', () => {
+    const testDir = createTestDir();
+    const gitignoreFile = path.join(testDir, '.gitignore');
+    fs.writeFileSync(
+      gitignoreFile,
+      '.claude/\n.cursor/\n.codex/\n!.codex/AGENTS.md\n'
+    );
+
+    const result = runValidatorWithDir('validate-runtime-ignores', 'GITIGNORE_FILE', gitignoreFile);
+    assert.strictEqual(result.code, 1, 'Should fail when a runtime dir is partially unignored');
+    assert.ok(result.stderr.includes('Runtime dir is partially unignored: .codex/'), 'Should report partial unignore');
+    cleanupTestDir(testDir);
+  })) passed++; else failed++;
+
+  // ==========================================
+  // validate-install-packages.js
+  // ==========================================
+  console.log('\nvalidate-install-packages.js:');
+
+  if (test('passes on real project install packages', () => {
+    const result = runValidator('validate-install-packages');
+    assert.strictEqual(result.code, 0, `Should pass, got stderr: ${result.stderr}`);
+    assert.ok(result.stdout.includes('Validated'), 'Should report validation success');
+  })) passed++; else failed++;
+
+  // ==========================================
+  // validate-template-doc-boundaries.js
+  // ==========================================
+  console.log('\nvalidate-template-doc-boundaries.js:');
+
+  if (test('passes on real project template docs', () => {
+    const result = runValidator('validate-template-doc-boundaries');
+    assert.strictEqual(result.code, 0, `Should pass, got stderr: ${result.stderr}`);
+    assert.ok(result.stdout.includes('Validated template-doc boundaries'), 'Should report validation success');
+  })) passed++; else failed++;
+
+  if (test('fails when a codex-template doc references Cursor', () => {
+    const testDir = createTestDir();
+    const codexDir = path.join(testDir, 'codex-template', 'skills', 'example');
+    fs.mkdirSync(codexDir, { recursive: true });
+    fs.writeFileSync(path.join(codexDir, 'SKILL.md'), '# Example\n\nUse Cursor here.');
+
+    const result = runValidatorWithDir('validate-template-doc-boundaries', 'REPO_ROOT', testDir);
+    assert.strictEqual(result.code, 1, 'Should fail on other-tool reference in template doc');
+    assert.ok(result.stderr.includes('Cursor'), 'Should report the other tool reference');
+    cleanupTestDir(testDir);
+  })) passed++; else failed++;
+
+  if (test('fails when codex continuous-learning template uses abstract data placeholders', () => {
+    const testDir = createTestDir();
+    const codexDir = path.join(testDir, 'codex-template', 'skills', 'continuous-learning-manual');
+    fs.mkdirSync(codexDir, { recursive: true });
+    fs.writeFileSync(
+      path.join(codexDir, 'SKILL.md'),
+      '# Continuous Learning\n\nStore data in `<data>/homunculus/`.\n'
+    );
+
+    const result = runValidatorWithDir('validate-template-doc-boundaries', 'REPO_ROOT', testDir);
+    assert.strictEqual(result.code, 1, 'Should fail on abstract data placeholder in codex template');
+    assert.ok(result.stderr.includes('<data>/homunculus/'), 'Should report forbidden placeholder');
+    cleanupTestDir(testDir);
+  })) passed++; else failed++;
+
+  if (test('fails when codex continuous-learning template uses MDT_ROOT-first examples', () => {
+    const testDir = createTestDir();
+    const codexDir = path.join(testDir, 'codex-template', 'skills', 'continuous-learning-manual');
+    fs.mkdirSync(codexDir, { recursive: true });
+    fs.writeFileSync(
+      path.join(codexDir, 'SKILL.md'),
+      '# Continuous Learning\n\nRun `node "${MDT_ROOT}/skills/continuous-learning-manual/scripts/instinct-cli.js" status`.\n'
+    );
+
+    const result = runValidatorWithDir('validate-template-doc-boundaries', 'REPO_ROOT', testDir);
+    assert.strictEqual(result.code, 1, 'Should fail on MDT_ROOT-first example in codex template');
+    assert.ok(result.stderr.includes('${MDT_ROOT}'), 'Should report forbidden MDT_ROOT example');
+    cleanupTestDir(testDir);
+  })) passed++; else failed++;
+
+  if (test('fails when a required package is missing', () => {
+    const packagesDir = createTestDir();
+    const rulesDir = createTestDir();
+    const agentsDir = createTestDir();
+    const commandsDir = createTestDir();
+    const skillsDir = createTestDir();
+    const cursorRulesDir = createTestDir();
+    const cursorSkillsDir = createTestDir();
+    const cursorCommandsDir = createTestDir();
+
+    fs.mkdirSync(path.join(packagesDir, 'typescript'));
+    fs.writeFileSync(path.join(agentsDir, 'planner.md'), '---\nmodel: sonnet\ntools: Read\n---\n# Planner');
+    fs.writeFileSync(path.join(commandsDir, 'plan.md'), '# Plan\nBody');
+    fs.mkdirSync(path.join(skillsDir, 'verification-loop'));
+    fs.writeFileSync(
+      path.join(skillsDir, 'verification-loop', 'SKILL.md'),
+      '# Verification Loop\n\n## When to Use\nUse this skill for verification.',
+      'utf8'
+    );
+    fs.writeFileSync(
+      path.join(packagesDir, 'typescript', 'package.json'),
+      JSON.stringify(buildValidPackageManifest('typescript')),
+      'utf8'
+    );
+    fs.mkdirSync(path.join(rulesDir, 'common'));
+    fs.mkdirSync(path.join(rulesDir, 'typescript'));
+    fs.writeFileSync(path.join(rulesDir, 'common', 'coding-style.md'), '# Common\nBody');
+    fs.writeFileSync(path.join(rulesDir, 'typescript', 'coding-style.md'), '# TS\nBody');
+
+    const result = runValidatorWithDirs('validate-install-packages', {
+      PACKAGES_DIR: packagesDir,
+      RULES_DIR: rulesDir,
+      AGENTS_DIR: agentsDir,
+      COMMANDS_DIR: commandsDir,
+      SKILLS_DIR: skillsDir,
+      CURSOR_RULES_DIR: cursorRulesDir,
+      CURSOR_SKILLS_DIR: cursorSkillsDir,
+      CURSOR_COMMANDS_DIR: cursorCommandsDir
+    });
+    assert.strictEqual(result.code, 1, 'Should fail when required packages are missing');
+    assert.ok(result.stderr.includes('Missing required package manifest directory: python'), 'Should report missing required package');
+    cleanupTestDir(packagesDir);
+    cleanupTestDir(rulesDir);
+    cleanupTestDir(agentsDir);
+    cleanupTestDir(commandsDir);
+    cleanupTestDir(skillsDir);
+    cleanupTestDir(cursorRulesDir);
+    cleanupTestDir(cursorSkillsDir);
+    cleanupTestDir(cursorCommandsDir);
+  })) passed++; else failed++;
+
+  if (test('fails when tools.cursor.commands references a missing Cursor command file', () => {
+    const packagesDir = createTestDir();
+    const rulesDir = createTestDir();
+    const agentsDir = createTestDir();
+    const commandsDir = createTestDir();
+    const skillsDir = createTestDir();
+    const cursorRulesDir = createTestDir();
+    const cursorSkillsDir = createTestDir();
+    const cursorCommandsDir = createTestDir();
+
+    for (const packageName of ['typescript', 'sql', 'dotnet', 'rust', 'python', 'bash', 'powershell']) {
+      fs.mkdirSync(path.join(packagesDir, packageName), { recursive: true });
+      fs.mkdirSync(path.join(rulesDir, packageName), { recursive: true });
+      fs.writeFileSync(path.join(rulesDir, packageName, 'coding-style.md'), `# ${packageName}\nBody`);
+      fs.writeFileSync(
+        path.join(packagesDir, packageName, 'package.json'),
+        JSON.stringify(buildValidPackageManifest(packageName, {
+          tools: {
+            cursor: {
+              rules: [],
+              skills: [],
+              commands: packageName === 'typescript' ? ['missing-command.md'] : []
+            },
+            gemini: {
+              rules: []
+            }
+          }
+        })),
+        'utf8'
+      );
+    }
+
+    fs.mkdirSync(path.join(rulesDir, 'common'), { recursive: true });
+    fs.writeFileSync(path.join(rulesDir, 'common', 'coding-style.md'), '# Common\nBody');
+    fs.writeFileSync(path.join(agentsDir, 'planner.md'), '---\nmodel: sonnet\ntools: Read\n---\n# Planner');
+    fs.writeFileSync(path.join(commandsDir, 'plan.md'), '# Plan\nBody');
+    fs.mkdirSync(path.join(skillsDir, 'verification-loop'), { recursive: true });
+    fs.writeFileSync(path.join(skillsDir, 'verification-loop', 'SKILL.md'), '# Verification Loop\n\n## When to Use\nUse this skill for verification.');
+
+    const result = runValidatorWithDirs('validate-install-packages', {
+      PACKAGES_DIR: packagesDir,
+      RULES_DIR: rulesDir,
+      AGENTS_DIR: agentsDir,
+      COMMANDS_DIR: commandsDir,
+      SKILLS_DIR: skillsDir,
+      CURSOR_RULES_DIR: cursorRulesDir,
+      CURSOR_SKILLS_DIR: cursorSkillsDir,
+      CURSOR_COMMANDS_DIR: cursorCommandsDir
+    });
+
+    assert.strictEqual(result.code, 1, 'Should fail when Cursor command reference is missing');
+    assert.ok(result.stderr.includes('missing Cursor command reference: missing-command.md'));
+
+    cleanupTestDir(packagesDir);
+    cleanupTestDir(rulesDir);
+    cleanupTestDir(agentsDir);
+    cleanupTestDir(commandsDir);
+    cleanupTestDir(skillsDir);
+    cleanupTestDir(cursorRulesDir);
+    cleanupTestDir(cursorSkillsDir);
+    cleanupTestDir(cursorCommandsDir);
+  })) passed++; else failed++;
+
+  if (test('fails when referenced Cursor assets do not exist', () => {
+    const packagesDir = createTestDir();
+    const rulesDir = createTestDir();
+    const agentsDir = createTestDir();
+    const commandsDir = createTestDir();
+    const skillsDir = createTestDir();
+    const cursorRulesDir = createTestDir();
+    const cursorSkillsDir = createTestDir();
+
+    fs.writeFileSync(path.join(agentsDir, 'planner.md'), '---\nmodel: sonnet\ntools: Read\n---\n# Planner');
+    fs.writeFileSync(path.join(commandsDir, 'plan.md'), '# Plan\nBody');
+    fs.mkdirSync(path.join(skillsDir, 'verification-loop'));
+    fs.writeFileSync(
+      path.join(skillsDir, 'verification-loop', 'SKILL.md'),
+      '# Verification Loop\n\n## When to Use\nUse this skill for verification.',
+      'utf8'
+    );
+    fs.mkdirSync(path.join(rulesDir, 'common'));
+    fs.writeFileSync(path.join(rulesDir, 'common', 'coding-style.md'), '# Common\nBody');
+
+    for (const packageName of ['typescript', 'sql', 'dotnet', 'rust', 'python', 'bash', 'powershell']) {
+      fs.mkdirSync(path.join(packagesDir, packageName));
+      fs.mkdirSync(path.join(rulesDir, packageName));
+      fs.writeFileSync(path.join(rulesDir, packageName, 'coding-style.md'), `# ${packageName}\nBody`);
+      fs.writeFileSync(
+        path.join(packagesDir, packageName, 'package.json'),
+        JSON.stringify(
+          buildValidPackageManifest(packageName, {
+            tools: {
+              cursor: packageName === 'typescript'
+                ? { rules: ['missing-rule.md'], skills: ['missing-skill'] }
+                : { rules: [], skills: [] },
+              gemini: { rules: [] }
+            }
+          })
+        ),
+        'utf8'
+      );
+    }
+
+    const result = runValidatorWithDirs('validate-install-packages', {
+      PACKAGES_DIR: packagesDir,
+      RULES_DIR: rulesDir,
+      AGENTS_DIR: agentsDir,
+      COMMANDS_DIR: commandsDir,
+      SKILLS_DIR: skillsDir,
+      CURSOR_RULES_DIR: cursorRulesDir,
+      CURSOR_SKILLS_DIR: cursorSkillsDir
+    });
+    assert.strictEqual(result.code, 1, 'Should fail on missing referenced assets');
+    assert.ok(result.stderr.includes('missing Cursor rule reference: missing-rule.md'), 'Should report missing rule');
+    assert.ok(result.stderr.includes('missing Cursor skill reference: missing-skill'), 'Should report missing skill');
+    cleanupTestDir(packagesDir);
+    cleanupTestDir(rulesDir);
+    cleanupTestDir(agentsDir);
+    cleanupTestDir(commandsDir);
+    cleanupTestDir(skillsDir);
+    cleanupTestDir(cursorRulesDir);
+    cleanupTestDir(cursorSkillsDir);
+  })) passed++; else failed++;
+
+  if (test('fails when referenced shared rules do not exist', () => {
+    const packagesDir = createTestDir();
+    const rulesDir = createTestDir();
+    const agentsDir = createTestDir();
+    const commandsDir = createTestDir();
+    const skillsDir = createTestDir();
+    const cursorRulesDir = createTestDir();
+    const cursorSkillsDir = createTestDir();
+
+    fs.writeFileSync(path.join(agentsDir, 'planner.md'), '---\nmodel: sonnet\ntools: Read\n---\n# Planner');
+    fs.writeFileSync(path.join(commandsDir, 'plan.md'), '# Plan\nBody');
+    fs.mkdirSync(path.join(skillsDir, 'verification-loop'));
+    fs.writeFileSync(
+      path.join(skillsDir, 'verification-loop', 'SKILL.md'),
+      '# Verification Loop\n\n## When to Use\nUse this skill for verification.',
+      'utf8'
+    );
+    fs.mkdirSync(path.join(rulesDir, 'common'));
+    fs.mkdirSync(path.join(rulesDir, 'typescript'));
+    fs.writeFileSync(path.join(rulesDir, 'common', 'coding-style.md'), '# Common\nBody');
+
+    for (const packageName of ['typescript', 'sql', 'dotnet', 'rust', 'python', 'bash', 'powershell']) {
+      fs.mkdirSync(path.join(packagesDir, packageName));
+      if (packageName !== 'typescript') {
+        fs.mkdirSync(path.join(rulesDir, packageName));
+        fs.writeFileSync(path.join(rulesDir, packageName, 'coding-style.md'), `# ${packageName}\nBody`);
+      }
+      fs.writeFileSync(
+        path.join(packagesDir, packageName, 'package.json'),
+        JSON.stringify(
+          buildValidPackageManifest(packageName, {
+            rules: packageName === 'typescript'
+              ? ['common/coding-style.md', 'typescript/missing-rule.md']
+              : ['common/coding-style.md', `${packageName}/coding-style.md`]
+          })
+        ),
+        'utf8'
+      );
+    }
+
+    const result = runValidatorWithDirs('validate-install-packages', {
+      PACKAGES_DIR: packagesDir,
+      RULES_DIR: rulesDir,
+      AGENTS_DIR: agentsDir,
+      COMMANDS_DIR: commandsDir,
+      SKILLS_DIR: skillsDir,
+      CURSOR_RULES_DIR: cursorRulesDir,
+      CURSOR_SKILLS_DIR: cursorSkillsDir
+    });
+    assert.strictEqual(result.code, 1, 'Should fail on missing shared rules');
+    assert.ok(result.stderr.includes('missing shared rule reference: typescript/missing-rule.md'), 'Should report missing shared rule');
+    cleanupTestDir(packagesDir);
+    cleanupTestDir(rulesDir);
+    cleanupTestDir(agentsDir);
+    cleanupTestDir(commandsDir);
+    cleanupTestDir(skillsDir);
+    cleanupTestDir(cursorRulesDir);
+    cleanupTestDir(cursorSkillsDir);
+  })) passed++; else failed++;
+
+  if (test('fails when extends references a missing package', () => {
+    const packagesDir = createTestDir();
+    const rulesDir = createTestDir();
+    const agentsDir = createTestDir();
+    const commandsDir = createTestDir();
+    const skillsDir = createTestDir();
+    const cursorRulesDir = createTestDir();
+    const cursorSkillsDir = createTestDir();
+
+    fs.writeFileSync(path.join(agentsDir, 'planner.md'), '---\nmodel: sonnet\ntools: Read\n---\n# Planner');
+    fs.writeFileSync(path.join(commandsDir, 'plan.md'), '# Plan\nBody');
+    fs.mkdirSync(path.join(skillsDir, 'verification-loop'));
+    fs.writeFileSync(path.join(skillsDir, 'verification-loop', 'SKILL.md'), '# Verification Loop\n\n## When to Use\nUse this skill.', 'utf8');
+    fs.mkdirSync(path.join(rulesDir, 'common'));
+    fs.writeFileSync(path.join(rulesDir, 'common', 'coding-style.md'), '# Common\nBody');
+
+    for (const packageName of ['typescript', 'sql', 'dotnet', 'rust', 'python', 'bash', 'powershell']) {
+      fs.mkdirSync(path.join(packagesDir, packageName));
+      fs.mkdirSync(path.join(rulesDir, packageName));
+      fs.writeFileSync(path.join(rulesDir, packageName, 'coding-style.md'), `# ${packageName}\nBody`);
+      fs.writeFileSync(
+        path.join(packagesDir, packageName, 'package.json'),
+        JSON.stringify(
+          buildValidPackageManifest(packageName, packageName === 'typescript' ? { extends: ['missing-package'] } : {})
+        ),
+        'utf8'
+      );
+    }
+
+    const result = runValidatorWithDirs('validate-install-packages', {
+      PACKAGES_DIR: packagesDir,
+      RULES_DIR: rulesDir,
+      AGENTS_DIR: agentsDir,
+      COMMANDS_DIR: commandsDir,
+      SKILLS_DIR: skillsDir,
+      CURSOR_RULES_DIR: cursorRulesDir,
+      CURSOR_SKILLS_DIR: cursorSkillsDir
+    });
+    assert.strictEqual(result.code, 1, 'Should fail when extends references a missing package');
+    assert.ok(result.stderr.includes('extends references missing package: missing-package'), 'Should report missing extends package');
+    cleanupTestDir(packagesDir);
+    cleanupTestDir(rulesDir);
+    cleanupTestDir(agentsDir);
+    cleanupTestDir(commandsDir);
+    cleanupTestDir(skillsDir);
+    cleanupTestDir(cursorRulesDir);
+    cleanupTestDir(cursorSkillsDir);
+  })) passed++; else failed++;
+
+  if (test('fails when package manifests contain an extends cycle', () => {
+    const packagesDir = createTestDir();
+    const rulesDir = createTestDir();
+    const agentsDir = createTestDir();
+    const commandsDir = createTestDir();
+    const skillsDir = createTestDir();
+    const cursorRulesDir = createTestDir();
+    const cursorSkillsDir = createTestDir();
+
+    fs.writeFileSync(path.join(agentsDir, 'planner.md'), '---\nmodel: sonnet\ntools: Read\n---\n# Planner');
+    fs.writeFileSync(path.join(commandsDir, 'plan.md'), '# Plan\nBody');
+    fs.mkdirSync(path.join(skillsDir, 'verification-loop'));
+    fs.writeFileSync(path.join(skillsDir, 'verification-loop', 'SKILL.md'), '# Verification Loop\n\n## When to Use\nUse this skill.', 'utf8');
+    fs.mkdirSync(path.join(rulesDir, 'common'));
+    fs.writeFileSync(path.join(rulesDir, 'common', 'coding-style.md'), '# Common\nBody');
+
+    for (const packageName of ['typescript', 'sql', 'dotnet', 'rust', 'python', 'bash', 'powershell']) {
+      fs.mkdirSync(path.join(packagesDir, packageName));
+      fs.mkdirSync(path.join(rulesDir, packageName));
+      fs.writeFileSync(path.join(rulesDir, packageName, 'coding-style.md'), `# ${packageName}\nBody`);
+    }
+
+    fs.writeFileSync(path.join(packagesDir, 'typescript', 'package.json'), JSON.stringify(buildValidPackageManifest('typescript', { extends: ['python'] })), 'utf8');
+    fs.writeFileSync(path.join(packagesDir, 'python', 'package.json'), JSON.stringify(buildValidPackageManifest('python', { extends: ['typescript'] })), 'utf8');
+    for (const packageName of ['sql', 'dotnet', 'rust', 'bash', 'powershell']) {
+      fs.writeFileSync(path.join(packagesDir, packageName, 'package.json'), JSON.stringify(buildValidPackageManifest(packageName)), 'utf8');
+    }
+
+    const result = runValidatorWithDirs('validate-install-packages', {
+      PACKAGES_DIR: packagesDir,
+      RULES_DIR: rulesDir,
+      AGENTS_DIR: agentsDir,
+      COMMANDS_DIR: commandsDir,
+      SKILLS_DIR: skillsDir,
+      CURSOR_RULES_DIR: cursorRulesDir,
+      CURSOR_SKILLS_DIR: cursorSkillsDir
+    });
+    assert.strictEqual(result.code, 1, 'Should fail on extends cycle');
+    assert.ok(result.stderr.includes('package extends cycle detected:'), 'Should report cycle');
+    assert.ok(result.stderr.includes('typescript'), 'Should include typescript in cycle output');
+    assert.ok(result.stderr.includes('python'), 'Should include python in cycle output');
+    cleanupTestDir(packagesDir);
+    cleanupTestDir(rulesDir);
+    cleanupTestDir(agentsDir);
+    cleanupTestDir(commandsDir);
+    cleanupTestDir(skillsDir);
+    cleanupTestDir(cursorRulesDir);
+    cleanupTestDir(cursorSkillsDir);
+  })) passed++; else failed++;
+
+  if (test('fails when requires has an invalid schema', () => {
+    const packagesDir = createTestDir();
+    const rulesDir = createTestDir();
+    const agentsDir = createTestDir();
+    const commandsDir = createTestDir();
+    const skillsDir = createTestDir();
+    const cursorRulesDir = createTestDir();
+    const cursorSkillsDir = createTestDir();
+
+    fs.writeFileSync(path.join(agentsDir, 'planner.md'), '---\nmodel: sonnet\ntools: Read\n---\n# Planner');
+    fs.writeFileSync(path.join(commandsDir, 'plan.md'), '# Plan\nBody');
+    fs.mkdirSync(path.join(skillsDir, 'verification-loop'));
+    fs.writeFileSync(path.join(skillsDir, 'verification-loop', 'SKILL.md'), '# Verification Loop\n\n## When to Use\nUse this skill.', 'utf8');
+    fs.mkdirSync(path.join(rulesDir, 'common'));
+    fs.writeFileSync(path.join(rulesDir, 'common', 'coding-style.md'), '# Common\nBody');
+
+    for (const packageName of ['typescript', 'sql', 'dotnet', 'rust', 'python', 'bash', 'powershell']) {
+      fs.mkdirSync(path.join(packagesDir, packageName));
+      fs.mkdirSync(path.join(rulesDir, packageName));
+      fs.writeFileSync(path.join(rulesDir, packageName, 'coding-style.md'), `# ${packageName}\nBody`);
+      fs.writeFileSync(
+        path.join(packagesDir, packageName, 'package.json'),
+        JSON.stringify(
+          buildValidPackageManifest(packageName, packageName === 'typescript'
+            ? { requires: { hooks: 'yes', tools: ['claude', 'bogus-target'] } }
+            : {})
+        ),
+        'utf8'
+      );
+    }
+
+    const result = runValidatorWithDirs('validate-install-packages', {
+      PACKAGES_DIR: packagesDir,
+      RULES_DIR: rulesDir,
+      AGENTS_DIR: agentsDir,
+      COMMANDS_DIR: commandsDir,
+      SKILLS_DIR: skillsDir,
+      CURSOR_RULES_DIR: cursorRulesDir,
+      CURSOR_SKILLS_DIR: cursorSkillsDir
+    });
+    assert.strictEqual(result.code, 1, 'Should fail on invalid requires schema');
+    assert.ok(result.stderr.includes('requires.hooks must be a boolean'), 'Should report invalid hooks type');
+    assert.ok(result.stderr.includes('requires.tools contains unsupported target'), 'Should report unsupported target');
+    cleanupTestDir(packagesDir);
+    cleanupTestDir(rulesDir);
+    cleanupTestDir(agentsDir);
+    cleanupTestDir(commandsDir);
+    cleanupTestDir(skillsDir);
+    cleanupTestDir(cursorRulesDir);
+    cleanupTestDir(cursorSkillsDir);
+  })) passed++; else failed++;
+
+  if (test('fails when requires capability flags are set without requires.tools', () => {
+    const packagesDir = createTestDir();
+    const rulesDir = createTestDir();
+    const agentsDir = createTestDir();
+    const commandsDir = createTestDir();
+    const skillsDir = createTestDir();
+    const cursorRulesDir = createTestDir();
+    const cursorSkillsDir = createTestDir();
+
+    fs.writeFileSync(path.join(agentsDir, 'planner.md'), '---\nmodel: sonnet\ntools: Read\n---\n# Planner');
+    fs.writeFileSync(path.join(commandsDir, 'plan.md'), '# Plan\nBody');
+    fs.mkdirSync(path.join(skillsDir, 'verification-loop'));
+    fs.writeFileSync(path.join(skillsDir, 'verification-loop', 'SKILL.md'), '# Verification Loop\n\n## When to Use\nUse this skill.', 'utf8');
+    fs.mkdirSync(path.join(rulesDir, 'common'));
+    fs.writeFileSync(path.join(rulesDir, 'common', 'coding-style.md'), '# Common\nBody');
+
+    for (const packageName of ['typescript', 'sql', 'dotnet', 'rust', 'python', 'bash', 'powershell']) {
+      fs.mkdirSync(path.join(packagesDir, packageName));
+      fs.mkdirSync(path.join(rulesDir, packageName));
+      fs.writeFileSync(path.join(rulesDir, packageName, 'coding-style.md'), `# ${packageName}\nBody`);
+      fs.writeFileSync(
+        path.join(packagesDir, packageName, 'package.json'),
+        JSON.stringify(
+          buildValidPackageManifest(packageName, packageName === 'typescript'
+            ? { requires: { hooks: true, runtimeScripts: true } }
+            : {})
+        ),
+        'utf8'
+      );
+    }
+
+    const result = runValidatorWithDirs('validate-install-packages', {
+      PACKAGES_DIR: packagesDir,
+      RULES_DIR: rulesDir,
+      AGENTS_DIR: agentsDir,
+      COMMANDS_DIR: commandsDir,
+      SKILLS_DIR: skillsDir,
+      CURSOR_RULES_DIR: cursorRulesDir,
+      CURSOR_SKILLS_DIR: cursorSkillsDir
+    });
+    assert.strictEqual(result.code, 1, 'Should fail when capability flags omit requires.tools');
+    assert.ok(result.stderr.includes('requires.tools must be provided'), 'Should require tool declarations');
+    cleanupTestDir(packagesDir);
+    cleanupTestDir(rulesDir);
+    cleanupTestDir(agentsDir);
+    cleanupTestDir(commandsDir);
+    cleanupTestDir(skillsDir);
+    cleanupTestDir(cursorRulesDir);
+    cleanupTestDir(cursorSkillsDir);
+  })) passed++; else failed++;
+
+  if (test('fails when referenced Gemini rules do not exist', () => {
+    const packagesDir = createTestDir();
+    const rulesDir = createTestDir();
+    const agentsDir = createTestDir();
+    const commandsDir = createTestDir();
+    const skillsDir = createTestDir();
+    const cursorRulesDir = createTestDir();
+    const cursorSkillsDir = createTestDir();
+
+    fs.writeFileSync(path.join(agentsDir, 'planner.md'), '---\nmodel: sonnet\ntools: Read\n---\n# Planner');
+    fs.writeFileSync(path.join(commandsDir, 'plan.md'), '# Plan\nBody');
+    fs.mkdirSync(path.join(skillsDir, 'verification-loop'));
+    fs.writeFileSync(
+      path.join(skillsDir, 'verification-loop', 'SKILL.md'),
+      '# Verification Loop\n\n## When to Use\nUse this skill for verification.',
+      'utf8'
+    );
+    fs.mkdirSync(path.join(rulesDir, 'common'));
+    fs.writeFileSync(path.join(rulesDir, 'common', 'coding-style.md'), '# Common\nBody');
+    fs.writeFileSync(path.join(cursorRulesDir, 'common-coding-style.md'), '# Common Cursor\nBody');
+
+    for (const packageName of ['typescript', 'sql', 'dotnet', 'rust', 'python', 'bash', 'powershell']) {
+      fs.mkdirSync(path.join(packagesDir, packageName));
+      fs.mkdirSync(path.join(rulesDir, packageName));
+      fs.writeFileSync(path.join(rulesDir, packageName, 'coding-style.md'), `# ${packageName}\nBody`);
+      fs.writeFileSync(
+        path.join(packagesDir, packageName, 'package.json'),
+        JSON.stringify(
+          buildValidPackageManifest(packageName, {
+            tools: {
+              cursor: { rules: [], skills: [] },
+              gemini: packageName === 'typescript'
+                ? { rules: ['missing-gemini-rule.md'] }
+                : { rules: ['common-coding-style.md'] }
+            }
+          })
+        ),
+        'utf8'
+      );
+    }
+
+    const result = runValidatorWithDirs('validate-install-packages', {
+      PACKAGES_DIR: packagesDir,
+      RULES_DIR: rulesDir,
+      AGENTS_DIR: agentsDir,
+      COMMANDS_DIR: commandsDir,
+      SKILLS_DIR: skillsDir,
+      CURSOR_RULES_DIR: cursorRulesDir,
+      CURSOR_SKILLS_DIR: cursorSkillsDir
+    });
+    assert.strictEqual(result.code, 1, 'Should fail on missing referenced Gemini rules');
+    assert.ok(result.stderr.includes('missing Gemini rule reference: missing-gemini-rule.md'), 'Should report missing Gemini rule');
+    cleanupTestDir(packagesDir);
+    cleanupTestDir(rulesDir);
+    cleanupTestDir(agentsDir);
+    cleanupTestDir(commandsDir);
+    cleanupTestDir(skillsDir);
+    cleanupTestDir(cursorRulesDir);
+    cleanupTestDir(cursorSkillsDir);
+  })) passed++; else failed++;
+
+  if (test('passes when a Codex skill is provided only by shared skills and not codex-template', () => {
+    const packagesDir = createTestDir();
+    const rulesDir = createTestDir();
+    const agentsDir = createTestDir();
+    const commandsDir = createTestDir();
+    const skillsDir = createTestDir();
+    const cursorRulesDir = createTestDir();
+    const cursorSkillsDir = createTestDir();
+    const codexSkillsDir = createTestDir();
+
+    fs.writeFileSync(path.join(agentsDir, 'planner.md'), '---\nmodel: sonnet\ntools: Read\n---\n# Planner');
+    fs.writeFileSync(path.join(commandsDir, 'plan.md'), '# Plan\nBody');
+    fs.mkdirSync(path.join(skillsDir, 'verification-loop'));
+    fs.writeFileSync(
+      path.join(skillsDir, 'verification-loop', 'SKILL.md'),
+      '---\nname: verification-loop\ndescription: Verification Loop Skill\nversion: 1.0.0\n---\n# Verification Loop\n\n## When to Use\nUse this skill for verification.',
+      'utf8'
+    );
+    fs.writeFileSync(
+      path.join(skillsDir, 'verification-loop', 'skill.meta.json'),
+      JSON.stringify({ requires: {} }),
+      'utf8'
+    );
+    fs.mkdirSync(path.join(rulesDir, 'common'));
+    fs.writeFileSync(path.join(rulesDir, 'common', 'coding-style.md'), '# Common\nBody');
+
+    for (const packageName of ['typescript', 'sql', 'dotnet', 'rust', 'python', 'bash', 'powershell']) {
+      fs.mkdirSync(path.join(packagesDir, packageName));
+      fs.mkdirSync(path.join(rulesDir, packageName));
+      fs.writeFileSync(path.join(rulesDir, packageName, 'coding-style.md'), `# ${packageName}\nBody`);
+      fs.writeFileSync(
+        path.join(packagesDir, packageName, 'package.json'),
+        JSON.stringify(
+          buildValidPackageManifest(packageName, {
+            tools: {
+              cursor: { rules: [], skills: [] },
+              gemini: { rules: [] },
+              codex: packageName === 'typescript'
+                ? { skills: ['verification-loop'] }
+                : undefined
+            }
+          })
+        ),
+        'utf8'
+      );
+    }
+
+    const result = runValidatorWithDirs('validate-install-packages', {
+      PACKAGES_DIR: packagesDir,
+      RULES_DIR: rulesDir,
+      AGENTS_DIR: agentsDir,
+      COMMANDS_DIR: commandsDir,
+      SKILLS_DIR: skillsDir,
+      CURSOR_RULES_DIR: cursorRulesDir,
+      CURSOR_SKILLS_DIR: cursorSkillsDir,
+      CODEX_SKILLS_DIR: codexSkillsDir
+    });
+    assert.strictEqual(result.code, 0, `Should pass when Codex skill is sourced from shared skills, got stderr: ${result.stderr}`);
+    cleanupTestDir(packagesDir);
+    cleanupTestDir(rulesDir);
+    cleanupTestDir(agentsDir);
+    cleanupTestDir(commandsDir);
+    cleanupTestDir(skillsDir);
+    cleanupTestDir(cursorRulesDir);
+    cleanupTestDir(cursorSkillsDir);
+    cleanupTestDir(codexSkillsDir);
+  })) passed++; else failed++;
+
+  // ==========================================
   // validate-skills.js
   // ==========================================
   console.log('\nvalidate-skills.js:');
@@ -395,6 +1117,112 @@ function runTests() {
     const result = runValidatorWithDir('validate-skills', 'SKILLS_DIR', testDir);
     assert.strictEqual(result.code, 0, 'Should accept BOM-prefixed SKILL.md');
     cleanupTestDir(testDir);
+  })) passed++; else failed++;
+
+  if (test('accepts valid skill.meta.json dependencies', () => {
+    const testDir = createTestDir();
+    const rulesDir = createTestDir();
+    fs.mkdirSync(path.join(rulesDir, 'common'), { recursive: true });
+    fs.writeFileSync(path.join(rulesDir, 'common', 'testing.md'), '# Testing');
+
+    const helperSkillDir = path.join(testDir, 'coding-standards');
+    fs.mkdirSync(helperSkillDir, { recursive: true });
+    fs.writeFileSync(path.join(helperSkillDir, 'SKILL.md'), '# Coding Standards\n\n## When to Use\nUse this skill.');
+
+    const skillDir = path.join(testDir, 'meta-skill');
+    fs.mkdirSync(skillDir, { recursive: true });
+    fs.writeFileSync(path.join(skillDir, 'SKILL.md'), '---\nname: meta-skill\ndescription: Example\n---\n# Meta Skill\n\n## When to Use\nUse this skill.');
+    fs.writeFileSync(path.join(skillDir, 'skill.meta.json'), JSON.stringify({
+      requires: {
+        rules: ['common/testing.md'],
+        skills: ['coding-standards'],
+        runtime: {
+          runtimeScripts: true,
+          sessionData: false,
+          hooks: { mode: 'optional', tools: ['claude', 'cursor'] }
+        }
+      }
+    }), 'utf8');
+
+    const result = runValidatorWithDirs('validate-skills', { SKILLS_DIR: testDir, RULES_DIR: rulesDir });
+    assert.strictEqual(result.code, 0, `Should accept valid skill.meta.json, got stderr: ${result.stderr}`);
+    cleanupTestDir(testDir);
+    cleanupTestDir(rulesDir);
+  })) passed++; else failed++;
+
+  if (test('fails on skill.meta.json with missing referenced rule', () => {
+    const testDir = createTestDir();
+    const rulesDir = createTestDir();
+    const skillDir = path.join(testDir, 'meta-skill');
+    fs.mkdirSync(skillDir, { recursive: true });
+    fs.writeFileSync(path.join(skillDir, 'SKILL.md'), '---\nname: meta-skill\ndescription: Example\n---\n# Meta Skill\n\n## When to Use\nUse this skill.');
+    fs.writeFileSync(path.join(skillDir, 'skill.meta.json'), JSON.stringify({
+      requires: {
+        rules: ['common/missing.md'],
+        skills: [],
+        runtime: {
+          runtimeScripts: false,
+          sessionData: false,
+          hooks: { mode: 'none', tools: [] }
+        }
+      }
+    }), 'utf8');
+
+    const result = runValidatorWithDirs('validate-skills', { SKILLS_DIR: testDir, RULES_DIR: rulesDir });
+    assert.strictEqual(result.code, 1, 'Should fail on missing referenced rule');
+    assert.ok(result.stderr.includes("Missing referenced rule 'common/missing.md'"), 'Should report missing rule');
+    cleanupTestDir(testDir);
+    cleanupTestDir(rulesDir);
+  })) passed++; else failed++;
+
+  if (test('fails on skill.meta.json with invalid hooks mode', () => {
+    const testDir = createTestDir();
+    const rulesDir = createTestDir();
+    const skillDir = path.join(testDir, 'meta-skill');
+    fs.mkdirSync(skillDir, { recursive: true });
+    fs.writeFileSync(path.join(skillDir, 'SKILL.md'), '---\nname: meta-skill\ndescription: Example\n---\n# Meta Skill\n\n## When to Use\nUse this skill.');
+    fs.writeFileSync(path.join(skillDir, 'skill.meta.json'), JSON.stringify({
+      requires: {
+        rules: [],
+        skills: [],
+        runtime: {
+          runtimeScripts: false,
+          sessionData: false,
+          hooks: { mode: 'sometimes', tools: ['codex'] }
+        }
+      }
+    }), 'utf8');
+
+    const result = runValidatorWithDirs('validate-skills', { SKILLS_DIR: testDir, RULES_DIR: rulesDir });
+    assert.strictEqual(result.code, 1, 'Should fail on invalid hooks mode');
+    assert.ok(result.stderr.includes("Invalid hooks.mode 'sometimes'"), 'Should report invalid hooks mode');
+    cleanupTestDir(testDir);
+    cleanupTestDir(rulesDir);
+  })) passed++; else failed++;
+
+  if (test('fails on skill.meta.json when hooks are required without tools', () => {
+    const testDir = createTestDir();
+    const rulesDir = createTestDir();
+    const skillDir = path.join(testDir, 'meta-skill');
+    fs.mkdirSync(skillDir, { recursive: true });
+    fs.writeFileSync(path.join(skillDir, 'SKILL.md'), '---\nname: meta-skill\ndescription: Example\n---\n# Meta Skill\n\n## When to Use\nUse this skill.');
+    fs.writeFileSync(path.join(skillDir, 'skill.meta.json'), JSON.stringify({
+      requires: {
+        rules: [],
+        skills: [],
+        runtime: {
+          runtimeScripts: true,
+          sessionData: true,
+          hooks: { mode: 'required', tools: [] }
+        }
+      }
+    }), 'utf8');
+
+    const result = runValidatorWithDirs('validate-skills', { SKILLS_DIR: testDir, RULES_DIR: rulesDir });
+    assert.strictEqual(result.code, 1, 'Should fail when required hooks omit tool targets');
+    assert.ok(result.stderr.includes("hooks.tools must be provided when hooks.mode is 'required'"), 'Should report missing hook tools');
+    cleanupTestDir(testDir);
+    cleanupTestDir(rulesDir);
   })) passed++; else failed++;
 
   // ==========================================

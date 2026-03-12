@@ -1,0 +1,16 @@
+{
+  "requires": {
+    "rules": [
+      "common/security.md"
+    ],
+    "skills": [],
+    "runtime": {
+      "runtimeScripts": false,
+      "sessionData": false,
+      "hooks": {
+        "mode": "none",
+        "tools": []
+      }
+    }
+  }
+}

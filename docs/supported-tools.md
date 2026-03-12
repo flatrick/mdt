@@ -25,15 +25,13 @@ Use this when you need to answer:
 - [Claude Code](./tools/claude-code.md)
 - [Cursor](./tools/cursor.md)
 - [Codex](./tools/codex.md)
-- [OpenCode](./tools/opencode.md)
 - [Local Verification Playbook](./tools/local-verification.md)
 
 ## Current Audit Summary
 
 - Claude Code is the closest match to MDT's current structure: hooks, slash commands, subagents, skills, and `CLAUDE.md`/memory are all native concepts.
-- Cursor officially supports rules, `AGENTS.md`, custom commands, memories, background agents, and a terminal agent/CLI. MDT's current `.cursor/hooks.json` flow should be treated as `experimental` until Cursor documents that surface.
-- Codex officially supports layered `AGENTS.md`, rule files, skills, and built-in slash commands. The repo currently underuses Codex by shipping only `config.toml` and `AGENTS.md`.
-- OpenCode officially exposes config-driven `instructions`, `agent`, `command`, and `plugin` surfaces. It is not installed locally on this machine, so its page is `not-locally-verified`.
+- Cursor officially supports rules, `AGENTS.md`, custom commands, memories, background agents, and a terminal agent/CLI. Local verification last confirmed on `2026-03-12` shows a real split between Cursor surfaces: Cursor IDE reads project rules from the opened repo and still appears to keep user-global rules in Cursor-managed app storage, while `cursor-agent` accepts file-backed user-global rules under `~/.cursor/rules/*.mdc`. MDT's current `cursor-template/hooks.json` flow should be treated as `experimental` until Cursor documents that surface.
+- Codex officially supports layered `AGENTS.md`, rule files, skills, and built-in slash commands. MDT installs Codex globally by default: tool-facing assets land under `~/.codex/`, while MDT-owned helpers and learning state live under `~/.codex/mdt/`.
 
 ## Local Tool Versions Observed During This Audit
 
@@ -41,7 +39,6 @@ Use this when you need to answer:
 - Cursor IDE: `2.6.13`
 - Cursor terminal agent present: `agent` (with `cursor-agent` also installed locally here)
 - Codex CLI: `0.111.0`
-- OpenCode: not installed locally
 
 ## Source Policy
 

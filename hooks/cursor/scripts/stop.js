@@ -1,21 +1,37 @@
 #!/usr/bin/env node
-const { readStdin, runExistingHook, transformToClaude, hookEnabled } = require('./adapter');
-readStdin().then(raw => {
-  const input = JSON.parse(raw || '{}');
-  const claudeInput = transformToClaude(input);
+'use strict';
+
+const { hookEnabled, readStdin, runExistingHook, transformToClaude } = require('./adapter');
+
+async function processCursorStop(raw) {
+  let input = {};
+  try {
+    input = JSON.parse(raw || '{}');
+  } catch {
+    input = {};
+  }
 
   if (hookEnabled('stop:check-console-log', ['standard', 'strict'])) {
-    runExistingHook('check-console-log.js', claudeInput);
-  }
-  if (hookEnabled('stop:session-end', ['minimal', 'standard', 'strict'])) {
-    runExistingHook('session-end.js', claudeInput);
-  }
-  if (hookEnabled('stop:evaluate-session', ['minimal', 'standard', 'strict'])) {
-    runExistingHook('evaluate-session.js', claudeInput);
-  }
-  if (hookEnabled('stop:cost-tracker', ['minimal', 'standard', 'strict'])) {
-    runExistingHook('cost-tracker.js', claudeInput);
+    runExistingHook('check-console-log.js', transformToClaude(input));
   }
 
-  process.stdout.write(raw);
-}).catch(() => process.exit(0));
+  return raw;
+}
+
+async function main() {
+  try {
+    const raw = await readStdin();
+    const output = await processCursorStop(raw);
+    process.stdout.write(output);
+  } catch {
+    process.exit(0);
+  }
+}
+
+if (require.main === module) {
+  main();
+}
+
+module.exports = {
+  processCursorStop
+};

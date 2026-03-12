@@ -10,6 +10,7 @@ open a separate PR against `affaan-m/modeldev-toolkit`.
 
 - [What We're Looking For](#what-were-looking-for)
 - [Quick Start](#quick-start)
+- [Backlog And History](#backlog-and-history)
 - [Contributing Skills](#contributing-skills)
 - [Contributing Agents](#contributing-agents)
 - [Contributing Hooks](#contributing-hooks)
@@ -68,6 +69,27 @@ cp -r skills/my-skill <config>/skills/  # for skills
 # 5. Submit PR
 git add . && git commit -m "feat: add my-skill" && git push
 ```
+
+---
+
+## Backlog And History
+
+Until this fork is ready for `v1.0.0`, future work is tracked primarily in
+[BACKLOG.md](BACKLOG.md). Keep using that file as the lightweight in-repo place
+to capture follow-up work, open questions, and deferred tasks.
+
+When backlog work is completed:
+
+- remove the completed item from [BACKLOG.md](BACKLOG.md)
+- add a corresponding completion note under [docs/history/](docs/history/)
+- if the finished change is substantial, create a dedicated dated history file
+  instead of burying it in an unrelated summary
+
+Do not silently drop completed backlog items. Move them into history in the same
+change so the repo preserves why the work happened and what changed.
+
+The plan is to keep this model until the repo is stable enough for `v1.0.0`,
+then reassess whether future planning should move to GitHub Issues.
 
 ---
 

@@ -82,6 +82,16 @@ function runTests() {
   else failed++;
 
   if (
+    test('detects Codex when CODEX_AGENT=1', () => {
+      const env = { CODEX_AGENT: '1' };
+      const d = createDetectEnv({ env });
+      assert.strictEqual(d.tool, 'codex');
+    })
+  )
+    passed++;
+  else failed++;
+
+  if (
     test('treats non-truthy detection values as neutral (unknown)', () => {
       const env = {
         CURSOR_AGENT: '0',
@@ -162,6 +172,17 @@ function runTests() {
   else failed++;
 
   if (
+    test('defaults to ~/.codex for Codex when CONFIG_DIR unset', () => {
+      const home = '/home/test';
+      const env = { CODEX_AGENT: '1' };
+      const d = createDetectEnv({ env, homedir: () => home, existsSync: () => false });
+      assert.strictEqual(d.configDir, path.join(home, '.codex'));
+    })
+  )
+    passed++;
+  else failed++;
+
+  if (
     test('unknown tool prefers ~/.cursor when both configs missing', () => {
       const home = '/home/test';
       const env = {};
@@ -216,6 +237,19 @@ function runTests() {
   else failed++;
 
   if (
+    test('explicit CONFIG_DIR also anchors data dir before legacy Claude fallback', () => {
+      const home = '/home/test';
+      const env = { CONFIG_DIR: '/custom/config' };
+      const existsSync = (p) => p === '/custom/config' || p === path.join(home, '.claude', 'homunculus');
+      const d = createDetectEnv({ env, homedir: () => home, existsSync });
+      assert.strictEqual(d.dataDir, path.join('/custom/config', 'mdt'));
+      assert.strictEqual(d.getDataDir(), path.join('/custom/config', 'mdt'));
+    })
+  )
+    passed++;
+  else failed++;
+
+  if (
     test('prefers homunculus next to configDir when present', () => {
       const home = '/home/test';
       const configDir = path.join(home, '.cursor');
@@ -223,7 +257,7 @@ function runTests() {
       const env = { CURSOR_AGENT: '1' };
       const existsSync = (p) => p === homunculusDir;
       const d = createDetectEnv({ env, homedir: () => home, existsSync });
-      assert.strictEqual(d.dataDir, configDir);
+      assert.strictEqual(d.dataDir, path.join(configDir, 'mdt'));
     })
   )
     passed++;
@@ -236,7 +270,7 @@ function runTests() {
       const env = { CURSOR_AGENT: '1' };
       const existsSync = (p) => p === legacyHomunculus;
       const d = createDetectEnv({ env, homedir: () => home, existsSync });
-      assert.strictEqual(d.dataDir, path.join(home, '.claude'));
+      assert.strictEqual(d.dataDir, path.join(home, '.cursor', 'mdt'));
     })
   )
     passed++;
@@ -248,7 +282,7 @@ function runTests() {
       const env = { CURSOR_AGENT: '1' };
       const existsSync = () => false;
       const d = createDetectEnv({ env, homedir: () => home, existsSync });
-      assert.strictEqual(d.dataDir, path.join(home, '.cursor'));
+      assert.strictEqual(d.dataDir, path.join(home, '.cursor', 'mdt'));
     })
   )
     passed++;
@@ -335,6 +369,16 @@ function runTests() {
   else failed++;
 
   if (
+    test('uses CODEX_SESSION_ID when tool-specific signal is set', () => {
+      const env = { CODEX_SESSION_ID: 'codex-sess-1' };
+      const d = createDetectEnv({ env });
+      assert.strictEqual(d.sessionId, 'codex-sess-1');
+    })
+  )
+    passed++;
+  else failed++;
+
+  if (
     test('generates stable session ID when no signals present', () => {
       const env = {};
       const d = createDetectEnv({ env });
@@ -358,9 +402,10 @@ function runTests() {
       const d = createDetectEnv({ env, homedir: () => home, existsSync });
       const pathsInfo = d.getPaths();
       const expectedConfig = path.join(home, '.cursor');
-      const expectedData = expectedConfig;
+      const expectedData = path.join(expectedConfig, 'mdt');
       assert.strictEqual(pathsInfo.configDir, expectedConfig);
       assert.strictEqual(pathsInfo.dataDir, expectedData);
+      assert.strictEqual(pathsInfo.mdtDir, expectedData);
       assert.strictEqual(pathsInfo.skillsDir, path.join(expectedConfig, 'skills'));
       assert.strictEqual(pathsInfo.hooksDir, path.join(expectedConfig, 'hooks'));
       assert.strictEqual(pathsInfo.homunculusDir, path.join(expectedData, 'homunculus'));

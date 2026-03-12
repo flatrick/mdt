@@ -1,0 +1,14 @@
+{
+  "requires": {
+    "rules": [],
+    "skills": [],
+    "runtime": {
+      "runtimeScripts": true,
+      "sessionData": false,
+      "hooks": {
+        "mode": "none",
+        "tools": []
+      }
+    }
+  }
+}

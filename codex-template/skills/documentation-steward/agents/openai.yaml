@@ -1,0 +1,7 @@
+interface:
+  display_name: "Documentation Steward"
+  short_description: "Audit MDT docs for correctness, placement, and readability"
+  brand_color: "#2563EB"
+  default_prompt: "Run a docs-health style audit. Start with validate-markdown-links.js and validate-markdown-path-refs.js, then classify any doc drift into current truth, roadmap, target state, history, or generated reference. Use docs/tools/ as the source of truth for cross-tool support claims."
+policy:
+  allow_implicit_invocation: true

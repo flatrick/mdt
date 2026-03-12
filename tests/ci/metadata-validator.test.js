@@ -60,16 +60,6 @@ function createFixtureRepo(overrides = {}) {
       }
     ]
   };
-  const openCodePackageJson = {
-    name: 'modeldev-toolkit',
-    version: '1.7.0',
-    repository: {
-      type: 'git',
-      url: 'git+https://github.com/flatrick/modeldev-toolkit.git'
-    },
-    homepage: 'https://github.com/flatrick/modeldev-toolkit#readme'
-  };
-
   writeJson(path.join(repoRoot, 'package.json'), {
     ...packageJson,
     ...(overrides.packageJson || {})
@@ -82,11 +72,6 @@ function createFixtureRepo(overrides = {}) {
     ...marketplaceJson,
     ...(overrides.marketplaceJson || {})
   });
-  writeJson(path.join(repoRoot, '.opencode', 'package.json'), {
-    ...openCodePackageJson,
-    ...(overrides.openCodePackageJson || {})
-  });
-
   return repoRoot;
 }
 
@@ -132,8 +117,15 @@ function runTests() {
 
   if (test('fails when repository or homepage drift across manifests', () => {
     const repoRoot = createFixtureRepo({
-      openCodePackageJson: {
-        homepage: 'https://github.com/flatrick/everything-claude-code#readme'
+      marketplaceJson: {
+        plugins: [
+          {
+            name: 'modeldev-toolkit',
+            version: '1.7.0',
+            homepage: 'https://github.com/flatrick/mdt#readme',
+            repository: 'https://github.com/flatrick/modeldev-toolkit'
+          }
+        ]
       }
     });
 

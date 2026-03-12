@@ -525,7 +525,7 @@ async function runTests() {
     const isoHome = path.join(os.tmpdir(), `MDT-start-empty-${Date.now()}`);
     const sessionsDir = getSessionsDirForHome(isoHome);
     fs.mkdirSync(sessionsDir, { recursive: true });
-    fs.mkdirSync(path.join(path.dirname(sessionsDir), 'skills', 'learned'), { recursive: true });
+    fs.mkdirSync(path.join(path.dirname(sessionsDir), 'generated', 'skills', 'learned'), { recursive: true });
     try {
       const result = await runScript(path.join(scriptsDir, 'session-start.js'), '', {
         HOME: isoHome, USERPROFILE: isoHome
@@ -542,7 +542,7 @@ async function runTests() {
     const isoHome = path.join(os.tmpdir(), `MDT-start-blank-${Date.now()}`);
     const sessionsDir = getSessionsDirForHome(isoHome);
     fs.mkdirSync(sessionsDir, { recursive: true });
-    fs.mkdirSync(path.join(path.dirname(sessionsDir), 'skills', 'learned'), { recursive: true });
+    fs.mkdirSync(path.join(path.dirname(sessionsDir), 'generated', 'skills', 'learned'), { recursive: true });
 
     // Create a session file with the blank template marker
     const today = new Date().toISOString().slice(0, 10);

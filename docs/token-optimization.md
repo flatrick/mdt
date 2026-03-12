@@ -98,7 +98,7 @@ Tips:
 - Run `/mcp` to see active servers and their context cost
 - Prefer CLI tools when available (`gh` instead of GitHub MCP, `aws` instead of AWS MCP)
 - Use `disabledMcpServers` in project config to disable servers per-project
-- The `memory` MCP server is configured by default but not used by any skill, agent, or hook — consider disabling it
+- Do not enable MCP servers by default unless a concrete workflow needs them
 
 ---
 
@@ -112,9 +112,12 @@ Tips:
 
 ---
 
-## Future: configure-mdt Integration
+## Future: install-time guidance
 
-The `configure-mdt` install wizard could offer to set these environment variables during setup, with explanations of the cost tradeoffs. This would help new users optimize from day one rather than discovering these settings after hitting limits.
+The installer and docs could eventually offer these environment variable
+recommendations during setup, with explanations of the cost tradeoffs. That
+would help new users optimize from day one rather than discovering these
+settings after hitting limits.
 
 ---
 

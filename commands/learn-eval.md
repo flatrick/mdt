@@ -1,6 +1,7 @@
 ---
 name: learn-eval
 description: Extract reusable patterns from the session, self-evaluate quality before saving, and determine the right save location (Global vs Project).
+
 ---
 
 # /learn-eval - Extract, Evaluate, then Save
@@ -23,9 +24,9 @@ Look for:
 
 3. **Determine save location:**
    - Ask: "Would this pattern be useful in a different project?"
-   - **Global** (`<config>/skills/learned/`): Generic patterns usable across 2+ projects (bash compatibility, LLM API behavior, debugging techniques, etc.)
-   - **Project** (the current project's tool config dir, for example `./.cursor/skills/learned/` or `./.claude/skills/learned/`): Project-specific knowledge (quirks of a particular config file, project-specific architecture decisions, etc.)
-   - When in doubt, choose Global (moving Global → Project is easier than the reverse)
+   - **Global candidate** (`<data>/generated/skills/learned/`): Generic patterns usable across 2+ projects (bash compatibility, LLM API behavior, debugging techniques, etc.)
+   - **Project learning state** (`<data>/homunculus/<project-id>/...`): Project-specific knowledge should stay in project-scoped instinct/evolution state until it is promoted into a real skill
+   - When in doubt, keep it in MDT-owned staging/state first; do not write candidate skills directly into the live tool skill directory
 
 4. Draft the skill file using this format:
 
@@ -70,7 +71,8 @@ origin: auto-extracted
    - Show: proposed save path + scores table + final draft
    - Wait for explicit confirmation before writing
 
-7. Save to the determined location
+7. Save to the determined MDT-owned location
+8. Only materialize into the live tool skill surface after explicit approval/promotion
 
 ## Output Format for Step 5 (scores table)
 

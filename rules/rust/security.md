@@ -1,6 +1,7 @@
 ---
 paths:
   - "**/*.rs"
+
 ---
 # Rust Security
 

@@ -3,6 +3,7 @@ paths:
   - "**/*.sh"
   - "**/*.bash"
   - "**/Makefile"
+
 ---
 # Bash Coding Style
 

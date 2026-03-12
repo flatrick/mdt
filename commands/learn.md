@@ -33,7 +33,7 @@ Look for:
 
 ## Output Format
 
-Create a skill file at `<config>/skills/learned/[pattern-name].md`:
+Create a candidate skill file at `<data>/generated/skills/learned/[pattern-name].md`:
 
 ```markdown
 # [Descriptive Pattern Name]
@@ -60,7 +60,8 @@ Create a skill file at `<config>/skills/learned/[pattern-name].md`:
 2. Identify the most valuable/reusable insight
 3. Draft the skill file
 4. Ask user to confirm before saving
-5. Save to `<config>/skills/learned/`
+5. Save to `<data>/generated/skills/learned/` as an MDT-managed candidate
+6. Promote/materialize into the live tool skill surface only after explicit approval
 
 ## Notes
 
@@ -68,3 +69,4 @@ Create a skill file at `<config>/skills/learned/[pattern-name].md`:
 - Don't extract one-time issues (specific API outages, etc.)
 - Focus on patterns that will save time in future sessions
 - Keep skills focused - one pattern per skill
+- Treat this location as staging, not the live tool skill directory

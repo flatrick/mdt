@@ -1,0 +1,25 @@
+{
+  "requires": {
+    "rules": [
+      "common/hooks.md",
+      "common/development-workflow.md",
+      "common/security.md",
+      "common/testing.md"
+    ],
+    "skills": [
+      "continuous-learning-manual",
+      "documentation-steward"
+    ],
+    "runtime": {
+      "runtimeScripts": true,
+      "sessionData": true,
+      "hooks": {
+        "mode": "required",
+        "tools": [
+          "claude",
+          "cursor"
+        ]
+      }
+    }
+  }
+}

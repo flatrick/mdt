@@ -615,8 +615,8 @@ function runTests() {
         delete require.cache[require.resolve('../../scripts/lib/package-manager')];
         const isolatedPm = require('../../scripts/lib/package-manager');
         const isolatedUtils = require('../../scripts/lib/utils');
-        const configDir = isolatedUtils.getConfigDir();
-        const configPath = path.join(configDir, 'package-manager.json');
+        const dataDir = isolatedUtils.getDataDir();
+        const configPath = path.join(dataDir, 'package-manager.json');
 
         const config = isolatedPm.setPreferredPackageManager('bun');
         assert.strictEqual(config.packageManager, 'bun');
@@ -752,4 +752,3 @@ function runTests() {
 }
 
 runTests();
-

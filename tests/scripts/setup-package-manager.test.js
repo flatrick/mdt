@@ -256,7 +256,7 @@ function runTests() {
       const result = run(['--global', 'npm'], { env: { HOME: tmpDir, USERPROFILE: tmpDir } });
       assert.strictEqual(result.code, 0, `Expected 0, got ${result.code}. stderr: ${result.stderr}`);
       assert.ok(result.stdout.includes('Global preference set to'));
-      const candidates = ['.cursor', '.claude', '.codex'].map(dir => path.join(tmpDir, dir, 'package-manager.json'));
+      const candidates = ['.cursor', '.claude', '.codex'].map(dir => path.join(tmpDir, dir, 'mdt', 'package-manager.json'));
       const existingPath = candidates.find(p => fs.existsSync(p));
       assert.ok(existingPath, 'Config file should be created');
       const config = JSON.parse(fs.readFileSync(existingPath, 'utf8'));
@@ -275,7 +275,7 @@ function runTests() {
       const result = run(['npm'], { env: { HOME: tmpDir, USERPROFILE: tmpDir } });
       assert.strictEqual(result.code, 0, `Expected 0, got ${result.code}. stderr: ${result.stderr}`);
       assert.ok(result.stdout.includes('Global preference set to'));
-      const candidates = ['.cursor', '.claude', '.codex'].map(dir => path.join(tmpDir, dir, 'package-manager.json'));
+      const candidates = ['.cursor', '.claude', '.codex'].map(dir => path.join(tmpDir, dir, 'mdt', 'package-manager.json'));
       const existingPath = candidates.find(p => fs.existsSync(p));
       assert.ok(existingPath, 'Config file should be created');
       const config = JSON.parse(fs.readFileSync(existingPath, 'utf8'));

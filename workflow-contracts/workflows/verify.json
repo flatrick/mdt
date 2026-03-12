@@ -1,0 +1,40 @@
+{
+  "id": "verify",
+  "title": "Verify",
+  "outcome": "Run targeted validation and summarize whether the current change is safe to ship.",
+  "successCriteria": [
+    "The workflow runs or prescribes the most relevant validation for the current change.",
+    "The workflow summarizes pass, fail, and skip results with concrete next steps."
+  ],
+  "tools": {
+    "claude": {
+      "status": "official",
+      "verificationMode": "installer-target",
+      "artifactMappings": [
+        { "surfaceType": "command", "name": "verify", "path": "commands/verify.md", "role": "primary-workflow" },
+        { "surfaceType": "skill", "name": "verification-loop", "path": "skills/verification-loop/SKILL.md", "role": "detailed-playbook" }
+      ],
+      "requiredFiles": ["commands/verify.md", "skills/verification-loop/SKILL.md"]
+    },
+    "cursor": {
+      "status": "repo-adapter",
+      "verificationMode": "installer-target",
+      "artifactMappings": [
+        { "surfaceType": "command", "name": "verify", "path": "cursor-template/commands/verify.md", "role": "custom-command" },
+        { "surfaceType": "guidance", "name": "workspace-guidance", "path": "AGENTS.md", "role": "shared-guidance" },
+        { "surfaceType": "rule", "name": "common-testing", "path": "cursor-template/rules/common-testing.md", "role": "verification-behavior" }
+      ],
+      "requiredFiles": ["AGENTS.md", "cursor-template/rules/common-testing.md"]
+    },
+    "codex": {
+      "status": "repo-adapter",
+      "verificationMode": "installer-target",
+      "artifactMappings": [
+        { "surfaceType": "guidance", "name": "codex-agents", "path": "codex-template/AGENTS.md", "role": "verification-guidance" },
+        { "surfaceType": "config", "name": "codex-config", "path": "codex-template/config.toml", "role": "codex-runtime-config" },
+        { "surfaceType": "skill", "name": "verification-loop", "path": "codex-template/skills/verification-loop/SKILL.md", "role": "installed-skill" }
+      ],
+      "requiredFiles": ["codex-template/config.toml", "codex-template/AGENTS.md", "codex-template/skills/verification-loop/SKILL.md"]
+    }
+  }
+}

@@ -23,9 +23,8 @@ Use this section to avoid mistakes; update it after changes.
 | Item | Status | Notes |
 |------|--------|--------|
 | **check-hook-enabled.js** | Not present | Add to `scripts/hooks/`. Depends on `scripts/lib/hook-flags.js` (present). |
-| **cost-tracker.js** | Not present | Add to `scripts/hooks/`. No `stop:cost-tracker` in `hooks/hooks.json` or `.cursor/hooks/stop.js`. Use `getConfigDir()` from `scripts/lib/utils.js` (or `getClaudeDir()` which delegates to it) for metrics path. |
-| **OpenCode profile support** | Not present | **Plugin file is `.opencode/plugins/mdt-hooks.ts`** (MDTHooksPlugin). Add MDT_HOOK_PROFILE / MDT_DISABLED_HOOKS and hookEnabled gating there. |
-| **Harness/loop commands** | Not present | `commands/` has no harness-audit, loop-start, loop-status, quality-gate, model-route. `.opencode/commands/` has 23 files, same gap. |
+| **cost-tracker.js** | Not present | Add to `scripts/hooks/`. No `stop:cost-tracker` in `hooks/hooks.json` or `~/.cursor/mdt/hooks/stop.js`. Use `getConfigDir()` from `scripts/lib/utils.js` (or `getClaudeDir()` which delegates to it) for metrics path. |
+| **Harness/loop commands** | Not present | `commands/` has no harness-audit, loop-start, loop-status, quality-gate, model-route. |
 | **Harness/loop agents** | Not present | `agents/` has no harness-optimizer, loop-operator. |
 | **hook-flags.js** | Present | `scripts/lib/hook-flags.js` exists. |
 | **run-with-flags.js** | Present | `scripts/hooks/run-with-flags.js` exists; Stop already has session-end, evaluate-session, session-end-marker. |
@@ -36,30 +35,17 @@ Use this section to avoid mistakes; update it after changes.
 
 **In scope now:**
 
-1. **OpenCode profile support** — Add MDT_HOOK_PROFILE / MDT_DISABLED_HOOKS and hookEnabled gating to `.opencode/plugins/mdt-hooks.ts`.
 2. **check-hook-enabled.js** — Add the small CLI script that prints yes/no for a hook ID and profiles.
 3. **Cost-tracker hook** — Port cost-tracker.js, wire on Stop in hooks.json and Cursor stop.js; use your repo's config dir for metrics path.
 4. **Harness/loop commands and agents** — Port from affaan-m: commands `/harness-audit`, `/loop-start`, `/loop-status`, `/quality-gate`, `/model-route` and agents `harness-optimizer`, `loop-operator`. Markdown only; no new scripts unless a command explicitly requires one.
 
 **Deferred (until the above are in place):**
 
-- **Quality-gate hook** — PostToolUse script that runs Biome/Prettier/ruff/gofmt per file. Revisit after OpenCode, check-hook-enabled, cost-tracker, and harness/loop are done.
+- **Quality-gate hook** — PostToolUse script that runs Biome/Prettier/ruff/gofmt per file. Revisit after check-hook-enabled, cost-tracker, and harness/loop are done.
 
 **Deferred (later stage):**
 
 - **Community and docs** — CHANGELOG, CODE_OF_CONDUCT, SPONSORING, etc.
-
----
-
-## 1. OpenCode plugin: profile and disabled-hooks support
-
-**What:** In affaan-m, `.opencode/plugins/ecc-hooks.ts` uses `ECC_HOOK_PROFILE` / `ECC_DISABLED_HOOKS` and `hookEnabled()`. In this fork the plugin is `.opencode/plugins/mdt-hooks.ts`; use `MDT_HOOK_PROFILE` / `MDT_DISABLED_HOOKS` and gate each behavior (format, console.log warn, tsc, etc.) with `hookEnabled(...)`.
-
-**This repo:** `.opencode/plugins/mdt-hooks.ts` has no profile or disabled-hooks logic; every hook behavior always runs.
-
-**Why adopt:** OpenCode users get the same runtime gating as Claude Code/Cursor (e.g. disable format or tsc via env without editing the plugin).
-
-**Effort:** Low. Port the `normalizeProfile`, `disabledHooks`, `profileOrder`, `profileAllowed`, and `hookEnabled` logic from affaan-m, then wrap each `file.edited` / `tool.execute.after` behavior in `if (hookEnabled(...))`.
 
 ---
 
@@ -69,19 +55,19 @@ Use this section to avoid mistakes; update it after changes.
 
 **This repo:** No cost-tracker; no metrics hook.
 
-**Why adopt:** Lightweight per-session cost tracking without external tooling. Only useful if the harness sends token usage on Stop (Claude Code may; Cursor/OpenCode may not).
+**Why adopt:** Lightweight per-session cost tracking without external tooling. Only useful if the harness sends token usage on Stop (Claude Code may; Cursor may not).
 
-**Effort:** Low–medium. Port the script and wire it in `hooks/hooks.json` (Stop) and `.cursor/hooks/stop.js`. This repo's utils use different names (e.g. no `getClaudeDir()`); use existing config/sessions dir or a dedicated `metrics` path under config dir.
+**Effort:** Low–medium. Port the script and wire it in `hooks/hooks.json` (Stop) and `~/.cursor/mdt/hooks/stop.js`. This repo's utils use different names (e.g. no `getClaudeDir()`); use existing config/sessions dir or a dedicated `metrics` path under config dir.
 
 ---
 
 ## 3. Quality-gate hook (PostToolUse, Edit) — DEFERRED
 
-Revisit after OpenCode profile support, check-hook-enabled, cost-tracker, and harness/loop are in place.
+Revisit after check-hook-enabled, cost-tracker, and harness/loop are in place.
 
 **What (for reference):** affaan-m's `scripts/hooks/quality-gate.js` runs after file edits: for the edited `file_path` it runs Biome (or Prettier), and for Go/Python runs gofmt/ruff. Optional env: `MDT_QUALITY_GATE_FIX`, `MDT_QUALITY_GATE_STRICT`.
 
-**Effort:** Low. Port the script, add a PostToolUse entry via run-with-flags (e.g. `post:quality-gate`), and optionally wire in Cursor/OpenCode if you mirror PostToolUse there.
+**Effort:** Low. Port the script and add a PostToolUse entry via run-with-flags (e.g. `post:quality-gate`).
 
 ---
 
@@ -115,14 +101,13 @@ CHANGELOG.md, CODE_OF_CONDUCT.md, SPONSORING.md, SPONSORS.md, and release/attrib
 
 | Item                             | Status                     |
 | -------------------------------- | -------------------------- |
-| OpenCode profile support         | **In scope**               |
 | check-hook-enabled.js            | **In scope**               |
 | Cost-tracker hook                | **In scope**               |
 | Harness/loop commands and agents | **In scope**               |
 | Quality-gate hook                | Deferred (after the above) |
 | Community and docs               | Deferred (later stage)     |
 
-Implementation order: (1) check-hook-enabled.js, (2) cost-tracker hook, (3) OpenCode profile support, (4) harness/loop commands and agents. Quality-gate hook can be added once these are in place.
+Implementation order: (1) check-hook-enabled.js, (2) cost-tracker hook, (3) harness/loop commands and agents. Quality-gate hook can be added once these are in place.
 
 ---
 
@@ -136,16 +121,12 @@ Use the indented rows under each task for status updates, gotchas found during w
 
 - [ ] **Cost-tracker hook**
   - *(Add status or important notes here when working on this task.)*
-  - Use this repo's config dir (or derived path) for metrics; no `getClaudeDir()`. Wire in `hooks/hooks.json` (Stop) and `.cursor/hooks/stop.js` with run-with-flags and hook ID e.g. `stop:cost-tracker`.
+  - Use this repo's config dir (or derived path) for metrics; no `getClaudeDir()`. Wire in `hooks/hooks.json` (Stop) and `~/.cursor/mdt/hooks/stop.js` with run-with-flags and hook ID e.g. `stop:cost-tracker`.
   - Only useful if the harness sends token usage on Stop.
-
-- [ ] **OpenCode profile support**
-  - *(Add status or important notes here when working on this task.)*
-  - **Target file is `.opencode/plugins/mdt-hooks.ts`** (MDTHooksPlugin), not ecc-hooks.ts. Port from affaan-m's ecc-hooks.ts: `normalizeProfile`, `disabledHooks`, `profileOrder`, `profileAllowed`, `hookEnabled`. Gate each `file.edited` and `tool.execute.after` behavior with `if (hookEnabled(...))`.
 
 - [ ] **Harness/loop commands and agents**
   - *(Add status or important notes here when working on this task.)*
-  - Port from affaan-m: `commands/harness-audit.md`, `loop-start.md`, `loop-status.md`, `quality-gate.md`, `model-route.md` and `agents/harness-optimizer.md`, `loop-operator.md`. Add to `.opencode/commands/` if you mirror OpenCode commands.
+  - Port from affaan-m: `commands/harness-audit.md`, `loop-start.md`, `loop-status.md`, `quality-gate.md`, `model-route.md` and `agents/harness-optimizer.md`, `loop-operator.md`.
   - Markdown only; no new scripts unless a command explicitly requires one.
 
 - [ ] **Quality-gate hook** (deferred)

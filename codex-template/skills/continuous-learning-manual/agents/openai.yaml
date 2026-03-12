@@ -1,0 +1,7 @@
+interface:
+  display_name: "Continuous Learning v2"
+  short_description: "Capture and analyze Codex session learnings into project-scoped instincts"
+  brand_color: "#2563EB"
+  default_prompt: "Use the explicit Codex continuous-learning workflow: check status, capture a concise session summary, analyze it, and write any resulting instincts or follow-up actions."
+policy:
+  allow_implicit_invocation: true

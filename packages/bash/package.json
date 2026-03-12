@@ -1,0 +1,61 @@
+{
+  "name": "bash",
+  "description": "Base Bash and shell workflow package",
+  "ruleDirectory": "bash",
+  "rules": [
+    "common/agents.md",
+    "common/coding-style.md",
+    "common/development-workflow.md",
+    "common/git-workflow.md",
+    "common/hooks.md",
+    "common/patterns.md",
+    "common/performance.md",
+    "common/security.md",
+    "common/testing.md",
+    "bash/coding-style.md",
+    "bash/hooks.md",
+    "bash/patterns.md",
+    "bash/security.md",
+    "bash/testing.md"
+  ],
+  "agents": [
+    "planner.md",
+    "code-reviewer.md",
+    "security-reviewer.md",
+    "bash-reviewer.md"
+  ],
+  "commands": [
+    "docs-health.md",
+    "plan.md",
+    "verify.md",
+    "code-review.md"
+  ],
+  "skills": [
+    "documentation-steward",
+    "bash-patterns",
+    "verification-loop",
+    "security-review"
+  ],
+  "tools": {
+    "cursor": {
+      "rules": [],
+      "skills": [],
+      "commands": [
+        "docs-health.md"
+      ]
+    },
+    "gemini": {
+      "rules": [
+        "common-agents.md",
+        "common-coding-style.md",
+        "common-development-workflow.md",
+        "common-git-workflow.md",
+        "common-hooks.md",
+        "common-patterns.md",
+        "common-performance.md",
+        "common-security.md",
+        "common-testing.md"
+      ]
+    }
+  }
+}

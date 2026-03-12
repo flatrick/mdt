@@ -1,6 +1,6 @@
 const assert = require('assert');
 const { test } = require('../helpers/test-runner');
-const { resolveWindowsShim, runProbe, smokeToolSetups } = require('../../scripts/smoke-tool-setups');
+const { resolveWindowsShim, runProbe, smokeToolSetups, summarizeProbeDetail } = require('../../scripts/smoke-tool-setups');
 
 function runTests() {
   console.log('\n=== Testing smoke-tool-setups.js ===\n');
@@ -55,6 +55,7 @@ function runTests() {
 
     assert.strictEqual(probe.status, 'SKIP');
     assert.ok(probe.detail.includes('EPERM'));
+    assert.ok(probe.detail.includes('allows local process spawn'));
   })) passed++; else failed++;
 
   if (test('returns FAIL when an installed command exits non-zero', () => {
@@ -85,6 +86,11 @@ function runTests() {
     assert.ok(probe.detail.includes('codex 1.0.0'));
   })) passed++; else failed++;
 
+  if (test('summarizes multi-line help output to the first line only', () => {
+    const summary = summarizeProbeDetail('Codex CLI\nUsage: codex [options]\nMore help');
+    assert.strictEqual(summary, 'Codex CLI');
+  })) passed++; else failed++;
+
   if (test('summarizes tools with PASS, SKIP, and FAIL states', () => {
     const output = [];
     const result = smokeToolSetups({
@@ -113,7 +119,7 @@ function runTests() {
     assert.ok(output.join('\n').includes('cursor: SKIP'));
     assert.ok(output.join('\n').includes('codex: FAIL'));
     assert.ok(output.join('\n').includes('Passed: 1'));
-    assert.ok(output.join('\n').includes('Failed: 2'));
+    assert.ok(output.join('\n').includes('Failed: 1'));
     assert.ok(output.join('\n').includes('Skipped: 1'));
   })) passed++; else failed++;
 

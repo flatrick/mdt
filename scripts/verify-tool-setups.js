@@ -34,12 +34,13 @@ function buildDocChecks(docContent) {
     });
 
     for (const tool of TOOL_ORDER) {
-      const docMarker = workflow.tools[tool].requiredFiles[workflow.tools[tool].requiredFiles.length - 1];
+      const toolDefinition = workflow.tools[tool];
+      const docMarker = toolDefinition.artifactMappings[toolDefinition.artifactMappings.length - 1].path;
       checks.push({
         kind: 'status-label',
         workflowId: workflow.id,
         tool,
-        ok: Boolean(row) && row.includes(workflow.tools[tool].status) && row.includes(docMarker)
+        ok: Boolean(row) && row.includes(toolDefinition.status) && row.includes(docMarker)
       });
     }
   }

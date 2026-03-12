@@ -1,0 +1,27 @@
+---
+description: "Never attempt to read global settings or install surfaces from other tools"
+alwaysApply: true
+---
+
+# Never Attempt To Read Other Tool Globals
+
+Never attempt to read or rely on another tool's global settings, install
+surfaces, or runtime state when operating as Cursor.
+
+Examples of paths that must be treated as off-limits unless the user explicitly
+asks for them:
+
+- `~/.claude/`
+- `~/.codex/`
+- other tools' global rules, skills, commands, hooks, or config files
+
+When you are working in Cursor:
+
+- prefer `~/.cursor/...` and `~/.cursor/mdt/...` for the normal global Cursor install
+- only use `.cursor/...` when the user explicitly asked for a repo-local bridge file
+- if the expected Cursor path is missing, report the install as incomplete
+  instead of guessing another tool path
+
+This rule exists because Cursor can sometimes improvise across tool boundaries
+when command or skill paths are ambiguous. Stay inside the Cursor surface unless
+the user explicitly requests otherwise.

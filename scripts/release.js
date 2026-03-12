@@ -15,8 +15,7 @@ const VERSION = process.argv[2];
 const FILES = [
   path.join(REPO_ROOT, 'package.json'),
   path.join(REPO_ROOT, '.claude-plugin', 'plugin.json'),
-  path.join(REPO_ROOT, '.claude-plugin', 'marketplace.json'),
-  path.join(REPO_ROOT, '.opencode', 'package.json')
+  path.join(REPO_ROOT, '.claude-plugin', 'marketplace.json')
 ];
 
 function usage() {

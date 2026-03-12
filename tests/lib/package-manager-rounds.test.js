@@ -345,9 +345,9 @@ function runTests() {
         delete require.cache[require.resolve('../../scripts/lib/detect-env')];
         delete require.cache[require.resolve('../../scripts/lib/utils')];
         const utils = require('../../scripts/lib/utils');
-        const configDir = utils.getConfigDir();
-        fs.mkdirSync(configDir, { recursive: true });
-        fs.writeFileSync(path.join(configDir, 'package-manager.json'), '{ invalid json !!!', 'utf8');
+        const dataDir = utils.getDataDir();
+        fs.mkdirSync(dataDir, { recursive: true });
+        fs.writeFileSync(path.join(dataDir, 'package-manager.json'), '{ invalid json !!!', 'utf8');
 
         delete require.cache[require.resolve('../../scripts/lib/package-manager')];
         const freshPM = require('../../scripts/lib/package-manager');
@@ -379,12 +379,12 @@ function runTests() {
         delete require.cache[require.resolve('../../scripts/lib/package-manager')];
         delete require.cache[require.resolve('../../scripts/lib/utils')];
         const freshUtils = require('../../scripts/lib/utils');
-        const configDir = freshUtils.getConfigDir();
+        const dataDir = freshUtils.getDataDir();
 
-        // Create valid global config with pnpm preference at detected configDir
-        fs.mkdirSync(configDir, { recursive: true });
+        // Create valid global config with pnpm preference at detected MDT data dir
+        fs.mkdirSync(dataDir, { recursive: true });
         fs.writeFileSync(
-          path.join(configDir, 'package-manager.json'),
+          path.join(dataDir, 'package-manager.json'),
           JSON.stringify({ packageManager: 'pnpm', setAt: '2026-01-01T00:00:00Z' }),
           'utf8'
         );
@@ -415,22 +415,22 @@ function runTests() {
       return;
     }
     const isoHome = path.join(os.tmpdir(), `MDT-pm-r71-${Date.now()}`);
-    const claudeDir = path.join(isoHome, '.claude');
-    fs.mkdirSync(claudeDir, { recursive: true });
+    const mdtDir = path.join(isoHome, '.claude', 'mdt');
+    fs.mkdirSync(mdtDir, { recursive: true });
     try {
       withEnv({ HOME: isoHome, USERPROFILE: isoHome }, () => {
         delete require.cache[require.resolve('../../scripts/lib/package-manager')];
         delete require.cache[require.resolve('../../scripts/lib/utils')];
         const freshPm = require('../../scripts/lib/package-manager');
-        // Make .claude directory read-only — can't create new files (package-manager.json)
-        fs.chmodSync(claudeDir, 0o555);
+        // Make the MDT state directory read-only — can't create package-manager.json there
+        fs.chmodSync(mdtDir, 0o555);
         assert.throws(() => {
           freshPm.setPreferredPackageManager('npm');
         }, /Failed to save package manager preference/);
       });
     } finally {
       try {
-        fs.chmodSync(claudeDir, 0o755);
+        fs.chmodSync(mdtDir, 0o755);
       } catch (_err) {
         /* best-effort */
       }
@@ -691,4 +691,3 @@ function runTests() {
 }
 
 runTests();
-

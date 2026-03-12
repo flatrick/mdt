@@ -12,10 +12,29 @@ const { ensureSubprocessCapability } = require('../helpers/subprocess-capability
 const { test, createTestDir, cleanupTestDir } = require('../helpers/test-runner');
 const { buildTestEnv } = require('../helpers/test-env-profiles');
 
+const REPRESENTATIVE_BASELINE_SKILLS = [
+  'api-design',
+  'backend-patterns',
+  'eval-harness',
+  'search-first',
+  'security-review',
+  'strategic-compact',
+  'tdd-workflow',
+  'verification-loop'
+];
+
 function runInstaller(args, options = {}) {
   const repoRoot = path.join(__dirname, '..', '..');
   const installerPath = path.join(repoRoot, 'scripts', 'install-mdt.js');
-  return spawnSync('node', [installerPath, ...args], {
+  const installerArgs = [installerPath];
+  if (options.projectDir) {
+    installerArgs.push('--project-dir', options.projectDir);
+  }
+  if (options.overrideDir) {
+    installerArgs.push('--override', options.overrideDir);
+  }
+  installerArgs.push(...args);
+  return spawnSync('node', installerArgs, {
     encoding: 'utf8',
     cwd: options.cwd || repoRoot,
     env: buildTestEnv(options.profile || 'neutral', options.env || {}),
@@ -46,13 +65,14 @@ function runTests() {
   const counters = { passed: 0, failed: 0 };
   const testCases = [
     {
-      name: 'claude install copies runtime scripts only (hooks + lib)',
+      name: 'claude install copies runtime scripts and docs validators into mdt root',
       run: () => {
         const tmpHome = createTestDir('mdt-install-claude-');
         const claudeBase = path.join(tmpHome, '.claude');
 
         try {
-          const result = runInstaller(['--global', 'typescript'], {
+          const result = runInstaller(['typescript'], {
+            overrideDir: claudeBase,
             env: {
               HOME: tmpHome,
               USERPROFILE: tmpHome,
@@ -61,39 +81,42 @@ function runTests() {
           });
           assertSuccess(result, 'claude install');
 
-          assert.ok(fs.existsSync(path.join(claudeBase, 'scripts', 'hooks', 'session-start.js')));
-          assert.ok(fs.existsSync(path.join(claudeBase, 'scripts', 'lib', 'utils.js')));
-          assert.ok(!fs.existsSync(path.join(claudeBase, 'scripts', 'ci')), 'scripts/ci must not be installed');
-          assert.ok(!fs.existsSync(path.join(claudeBase, 'scripts', 'install-mdt.js')), 'top-level installer must not be installed');
+          assert.ok(fs.existsSync(path.join(claudeBase, 'mdt', 'scripts', 'hooks', 'session-start.js')));
+          assert.ok(fs.existsSync(path.join(claudeBase, 'mdt', 'scripts', 'lib', 'utils.js')));
+          assert.ok(fs.existsSync(path.join(claudeBase, 'mdt', 'scripts', 'ci', 'validate-markdown-links.js')));
+          assert.ok(fs.existsSync(path.join(claudeBase, 'mdt', 'scripts', 'ci', 'validate-markdown-path-refs.js')));
+          assert.ok(fs.existsSync(path.join(claudeBase, 'mdt', 'scripts', 'ci', 'markdown-utils.js')));
+          assert.ok(fs.existsSync(path.join(claudeBase, 'mdt', 'scripts', 'smoke-claude-workflows.js')));
+          assert.ok(!fs.existsSync(path.join(claudeBase, 'mdt', 'scripts', 'ci', 'validate-install-packages.js')));
+          assert.ok(!fs.existsSync(path.join(claudeBase, 'mdt', 'scripts', 'install-mdt.js')));
         } finally {
           cleanupTestDir(tmpHome);
         }
       }
     },
     {
-      name: 'cursor install copies runtime scripts only (hooks + lib)',
+      name: 'claude dev install always materializes smoke command and tool smoke script',
       run: () => {
-        const tmpHome = createTestDir('mdt-install-cursor-home-');
-        const tmpProject = createTestDir('mdt-install-cursor-proj-');
+        const tmpHome = createTestDir('mdt-install-claude-dev-home-');
+        const claudeBase = path.join(tmpHome, '.claude');
 
         try {
-          const result = runInstaller(['--target', 'cursor', 'typescript'], {
-            cwd: tmpProject,
+          const result = runInstaller(['--dev', 'continuous-learning'], {
+            overrideDir: claudeBase,
             env: {
               HOME: tmpHome,
-              USERPROFILE: tmpHome
+              USERPROFILE: tmpHome,
+              CLAUDE_BASE_DIR: claudeBase
             }
           });
-          assertSuccess(result, 'cursor install');
+          assertSuccess(result, 'claude dev install');
 
-          const cursorRoot = path.join(tmpProject, '.cursor');
-          assert.ok(fs.existsSync(path.join(cursorRoot, 'scripts', 'hooks', 'session-start.js')));
-          assert.ok(fs.existsSync(path.join(cursorRoot, 'scripts', 'lib', 'utils.js')));
-          assert.ok(!fs.existsSync(path.join(cursorRoot, 'scripts', 'ci')), 'scripts/ci must not be installed');
-          assert.ok(!fs.existsSync(path.join(cursorRoot, 'scripts', 'install-mdt.js')), 'top-level installer must not be installed');
+          assert.ok(fs.existsSync(path.join(claudeBase, 'commands', 'smoke.md')));
+          assert.ok(fs.existsSync(path.join(claudeBase, 'mdt', 'scripts', 'smoke-tool-setups.js')));
+          assert.ok(fs.existsSync(path.join(claudeBase, 'mdt', 'scripts', 'smoke-claude-workflows.js')));
+          assert.ok(fs.existsSync(path.join(claudeBase, 'mdt', 'workflow-contracts', 'metadata.json')));
         } finally {
           cleanupTestDir(tmpHome);
-          cleanupTestDir(tmpProject);
         }
       }
     },
@@ -111,7 +134,8 @@ function runTests() {
             'utf8'
           );
 
-          const result = runInstaller(['--global', 'typescript'], {
+          const result = runInstaller(['typescript'], {
+            overrideDir: claudeBase,
             env: {
               HOME: tmpHome,
               USERPROFILE: tmpHome,
@@ -124,41 +148,417 @@ function runTests() {
           const settings = JSON.parse(fs.readFileSync(settingsPath, 'utf8'));
           const settingsRaw = fs.readFileSync(settingsPath, 'utf8');
 
-          assert.strictEqual(settings.theme, 'dark', 'existing non-hook keys should be preserved');
-          assert.strictEqual(settings.customFlag, true, 'existing boolean key should be preserved');
-          assert.ok(settings.hooks && settings.hooks.PreToolUse, 'hooks should be replaced with installer hooks block');
-          assert.ok(!settingsRaw.includes('${MDT_ROOT}'), 'hooks should be materialized to absolute paths');
-          assert.ok(fs.existsSync(path.join(claudeBase, 'settings.json.bkp')), 'installer should create backup file');
+          assert.strictEqual(settings.theme, 'dark');
+          assert.strictEqual(settings.customFlag, true);
+          assert.ok(settings.hooks && settings.hooks.PreToolUse);
+          assert.ok(settingsRaw.includes('.claude/mdt'));
+          assert.ok(fs.existsSync(path.join(claudeBase, 'settings.json.bkp')));
         } finally {
           cleanupTestDir(tmpHome);
         }
       }
     },
     {
-      name: 'claude project-level install copies to cwd .claude',
+      name: 'claude install writes Edit and Write permissions for mdt root into settings.json',
       run: () => {
-        const tmpProject = createTestDir('mdt-install-claude-proj-');
+        const tmpHome = createTestDir('mdt-install-permissions-');
+        const claudeBase = path.join(tmpHome, '.claude');
+
+        try {
+          const result = runInstaller(['typescript'], {
+            overrideDir: claudeBase,
+            env: {
+              HOME: tmpHome,
+              USERPROFILE: tmpHome,
+              CLAUDE_BASE_DIR: claudeBase
+            }
+          });
+          assertSuccess(result, 'claude install permissions');
+
+          const settingsPath = path.join(claudeBase, 'settings.json');
+          const settings = JSON.parse(fs.readFileSync(settingsPath, 'utf8'));
+          const allow = settings.permissions && settings.permissions.allow;
+          const mdtRoot = path.join(claudeBase, 'mdt').replace(/\\/g, '/');
+
+          assert.ok(Array.isArray(allow), 'permissions.allow should be an array');
+          assert.ok(allow.includes(`Edit(${mdtRoot}/**)`), `permissions.allow should contain Edit(${mdtRoot}/**)`);
+          assert.ok(allow.includes(`Write(${mdtRoot}/**)`), `permissions.allow should contain Write(${mdtRoot}/**)`);
+        } finally {
+          cleanupTestDir(tmpHome);
+        }
+      }
+    },
+    {
+      name: 'claude install merges mdt permissions without duplicating existing allow entries',
+      run: () => {
+        const tmpHome = createTestDir('mdt-install-permissions-merge-');
+        const claudeBase = path.join(tmpHome, '.claude');
+        const mdtRoot = path.join(claudeBase, 'mdt').replace(/\\/g, '/');
+
+        try {
+          fs.mkdirSync(claudeBase, { recursive: true });
+          fs.writeFileSync(
+            path.join(claudeBase, 'settings.json'),
+            JSON.stringify({
+              permissions: { allow: [`Edit(${mdtRoot}/**)`, 'Bash(npm run *)'] }
+            }, null, 2),
+            'utf8'
+          );
+
+          const result = runInstaller(['typescript'], {
+            overrideDir: claudeBase,
+            env: {
+              HOME: tmpHome,
+              USERPROFILE: tmpHome,
+              CLAUDE_BASE_DIR: claudeBase
+            }
+          });
+          assertSuccess(result, 'claude install permissions merge');
+
+          const settings = JSON.parse(fs.readFileSync(path.join(claudeBase, 'settings.json'), 'utf8'));
+          const allow = settings.permissions.allow;
+
+          assert.strictEqual(allow.filter((e) => e === `Edit(${mdtRoot}/**)`).length, 1, 'Edit entry should not be duplicated');
+          assert.ok(allow.includes(`Write(${mdtRoot}/**)`), 'Write entry should be added');
+          assert.ok(allow.includes('Bash(npm run *)'), 'pre-existing allow entry should be preserved');
+        } finally {
+          cleanupTestDir(tmpHome);
+        }
+      }
+    },
+    {
+      name: 'cursor install copies selected rules skills commands and runtime scripts globally',
+      run: () => {
+        const tmpHome = createTestDir('mdt-install-cursor-home-');
+        const cursorRoot = path.join(tmpHome, '.cursor');
+
+        try {
+          const result = runInstaller(['--target', 'cursor', 'typescript', 'continuous-learning'], {
+            overrideDir: cursorRoot,
+            env: {
+              HOME: tmpHome,
+              USERPROFILE: tmpHome
+            }
+          });
+          assertSuccess(result, 'cursor install');
+
+          assert.ok(fs.existsSync(path.join(cursorRoot, 'mdt', 'scripts', 'hooks', 'session-start.js')));
+          assert.ok(fs.existsSync(path.join(cursorRoot, 'skills', 'documentation-steward', 'SKILL.md')));
+          assert.ok(fs.existsSync(path.join(cursorRoot, 'skills', 'frontend-slides', 'SKILL.md')));
+          assert.ok(fs.existsSync(path.join(cursorRoot, 'skills', 'continuous-learning-manual', 'SKILL.md')));
+          assert.ok(fs.existsSync(path.join(cursorRoot, 'skills', 'continuous-learning-automatic', 'SKILL.md')));
+          assert.ok(fs.existsSync(path.join(cursorRoot, 'commands', 'plan.md')));
+          assert.ok(fs.existsSync(path.join(cursorRoot, 'commands', 'install-rules.md')));
+          assert.ok(fs.existsSync(path.join(cursorRoot, 'commands', 'instinct-status.md')));
+          assert.ok(fs.existsSync(path.join(cursorRoot, 'mdt', 'scripts', 'materialize-mdt-local.js')));
+          assert.ok(fs.existsSync(path.join(cursorRoot, 'rules', 'typescript-coding-style.mdc')));
+          assert.ok(fs.existsSync(path.join(cursorRoot, 'rules', 'common-coding-style.mdc')));
+          assert.ok(!fs.existsSync(path.join(cursorRoot, 'skills', 'rust-patterns')));
+          assert.ok(!fs.existsSync(path.join(cursorRoot, 'rules', 'python-coding-style.mdc')));
+        } finally {
+          cleanupTestDir(tmpHome);
+        }
+      }
+    },
+    {
+      name: 'cursor dev install always materializes smoke command and tool smoke script',
+      run: () => {
+        const tmpHome = createTestDir('mdt-install-cursor-dev-home-');
+        const cursorRoot = path.join(tmpHome, '.cursor');
+
+        try {
+          const result = runInstaller(['--target', 'cursor', '--dev', 'continuous-learning'], {
+            overrideDir: cursorRoot,
+            env: {
+              HOME: tmpHome,
+              USERPROFILE: tmpHome
+            }
+          });
+          assertSuccess(result, 'cursor dev install');
+
+          assert.ok(fs.existsSync(path.join(cursorRoot, 'commands', 'smoke.md')));
+          assert.ok(fs.existsSync(path.join(cursorRoot, 'mdt', 'scripts', 'smoke-tool-setups.js')));
+          assert.ok(fs.existsSync(path.join(cursorRoot, 'mdt', 'workflow-contracts', 'metadata.json')));
+        } finally {
+          cleanupTestDir(tmpHome);
+        }
+      }
+    },
+    {
+      name: 'gemini global install appends only package-selected rules and installs mdt scripts',
+      run: () => {
+        const tmpHome = createTestDir('mdt-install-gemini-home-');
+        const geminiRoot = path.join(tmpHome, '.gemini');
+
+        try {
+          const result = runInstaller(['--target', 'gemini', 'typescript'], {
+            overrideDir: geminiRoot,
+            env: {
+              HOME: tmpHome,
+              USERPROFILE: tmpHome
+            }
+          });
+          assertSuccess(result, 'gemini install');
+
+          const geminiMdPath = path.join(geminiRoot, 'GEMINI.md');
+          const geminiMd = fs.readFileSync(geminiMdPath, 'utf8');
+          assert.ok(geminiMd.includes('# TypeScript/JavaScript Coding Style'));
+          assert.ok(geminiMd.includes('# Coding Style'));
+          assert.ok(!geminiMd.includes('# Python Coding Style'));
+          assert.ok(fs.existsSync(path.join(geminiRoot, 'mdt', 'scripts', 'lib', 'utils.js')));
+          assert.ok(fs.existsSync(path.join(geminiRoot, 'antigravity', '.agents', 'skills', 'coding-standards', 'SKILL.md')));
+        } finally {
+          cleanupTestDir(tmpHome);
+        }
+      }
+    },
+    {
+      name: 'codex global install copies selected assets and runtime scripts into mdt root',
+      run: () => {
+        const tmpHome = createTestDir('mdt-install-codex-home-');
+        const codexRoot = path.join(tmpHome, '.codex');
+
+        try {
+          const result = runInstaller(['--target', 'codex', 'typescript', 'continuous-learning'], {
+            overrideDir: codexRoot,
+            env: {
+              HOME: tmpHome,
+              USERPROFILE: tmpHome
+            }
+          });
+          assertSuccess(result, 'codex install');
+
+          assert.ok(fs.existsSync(path.join(codexRoot, 'config.toml')));
+          assert.ok(fs.existsSync(path.join(codexRoot, 'AGENTS.md')));
+          assert.ok(fs.existsSync(path.join(codexRoot, 'rules', 'common-coding-style.md')));
+          assert.ok(fs.existsSync(path.join(codexRoot, 'skills', 'coding-standards', 'SKILL.md')));
+          assert.ok(fs.existsSync(path.join(codexRoot, 'skills', 'documentation-steward', 'SKILL.md')));
+          assert.ok(fs.existsSync(path.join(codexRoot, 'skills', 'continuous-learning-manual', 'SKILL.md')));
+          assert.ok(fs.existsSync(path.join(codexRoot, 'skills', 'continuous-learning-manual', 'scripts', 'retrospect-week.js')));
+          assert.ok(fs.existsSync(path.join(codexRoot, 'skills', 'continuous-learning-manual', 'agents', 'openai.yaml')));
+          assert.ok(!fs.existsSync(path.join(codexRoot, 'skills', 'continuous-learning-automatic', 'SKILL.md')));
+          assert.ok(!fs.existsSync(path.join(codexRoot, 'skills', 'python-patterns', 'SKILL.md')));
+          assert.ok(fs.existsSync(path.join(codexRoot, 'mdt', 'scripts', 'lib', 'detect-env.js')));
+          assert.ok(fs.existsSync(path.join(codexRoot, 'mdt', 'scripts', 'ci', 'validate-markdown-links.js')));
+          assert.ok(fs.existsSync(path.join(codexRoot, 'mdt', 'scripts', 'ci', 'validate-markdown-path-refs.js')));
+        } finally {
+          cleanupTestDir(tmpHome);
+        }
+      }
+    },
+    {
+      name: 'codex dev install always materializes smoke skill and smoke scripts',
+      run: () => {
+        const tmpHome = createTestDir('mdt-install-codex-dev-home-');
+        const codexRoot = path.join(tmpHome, '.codex');
+
+        try {
+          const result = runInstaller(['--target', 'codex', '--dev', 'continuous-learning'], {
+            overrideDir: codexRoot,
+            env: {
+              HOME: tmpHome,
+              USERPROFILE: tmpHome
+            }
+          });
+          assertSuccess(result, 'codex dev install');
+
+          assert.ok(fs.existsSync(path.join(codexRoot, 'skills', 'smoke', 'SKILL.md')));
+          assert.ok(fs.existsSync(path.join(codexRoot, 'skills', 'tool-setup-verifier', 'SKILL.md')));
+          assert.ok(fs.existsSync(path.join(codexRoot, 'mdt', 'scripts', 'smoke-tool-setups.js')));
+          assert.ok(fs.existsSync(path.join(codexRoot, 'mdt', 'scripts', 'smoke-codex-workflows.js')));
+          assert.ok(fs.existsSync(path.join(codexRoot, 'mdt', 'workflow-contracts', 'metadata.json')));
+          assert.ok(fs.existsSync(path.join(codexRoot, 'mdt', 'workflow-contracts', 'workflows', 'smoke.json')));
+        } finally {
+          cleanupTestDir(tmpHome);
+        }
+      }
+    },
+    {
+      name: 'codex install always includes baseline tdd-workflow skill',
+      run: () => {
+        const tmpHome = createTestDir('mdt-install-codex-baseline-home-');
+        const codexRoot = path.join(tmpHome, '.codex');
+
+        try {
+          const result = runInstaller(['--target', 'codex', 'continuous-learning'], {
+            overrideDir: codexRoot,
+            env: {
+              HOME: tmpHome,
+              USERPROFILE: tmpHome
+            }
+          });
+          assertSuccess(result, 'codex baseline skill install');
+
+          for (const skillName of REPRESENTATIVE_BASELINE_SKILLS) {
+            assert.ok(fs.existsSync(path.join(codexRoot, 'skills', skillName, 'SKILL.md')));
+          }
+        } finally {
+          cleanupTestDir(tmpHome);
+        }
+      }
+    },
+    {
+      name: 'codex reinstall keeps skill frontmatter intact',
+      run: () => {
+        const tmpHome = createTestDir('mdt-install-codex-reinstall-home-');
+        const codexRoot = path.join(tmpHome, '.codex');
+
+        try {
+          const first = runInstaller(['--target', 'codex', '--dev', 'typescript', 'continuous-learning'], {
+            overrideDir: codexRoot,
+            env: {
+              HOME: tmpHome,
+              USERPROFILE: tmpHome
+            }
+          });
+          assertSuccess(first, 'codex first install');
+
+          const second = runInstaller(['--target', 'codex', '--dev', 'typescript', 'continuous-learning'], {
+            overrideDir: codexRoot,
+            env: {
+              HOME: tmpHome,
+              USERPROFILE: tmpHome
+            }
+          });
+          assertSuccess(second, 'codex second install');
+
+          const skillPath = path.join(codexRoot, 'skills', 'tdd-workflow', 'SKILL.md');
+          const skillContent = fs.readFileSync(skillPath, 'utf8');
+          assert.ok(skillContent.startsWith('---\n') || skillContent.startsWith('---\r\n'));
+          assert.ok(!fs.existsSync(skillPath + '.tmp'));
+        } finally {
+          cleanupTestDir(tmpHome);
+        }
+      }
+    },
+    {
+      name: 'codex observer package installs optional observer script into mdt scripts',
+      run: () => {
+        const tmpHome = createTestDir('mdt-install-codex-observer-home-');
+        const codexRoot = path.join(tmpHome, '.codex');
+
+        try {
+          const result = runInstaller(['--target', 'codex', 'typescript', 'continuous-learning-observer'], {
+            overrideDir: codexRoot,
+            env: {
+              HOME: tmpHome,
+              USERPROFILE: tmpHome
+            }
+          });
+          assertSuccess(result, 'codex observer install');
+
+          assert.ok(fs.existsSync(path.join(codexRoot, 'mdt', 'scripts', 'codex-observer.js')));
+          assert.ok(fs.existsSync(path.join(codexRoot, 'skills', 'continuous-learning-manual', 'SKILL.md')));
+        } finally {
+          cleanupTestDir(tmpHome);
+        }
+      }
+    },
+    {
+      name: 'codex global install preserves existing user config and writes MDT reference config only',
+      run: () => {
+        const tmpHome = createTestDir('mdt-install-codex-existing-home-');
+        const codexRoot = path.join(tmpHome, '.codex');
+
+        try {
+          fs.mkdirSync(codexRoot, { recursive: true });
+          const existingConfig = [
+            "[projects.'\\\\?\\C:\\\\src\\\\github\\\\example']",
+            'trust_level = "trusted"',
+            '',
+            '[windows]',
+            'sandbox = "elevated"'
+          ].join('\n');
+          fs.writeFileSync(path.join(codexRoot, 'config.toml'), existingConfig, 'utf8');
+
+          const result = runInstaller(['--target', 'codex', 'typescript'], {
+            overrideDir: codexRoot,
+            env: {
+              HOME: tmpHome,
+              USERPROFILE: tmpHome
+            }
+          });
+          assertSuccess(result, 'codex install with existing config');
+
+          assert.strictEqual(fs.readFileSync(path.join(codexRoot, 'config.toml'), 'utf8'), existingConfig);
+          const referenceConfig = fs.readFileSync(path.join(codexRoot, 'config.mdt.toml'), 'utf8');
+          assert.ok(referenceConfig.includes('sandbox_mode = "workspace-write"'));
+          assert.ok(!referenceConfig.includes('[mcp_servers.'));
+          assert.ok(fs.existsSync(path.join(codexRoot, 'rules', 'common-coding-style.md')));
+          assert.ok(fs.existsSync(path.join(codexRoot, 'mdt', 'scripts', 'lib', 'detect-env.js')));
+        } finally {
+          cleanupTestDir(tmpHome);
+        }
+      }
+    },
+    {
+      name: 'retired project-dir flag exits with migration guidance',
+      run: () => {
+        const tmpHome = createTestDir('mdt-install-project-dir-home-');
+        const tmpProject = createTestDir('mdt-install-project-dir-proj-');
 
         try {
           const result = runInstaller(['typescript'], {
             cwd: tmpProject,
             env: {
-              HOME: tmpProject,
-              USERPROFILE: tmpProject
+              HOME: tmpHome,
+              USERPROFILE: tmpHome
+            },
+            overrideDir: null,
+            projectDir: tmpProject
+          });
+          assert.strictEqual(result.status, 1);
+          assert.ok(result.stderr.includes('--project-dir is retired'));
+          assert.ok(result.stderr.includes('materialize-mdt-local.js'));
+        } finally {
+          cleanupTestDir(tmpHome);
+          cleanupTestDir(tmpProject);
+        }
+      }
+    },
+    {
+      name: 'claude install always includes baseline tdd-workflow skill',
+      run: () => {
+        const tmpHome = createTestDir('mdt-install-claude-baseline-');
+        const claudeBase = path.join(tmpHome, '.claude');
+
+        try {
+          const result = runInstaller(['continuous-learning'], {
+            overrideDir: claudeBase,
+            env: {
+              HOME: tmpHome,
+              USERPROFILE: tmpHome,
+              CLAUDE_BASE_DIR: claudeBase
             }
           });
-          assertSuccess(result, 'claude project install');
+          assertSuccess(result, 'claude baseline skill install');
 
-          const claudeRoot = path.join(tmpProject, '.claude');
-          assert.ok(fs.existsSync(path.join(claudeRoot, 'rules', 'common')), 'common rules should exist');
-          assert.ok(fs.existsSync(path.join(claudeRoot, 'scripts', 'lib', 'utils.js')), 'runtime scripts should exist');
-          assert.ok(fs.existsSync(path.join(claudeRoot, 'settings.json')), 'settings.json should exist');
-
-          const settingsRaw = fs.readFileSync(path.join(claudeRoot, 'settings.json'), 'utf8');
-          assert.ok(!settingsRaw.includes('${MDT_ROOT}'), 'plugin root placeholder should be resolved');
-          assert.ok(settingsRaw.includes('.claude'), 'hook paths should use project-relative .claude');
+          for (const skillName of REPRESENTATIVE_BASELINE_SKILLS) {
+            assert.ok(fs.existsSync(path.join(claudeBase, 'skills', skillName, 'SKILL.md')));
+          }
         } finally {
-          cleanupTestDir(tmpProject);
+          cleanupTestDir(tmpHome);
+        }
+      }
+    },
+    {
+      name: 'gemini install rejects package that does not support gemini target',
+      run: () => {
+        const tmpHome = createTestDir('mdt-install-gemini-incompatible-');
+        const geminiRoot = path.join(tmpHome, '.gemini');
+
+        try {
+          const result = runInstaller(['--target', 'gemini', 'continuous-learning'], {
+            overrideDir: geminiRoot,
+            env: {
+              HOME: tmpHome,
+              USERPROFILE: tmpHome
+            }
+          });
+          assert.strictEqual(result.status, 1);
+          assert.ok(result.stderr.includes("Package 'continuous-learning' does not support target 'gemini'"));
+        } finally {
+          cleanupTestDir(tmpHome);
         }
       }
     }

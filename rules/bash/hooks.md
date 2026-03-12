@@ -2,6 +2,7 @@
 paths:
   - "**/*.sh"
   - "**/*.bash"
+
 ---
 # Bash Hooks
 

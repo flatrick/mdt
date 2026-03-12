@@ -111,7 +111,7 @@ async function runTests() {
     const isoHome = path.join(os.tmpdir(), `MDT-start-empty-file-${Date.now()}`);
     const sessionsDir = getSessionsDirForHome(isoHome);
     fs.mkdirSync(sessionsDir, { recursive: true });
-    fs.mkdirSync(path.join(path.dirname(sessionsDir), 'skills', 'learned'), { recursive: true });
+    fs.mkdirSync(path.join(path.dirname(sessionsDir), 'generated', 'skills', 'learned'), { recursive: true });
 
     // Create a 0-byte session file (simulates truncated/corrupted write)
     const today = new Date().toISOString().slice(0, 10);
@@ -198,7 +198,7 @@ async function runTests() {
     const sessionsDir = getSessionsDirForHome(isoHome);
     const configDir = path.dirname(sessionsDir);
     fs.mkdirSync(sessionsDir, { recursive: true });
-    fs.mkdirSync(path.join(configDir, 'skills', 'learned'), { recursive: true });
+    fs.mkdirSync(path.join(configDir, 'mdt', 'generated', 'skills', 'learned'), { recursive: true });
 
     fs.writeFileSync(path.join(configDir, 'session-aliases.json'), JSON.stringify({
       version: '1.0',
@@ -337,7 +337,7 @@ async function runTests() {
     const isoHome = path.join(os.tmpdir(), `MDT-start-7day-${Date.now()}`);
     const sessionsDir = getSessionsDirForHome(isoHome);
     fs.mkdirSync(sessionsDir, { recursive: true });
-    fs.mkdirSync(path.join(path.dirname(sessionsDir), 'skills', 'learned'), { recursive: true });
+    fs.mkdirSync(path.join(path.dirname(sessionsDir), 'generated', 'skills', 'learned'), { recursive: true });
 
     // Create session file 6.9 days old (should be INCLUDED by maxAge:7)
     const recentFile = path.join(sessionsDir, '2026-02-06-recent69-session.tmp');
@@ -373,7 +373,7 @@ async function runTests() {
     const isoHome = path.join(os.tmpdir(), `MDT-start-multi-${Date.now()}`);
     const sessionsDir = getSessionsDirForHome(isoHome);
     fs.mkdirSync(sessionsDir, { recursive: true });
-    fs.mkdirSync(path.join(path.dirname(sessionsDir), 'skills', 'learned'), { recursive: true });
+    fs.mkdirSync(path.join(path.dirname(sessionsDir), 'generated', 'skills', 'learned'), { recursive: true });
 
     const now = Date.now();
 

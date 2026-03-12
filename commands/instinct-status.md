@@ -2,6 +2,7 @@
 name: instinct-status
 description: Show learned instincts (project + global) with confidence
 command: true
+
 ---
 
 # Instinct Status Command
@@ -13,13 +14,13 @@ Shows learned instincts for the current project plus global instincts, grouped b
 Run the instinct CLI using `MDT_ROOT` when available:
 
 ```bash
-node "${MDT_ROOT}/skills/continuous-learning-v2/scripts/instinct-cli.js" status
+node "${MDT_ROOT}/skills/continuous-learning-manual/scripts/instinct-cli.js" status
 ```
 
 For manual installs, replace `<config>` with your MDT config directory (for example `~/.claude` or `~/.cursor`):
 
 ```bash
-node "<config>/skills/continuous-learning-v2/scripts/instinct-cli.js" status
+node "<config>/skills/continuous-learning-manual/scripts/instinct-cli.js" status
 ```
 
 ## Usage
@@ -31,7 +32,7 @@ node "<config>/skills/continuous-learning-v2/scripts/instinct-cli.js" status
 ## What to Do
 
 1. Detect current project context (git remote/path hash)
-2. Read project instincts from `<data>/homunculus/projects/<project-id>/instincts/`
+2. Read project instincts from `<data>/homunculus/<project-id>/instincts/`
 3. Read global instincts from `<data>/homunculus/instincts/`
 4. Merge with precedence rules (project overrides global when IDs collide)
 5. Display grouped by domain with confidence bars and observation stats

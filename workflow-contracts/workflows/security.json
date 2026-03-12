@@ -1,0 +1,39 @@
+{
+  "id": "security",
+  "title": "Security",
+  "outcome": "Apply security review guidance before committing changes that touch trust boundaries or secrets.",
+  "successCriteria": [
+    "The workflow applies security review guidance before sign-off.",
+    "The workflow explicitly checks or calls out trust-boundary, secret, and validation concerns."
+  ],
+  "tools": {
+    "claude": {
+      "status": "official",
+      "verificationMode": "installer-target",
+      "artifactMappings": [
+        { "surfaceType": "agent", "name": "security-reviewer", "path": "agents/security-reviewer.md", "role": "specialized-reviewer" },
+        { "surfaceType": "skill", "name": "security-review", "path": "skills/security-review/SKILL.md", "role": "detailed-playbook" }
+      ],
+      "requiredFiles": ["agents/security-reviewer.md", "skills/security-review/SKILL.md"]
+    },
+    "cursor": {
+      "status": "repo-adapter",
+      "verificationMode": "installer-target",
+      "artifactMappings": [
+        { "surfaceType": "guidance", "name": "workspace-guidance", "path": "AGENTS.md", "role": "security-guidance" },
+        { "surfaceType": "rule", "name": "common-security", "path": "cursor-template/rules/common-security.md", "role": "security-rule" }
+      ],
+      "requiredFiles": ["AGENTS.md", "cursor-template/rules/common-security.md"]
+    },
+    "codex": {
+      "status": "repo-adapter",
+      "verificationMode": "installer-target",
+      "artifactMappings": [
+        { "surfaceType": "guidance", "name": "codex-agents", "path": "codex-template/AGENTS.md", "role": "security-guidance" },
+        { "surfaceType": "config", "name": "codex-config", "path": "codex-template/config.toml", "role": "codex-runtime-config" },
+        { "surfaceType": "skill", "name": "security-review", "path": "codex-template/skills/security-review/SKILL.md", "role": "installed-skill" }
+      ],
+      "requiredFiles": ["codex-template/config.toml", "codex-template/AGENTS.md", "codex-template/skills/security-review/SKILL.md"]
+    }
+  }
+}

@@ -7,7 +7,7 @@ const fs = require('fs');
 const path = require('path');
 
 const {
-  getConfigDir,
+  getDataDir,
   ensureDir,
   readFile,
   log
@@ -15,7 +15,7 @@ const {
 
 // Aliases file path
 function getAliasesPath() {
-  return path.join(getConfigDir(), 'session-aliases.json');
+  return path.join(getDataDir(), 'session-aliases.json');
 }
 
 // Current alias storage format version

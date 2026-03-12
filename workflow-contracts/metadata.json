@@ -1,0 +1,17 @@
+{
+  "toolOrder": ["claude", "cursor", "codex"],
+  "smokeProbes": {
+    "claude": [
+      { "command": "claude", "args": ["--version"] },
+      { "command": "claude", "args": ["--help"] }
+    ],
+    "cursor": [
+      { "command": "agent", "args": ["--help"] },
+      { "command": "cursor-agent", "args": ["--help"] }
+    ],
+    "codex": [
+      { "command": "codex", "args": ["--version"] },
+      { "command": "codex", "args": ["--help"] }
+    ]
+  }
+}

@@ -60,14 +60,14 @@ export interface GetPackageManagerOptions {
  * 2. Project-specific config (.claude/package-manager.json)
  * 3. package.json `packageManager` field
  * 4. Lock file detection
- * 5. Global user preference (config dir/package-manager.json, e.g. <config>/package-manager.json)
+ * 5. Global user preference (config dir/mdt/package-manager.json, e.g. <config>/mdt/package-manager.json)
  * 6. Default to npm (no child processes spawned)
  */
 export function getPackageManager(options?: GetPackageManagerOptions): PackageManagerResult;
 
 /**
  * Set the user's globally preferred package manager.
- * Saves to the active config dir/package-manager.json.
+ * Saves to the active config dir/mdt/package-manager.json.
  * @throws If pmName is not a known package manager or if save fails
  */
 export function setPreferredPackageManager(pmName: PackageManagerName): { packageManager: string; setAt: string };

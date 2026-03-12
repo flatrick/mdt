@@ -23,7 +23,7 @@ const {
 const MAX_STDIN = 1024 * 1024;
 
 function getDefaultConfigPath(env = process.env) {
-  return env.MDT_CONTINUOUS_LEARNING_CONFIG || path.join(__dirname, '..', '..', 'skills', 'continuous-learning', 'config.json');
+  return env.MDT_CONTINUOUS_LEARNING_CONFIG || path.join(__dirname, 'evaluate-session.config.json');
 }
 
 function expandConfiguredPath(configuredPath, env = process.env) {
@@ -47,7 +47,7 @@ function expandConfiguredPath(configuredPath, env = process.env) {
 function loadEvaluateConfig(configPath, logger = log, env = process.env) {
   const configContent = readFile(configPath);
   let minSessionLength = 10;
-  let learnedSkillsPath = getLearnedSkillsDir();
+  let learnedSkillsPath = getLearnedSkillsDir(env);
 
   if (configContent) {
     try {
@@ -89,7 +89,7 @@ function evaluateSession(options = {}) {
   }
 
   logger(`[ContinuousLearning] Session has ${messageCount} messages - evaluate for extractable patterns`);
-  logger(`[ContinuousLearning] Save learned skills to: ${learnedSkillsPath}`);
+  logger(`[ContinuousLearning] Save learned candidate skills to: ${learnedSkillsPath}`);
 
   return { shouldEvaluate: true, reason: 'evaluate', messageCount, learnedSkillsPath };
 }

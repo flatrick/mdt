@@ -3,7 +3,7 @@ const fs = require('fs');
 const path = require('path');
 const { test, createTestDir, cleanupTestDir } = require('../helpers/test-runner');
 const { evaluateToolSetups } = require('../../scripts/verify-tool-setups');
-const { TOOL_WORKFLOW_CONTRACT } = require('../../scripts/lib/tool-workflow-contract');
+const { TOOL_WORKFLOW_CONTRACT, WORKFLOW_CONTRACT_ROOT } = require('../../scripts/lib/tool-workflow-contract');
 
 function copyFileIntoFixture(rootDir, relativePath) {
   const sourcePath = path.join(__dirname, '..', '..', relativePath);
@@ -15,6 +15,11 @@ function copyFileIntoFixture(rootDir, relativePath) {
 function createFixtureRoot() {
   const rootDir = createTestDir('tool-setups-');
   copyFileIntoFixture(rootDir, path.join('docs', 'tools', 'workflow-matrix.md'));
+  copyFileIntoFixture(rootDir, path.join('workflow-contracts', 'metadata.json'));
+
+  for (const workflowFile of fs.readdirSync(path.join(WORKFLOW_CONTRACT_ROOT, 'workflows'))) {
+    copyFileIntoFixture(rootDir, path.join('workflow-contracts', 'workflows', workflowFile));
+  }
 
   for (const workflow of TOOL_WORKFLOW_CONTRACT.workflows) {
     for (const toolConfig of Object.values(workflow.tools)) {
@@ -76,7 +81,7 @@ function runTests() {
     const rootDir = createFixtureRoot();
 
     try {
-      fs.rmSync(path.join(rootDir, '.opencode', 'tools', 'run-tests.ts'));
+      fs.rmSync(path.join(rootDir, 'codex-template', 'skills', 'verification-loop', 'SKILL.md'));
 
       const errors = [];
       const result = evaluateToolSetups({
@@ -88,7 +93,7 @@ function runTests() {
       });
 
       assert.strictEqual(result.exitCode, 1, 'Expected missing required file to fail');
-      assert.ok(errors.join('\n').includes('.opencode/tools/run-tests.ts'), 'Expected missing file path in error output');
+      assert.ok(errors.join('\n').includes('codex-template/skills/verification-loop/SKILL.md'), 'Expected missing file path in error output');
     } finally {
       cleanupTestDir(rootDir);
     }

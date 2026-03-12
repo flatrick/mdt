@@ -207,7 +207,7 @@ async function runTests() {
     const isoProject = path.join(isoHome, 'project');
     const sessionsDir = getSessionsDirForHome(isoHome);
     fs.mkdirSync(sessionsDir, { recursive: true });
-    fs.mkdirSync(path.join(path.dirname(sessionsDir), 'skills', 'learned'), { recursive: true });
+    fs.mkdirSync(path.join(path.dirname(sessionsDir), 'generated', 'skills', 'learned'), { recursive: true });
     fs.mkdirSync(isoProject, { recursive: true });
     // No package.json, no lock files, no package-manager.json — forces default source
 

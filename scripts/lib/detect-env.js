@@ -2,7 +2,7 @@
  * Environment detection and path resolution for ModelDev Toolkit.
  *
  * Responsibilities:
- * - Detect running tool (Cursor, Claude Code, unknown)
+ * - Detect running tool (Cursor, Claude Code, Codex, unknown)
  * - Resolve config and data directories with sensible fallbacks
  * - Detect platform (Windows, WSL, Linux, macOS)
  * - Provide derived paths (skills, hooks, homunculus)
@@ -50,6 +50,10 @@ function detectTool(ctx) {
     ctx.cache.tool = 'claude';
     return ctx.cache.tool;
   }
+  if (ctx.env.CODEX_AGENT === '1') {
+    ctx.cache.tool = 'codex';
+    return ctx.cache.tool;
+  }
 
   ctx.cache.tool = 'unknown';
   return ctx.cache.tool;
@@ -89,6 +93,10 @@ function resolveConfigDir(ctx) {
     ctx.cache.configDir = path.join(homeDir, '.claude');
     return ctx.cache.configDir;
   }
+  if (tool === 'codex') {
+    ctx.cache.configDir = path.join(homeDir, '.codex');
+    return ctx.cache.configDir;
+  }
 
   const cursorSkillsDir = path.join(homeDir, '.cursor', 'skills');
   if (ctx.existsSync(cursorSkillsDir)) {
@@ -102,6 +110,12 @@ function resolveConfigDir(ctx) {
     return ctx.cache.configDir;
   }
 
+  const codexConfigDir = path.join(homeDir, '.codex');
+  if (ctx.existsSync(codexConfigDir)) {
+    ctx.cache.configDir = codexConfigDir;
+    return ctx.cache.configDir;
+  }
+
   ctx.cache.configDir = path.join(homeDir, '.cursor');
   return ctx.cache.configDir;
 }
@@ -109,9 +123,9 @@ function resolveConfigDir(ctx) {
 function resolveDataDir(ctx) {
   if (ctx.cache.dataDir) return ctx.cache.dataDir;
 
-  const homeDir = getHomeDir(ctx);
   const configDir = resolveConfigDir(ctx);
   const explicit = getExplicitDirValue(ctx, 'DATA_DIR');
+  const mdtDir = path.join(configDir, 'mdt');
 
   if (explicit && ctx.existsSync(explicit)) {
     ctx.cache.dataDir = explicit;
@@ -123,19 +137,7 @@ function resolveDataDir(ctx) {
     );
   }
 
-  const configHomunculusDir = path.join(configDir, 'homunculus');
-  if (ctx.existsSync(configHomunculusDir)) {
-    ctx.cache.dataDir = configDir;
-    return ctx.cache.dataDir;
-  }
-
-  const legacyClaudeHomunculusDir = path.join(homeDir, '.claude', 'homunculus');
-  if (ctx.existsSync(legacyClaudeHomunculusDir)) {
-    ctx.cache.dataDir = path.join(homeDir, '.claude');
-    return ctx.cache.dataDir;
-  }
-
-  ctx.cache.dataDir = configDir;
+  ctx.cache.dataDir = mdtDir;
   return ctx.cache.dataDir;
 }
 
@@ -175,6 +177,10 @@ function resolveSessionId(ctx) {
     ctx.cache.sessionId = ctx.env.CURSOR_TRACE_ID;
     return ctx.cache.sessionId;
   }
+  if (ctx.env.CODEX_SESSION_ID && ctx.env.CODEX_SESSION_ID.length > 0) {
+    ctx.cache.sessionId = ctx.env.CODEX_SESSION_ID;
+    return ctx.cache.sessionId;
+  }
 
   const rand = Math.random().toString(16).slice(2, 10);
   ctx.cache.sessionId = `sess-${Date.now().toString(16)}-${rand}`;
@@ -188,6 +194,7 @@ function getDerivedPaths(ctx) {
   return {
     configDir,
     dataDir,
+    mdtDir: dataDir,
     skillsDir: path.join(configDir, 'skills'),
     hooksDir: path.join(configDir, 'hooks'),
     homunculusDir: path.join(dataDir, 'homunculus')

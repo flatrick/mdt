@@ -12,11 +12,12 @@ This is a multi-tool, Node-first AI coding repository with specialized agents, s
 
 ## Repo-Specific Working Rules
 
-- Treat `docs/supported-tools.md` and `docs/tools/` as the source of truth for Claude Code, Cursor, Codex, and OpenCode capability claims.
-- Do not assume a file under `.cursor/`, `.codex/`, or `.opencode/` proves that the corresponding vendor supports that feature natively.
+- Treat `docs/supported-tools.md` and `docs/tools/` as the source of truth for Claude Code, Cursor, and Codex capability claims.
+- Do not assume a file under `cursor-template/` or `codex-template/` proves that the corresponding vendor supports that feature natively.
 - When updating cross-tool capability documentation, use `skills/tool-doc-maintainer/SKILL.md` and follow its verification workflow.
 - Prefer the repo's Node-first runtime and adapters. Do not reintroduce Bash-, PowerShell-, or Python-specific runtime assumptions unless the repo already requires them.
 - Do not assume a specific OS or shell. Verify the environment before giving shell-specific instructions, and prefer shell-neutral guidance when possible.
+- Installer scope rule: normal `scripts/install-mdt.js` installs target the tool's user/global config root. Treat `--global` as a compatibility alias/no-op. `--project-dir` is retired. If a tool still needs a repo-local surface, use an explicit bridge flow and document that exception in `docs/INSTALLATION.md` and the relevant tool page.
 
 ## Available Agents
 
@@ -111,7 +112,7 @@ Troubleshoot failures: check test isolation → verify mocks → fix implementat
 
 ## Tool Capability Docs
 
-When working on cross-tool behavior for Claude Code, Cursor, Codex, or OpenCode:
+When working on cross-tool behavior for Claude Code, Cursor, or Codex:
 
 - Treat `docs/supported-tools.md` and `docs/tools/` as the repo's capability source of truth.
 - Read `docs/tools/capability-matrix.md` and the relevant per-tool page before making claims about hooks, skills, commands, agents, rules, memory, or MCP support.

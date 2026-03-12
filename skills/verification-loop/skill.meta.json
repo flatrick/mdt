@@ -1,0 +1,20 @@
+{
+  "requires": {
+    "rules": [
+      "common/development-workflow.md",
+      "common/security.md",
+      "common/testing.md"
+    ],
+    "skills": [
+      "coding-standards"
+    ],
+    "runtime": {
+      "runtimeScripts": false,
+      "sessionData": false,
+      "hooks": {
+        "mode": "none",
+        "tools": []
+      }
+    }
+  }
+}
