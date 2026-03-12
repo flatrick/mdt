@@ -102,6 +102,8 @@ Use these as the current source of truth:
 - [docs/testing/manual-verification/README.md](docs/testing/manual-verification/README.md) for manual runtime checks
 - [docs/MIGRATION.md](docs/MIGRATION.md) for reset/reinstall policy
 - [NEXT-STEPS.md](NEXT-STEPS.md) for active roadmap items
+- [BACKLOG.md](BACKLOG.md) for deferred future work tracked in-repo until `v1.0.0`
+- [docs/history/](docs/history/) for completed work that has been moved out of the backlog
 
 ---
 
