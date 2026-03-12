@@ -5,38 +5,7 @@ Deferred work items that are documented but not yet scheduled.
 Completed backlog items have been moved to:
 
 - [History: 2026-03-11 global-install stabilization](docs/history/2026-03-11.global-install-stabilization.md)
-
----
-
-## Restore repo-wide lint green after observer runtime extraction
-
-**Status:** Open — verification blocked by lint.
-
-`/verify` on `2026-03-12` reported:
-
-- `npm test` passed cleanly: `1274/1274` tests, `63` suites, `0` failures
-- no dedicated build script or TypeScript project config was detected for a separate
-  build/type-check phase
-- `npm run lint` failed with `67` errors, so the branch was not ready for PR
-
-**Observed lint hotspots:**
-
-- `scripts/lib/continuous-learning/observer-runtime.js` — complexity and
-  max-lines violations in the extracted observer runtime
-- `codex-template/hardening/*.mjs` — parse failures under the current ESLint
-  config (`sourceType: module` mismatch)
-- `hooks/cursor/scripts/*.js` — multiple `no-empty` failures
-- existing repo-wide baseline issues in `scripts/install-mdt.js`,
-  `scripts/lib/continuous-learning/*.js`, and a few test files
-
-**Follow-up goal:**
-
-- decide whether to:
-  1. do a focused lint cleanup for the observer-runtime extraction work, or
-  2. treat this as a broader repo-wide lint-baseline restoration pass
-
-Until one of those happens, `/verify` should continue to report "Ready for PR:
-NO" even when tests pass.
+- [History: 2026-03-12 verification stabilization](docs/history/2026-03-12.verification-stabilization.md)
 
 ---
 
@@ -210,3 +179,4 @@ If support is resumed later:
 - reintroduce it through packages, workflow contracts, and tool docs together
 
 ---
+
