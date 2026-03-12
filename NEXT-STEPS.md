@@ -9,7 +9,7 @@
 - The current install/package contract now lives in [docs/package-manifest-schema.md](docs/package-manifest-schema.md).
 - Cross-tool parity analysis stays in [docs/functional-parity-plan.md](docs/functional-parity-plan.md).
 - Until a commit is tagged `v1.0.0`, install layout and package composition are allowed to change.
-- Before `v1.0.0`, assume fresh installs rather than in-place migration: rerun `node scripts/install-mdt.js`.
+- Before `v1.0.0`, assume fresh installs rather than in-place migration: rerun `mdt install`.
 
 Recent completed milestone archive:
 
@@ -28,53 +28,44 @@ Installer scope contract:
 
 ## Next Practical Steps
 
-### 1. Add detached-process lifecycle management for background helpers (P1)
+### 1. Finish the v1 docs convergence pass (P1)
 
-Local debugging found that stale detached `node.exe` processes can keep old
-Cursor `.cursor/` state alive even after reinstalling or removing files. This
-should become a general MDT rule for any background helper launched separately
-from a tool session.
+Current-state docs should describe only what is shipped now, and roadmap docs
+should describe only what is still planned.
 
-Next implementation slice:
+Remaining pass criteria:
 
-- add a shared detached-process lifecycle contract
-- make observers/helpers self-terminate when the owning tool/session is gone
-- clean up PID files on exit
-- document stale detached-process checks as part of normal troubleshooting for
-  Cursor and any future background helper integrations
+- all current user-facing docs prefer `mdt ...` over retired direct script entrypoints
+- current support docs under `docs/tools/` match local verification and current install behavior
+- roadmap docs keep future work separate from current support claims
+- historical command examples stay under `docs/history/` only
 
-### 2. Validate weekly continuous-learning retrospectives (P2)
-
-Goal:
-
-- keep the live observer cheap and low-noise
-- validate one-calendar-week summaries as useful sources of automation
-  candidates
-- keep monthly rollups deferred unless weekly summaries prove useful
+### 2. Validate weekly retrospectives against real usage (P2)
 
 Current shipped surface:
 
-- Codex weekly retrospectives run through:
-  `node ~/.codex/skills/continuous-learning-manual/scripts/codex-learn.js weekly --week YYYY-Www`
-- structured output lands under:
+- `mdt learning retrospective weekly --week YYYY-Www`
+- installed Codex dev root equivalent:
+  `node ~/.codex/mdt/scripts/mdt.js learning retrospective weekly --week YYYY-Www`
+- structured output under:
   `~/.codex/mdt/homunculus/<project-id>/retrospectives/weekly/YYYY-Www.json`
 
-Follow-ups:
+What still needs proof:
 
-- manually validate that weekly summaries produce useful automation candidates
-  instead of noise
-- decide whether Cursor should get the same explicit weekly command surface
-- keep monthly rollups deferred until weekly summaries prove useful
+- whether one-calendar-week summaries produce useful automation candidates instead of noise
+- whether Cursor needs the same explicit weekly workflow called out in its docs
+- whether monthly rollups should stay deferred past `v1.0.0`
 
-### 3. Cut a stabilization release boundary (P2)
+### 3. Cut the `v1.0.0` release boundary (P1)
 
-Once detached-process lifecycle management lands and the current workflow smoke
-surface stays green, prepare release notes covering:
+Once the docs pass is complete and the current verification surface stays
+green, prepare release notes covering:
 
 - global-first install stabilization
-- package-manifest contract + validation
-- continuous-learning runtime extraction and Codex manual workflow baseline
-- workflow smoke coverage and compatibility suites
+- the `mdt` umbrella CLI contract
+- package-manifest contract and validation
+- continuous-learning runtime extraction plus observer lifecycle hardening
+- workflow smoke coverage for Claude, Cursor, and Codex
 
 ---
 
@@ -82,10 +73,10 @@ surface stays green, prepare release notes covering:
 
 For future verification passes, use:
 
-- `node scripts/verify-tool-setups.js`
-- `node scripts/smoke-tool-setups.js`
-- `node scripts/smoke-claude-workflows.js`
-- `node scripts/smoke-codex-workflows.js`
+- `mdt verify tool-setups`
+- `mdt smoke tool-setups`
+- `mdt smoke workflows --tool claude`
+- `mdt smoke workflows --tool codex`
 - `node tests/run-all.js --profile neutral`
 
 If a tool is not installed locally, record it as `SKIP` rather than guessing.

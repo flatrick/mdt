@@ -50,23 +50,23 @@ In that mode:
 1. read `~/.codex/skills/tool-setup-verifier/SKILL.md`
 2. read `~/.codex/mdt/scripts/lib/tool-workflow-contract.js`
 3. treat `~/.codex/` plus `~/.codex/mdt/` as the install surface
-4. do **not** fail just because `docs/tools/*` or `scripts/verify-tool-setups.js`
+4. do **not** fail just because `docs/tools/*` or `scripts/mdt.js`
    are absent at repo root
 
 ## Required Workflow
 
 ### MDT repo mode
 
-1. Run `node scripts/verify-tool-setups.js`.
-2. If the relevant CLIs are installed locally, run `node scripts/smoke-tool-setups.js`.
-3. For deeper Codex coverage, run `node scripts/smoke-codex-workflows.js`.
+1. Run `node scripts/mdt.js`.
+2. If the relevant CLIs are installed locally, run `mdt smoke tool-setups`.
+3. For deeper Codex coverage, run `mdt smoke workflows --tool codex`.
 4. Summarize results by workflow and by Codex readiness.
 5. If something fails, identify the missing file, stale doc claim, or broken local probe before proposing broader changes.
 
 ### Installed global tool mode
 
-1. Run `node ~/.codex/mdt/scripts/smoke-tool-setups.js`.
-2. Run `node ~/.codex/mdt/scripts/smoke-codex-workflows.js`.
+1. Run `node ~/.codex/mdt/scripts/mdt.js smoke tool-setups`.
+2. Run `node ~/.codex/mdt/scripts/mdt.js smoke workflows --tool codex`.
 3. Summarize Codex readiness from the installed global surfaces only.
 4. If something fails, identify the missing installed skill, missing local script,
    or missing `~/.codex/` file before proposing broader changes.
@@ -75,7 +75,7 @@ In that mode:
 
 - `node` must be installed and available on `PATH`
 - tool smoke probes require a local shell/session that allows subprocess spawn
-- if `smoke-tool-setups.js` reports `SKIP` with `EPERM` or `EACCES`, treat that
+- if `mdt smoke tool-setups` reports `SKIP` with `EPERM` or `EACCES`, treat that
   as an environment limitation, not as proof that the tool is missing or broken
 - in that case, rely on workflow smoke plus direct local invocation in a less
   restricted shell before claiming the tool setup is broken

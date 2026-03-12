@@ -10,7 +10,7 @@ repo-local `.cursor/rules/` bridge that Cursor IDE reads.
 2. Install MDT into Cursor:
 
 ```bash
-node scripts/install-mdt.js --target cursor typescript continuous-learning
+mdt install --tool cursor typescript continuous-learning
 ```
 
 If you want Cursor IDE to read repo-local MDT rules in the current repository,
@@ -23,7 +23,7 @@ also materialize the local rules bridge:
 Equivalent shell command:
 
 ```bash
-node ~/.cursor/mdt/scripts/materialize-mdt-local.js --target cursor --surface rules
+node ~/.cursor/mdt/scripts/mdt.js bridge materialize --tool cursor --surface rules
 ```
 
 3. Confirm the install exists (full MDT baseline with experimental hooks enabled):
@@ -47,13 +47,13 @@ sanity check before doing deeper runtime verification.
 For deterministic local verification outside Cursor chat, run:
 
 ```bash
-node scripts/smoke-cursor-workflows.js
+mdt smoke workflows --tool cursor
 ```
 
 From an installed Cursor dev setup, run:
 
 ```bash
-node ~/.cursor/mdt/scripts/smoke-cursor-workflows.js
+node ~/.cursor/mdt/scripts/mdt.js smoke workflows --tool cursor
 ```
 
 Expected:

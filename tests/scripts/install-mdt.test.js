@@ -243,6 +243,7 @@ function runTests() {
           assertSuccess(result, 'cursor install');
 
           assert.ok(fs.existsSync(path.join(cursorRoot, 'mdt', 'scripts', 'hooks', 'session-start.js')));
+          assert.ok(fs.existsSync(path.join(cursorRoot, 'mdt', 'scripts', 'mdt.js')));
           assert.ok(fs.existsSync(path.join(cursorRoot, 'skills', 'documentation-steward', 'SKILL.md')));
           assert.ok(fs.existsSync(path.join(cursorRoot, 'skills', 'frontend-slides', 'SKILL.md')));
           assert.ok(fs.existsSync(path.join(cursorRoot, 'skills', 'continuous-learning-manual', 'SKILL.md')));
@@ -306,6 +307,7 @@ function runTests() {
           assert.ok(geminiMd.includes('# Coding Style'));
           assert.ok(!geminiMd.includes('# Python Coding Style'));
           assert.ok(fs.existsSync(path.join(geminiRoot, 'mdt', 'scripts', 'lib', 'utils.js')));
+          assert.ok(fs.existsSync(path.join(geminiRoot, 'mdt', 'scripts', 'mdt.js')));
           assert.ok(fs.existsSync(path.join(geminiRoot, 'antigravity', '.agents', 'skills', 'coding-standards', 'SKILL.md')));
         } finally {
           cleanupTestDir(tmpHome);
@@ -339,6 +341,7 @@ function runTests() {
           assert.ok(!fs.existsSync(path.join(codexRoot, 'skills', 'continuous-learning-automatic', 'SKILL.md')));
           assert.ok(!fs.existsSync(path.join(codexRoot, 'skills', 'python-patterns', 'SKILL.md')));
           assert.ok(fs.existsSync(path.join(codexRoot, 'mdt', 'scripts', 'lib', 'detect-env.js')));
+          assert.ok(fs.existsSync(path.join(codexRoot, 'mdt', 'scripts', 'mdt.js')));
           assert.ok(fs.existsSync(path.join(codexRoot, 'mdt', 'scripts', 'ci', 'validate-markdown-links.js')));
           assert.ok(fs.existsSync(path.join(codexRoot, 'mdt', 'scripts', 'ci', 'validate-markdown-path-refs.js')));
         } finally {

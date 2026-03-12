@@ -19,7 +19,7 @@ The second goal is to steer away from being all about Claude Code as the primary
 ### This fork
 
 - **Node-only:** No Bash or PowerShell scripts. All install and hook logic is JavaScript run with Node.js.
-- **Single installer:** `node scripts/install-mdt.js` installs to Claude Code, Cursor, Codex, or Gemini.
+- **Single CLI:** `mdt` installs to Claude Code, Cursor, Codex, or Gemini and runs MDT verification workflows.
 - **Per-tool installs:** each tool has its own install surfaces; see [Installation](docs/INSTALLATION.md).
 - **Docs-first:** detailed capability and install claims live under [docs/](docs/), especially [docs/supported-tools.md](docs/supported-tools.md) and [docs/tools/](docs/tools/).
 - **Fork v1 direction:** Backwards compatibility with legacy passthrough behavior is not a goal; this fork prioritizes explicit, security-first defaults.
@@ -60,34 +60,34 @@ Guides refer to the upstream project; this fork may differ. For this fork, prefe
 2. **Install** (pick target and package set)
    ```bash
    # Claude Code
-   node scripts/install-mdt.js typescript
+   mdt install typescript
 
    # Cursor global install (always install to ~/.cursor/)
-   node scripts/install-mdt.js --target cursor typescript
+   mdt install --tool cursor typescript
 
    # Cursor IDE repo-local rules bridge (additional step when needed)
    # Preferred inside Cursor after install: /install-rules
-   node scripts/materialize-mdt-local.js --target cursor --surface rules
+   mdt bridge materialize --tool cursor --surface rules
 
    # Codex
-   node scripts/install-mdt.js --target codex typescript continuous-learning
+   mdt install --tool codex typescript continuous-learning
 
    # Discover available targets/packages
-   node scripts/install-mdt.js --list
+   mdt install list
 
    # Preview install without writing files
-   node scripts/install-mdt.js --target cursor --dry-run typescript
+   mdt install --tool cursor --dry-run typescript
    ```
 
 3. **Verify** with:
    ```bash
-   node scripts/verify-tool-setups.js
-   node scripts/smoke-tool-setups.js
+   mdt verify tool-setups
+   mdt smoke tool-setups
    ```
 
 Marketplace/plugin support remains secondary in this fork for now. For the official upstream Claude Code plugin flow, use the [original repo](https://github.com/affaan-m/modeldev-toolkit).
 
-Cursor note, last locally true `2026-03-12`: always install MDT for Cursor into the global `~/.cursor/` directory, even if the user only plans to use Cursor IDE today. That global install remains the shared MDT install surface and may be consumed by more Cursor surfaces in the future. If the user also wants repo-local `.cursor/rules/` files for Cursor IDE, use the installed Cursor custom command `/install-rules` or run `materialize-mdt-local.js --target cursor --surface rules` as an additional bridge step. The bridge command copies the rules currently installed under `~/.cursor/rules/` into the opened repo's `.cursor/rules/`.
+Cursor note, last locally true `2026-03-12`: always install MDT for Cursor into the global `~/.cursor/` directory, even if the user only plans to use Cursor IDE today. That global install remains the shared MDT install surface and may be consumed by more Cursor surfaces in the future. If the user also wants repo-local `.cursor/rules/` files for Cursor IDE, use the installed Cursor custom command `/install-rules` or run `mdt bridge materialize --tool cursor --surface rules` as an additional bridge step. The bridge command copies the rules currently installed under `~/.cursor/rules/` into the opened repo's `.cursor/rules/`.
 
 ---
 
@@ -115,7 +115,7 @@ Use these as the current source of truth:
 - `rules/` — Common + language-specific rules (TypeScript, Python, …)
 - `hooks/` — Hook mirrors and shared hook docs; `hooks/hooks.json` remains the Claude-facing mirror
 - `claude-template/` — Claude-specific source templates such as hook config rendered into `.claude/`
-- `scripts/` — Node.js only (install-mdt.js, hooks, lib, detect-env, sync-hook-mirrors.js)
+- `scripts/` — Node.js only (`mdt.js`, installer/runtime helpers, hooks, lib, sync-hook-mirrors.js)
 - `cursor-template/` — Cursor source templates (rules, hooks, skills, and config files rendered into `.cursor/` on install)
 - `codex-template/` — Codex source templates (`config.toml`, `AGENTS.md`, `skills/`) rendered into `~/.codex/`, with MDT-owned runtime/state under `~/.codex/mdt/`
 - `tests/` — Test suite
@@ -169,7 +169,7 @@ See [AGENTS.md](AGENTS.md) and [CLAUDE.md](CLAUDE.md).
 
 ### How do I install?
 
-Use `node scripts/install-mdt.js` with package names such as `typescript` or `continuous-learning`.
+Use `mdt install` with package names such as `typescript` or `continuous-learning`.
 
 See [docs/INSTALLATION.md](docs/INSTALLATION.md).
 

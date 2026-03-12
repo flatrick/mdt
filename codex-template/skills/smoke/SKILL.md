@@ -13,8 +13,8 @@ Codex setup may have drifted from the documented MDT contract.
 
 ## Required Workflow
 
-1. Run `node ~/.codex/mdt/scripts/smoke-tool-setups.js`.
-2. Run `node ~/.codex/mdt/scripts/smoke-codex-workflows.js`.
+1. Run `node ~/.codex/mdt/scripts/mdt.js smoke tool-setups`.
+2. Run `node ~/.codex/mdt/scripts/mdt.js smoke workflows --tool codex`.
 3. Summarize the result as `PASS`, `FAIL`, or `SKIP`.
 4. If anything fails, name the missing file or broken surface before proposing broader changes.
 

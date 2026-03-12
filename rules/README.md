@@ -28,11 +28,11 @@ rules/
 
 ```bash
 # Install common + one or more language-specific rule sets
-node scripts/install-mdt.js typescript
-node scripts/install-mdt.js python
+mdt install typescript
+mdt install python
 
 # Install multiple languages at once
-node scripts/install-mdt.js typescript python
+mdt install typescript python
 ```
 
 ### Option 2: Manual Installation

@@ -1,6 +1,6 @@
 # Installation
 
-Use `scripts/install-mdt.js` to install MDT into Claude Code, Cursor, Codex, or Gemini.
+Use `mdt` to install MDT into Claude Code, Cursor, Codex, or Gemini.
 
 Detailed tool behavior lives in:
 
@@ -14,16 +14,17 @@ Detailed tool behavior lives in:
 ## CLI
 
 ```bash
-node scripts/install-mdt.js [--target claude|cursor|codex|gemini] [--override <tool-config-dir>] [--dev] [--list] [--dry-run] [package ...]
+mdt install [package ...] [--tool claude|cursor|codex|gemini] [--config-root <tool-config-dir>] [--dev] [--dry-run]
+mdt install list [--tool claude|cursor|codex|gemini]
 ```
 
 Notes:
 
 - positional args are package names
-- default target is `claude`
+- default tool is `claude`
 - installs are global-only; `--global` is accepted as a compatibility no-op
 - `--project-dir` is retired and exits with a migration message
-- `--override` redirects the tool config root for tests or isolated installs
+- `--config-root` redirects the tool config root for tests or isolated installs
 - `--dev` adds MDT-internal maintenance surfaces meant for MDT development, not normal end-user installs
 
 ## Install Contract
@@ -40,7 +41,7 @@ Current bridge support:
 
 - Cursor repo-local rules for Cursor IDE via:
   - Cursor custom command `/install-rules` after a normal Cursor install
-  - or `node scripts/materialize-mdt-local.js --target cursor --surface rules`
+  - or `mdt bridge materialize --tool cursor --surface rules`
 
 ## Target Summary
 
@@ -56,34 +57,34 @@ Current bridge support:
 Claude Code:
 
 ```bash
-node scripts/install-mdt.js typescript
-node scripts/install-mdt.js --dry-run typescript continuous-learning
+mdt install typescript
+mdt install --dry-run typescript continuous-learning
 ```
 
 Cursor:
 
 ```bash
 # Global Cursor install surface (always install to ~/.cursor/)
-node scripts/install-mdt.js --target cursor typescript
-node scripts/install-mdt.js --target cursor typescript continuous-learning
+mdt install --tool cursor typescript
+mdt install --tool cursor typescript continuous-learning
 
 # Repo-local Cursor IDE rules bridge (additional step when needed)
 # Preferred inside Cursor after install: /install-rules
-node scripts/materialize-mdt-local.js --target cursor --surface rules
+mdt bridge materialize --tool cursor --surface rules
 ```
 
 Cursor mode split, last locally true `2026-03-12`:
 
-- always use `install-mdt.js --target cursor ...` to install MDT into the global `~/.cursor/` directory, even if the user does not currently use `cursor-agent`
+- always use `mdt install --tool cursor ...` to install MDT into the global `~/.cursor/` directory, even if the user does not currently use `cursor-agent`
 - treat that global install as the primary MDT Cursor install surface and future-compatible shared location
-- use `/install-rules` inside Cursor, or `materialize-mdt-local.js --target cursor --surface rules`, only as an additional step when a repo needs `.cursor/rules/` files for Cursor IDE
+- use `/install-rules` inside Cursor, or `mdt bridge materialize --tool cursor --surface rules`, only as an additional step when a repo needs `.cursor/rules/` files for Cursor IDE
 - the repo-local bridge complements the global install; it does not replace it
 
 Codex:
 
 ```bash
-node scripts/install-mdt.js --target codex typescript continuous-learning
-node scripts/install-mdt.js --target codex --dev typescript continuous-learning
+mdt install --tool codex typescript continuous-learning
+mdt install --tool codex --dev typescript continuous-learning
 ```
 
 Codex notes:
@@ -97,14 +98,14 @@ Codex notes:
 Gemini:
 
 ```bash
-node scripts/install-mdt.js --target gemini typescript
+mdt install --tool gemini typescript
 ```
 
 Discovery:
 
 ```bash
-node scripts/install-mdt.js --list
-node scripts/install-mdt.js --target cursor --dry-run typescript
+mdt install list
+mdt install --tool cursor --dry-run typescript
 ```
 
 ## Verification
@@ -112,16 +113,16 @@ node scripts/install-mdt.js --target cursor --dry-run typescript
 After install, prefer:
 
 ```bash
-node scripts/verify-tool-setups.js
-node scripts/smoke-tool-setups.js
+mdt verify tool-setups
+mdt smoke tool-setups
 ```
 
 Tool-specific deeper smoke checks:
 
 ```bash
-node scripts/smoke-claude-workflows.js
-node scripts/smoke-cursor-workflows.js
-node scripts/smoke-codex-workflows.js
+mdt smoke workflows --tool claude
+mdt smoke workflows --tool cursor
+mdt smoke workflows --tool codex
 ```
 
 Tool-specific manual checks live under:
@@ -140,5 +141,5 @@ Dev-only verification helpers:
 Before `v1.0.0`, assume reinstall rather than in-place upgrade:
 
 - start fresh when install layout changes
-- rerun `node scripts/install-mdt.js`
+- rerun `mdt install`
 - do not rely on compatibility migration steps between intermediate revisions

@@ -11,24 +11,24 @@ For Codex, the smoke path is:
 - the `smoke` skill under `~/.codex/skills/` when Codex was installed with `--dev`
 - the local smoke scripts for the current repo mode:
   - MDT repo mode:
-    - `node scripts/verify-tool-setups.js`
-    - `node scripts/smoke-tool-setups.js`
-    - `node scripts/smoke-codex-workflows.js`
+    - `mdt verify tool-setups`
+    - `mdt smoke tool-setups`
+    - `mdt smoke workflows --tool codex`
   - installed global Codex root with `--dev`:
-    - `node ~/.codex/mdt/scripts/smoke-tool-setups.js`
-    - `node ~/.codex/mdt/scripts/smoke-codex-workflows.js`
+    - `node ~/.codex/mdt/scripts/mdt.js smoke tool-setups`
+    - `node ~/.codex/mdt/scripts/mdt.js smoke workflows --tool codex`
 
 Expected:
-- in MDT repo mode, `verify-tool-setups.js` passes
-- `smoke-tool-setups.js` reports Codex CLI probes as `PASS` when Codex is installed
-- `smoke-codex-workflows.js` reports the current Codex MDT workflows as `PASS`
+- in MDT repo mode, `mdt verify tool-setups` passes
+- `mdt smoke tool-setups` reports Codex CLI probes as `PASS` when Codex is installed
+- `mdt smoke workflows --tool codex` reports the current Codex MDT workflows as `PASS`
 
 ## Package Install
 
 Install Codex with explicit packages:
 
 ```bash
-node scripts/install-mdt.js --target codex typescript continuous-learning
+mdt install --tool codex typescript continuous-learning
 ```
 
 Then confirm:
@@ -62,7 +62,7 @@ Interpretation rule:
 1. Check status:
 
 ```bash
-node ~/.codex/skills/continuous-learning-manual/scripts/codex-learn.js status
+node ~/.codex/mdt/scripts/mdt.js learning status
 ```
 
 Expected:
@@ -72,13 +72,13 @@ Expected:
 2. Capture a concise session summary:
 
 ```bash
-node ~/.codex/skills/continuous-learning-manual/scripts/codex-learn.js capture < summary.txt
+node ~/.codex/mdt/scripts/mdt.js learning capture < summary.txt
 ```
 
 3. Run one explicit analysis pass:
 
 ```bash
-node ~/.codex/skills/continuous-learning-manual/scripts/codex-learn.js analyze
+node ~/.codex/mdt/scripts/mdt.js learning analyze
 ```
 
 Expected:
@@ -91,7 +91,7 @@ Expected:
 4. Generate one weekly retrospective:
 
 ```bash
-node ~/.codex/skills/continuous-learning-manual/scripts/codex-learn.js weekly --week 2026-W11
+node ~/.codex/mdt/scripts/mdt.js learning retrospective weekly --week 2026-W11
 ```
 
 Expected:
@@ -109,15 +109,15 @@ a normal terminal outside the active Codex shell. Install it explicitly when
 needed:
 
 ```bash
-node scripts/install-mdt.js --target codex continuous-learning-observer
+mdt install --tool codex continuous-learning-observer
 ```
 
 Then use:
 
 ```bash
-node ~/.codex/mdt/scripts/codex-observer.js status
-node ~/.codex/mdt/scripts/codex-observer.js once
-node ~/.codex/mdt/scripts/codex-observer.js watch --interval-seconds 15
+node ~/.codex/mdt/scripts/mdt.js learning observer status
+node ~/.codex/mdt/scripts/mdt.js learning observer run
+node ~/.codex/mdt/scripts/mdt.js learning observer watch --interval-seconds 15
 ```
 
 Use it when:

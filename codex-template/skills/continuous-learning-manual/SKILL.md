@@ -125,31 +125,40 @@ Only git is currently detected; other VCS systems are in the backlog. A registry
 
 ### Codex Explicit Workflow
 
-Use the explicit global-install workflow:
+Use the explicit `mdt` workflow:
 
 ```bash
-node ~/.codex/skills/continuous-learning-manual/scripts/codex-learn.js status
+mdt learning status
 ```
 
 Then capture a concise session summary:
 
 ```bash
-node ~/.codex/skills/continuous-learning-manual/scripts/codex-learn.js capture < summary.txt
+mdt learning capture < summary.txt
 ```
 
 Run an explicit analysis pass:
 
 ```bash
-node ~/.codex/skills/continuous-learning-manual/scripts/codex-learn.js analyze
+mdt learning analyze
 ```
 
 Run a weekly retrospective for one ISO week:
 
 ```bash
-node ~/.codex/skills/continuous-learning-manual/scripts/codex-learn.js weekly --week 2026-W11
+mdt learning retrospective weekly --week 2026-W11
 ```
 
 This writes Codex project learning state under `~/.codex/mdt/homunculus/<project-id>/...`.
+
+Installed Codex-root equivalent if `mdt` is not on `PATH`:
+
+```bash
+node ~/.codex/mdt/scripts/mdt.js learning status
+node ~/.codex/mdt/scripts/mdt.js learning capture < summary.txt
+node ~/.codex/mdt/scripts/mdt.js learning analyze
+node ~/.codex/mdt/scripts/mdt.js learning retrospective weekly --week 2026-W11
+```
 
 Codex baseline:
 
@@ -170,7 +179,7 @@ The instinct workflows are:
 - `projects`
 - `weekly`
 
-For Codex, these are explicit script/workflow entrypoints.
+For Codex, these are explicit `mdt` workflow entrypoints.
 
 ## Configuration
 

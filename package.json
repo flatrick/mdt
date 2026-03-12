@@ -60,6 +60,7 @@
     "scripts/ci/",
     "scripts/hooks/",
     "scripts/lib/",
+    "scripts/mdt.js",
     "scripts/setup-package-manager.js",
     "scripts/skill-create-output.js",
     "skills/",
@@ -69,11 +70,12 @@
     "scripts/install-mdt.js"
   ],
   "bin": {
-    "mdt-install": "scripts/install-mdt.js"
+    "mdt": "scripts/mdt.js"
   },
   "scripts": {
-    "postinstall": "echo '\\n  modeldev-toolkit installed!\\n  Run: npx mdt-install typescript\\n  Docs: https://github.com/flatrick/modeldev-toolkit\\n'",
-    "install-mdt": "node scripts/install-mdt.js",
+    "postinstall": "echo '\\n  modeldev-toolkit installed!\\n  Run: npx mdt install typescript\\n  Docs: https://github.com/flatrick/modeldev-toolkit\\n'",
+    "mdt": "node scripts/mdt.js",
+    "install-mdt": "node scripts/mdt.js install",
     "sync:hook-mirrors": "node scripts/sync-hook-mirrors.js",
     "release": "node scripts/release.js",
     "lint": "node scripts/ci/check-dependencies.js eslint markdownlint-cli && eslint . && node scripts/ci/validate-frontmatter-format.js && markdownlint \"**/*.md\" --ignore node_modules",
@@ -83,10 +85,10 @@
     "test:cursor": "node tests/run-all.js --profile cursor",
     "test:codex": "node tests/run-all.js --profile codex",
     "test:gemini": "node tests/run-all.js --profile gemini",
-    "verify:tool-setups": "node scripts/verify-tool-setups.js",
-    "smoke:tool-setups": "node scripts/smoke-tool-setups.js",
-    "smoke:cursor-workflows": "node scripts/smoke-cursor-workflows.js",
-    "smoke:codex-workflows": "node scripts/smoke-codex-workflows.js"
+    "verify:tool-setups": "node scripts/mdt.js verify tool-setups",
+    "smoke:tool-setups": "node scripts/mdt.js smoke tool-setups",
+    "smoke:cursor-workflows": "node scripts/mdt.js smoke workflows --tool cursor",
+    "smoke:codex-workflows": "node scripts/mdt.js smoke workflows --tool codex"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.2",

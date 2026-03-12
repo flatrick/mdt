@@ -33,8 +33,8 @@ Return:
 For `setup` scope, return:
 
 1. Per-workflow coverage across Claude, Cursor, and Codex
-2. Deterministic contract status from `node scripts/verify-tool-setups.js`
-3. Optional local smoke status from `node scripts/smoke-tool-setups.js`
+2. Deterministic contract status from `mdt verify tool-setups`
+3. Optional local smoke status from `mdt smoke tool-setups`
 4. Top 3 setup fixes with exact file paths
 
 ## Checklist

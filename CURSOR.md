@@ -40,5 +40,5 @@ npm test
 If you need Cursor-specific workflow verification, also use:
 
 ```bash
-node scripts/smoke-cursor-workflows.js
+mdt smoke workflows --tool cursor
 ```

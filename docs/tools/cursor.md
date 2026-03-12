@@ -188,7 +188,7 @@ the opened repo's `.cursor/rules/`.
 Equivalent shell command:
 
 ```bash
-node ~/.cursor/mdt/scripts/materialize-mdt-local.js --target cursor --surface rules
+node ~/.cursor/mdt/scripts/mdt.js bridge materialize --tool cursor --surface rules
 ```
 
 That materializes only the local `.cursor/rules/` bridge for the current repo.

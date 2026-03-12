@@ -9,7 +9,7 @@ when MDT is installed into `~/.claude/`.
 2. Install MDT into Claude Code:
 
 ```bash
-node scripts/install-mdt.js typescript continuous-learning
+mdt install typescript continuous-learning
 ```
 
 3. Confirm the install exists:
@@ -40,13 +40,13 @@ Use the deterministic workflow smoke companion when you want a local
 non-session check of the Claude workflow surfaces:
 
 ```bash
-node scripts/smoke-claude-workflows.js
+mdt smoke workflows --tool claude
 ```
 
 If you are validating the installed Claude home rather than the MDT source repo:
 
 ```bash
-node ~/.claude/mdt/scripts/smoke-claude-workflows.js
+node ~/.claude/mdt/scripts/mdt.js smoke workflows --tool claude
 ```
 
 Expected:

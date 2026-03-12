@@ -780,6 +780,8 @@ function copyRuntimeScripts(destScriptsDir) {
   if (copyExplicitFiles(ciSrcDir, ciDestDir, RUNTIME_CI_FILES, 'Runtime CI script') > 0) {
     // Installed docs-health workflows rely on these validator scripts.
   }
+
+  copyExplicitFiles(path.join(REPO_ROOT, 'scripts'), destScriptsDir, ['mdt.js'], 'Runtime CLI script');
 }
 
 function ensureMdtRoot(installRoot) {

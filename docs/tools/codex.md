@@ -40,14 +40,14 @@ The repo currently ships:
 - `codex-template/config.toml`
 - `codex-template/AGENTS.md`
 - `codex-template/skills/` as the install-source tree for Codex-readable skills
-- package-driven Codex installs via `node scripts/install-mdt.js --target codex <package...>`
+- package-driven Codex installs via `mdt install --tool codex <package...>`
 
 Codex install scope follows the shared MDT contract:
 
 - installs are global-only by default
 - `--global` is accepted as a compatibility alias/no-op
 - `--project-dir` is retired
-- `--override <dir>` is for tests/dev when you need a fake Codex root
+- `--config-root <dir>` is for tests/dev when you need a fake Codex root
 
 Codex now uses two distinct global layers:
 
@@ -114,12 +114,12 @@ For MDT smoke-style verification in Codex, prefer the shipped
 Smoke paths:
 
 - MDT repo mode:
-  - `node scripts/verify-tool-setups.js`
-  - `node scripts/smoke-tool-setups.js`
-  - `node scripts/smoke-codex-workflows.js`
+  - `mdt verify tool-setups`
+  - `mdt smoke tool-setups`
+  - `mdt smoke workflows --tool codex`
 - installed global Codex root with `--dev`:
-  - `node ~/.codex/mdt/scripts/smoke-tool-setups.js`
-  - `node ~/.codex/mdt/scripts/smoke-codex-workflows.js`
+  - `node ~/.codex/mdt/scripts/mdt.js smoke tool-setups`
+  - `node ~/.codex/mdt/scripts/mdt.js smoke workflows --tool codex`
 
 For package-driven Codex installs, the installer materializes selected skills
 from `codex-template/skills/` into `~/.codex/skills/`.
@@ -132,21 +132,30 @@ materialized into the installed global Codex root.
 When testing against a clean environment, prefer:
 
 ```bash
-node scripts/install-mdt.js --target codex typescript continuous-learning
-node scripts/install-mdt.js --target codex --dev typescript continuous-learning
+mdt install --tool codex typescript continuous-learning
+mdt install --tool codex --dev typescript continuous-learning
 ```
 
 For `continuous-learning`, Codex currently uses an explicit manual workflow
 instead of hooks:
 
 ```bash
-node ~/.codex/skills/continuous-learning-manual/scripts/codex-learn.js status
-node ~/.codex/skills/continuous-learning-manual/scripts/codex-learn.js capture < summary.txt
-node ~/.codex/skills/continuous-learning-manual/scripts/codex-learn.js analyze
-node ~/.codex/skills/continuous-learning-manual/scripts/codex-learn.js weekly --week 2026-W11
+mdt learning status
+mdt learning capture < summary.txt
+mdt learning analyze
+mdt learning retrospective weekly --week 2026-W11
 ```
 
 That writes project-scoped learning state under `~/.codex/mdt/homunculus/<project-id>/`.
+
+Installed Codex-root equivalent:
+
+```bash
+node ~/.codex/mdt/scripts/mdt.js learning status
+node ~/.codex/mdt/scripts/mdt.js learning capture < summary.txt
+node ~/.codex/mdt/scripts/mdt.js learning analyze
+node ~/.codex/mdt/scripts/mdt.js learning retrospective weekly --week 2026-W11
+```
 
 This is an intentional product choice, not a temporary documentation gap:
 
@@ -185,15 +194,23 @@ active Codex shell cannot spawn `codex exec`. Install it explicitly when
 needed:
 
 ```bash
-node scripts/install-mdt.js --target codex continuous-learning-observer
+mdt install --tool codex continuous-learning-observer
 ```
 
 Then use:
 
 ```bash
-node ~/.codex/mdt/scripts/codex-observer.js status
-node ~/.codex/mdt/scripts/codex-observer.js once
-node ~/.codex/mdt/scripts/codex-observer.js watch --interval-seconds 15
+mdt learning observer status
+mdt learning observer run
+mdt learning observer watch --interval-seconds 15
+```
+
+Installed Codex-root equivalent:
+
+```bash
+node ~/.codex/mdt/scripts/mdt.js learning observer status
+node ~/.codex/mdt/scripts/mdt.js learning observer run
+node ~/.codex/mdt/scripts/mdt.js learning observer watch --interval-seconds 15
 ```
 
 That observer:

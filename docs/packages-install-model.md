@@ -12,7 +12,7 @@ implicit.
 Example failure:
 
 ```text
-node scripts/install-mdt.js --target cursor typescript
+mdt install --tool cursor typescript
 ```
 
 can install unrelated skills because Cursor skill install is currently driven by
@@ -37,7 +37,7 @@ That means:
 
 - do not preserve intermediate migration workflows for installer layout changes
 - do not keep compatibility shims just to carry older partial installs forward
-- assume the supported update path is: start fresh and run `node scripts/install-mdt.js`
+- assume the supported update path is: start fresh and run `mdt install`
 
 This design should optimize for clarity and explicitness, not upgrade-path
 stability across pre-v1 revisions.
@@ -200,8 +200,8 @@ Target behavior:
 Pre-v1, keep the current CLI shape if useful:
 
 ```text
-node scripts/install-mdt.js typescript
-node scripts/install-mdt.js --target cursor typescript
+mdt install typescript
+mdt install --tool cursor typescript
 ```
 
 But reinterpret the positional args as package names rather than “languages
@@ -212,7 +212,7 @@ That keeps the UX stable while changing the internal model.
 Possible later expansion:
 
 ```text
-node scripts/install-mdt.js --target cursor typescript frontend
+mdt install --tool cursor typescript frontend
 ```
 
 This should mean “install the `typescript` package plus the `frontend` package”.
@@ -248,7 +248,7 @@ Add or update tests around `scripts/install-mdt.js`:
 
 Minimum expected assertions for the first slice:
 
-- `node scripts/install-mdt.js --target cursor typescript` installs declared
+- `mdt install --tool cursor typescript` installs declared
   Cursor rules
 - it installs only declared Cursor skills
 - it does not copy the whole shared `skills/` tree into `.cursor/skills/`

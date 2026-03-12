@@ -28,14 +28,14 @@ Use this when you need to refresh or challenge any claim in the MDT tool docs.
 ### Workflow Contract
 
 ```bash
-node scripts/verify-tool-setups.js
-node scripts/smoke-tool-setups.js
-node scripts/smoke-claude-workflows.js
-node scripts/smoke-cursor-workflows.js
-node scripts/smoke-codex-workflows.js
+mdt verify tool-setups
+mdt smoke tool-setups
+mdt smoke workflows --tool claude
+mdt smoke workflows --tool cursor
+mdt smoke workflows --tool codex
 ```
 
-Use `verify-tool-setups.js` as the deterministic local check for the core MDT workflows:
+Use `mdt verify tool-setups` as the deterministic local check for the core MDT workflows:
 - `plan`
 - `tdd`
 - `code-review`
@@ -43,17 +43,17 @@ Use `verify-tool-setups.js` as the deterministic local check for the core MDT wo
 - `security`
 - `e2e`
 
-Use `smoke-tool-setups.js` as an optional local CLI probe. Missing tools should be recorded as `SKIP`, not guessed as passing or failing.
+Use `mdt smoke tool-setups` as an optional local CLI probe. Missing tools should be recorded as `SKIP`, not guessed as passing or failing.
 
-Use `smoke-claude-workflows.js` when you want a deeper Claude-specific check for
+Use `mdt smoke workflows --tool claude` when you want a deeper Claude-specific check for
 the current `plan`, `tdd`, `code-review`, `verify`, `smoke`, `security`, and
 `e2e` workflows without requiring a live Claude session.
 
-Use `smoke-cursor-workflows.js` when you want a deeper Cursor-specific check for
+Use `mdt smoke workflows --tool cursor` when you want a deeper Cursor-specific check for
 the current `plan`, `tdd`, `code-review`, `verify`, `smoke`, `security`, and
 `e2e` workflows without requiring a live Cursor desktop session.
 
-Use `smoke-codex-workflows.js` when you want a deeper Codex-specific check for
+Use `mdt smoke workflows --tool codex` when you want a deeper Codex-specific check for
 the current `plan`, `tdd`, `code-review`, `verify`, `smoke`, `security`, and
 `e2e` workflows without requiring a live model session.
 

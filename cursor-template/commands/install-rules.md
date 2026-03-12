@@ -20,7 +20,7 @@ IDE can read repo-local rules from `.cursor/rules/`.
 2. Run the installed MDT bridge script from the global Cursor install:
 
 ```bash
-node ~/.cursor/mdt/scripts/materialize-mdt-local.js --target cursor --surface rules
+node ~/.cursor/mdt/scripts/mdt.js bridge materialize --tool cursor --surface rules
 ```
 
 3. Report:
@@ -36,7 +36,7 @@ node ~/.cursor/mdt/scripts/materialize-mdt-local.js --target cursor --surface ru
   installed under `~/.cursor/` and tell the user to run:
 
 ```bash
-node scripts/install-mdt.js --target cursor <package...>
+mdt install --tool cursor <package...>
 ```
 
 - If the repo cannot be detected, stop and report that clearly.
