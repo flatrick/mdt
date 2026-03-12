@@ -11,12 +11,14 @@ Current active plan:
 - [ ] Keep every current-state verification claim version-stamped and remove any stale value that cannot be re-verified locally.
 - [ ] Generalize or retire the remaining Claude-only example/reference surfaces under `examples/*CLAUDE*.md`.
 - [ ] Keep root docs thin and prevent drift from `docs/` as the source of truth.
+- [ ] Fix installed Codex workflow smoke packaging: `~/.codex/mdt/scripts/mdt.js smoke workflows --tool codex` currently fails because `mdt.js` eagerly requires `smoke-claude-workflows.js` and `smoke-cursor-workflows.js`, but those files are not installed in `~/.codex/mdt/scripts/`.
 
 ## Remaining Vendor-Specific Gaps
 
 - [ ] Cursor IDE verification remains manual-only. Keep the manual workflow current and version-stamped.
 - [ ] Cursor hook support remains an experimental adapter rather than a documented vendor-native surface.
 - [ ] Codex still relies on explicit/manual continuous-learning workflows instead of hook-driven capture.
+- [ ] Codex tool-setup smoke can only be `SKIP` in restricted local sessions where CLI probes hit `EPERM`; document the environment limitation and keep smoke output explicit about rerunning in a shell that allows local process spawn.
 
 ## Deferred Product Work
 
