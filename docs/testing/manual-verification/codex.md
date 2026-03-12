@@ -67,7 +67,7 @@ node ~/.codex/skills/continuous-learning-manual/scripts/codex-learn.js status
 
 Expected:
 - `Tool: codex`
-- storage under `~/.codex/mdt/homunculus/projects/...`
+- storage under `~/.codex/mdt/homunculus/...`
 
 2. Capture a concise session summary:
 
@@ -83,8 +83,8 @@ node ~/.codex/skills/continuous-learning-manual/scripts/codex-learn.js analyze
 
 Expected:
 - observations are archived after analysis
-- `observer.log` is written under `~/.codex/mdt/homunculus/projects/<id>/`
-- project-scoped instincts can be created under `~/.codex/mdt/homunculus/projects/<id>/instincts/personal/`
+- `observer.log` is written under `~/.codex/mdt/homunculus/<id>/`
+- project-scoped instincts can be created under `~/.codex/mdt/homunculus/<id>/instincts/personal/`
 - if the active Codex shell blocks subprocess spawn (`EPERM`/`EACCES`), treat
   that as an environment limitation, not as proof that project detection is broken
 
@@ -95,7 +95,7 @@ node ~/.codex/skills/continuous-learning-manual/scripts/codex-learn.js weekly --
 ```
 
 Expected:
-- a summary file is written under `~/.codex/mdt/homunculus/projects/<id>/retrospectives/weekly/`
+- a summary file is written under `~/.codex/mdt/homunculus/<id>/retrospectives/weekly/`
 - the summary includes automation-oriented sections such as repeated commands,
   repeated files, repeated workflows, and automation candidates
 - repeated file hotspots should be called out explicitly when the same file is
@@ -128,7 +128,7 @@ Use it when:
 
 Expected:
 
-- `status` reports `~/.codex/mdt/homunculus/projects/<id>/...` storage
+- `status` reports `~/.codex/mdt/homunculus/<id>/...` storage
 - `once` triggers analysis when the observation threshold is met
 - `watch` polls the same project-scoped observations file and runs analysis after
   new observations accumulate

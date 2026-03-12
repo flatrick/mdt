@@ -91,7 +91,7 @@ Codex notes:
 - `~/.codex/config.toml` is treated as user-owned
 - if `config.toml` already exists, MDT preserves it and writes `~/.codex/config.mdt.toml` as a reference file instead of overwriting local Codex settings
 - Codex-specific MDT guidance lives primarily in `~/.codex/AGENTS.md`
-- continuous-learning state is project-scoped inside `~/.codex/mdt/homunculus/projects/<project-id>/`
+- continuous-learning state is project-scoped inside `~/.codex/mdt/homunculus/<project-id>/`
 - MDT does not enable any Codex MCP servers by default; add them manually only when a concrete workflow needs them
 
 Gemini:

@@ -174,7 +174,7 @@ The intended output is low-noise and automation-focused:
 Important operational note:
 
 - Codex project detection should prefer project-scoped records inside
-  `~/.codex/mdt/homunculus/projects/<id>/...` even when Node cannot spawn `git`
+  `~/.codex/mdt/homunculus/<id>/...` even when Node cannot spawn `git`
   in the active shell
 - background analysis is different: if the active Codex shell blocks subprocess
   spawn (`EPERM`/`EACCES`), `analyze` may still be unable to launch the native
@@ -198,7 +198,7 @@ node ~/.codex/mdt/scripts/codex-observer.js watch --interval-seconds 15
 
 That observer:
 - keeps the explicit/manual `status`, `capture`, `analyze`, and `weekly` flows as the baseline
-- watches `~/.codex/mdt/homunculus/projects/<id>/observations.jsonl`
+- watches `~/.codex/mdt/homunculus/<id>/observations.jsonl`
 - runs analysis in a normal shell environment where `codex exec` is allowed
 - does not change Cursor or Claude behavior
 - does not make Codex fully automatic; it supplements manual capture with

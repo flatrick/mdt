@@ -160,7 +160,7 @@ Project IDs use the current runtime contract:
 - **Git repo, no remote** → `<basename>-<md5(path)>` — path-anchored local fallback
 - **No git project** → `<basename>-<md5(path)>` using the current cwd instead of collapsing into a global project
 
-Only git is currently detected; other VCS systems are in the backlog. A registry file at `<data>/homunculus/projects.json` maps IDs to absolute paths, remotes, and human-readable names.
+Only git is currently detected; other VCS systems are in the backlog. A registry file at `<data>/homunculus/projects.json` maps IDs to absolute paths, remotes, and human-readable names, while each project stores its own state under `<data>/homunculus/<project-id>/`.
 
 ## Quick Start
 

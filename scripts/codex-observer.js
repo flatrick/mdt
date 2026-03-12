@@ -2,8 +2,8 @@
 /**
  * Optional external observer for Codex continuous learning.
  *
- * This runs outside the Codex session and watches global MDT observations
- * under ~/.codex/mdt/homunculus/projects/<id>/observations.jsonl. When enough new
+ * This runs outside the Codex session and watches project-scoped MDT observations
+ * under ~/.codex/mdt/homunculus/<id>/observations.jsonl. When enough new
  * observations exist, it triggers the existing observer analysis pipeline using
  * the native Codex CLI from a normal shell environment.
  *
