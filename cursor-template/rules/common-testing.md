@@ -1,6 +1,7 @@
 ---
 description: "Testing requirements: 80% coverage, TDD workflow, test types"
 alwaysApply: true
+
 ---
 # Testing Requirements
 

@@ -4,6 +4,7 @@ paths:
   - "**/*.vb"
   - "**/*.csproj"
   - "**/*.vbproj"
+
 ---
 # .NET Hooks
 

@@ -1,6 +1,7 @@
 ---
 name: documentation-steward
 description: Keep MDT documentation current, accurate, well-placed, and easy to follow for both humans and LLMs. Use when auditing doc drift, correcting stale claims, deciding where docs belong, or validating documentation quality before a commit.
+
 ---
 
 # Documentation Steward

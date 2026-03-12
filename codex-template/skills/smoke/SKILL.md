@@ -1,6 +1,7 @@
 ---
 name: smoke
 description: Run a quick MDT Codex smoke check from an installed dev setup using the shipped global smoke scripts.
+
 ---
 
 # Smoke

@@ -2,6 +2,7 @@
 description: "Python testing extending common rules"
 globs: ["**/*.py", "**/*.pyi"]
 alwaysApply: false
+
 ---
 # Python Testing
 

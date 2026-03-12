@@ -1,12 +1,13 @@
 ---
 name: autonomous-loops
-description: "Patterns and architectures for autonomous Claude Code loops — from simple sequential pipelines to RFC-driven multi-agent DAG systems."
+description: "Patterns and architectures for autonomous MDT loops — from simple sequential pipelines to RFC-driven multi-agent DAG systems."
+
 
 ---
 
 # Autonomous Loops Skill
 
-Patterns, architectures, and reference implementations for running Claude Code autonomously in loops. Covers everything from simple `claude -p` pipelines to full RFC-driven multi-agent DAG orchestration.
+Patterns, architectures, and reference implementations for running MDT-compatible coding agents autonomously in loops. Covers everything from simple sequential CLI pipelines to full RFC-driven multi-agent DAG orchestration.
 
 ## When to Use
 
@@ -23,23 +24,23 @@ From simplest to most sophisticated:
 
 | Pattern | Complexity | Best For |
 |---------|-----------|----------|
-| [Sequential Pipeline](#1-sequential-pipeline-claude-p) | Low | Daily dev steps, scripted workflows |
+| [Sequential Pipeline](#1-sequential-pipeline-cli-pipeline) | Low | Daily dev steps, scripted workflows |
 | [Infinite Agentic Loop](#2-infinite-agentic-loop) | Medium | Parallel content generation, spec-driven work |
-| [Continuous Claude PR Loop](#3-continuous-claude-pr-loop) | Medium | Multi-day iterative projects with CI gates |
+| [Continuous PR Loop](#3-continuous-pr-loop) | Medium | Multi-day iterative projects with CI gates |
 | [De-Sloppify Pattern](#4-the-de-sloppify-pattern) | Add-on | Quality cleanup after any Implementer step |
-| [Ralphinho / RFC-Driven DAG](#5-ralphinho-rfc-driven-dag-orchestration) | High | Large features, multi-unit parallel work with merge queue |
+| [Ralphinho / RFC-Driven DAG](#5-ralphinho-and-rfc-driven-dag-orchestration) | High | Large features, multi-unit parallel work with merge queue |
 
 ---
 
-## 1. Sequential Pipeline (`claude -p`)
+## 1. Sequential Pipeline (CLI pipeline)
 
-**The simplest loop.** Break daily development into a sequence of non-interactive `claude -p` calls. Each call is a focused step with a clear prompt.
+**The simplest loop.** Break daily development into a sequence of non-interactive agent calls. Each call is a focused step with a clear prompt.
 
 ### Core Insight
 
-> If you can't figure out a loop like this, it means you can't even drive the LLM to fix your code in interactive mode.
+> If you cannot make a simple sequential loop work, deeper orchestration is not the real bottleneck yet.
 
-The `claude -p` flag runs Claude Code non-interactively with a prompt, exits when done. Chain calls to build a pipeline:
+Use your tool's non-interactive entrypoint to run one focused step at a time, then chain those steps into a pipeline:
 
 ```bash
 #!/bin/bash
@@ -48,21 +49,21 @@ The `claude -p` flag runs Claude Code non-interactively with a prompt, exits whe
 set -e
 
 # Step 1: Implement the feature
-claude -p "Read the spec in docs/auth-spec.md. Implement OAuth2 login in src/auth/. Write tests first (TDD). Do NOT create any new documentation files."
+agent-cli run "Read the spec in docs/auth-spec.md. Implement OAuth2 login in src/auth/. Write tests first (TDD). Do NOT create any new documentation files."
 
 # Step 2: De-sloppify (cleanup pass)
-claude -p "Review all files changed by the previous commit. Remove any unnecessary type tests, overly defensive checks, or testing of language features (e.g., testing that TypeScript generics work). Keep real business logic tests. Run the test suite after cleanup."
+agent-cli run "Review all files changed by the previous commit. Remove any unnecessary type tests, overly defensive checks, or testing of language features (e.g., testing that TypeScript generics work). Keep real business logic tests. Run the test suite after cleanup."
 
 # Step 3: Verify
-claude -p "Run the full build, lint, type check, and test suite. Fix any failures. Do not add new features."
+agent-cli run "Run the full build, lint, type check, and test suite. Fix any failures. Do not add new features."
 
 # Step 4: Commit
-claude -p "Create a conventional commit for all staged changes. Use 'feat: add OAuth2 login flow' as the message."
+agent-cli run "Create a conventional commit for all staged changes. Use 'feat: add OAuth2 login flow' as the message."
 ```
 
 ### Key Design Principles
 
-1. **Each step is isolated** — A fresh context window per `claude -p` call means no context bleed between steps.
+1. **Each step is isolated** — A fresh context window per non-interactive call means no context bleed between steps.
 2. **Order matters** — Steps execute sequentially. Each builds on the filesystem state left by the previous.
 3. **Negative instructions are dangerous** — Don't say "don't test type systems." Instead, add a separate cleanup step (see [De-Sloppify Pattern](#4-the-de-sloppify-pattern)).
 4. **Exit codes propagate** — `set -e` stops the pipeline on failure.
@@ -72,30 +73,30 @@ claude -p "Create a conventional commit for all staged changes. Use 'feat: add O
 **With model routing:**
 ```bash
 # Research with Opus (deep reasoning)
-claude -p --model opus "Analyze the codebase architecture and write a plan for adding caching..."
+agent-cli run --model reasoning "Analyze the codebase architecture and write a plan for adding caching..."
 
 # Implement with Sonnet (fast, capable)
-claude -p "Implement the caching layer according to the plan in docs/caching-plan.md..."
+agent-cli run "Implement the caching layer according to the plan in docs/caching-plan.md..."
 
 # Review with Opus (thorough)
-claude -p --model opus "Review all changes for security issues, race conditions, and edge cases..."
+agent-cli run --model reasoning "Review all changes for security issues, race conditions, and edge cases..."
 ```
 
 **With environment context:**
 ```bash
 # Pass context via files, not prompt length
-echo "Focus areas: auth module, API rate limiting" > .claude-context.md
-claude -p "Read .claude-context.md for priorities. Work through them in order."
-rm .claude-context.md
+echo "Focus areas: auth module, API rate limiting" > .agent-context.md
+agent-cli run "Read .agent-context.md for priorities. Work through them in order."
+rm .agent-context.md
 ```
 
 **With `--allowedTools` restrictions:**
 ```bash
 # Read-only analysis pass
-claude -p --allowedTools "Read,Grep,Glob" "Audit this codebase for security vulnerabilities..."
+agent-cli run --allowedTools "Read,Grep,Glob" "Audit this codebase for security vulnerabilities..."
 
 # Write-only implementation pass
-claude -p --allowedTools "Read,Write,Edit,Bash" "Implement the fixes from security-audit.md..."
+agent-cli run --allowedTools "Read,Write,Edit,Bash" "Implement the fixes from security-audit.md..."
 ```
 
 ---
@@ -128,9 +129,9 @@ PROMPT 1 (Orchestrator)              PROMPT 2 (Sub-Agents)
    - A snapshot of existing iterations (for uniqueness)
 4. **Wave Management** — For infinite mode, deploys waves of 3-5 agents until context is exhausted
 
-### Implementation via Claude Code Commands
+### Implementation via command or prompt surface
 
-Create `.claude/commands/infinite.md`:
+Create an `infinite` command or prompt in the surface your tool supports:
 
 ```markdown
 Parse the following arguments from $ARGUMENTS:
@@ -169,9 +170,9 @@ Don't rely on agents to self-differentiate. The orchestrator **assigns** each ag
 
 ---
 
-## 3. Continuous Claude PR Loop
+## 3. Continuous PR Loop
 
-**A production-grade shell script** that runs Claude Code in a continuous loop, creating PRs, waiting for CI, and merging automatically. Created by AnandChowdhary (credit: @AnandChowdhary).
+**A production-grade shell script** that runs an agent in a continuous loop, creating PRs, waiting for CI, and merging automatically. Created by AnandChowdhary (credit: @AnandChowdhary).
 
 ### Core Loop
 
@@ -339,7 +340,7 @@ done
 
 ---
 
-## 5. Ralphinho / RFC-Driven DAG Orchestration
+## 5. Ralphinho and RFC-Driven DAG Orchestration
 
 **The most sophisticated pattern.** An RFC-driven, multi-agent pipeline that decomposes a spec into a dependency DAG, runs each unit through a tiered quality pipeline, and lands them via an agent-driven merge queue. Created by enitrat (credit: @enitrat).
 

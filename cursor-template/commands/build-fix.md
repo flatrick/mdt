@@ -1,6 +1,7 @@
 ---
 name: build-fix
 description: Incrementally fix build and type errors with minimal, safe changes. One error at a time with verification after each fix.
+
 ---
 
 # Build Fix Command

@@ -1,6 +1,7 @@
 ---
 name: install-rules
 description: Copy the installed global Cursor rules into the current repo's `.cursor/rules/` bridge.
+
 ---
 
 # Install Rules Command

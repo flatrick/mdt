@@ -1,6 +1,7 @@
 ---
 description: "Git workflow: conventional commits, PR process"
 alwaysApply: true
+
 ---
 # Git Workflow
 

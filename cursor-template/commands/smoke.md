@@ -1,6 +1,7 @@
 ---
 name: smoke
 description: Run a quick MDT sanity check for the current Cursor workspace.
+
 ---
 
 # Smoke Command

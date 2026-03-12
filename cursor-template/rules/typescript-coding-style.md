@@ -2,6 +2,7 @@
 description: "TypeScript coding style extending common rules"
 globs: ["**/*.ts", "**/*.tsx", "**/*.js", "**/*.jsx"]
 alwaysApply: false
+
 ---
 # TypeScript/JavaScript Coding Style
 

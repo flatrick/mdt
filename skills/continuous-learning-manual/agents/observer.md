@@ -2,6 +2,7 @@
 name: observer
 description: Background observer that analyzes session observations to detect patterns and create instincts using the active MDT tool's cheaper/faster model tier when configured. v2.1 adds project-scoped instincts.
 model: inherit
+
 ---
 
 # Observer Agent

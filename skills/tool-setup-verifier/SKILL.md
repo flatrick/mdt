@@ -1,6 +1,8 @@
 ---
 name: tool-setup-verifier
 description: Verify MDT's shipped Claude, Cursor, and Codex setups against the local workflow contract. Use when auditing tool support, checking whether setup files still exist, validating workflow coverage, or producing a per-tool readiness report without relying on GitHub Actions or live model calls.
+
+
 ---
 
 # Tool Setup Verifier
@@ -47,8 +49,8 @@ In that mode:
 1. read `~/.codex/skills/tool-setup-verifier/SKILL.md`
 2. read `~/.codex/mdt/scripts/lib/tool-workflow-contract.js`
 3. treat `~/.codex/` plus `~/.codex/mdt/` as the install surface
-4. do **not** fail just because `docs/tools/*` or `scripts/verify-tool-setups.js`
-   are absent at repo root
+4. do **not** fail just because `docs/tools/`* or `scripts/verify-tool-setups.js`
+  are absent at repo root
 
 ## Required Workflow
 
@@ -66,16 +68,16 @@ In that mode:
 2. Run `node ~/.codex/mdt/scripts/smoke-codex-workflows.js`.
 3. Summarize Codex readiness from the installed global surfaces only.
 4. If something fails, identify the missing installed skill, missing local script,
-   or missing `~/.codex/` file before proposing broader changes.
+  or missing `~/.codex/` file before proposing broader changes.
 
 ## Local Prerequisites
 
 - `node` must be installed and available on `PATH`
 - tool smoke probes require a local shell/session that allows subprocess spawn
 - if `smoke-tool-setups.js` reports `SKIP` with `EPERM` or `EACCES`, treat that
-  as an environment limitation, not as proof that the tool is missing or broken
+as an environment limitation, not as proof that the tool is missing or broken
 - in that case, rely on workflow smoke plus direct local invocation in a less
-  restricted shell before claiming the tool setup is broken
+restricted shell before claiming the tool setup is broken
 
 ## Reporting Format
 
@@ -102,4 +104,4 @@ Also include:
 - Do not promote a workflow claim to `official` unless the docs pack already supports that classification.
 - If the docs and the contract disagree, fix the disagreement before expanding scope.
 - In installed global tool mode, do not report false failures just because the
-  full MDT repo docs pack is not present.
+full MDT repo docs pack is not present.

@@ -1,6 +1,8 @@
 ---
 name: tool-doc-maintainer
 description: Keep MDT's tool capability docs under docs/tools/ correct, sourced, and locally verified without guessing.
+
+
 ---
 
 # Tool Doc Maintainer

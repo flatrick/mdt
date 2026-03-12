@@ -1,6 +1,7 @@
 ---
 name: e2e
 description: Generate and run end-to-end tests with Playwright using Page Object Model. Creates test journeys, runs tests, and captures artifacts on failure.
+
 ---
 
 # E2E Command

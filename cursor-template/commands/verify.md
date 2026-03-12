@@ -1,6 +1,7 @@
 ---
 name: verify
 description: Run targeted verification on the current change and decide whether it is safe to ship.
+
 ---
 
 # Verification Command

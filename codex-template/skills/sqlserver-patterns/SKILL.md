@@ -1,6 +1,7 @@
 ---
 name: sqlserver-patterns
 description: T-SQL and SQL Server best practices, query optimization, stored procedures, indexing strategies, security, and administration patterns for SQL Server 2016+ and Azure SQL Database.
+
 ---
 
 # SQL Server / T-SQL Patterns

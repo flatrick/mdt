@@ -1,6 +1,7 @@
 ---
 name: plan
 description: Restate requirements, assess risks, and create a step-by-step implementation plan. Wait for user confirmation before touching code.
+
 ---
 
 # Plan Command

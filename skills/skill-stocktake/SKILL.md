@@ -1,10 +1,12 @@
 ---
-description: "Use when auditing Claude skills and commands for quality. Supports Quick Scan (changed skills only) and Full Stocktake modes with sequential subagent batch evaluation."
+name: skill-stocktake
+description: "Use when auditing MDT skills and commands for quality. Supports Quick Scan (changed skills only) and Full Stocktake modes with sequential subagent batch evaluation."
+
 ---
 
 # skill-stocktake
 
-Slash command (`/skill-stocktake`) that audits all Claude skills and commands using a quality checklist + AI holistic judgment. Supports two modes: Quick Scan for recently changed skills, and Full Stocktake for a complete review.
+Workflow that audits MDT skills and commands using a quality checklist plus AI holistic judgment. Supports two modes: Quick Scan for recently changed skills, and Full Stocktake for a complete review.
 
 ## When to Activate
 
@@ -12,14 +14,14 @@ Use this skill when you want a quality audit of skills/commands, especially afte
 
 ## Scope
 
-The command targets the following paths **relative to the directory where it is invoked**:
+The workflow targets the following paths **relative to the directory where it is invoked**:
 
 | Path | Description |
 |------|-------------|
-| `<config>/skills/` | Global skills (all projects). `<config>` = ~/.cursor or ~/.claude (auto-detected). |
-| `{cwd}/.cursor/skills/` or `{cwd}/.claude/skills/` | Project-level skills (if the directory exists) |
+| `<config>/skills/` | Global skills (all projects). `<config>` is the active tool config root. |
+| `{cwd}/.<tool>/skills/` | Project-level skills if the active tool supports repo-local skills and the directory exists |
 
-**At the start of Phase 1, the command explicitly lists which paths were found and scanned.**
+**At the start of Phase 1, the workflow explicitly lists which paths were found and scanned.**
 
 ### Targeting a specific project
 
@@ -27,17 +29,17 @@ To include project-level skills, run from that project's root directory:
 
 ```bash
 cd ~/path/to/my-project
-/skill-stocktake
+run the tool surface that invokes `skill-stocktake`
 ```
 
-If the project has no `.claude/skills/` directory, only global skills and commands are evaluated.
+If the project has no repo-local skill directory for the active tool, only global skills and commands are evaluated.
 
 ## Modes
 
 | Mode | Trigger | Duration |
 |------|---------|---------|
 | Quick Scan | `results.json` exists (default) | 5–10 min |
-| Full Stocktake | `results.json` absent, or `/skill-stocktake full` | 20–30 min |
+| Full Stocktake | `results.json` absent, or explicit full-run invocation | 20–30 min |
 
 **Results cache:** `<config>/skills/skill-stocktake/results.json`
 
@@ -47,7 +49,7 @@ Re-evaluate only skills that have changed since the last run (5–10 min).
 
 1. Read `<config>/skills/skill-stocktake/results.json`
 2. Run: `node <config>/skills/skill-stocktake/scripts/quick-diff.js <config>/skills/skill-stocktake/results.json`
-   (Project dir is auto-detected from `$PWD/.cursor/skills` or `$PWD/.claude/skills`; override via `SKILL_STOCKTAKE_PROJECT_DIR` if needed)
+   (Project dir is auto-detected from supported repo-local skill directories; override via `SKILL_STOCKTAKE_PROJECT_DIR` if needed)
 3. If output is `[]`: report "No changes since last run." and stop
 4. Re-evaluate only those changed files using the same Phase 2 criteria
 5. Carry forward unchanged skills from previous results
@@ -61,7 +63,7 @@ Re-evaluate only skills that have changed since the last run (5–10 min).
 Run: `node <config>/skills/skill-stocktake/scripts/scan.js`
 
 The script enumerates skill files, extracts frontmatter, and collects UTC mtimes.
-Project dir is auto-detected from `$PWD/.claude/skills`; pass it explicitly only if needed.
+Project dir is auto-detected from the active tool's repo-local skill directory; pass it explicitly only if needed.
 Present the scan summary and inventory table from the script output:
 
 ```
@@ -75,7 +77,7 @@ Scanning:
 
 ### Phase 2 — Quality Evaluation
 
-Launch a Task tool subagent (**Explore agent, model: opus**) with the full inventory and checklist.
+Launch a subagent with the full inventory and checklist.
 The subagent reads each skill, applies the checklist, and returns per-skill JSON:
 
 `{ "verdict": "Keep"|"Improve"|"Update"|"Retire"|"Merge into [X]", "reason": "..." }`
@@ -90,7 +92,7 @@ Each skill is evaluated against this checklist:
 
 ```
 - [ ] Content overlap with other skills checked
-- [ ] Overlap with MEMORY.md / CLAUDE.md checked
+- [ ] Overlap with durable instruction surfaces checked
 - [ ] Freshness of technical references verified (use WebSearch if tool names / CLI flags / APIs are present)
 - [ ] Usage frequency considered
 ```
@@ -108,7 +110,7 @@ Verdict criteria:
 Evaluation is **holistic AI judgment** — not a numeric rubric. Guiding dimensions:
 - **Actionability**: code examples, commands, or steps that let you act immediately
 - **Scope fit**: name, trigger, and content are aligned; not too broad or narrow
-- **Uniqueness**: value not replaceable by MEMORY.md / CLAUDE.md / another skill
+- **Uniqueness**: value not replaceable by durable instructions or another skill
 - **Currency**: technical references work in the current environment
 
 **Reason quality requirements** — the `reason` field must be self-contained and decision-enabling:

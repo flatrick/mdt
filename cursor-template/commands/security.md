@@ -1,6 +1,7 @@
 ---
 name: security
 description: Run a security review of the current change or file. Checks for secrets, injection vulnerabilities, auth issues, and other OWASP Top 10 risks.
+
 ---
 
 # Security Command

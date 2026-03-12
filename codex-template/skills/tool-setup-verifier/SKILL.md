@@ -1,6 +1,7 @@
 ---
 name: tool-setup-verifier
 description: Verify MDT's shipped Codex setup against the local workflow contract. Use when auditing Codex support, checking whether installed setup files still exist, validating Codex workflow coverage, or producing a readiness report without relying on CI or live model calls.
+
 ---
 
 # Tool Setup Verifier

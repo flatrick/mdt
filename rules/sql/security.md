@@ -2,6 +2,7 @@
 paths:
   - "**/*.sql"
   - "**/*.tsql"
+
 ---
 # SQL Security
 

@@ -1,6 +1,7 @@
 ---
 name: refactor-clean
 description: Safely identify and remove dead code with test verification at every step. One deletion at a time, never without a green baseline first.
+
 ---
 
 # Refactor Clean Command

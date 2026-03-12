@@ -1,6 +1,7 @@
 ---
 name: learn
 description: Extract reusable patterns, lessons, or candidate skills from the current session.
+
 ---
 
 # Learn Command

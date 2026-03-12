@@ -1,6 +1,7 @@
 ---
 name: dotnet-patterns
 description: Idiomatic C# and VB.NET patterns, best practices, and conventions for .NET Framework 4.8 and modern .NET (5/6/7/8+). Covers async/await, LINQ, EF Core, DI, records, and enterprise patterns.
+
 ---
 
 # .NET Development Patterns

@@ -2,6 +2,7 @@
 description: "Python security extending common rules"
 globs: ["**/*.py", "**/*.pyi"]
 alwaysApply: false
+
 ---
 # Python Security
 

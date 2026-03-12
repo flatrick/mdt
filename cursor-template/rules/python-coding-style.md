@@ -2,6 +2,7 @@
 description: "Python coding style extending common rules"
 globs: ["**/*.py", "**/*.pyi"]
 alwaysApply: false
+
 ---
 # Python Coding Style
 

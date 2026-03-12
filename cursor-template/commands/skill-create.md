@@ -1,6 +1,7 @@
 ---
 name: skill-create
 description: Turn a repeated workflow or solution pattern into a reusable MDT skill definition.
+
 ---
 
 # Skill Creation Command

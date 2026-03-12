@@ -1,6 +1,7 @@
 ---
 name: docs-health
 description: Audit MDT documentation health in this Cursor workspace.
+
 ---
 
 # Docs Health

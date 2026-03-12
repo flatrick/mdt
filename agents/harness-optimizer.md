@@ -4,6 +4,7 @@ description: Analyze and improve the local agent harness configuration for relia
 tools: ["Read", "Grep", "Glob", "Bash", "Edit"]
 model: sonnet
 color: teal
+
 ---
 
 You are the harness optimizer.

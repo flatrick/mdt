@@ -1,6 +1,7 @@
 ---
 name: bash-patterns
 description: Safe, portable, and idiomatic Bash/shell scripting patterns including error handling, security hardening, argument parsing, testing with bats-core, and cross-platform techniques.
+
 ---
 
 # Bash Development Patterns

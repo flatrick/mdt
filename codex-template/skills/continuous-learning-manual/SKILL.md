@@ -2,6 +2,7 @@
 name: continuous-learning-manual
 description: Instinct-based learning system that turns explicit session summaries, optional tool observations, and retrospectives into reusable instincts, skills, commands, and agents. v2.1 adds project-scoped instincts to prevent cross-project contamination.
 version: 2.1.0
+
 ---
 
 # Continuous Learning v2.1

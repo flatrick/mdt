@@ -1,5 +1,6 @@
 ---
 name: rust-patterns
+
 ---
 
 # Rust Development Patterns

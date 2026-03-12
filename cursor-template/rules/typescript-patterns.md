@@ -2,6 +2,7 @@
 description: "TypeScript patterns extending common rules"
 globs: ["**/*.ts", "**/*.tsx", "**/*.js", "**/*.jsx"]
 alwaysApply: false
+
 ---
 # TypeScript/JavaScript Patterns
 
