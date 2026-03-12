@@ -17,6 +17,22 @@ This skill ensures all code follows security best practices and identifies poten
 - Storing or transmitting sensitive data
 - Integrating third-party APIs
 
+## Companion File Index
+
+This directory may contain companion playbooks for narrower security domains.
+Do not read every file in this folder by default. Start with this `SKILL.md`,
+identify the active subtopic, then read only the companion file that matches the
+current task.
+
+Current companion files:
+
+| File | Subtopic | Read it when |
+|------|----------|--------------|
+| `cloud-infrastructure-security.md` | Cloud infrastructure, IAM, CI/CD, CDN/WAF, backups, logging/monitoring | The task involves deployment platforms, cloud configuration, infrastructure as code, CI/CD hardening, secrets managers, network policy, or cloud incident readiness |
+
+If a task does not clearly involve one of the indexed subtopics above, do not
+open companion files from this folder.
+
 ## Security Checklist
 
 ### 1. Secrets Management
