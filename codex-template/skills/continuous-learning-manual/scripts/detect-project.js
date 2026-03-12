@@ -8,10 +8,13 @@
 const path = require('path');
 
 function loadProjectDetectionModule() {
-  const root = path.join(__dirname, '..', '..', '..');
+  const roots = [
+    path.join(__dirname, '..', '..', '..', '..'),
+    path.join(__dirname, '..', '..', '..')
+  ];
   const candidates = [
-    path.join(root, 'scripts', 'lib', 'continuous-learning', 'project-detection.js'),
-    path.join(root, 'mdt', 'scripts', 'lib', 'continuous-learning', 'project-detection.js')
+    ...roots.map(root => path.join(root, 'scripts', 'lib', 'continuous-learning', 'project-detection.js')),
+    ...roots.map(root => path.join(root, 'mdt', 'scripts', 'lib', 'continuous-learning', 'project-detection.js'))
   ];
   for (const candidate of candidates) {
     try {

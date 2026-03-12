@@ -68,6 +68,22 @@ function runTests() {
     }
   })) passed++; else failed++;
 
+  if (test('codex overlay instinct-cli wrapper exports the same public runtime helpers', () => {
+    const overlayCli = require(path.join(
+      __dirname,
+      '..',
+      '..',
+      'codex-template',
+      'skills',
+      'continuous-learning-manual',
+      'scripts',
+      'instinct-cli.js'
+    ));
+
+    assert.strictEqual(typeof overlayCli.buildCodexEnv, 'function');
+    assert.strictEqual(typeof overlayCli.getCliPaths, 'function');
+  })) passed++; else failed++;
+
   console.log(`\nResults: Passed: ${passed}, Failed: ${failed}`);
   process.exit(failed > 0 ? 1 : 0);
 }

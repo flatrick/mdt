@@ -11,9 +11,13 @@ const skillRoot = path.join(__dirname, '..');
 const { detectProject } = require(path.join(skillRoot, 'scripts', 'detect-project.js'));
 
 function loadObserverRuntimeModule() {
+  const roots = [
+    path.join(skillRoot, '..', '..', '..'),
+    path.join(skillRoot, '..', '..')
+  ];
   const candidates = [
-    path.join(skillRoot, '..', '..', 'scripts', 'lib', 'continuous-learning', 'observer-runtime.js'),
-    path.join(skillRoot, '..', '..', 'mdt', 'scripts', 'lib', 'continuous-learning', 'observer-runtime.js')
+    ...roots.map(root => path.join(root, 'scripts', 'lib', 'continuous-learning', 'observer-runtime.js')),
+    ...roots.map(root => path.join(root, 'mdt', 'scripts', 'lib', 'continuous-learning', 'observer-runtime.js'))
   ];
   for (const candidate of candidates) {
     try {
