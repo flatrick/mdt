@@ -162,6 +162,23 @@ This means compatibility work must preserve both:
 - public script paths
 - public module export behavior used by tests and any repo-local consumers
 
+### Current compatibility suites do not yet prove real tool-runtime execution
+The current `tests/compatibility-testing/` suites are useful, but they mostly
+prove install shape, direct Node invocations, and mocked smoke paths. They do
+not yet prove that Codex, Claude Code, Cursor Agent, and Cursor IDE all invoke
+the same surfaces the same way in their real runtimes.
+
+This means current green compatibility coverage should be treated as strong
+repo-side confidence, not as full tool-runtime proof.
+
+### One stale runtime path still exists in instinct-cli
+Current project detection writes projects directly under
+`homunculus/<project-id>/`, but `instinct-cli projects` still assumes the old
+`homunculus/projects/<project-id>/` layout.
+
+This means the migration plan should explicitly fix and lock this path contract
+before treating the continuous-learning CLI surface as fully stable.
+
 ### Codex overlay docs are validator-constrained, not just metadata-constrained
 Current validators enforce Codex-specific documentation boundaries for
 `codex-template/skills/continuous-learning-manual/SKILL.md`, including concrete
@@ -712,6 +729,13 @@ The goal is not only to keep tests green. It is to surface tool-specific launch
 differences early enough that they can be documented as supported behavior,
 known limitations, or installer/wrapper requirements.
 
+Current limitation to keep explicit:
+
+- green compatibility tests do not currently mean full end-to-end proof inside
+  the real vendor tools
+- skipped subprocess-dependent suites must be recorded as uncovered execution
+  surfaces, not treated as equivalent to a passing tool-runtime check
+
 Minimum first-pass matrix:
 
 - Codex:
@@ -726,6 +750,9 @@ Minimum first-pass matrix:
   - public manual wrappers
   - automatic hook-compatible execution where applicable
   - command and rule flows under `~/.cursor/`
+- Cursor IDE:
+  - repo-local `.cursor/rules/` materialization flow
+  - real opened-workspace verification, distinct from Cursor Agent
 
 Suggested initial files:
 
@@ -744,6 +771,28 @@ the check instead of only asserting file presence. For example:
 - Claude Code: installed `/smoke` command plus `smoke-claude-workflows.js`
 - Cursor Agent: installed `/smoke` and `/install-rules` commands plus
   rule-materialization checks
+
+Add a stricter second-pass matrix after the initial suite exists:
+
+- Codex:
+  - run the installed Codex surface against a temp repo and verify real
+    observation capture and analysis artifacts
+- Claude Code:
+  - run the installed hook/command surface against a temp repo and verify that
+    a real hook event writes project-scoped observations
+- Cursor Agent:
+  - run the installed command surface through `agent` / `cursor-agent`
+    directly, not only via backing Node scripts
+- Cursor IDE:
+  - verify `/install-rules` against a real opened repo and confirm the
+    repo-local `.cursor/rules/` bridge is the path the IDE consumes
+
+For Cursor specifically, lock this command equivalence into the plan:
+
+- `agent` and `cursor-agent` are the same Cursor Agent surface
+- on Windows this may resolve through `agent.cmd` or `cursor-agent.cmd`
+- tests and wrapper logic should treat those command names as equivalent shims,
+  not as separate runtimes
 
 Document any failures found by this suite in the relevant tool docs before
 changing ownership assumptions in later extraction PRs.
@@ -836,6 +885,31 @@ Mitigation:
   `configDir`, `configPath`, `cwd`, and tool identity where relevant
 - add tests that compare wrapper behavior before and after installed relocation
 
+### Risk: Compatibility tests overstate confidence
+Install-shape checks, mocked smoke flows, and direct Node execution can all pass
+even when the real external tool runtime would invoke the feature differently.
+
+Mitigation:
+
+- clearly separate repo-side compatibility coverage from real tool-runtime
+  verification
+- add second-pass tests that execute the installed surface through the actual
+  tool command where available
+- do not describe the feature as fully verified in a tool until the real tool
+  surface has been exercised
+
+### Risk: A stale path contract survives behind wrappers
+Even after extraction, a CLI or adapter can continue reading an old layout such
+as `homunculus/projects/<id>` while the runtime writes to `homunculus/<id>`.
+
+Mitigation:
+
+- add explicit regression tests for current project storage layout
+- audit CL commands for old `projects/` assumptions before calling the split
+  complete
+- treat path-contract mismatches as release blockers because they create false
+  status output even when storage is working
+
 ### Risk: Wrapper module exports regress even if CLI behavior stays green
 Mitigation:
 
@@ -871,6 +945,8 @@ Mitigation:
 - test Windows shim resolution and shell-neutral spawning behavior explicitly
 - treat restricted nested-subprocess environments as a known coverage gap to
   document, not as proof that the tool surface is safe
+- treat `agent`, `cursor-agent`, `agent.cmd`, and `cursor-agent.cmd` as the
+  same Cursor Agent runtime surface when validating command execution
 
 ### Risk: Environment inheritance differs by hook, command, and agent surface
 Different launch surfaces may provide different `cwd`, PATH, HOME, and
@@ -969,10 +1045,16 @@ Mitigation:
       public ownership, config ownership, or tool identity
 - [ ] installed config-root inference still works for `.claude`, `.cursor`, and
       `.codex`
+- [ ] current project storage layout is locked to `homunculus/<project-id>/`
+      and no CL command still assumes `homunculus/projects/<project-id>/`
 - [ ] migrated hooks, commands, rules, and observers are verified through
       direct import, in-repo wrapper, and installed-layout execution
 - [ ] execution-surface compatibility tests exist for Codex, Claude Code, and
       `cursor-agent`-style launches where those surfaces are supported
+- [ ] Cursor IDE execution-surface verification is tracked separately from
+      Cursor Agent verification
+- [ ] any skipped compatibility suites are reported as uncovered rather than
+      treated as equivalent to full tool-runtime verification
 - [ ] discovered tool-runtime differences are documented in the relevant tool
       docs before duplicate ownership is removed
 - [ ] `scripts/codex-observer.js` works with the extracted runtime
