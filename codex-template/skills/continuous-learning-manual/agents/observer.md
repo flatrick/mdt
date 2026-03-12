@@ -19,7 +19,6 @@ A background observer that analyzes observations from MDT tool sessions to detec
 Reads observations from the **project-scoped** observations file:
 - Project: `<data>/homunculus/<project-id>/observations.jsonl`
 - Registry: `<data>/homunculus/projects.json`
-- Global fallback: `<data>/homunculus/observations.jsonl`
 
 ```jsonl
 {"timestamp":"2025-01-22T10:30:00Z","event":"tool_start","session":"abc123","tool":"Edit","input":"...","project_id":"a1b2c3d4e5f6","project_name":"my-react-app"}
@@ -71,7 +70,6 @@ Creates/updates instincts in the **project-scoped** instincts directory:
 - Additional project artifacts such as `observer.log`, archived observations,
   and weekly retrospectives live alongside that directory under
   `<data>/homunculus/<project-id>/`
-- Global: `<data>/homunculus/instincts/personal/` (for universal patterns)
 
 ### Project-Scoped Instinct (default)
 
@@ -98,7 +96,11 @@ Always use functional components with hooks instead of class components.
 - Last observed: 2025-01-22
 ```
 
-### Global Instinct (universal patterns)
+### Cross-Project Instinct Pattern
+
+If a pattern is truly universal, document it as a general instinct pattern or
+promote it through the broader skill/rule/command workflow rather than assuming
+the observer writes to a separate global instincts directory by default.
 
 ```yaml
 ---
