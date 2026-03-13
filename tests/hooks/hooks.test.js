@@ -996,6 +996,46 @@ async function runTests() {
     );
   })) passed++; else failed++;
 
+  if (test('plugin.json declares agents as non-empty array of existing .md files', () => {
+    const pluginPath = path.join(__dirname, '..', '..', '.claude-plugin', 'plugin.json');
+    const repoRoot = path.join(__dirname, '..', '..');
+    const plugin = JSON.parse(fs.readFileSync(pluginPath, 'utf8'));
+
+    assert.ok(Array.isArray(plugin.agents) && plugin.agents.length > 0,
+      'plugin.agents must be a non-empty array');
+    for (const agentPath of plugin.agents) {
+      assert.ok(agentPath.endsWith('.md'),
+        `Agent path must end with .md: ${agentPath}`);
+      const resolved = path.join(repoRoot, agentPath);
+      assert.ok(fs.existsSync(resolved),
+        `Agent file must exist: ${agentPath} (resolved: ${resolved})`);
+    }
+  })) passed++; else failed++;
+
+  if (test('plugin.json declares commands as non-empty array', () => {
+    const pluginPath = path.join(__dirname, '..', '..', '.claude-plugin', 'plugin.json');
+    const plugin = JSON.parse(fs.readFileSync(pluginPath, 'utf8'));
+
+    assert.ok(Array.isArray(plugin.commands) && plugin.commands.length > 0,
+      'plugin.commands must be a non-empty array');
+  })) passed++; else failed++;
+
+  if (test('plugin.json declares skills as non-empty array', () => {
+    const pluginPath = path.join(__dirname, '..', '..', '.claude-plugin', 'plugin.json');
+    const plugin = JSON.parse(fs.readFileSync(pluginPath, 'utf8'));
+
+    assert.ok(Array.isArray(plugin.skills) && plugin.skills.length > 0,
+      'plugin.skills must be a non-empty array');
+  })) passed++; else failed++;
+
+  if (test('plugin.json declares rules as non-empty array', () => {
+    const pluginPath = path.join(__dirname, '..', '..', '.claude-plugin', 'plugin.json');
+    const plugin = JSON.parse(fs.readFileSync(pluginPath, 'utf8'));
+
+    assert.ok(Array.isArray(plugin.rules) && plugin.rules.length > 0,
+      'plugin.rules must be a non-empty array');
+  })) passed++; else failed++;
+
   // ─── evaluate-session.js tests ───
   console.log('\nevaluate-session.js:');
 
