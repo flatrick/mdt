@@ -4,10 +4,13 @@
 const path = require('path');
 const { spawnSync } = require('child_process');
 const { createDetectEnv } = require('./lib/detect-env');
+const {
+  inferInstalledConfigDir,
+  resolveContinuousLearningSkillRoot
+} = require('./lib/continuous-learning/runtime-context');
 
 const REPO_ROOT = path.join(__dirname, '..');
 const SCRIPTS_ROOT = path.join(REPO_ROOT, 'scripts');
-const SKILLS_ROOT = path.join(REPO_ROOT, 'skills', 'continuous-learning-manual', 'scripts');
 
 const CI_VALIDATORS = [
   'agents',
@@ -266,6 +269,23 @@ function runNodeScript(scriptPath, scriptArgs, options = {}) {
     stdout,
     stderr
   };
+}
+
+function resolveLearningScriptsRoot(options = {}) {
+  const detectEnv = options.detectEnv || createDetectEnv({ env: options.env || process.env });
+  const installedConfigDir = inferInstalledConfigDir(REPO_ROOT);
+  const skillRoot = resolveContinuousLearningSkillRoot({
+    entrypointDir: REPO_ROOT,
+    configDir: options.configRoot || installedConfigDir || detectEnv.getConfigDir(),
+    repoRoot: REPO_ROOT,
+    skillName: 'continuous-learning-manual'
+  });
+
+  if (!skillRoot) {
+    throw new Error('Unable to locate continuous-learning-manual skill');
+  }
+
+  return path.join(skillRoot, 'scripts');
 }
 
 function renderResult(result, io) {
@@ -566,7 +586,7 @@ function buildLearningObserverCommand(argv) {
   const args = [command];
   appendLearningLocationArgs(args, options);
   return runNodeScript(path.join(SCRIPTS_ROOT, 'codex-observer.js'), args, {
-    cwd: options.cwd || REPO_ROOT,
+    cwd: options.cwd || process.cwd(),
     format: options.format,
     commandName: `learning observer ${action}`
   });
@@ -581,8 +601,9 @@ function buildLearningRetrospectiveCommand(argv) {
   if (options.week) {
     args.push('--week', options.week);
   }
-  return runNodeScript(path.join(SKILLS_ROOT, 'codex-learn.js'), args, {
-    cwd: options.cwd || REPO_ROOT,
+  const skillsRoot = resolveLearningScriptsRoot({ configRoot: options.configRoot });
+  return runNodeScript(path.join(skillsRoot, 'codex-learn.js'), args, {
+    cwd: options.cwd || process.cwd(),
     format: options.format,
     commandName: 'learning retrospective weekly'
   });
@@ -621,8 +642,9 @@ function buildLearningInstinctsCommand(argv) {
     throw createUsageError('learning instincts requires a subcommand');
   }
   const options = parseCommonOptions(argv.slice(2));
-  return runNodeScript(path.join(SKILLS_ROOT, 'instinct-cli.js'), buildLearningInstinctsArgs(action, options), {
-    cwd: options.cwd || REPO_ROOT,
+  const skillsRoot = resolveLearningScriptsRoot({ configRoot: options.configRoot });
+  return runNodeScript(path.join(skillsRoot, 'instinct-cli.js'), buildLearningInstinctsArgs(action, options), {
+    cwd: options.cwd || process.cwd(),
     format: options.format,
     commandName: `learning instincts ${action}`
   });
@@ -630,8 +652,9 @@ function buildLearningInstinctsCommand(argv) {
 
 function buildLearningBasicCommand(area, argv) {
   const options = parseCommonOptions(argv.slice(1));
-  return runNodeScript(path.join(SKILLS_ROOT, 'codex-learn.js'), [area], {
-    cwd: options.cwd || REPO_ROOT,
+  const skillsRoot = resolveLearningScriptsRoot({ configRoot: options.configRoot });
+  return runNodeScript(path.join(skillsRoot, 'codex-learn.js'), [area], {
+    cwd: options.cwd || process.cwd(),
     format: options.format,
     commandName: `learning ${area}`
   });
@@ -773,6 +796,7 @@ module.exports = {
   main,
   normalizeJsonResult,
   parseCommonOptions,
+  resolveLearningScriptsRoot,
   runCiValidatorInProcess,
   runNodeScript
 };
