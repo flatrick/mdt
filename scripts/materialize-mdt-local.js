@@ -16,6 +16,18 @@ const {
 const REPO_ROOT = path.join(__dirname, '..');
 const CURSOR_RULES_SRC = path.join(REPO_ROOT, 'cursor-template', 'rules');
 
+const PARSE_ARGS_FLAG_MAP = {
+  '--target': 'target',
+  '--tool': 'target',
+  '--surface': 'surface',
+  '--repo': 'repoDir',
+  '--cwd': 'repoDir',
+  '--override': 'overrideDir',
+  '--config-root': 'overrideDir'
+};
+
+const PARSE_ARGS_PATH_FIELDS = new Set(['repoDir', 'overrideDir']);
+
 function parseArgs(args) {
   let target = 'cursor';
   let surface = null;
@@ -25,14 +37,13 @@ function parseArgs(args) {
 
   for (let i = 0; i < args.length; i++) {
     const arg = args[i];
-    if ((arg === '--target' || arg === '--tool') && args[i + 1]) {
-      target = args[++i];
-    } else if (arg === '--surface' && args[i + 1]) {
-      surface = args[++i];
-    } else if ((arg === '--repo' || arg === '--cwd') && args[i + 1]) {
-      repoDir = path.resolve(args[++i]);
-    } else if ((arg === '--override' || arg === '--config-root') && args[i + 1]) {
-      overrideDir = path.resolve(args[++i]);
+    const field = PARSE_ARGS_FLAG_MAP[arg];
+    if (field && args[i + 1]) {
+      const value = PARSE_ARGS_PATH_FIELDS.has(field) ? path.resolve(args[++i]) : args[++i];
+      if (field === 'target') target = value;
+      else if (field === 'surface') surface = value;
+      else if (field === 'repoDir') repoDir = value;
+      else overrideDir = value;
     } else if (!arg.startsWith('-')) {
       packageNames.push(arg);
     }

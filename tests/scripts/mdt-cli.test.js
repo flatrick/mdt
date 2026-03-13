@@ -176,7 +176,7 @@ function runTests() {
   if (test('ci validate all runs validators through the shared dispatcher', () => {
     const invoked = [];
     const result = buildCiCommand(['validate', 'all'], {
-      execScript: (validatorName, options) => {
+      execScript: (validatorName, _options) => {
         invoked.push({
           validatorName,
           commandName: `ci validate ${validatorName}`

@@ -4,6 +4,31 @@
 const fs = require('fs');
 const path = require('path');
 
+const CURRENT_DOC_PATHS = [
+  'README.md',
+  'README.POST-CLONE.md',
+  'AGENTS.md',
+  'CLAUDE.md',
+  'CURSOR.md',
+  'CODEX.md',
+  'docs/INSTALLATION.md',
+  'docs/MIGRATION.md',
+  'docs/package-manifest-schema.md',
+  'docs/supported-tools.md',
+  'docs/token-optimization.md',
+  'docs/tools/README.md',
+  'docs/tools/claude-code.md',
+  'docs/tools/codex.md',
+  'docs/tools/cursor.md',
+  'docs/tools/local-verification.md',
+  'docs/tools/capability-matrix.md',
+  'docs/tools/workflow-matrix.md',
+  'docs/testing/manual-verification/README.md',
+  'docs/testing/manual-verification/claude-code.md',
+  'docs/testing/manual-verification/codex.md',
+  'docs/testing/manual-verification/cursor.md'
+];
+
 function validateDocsConsistency(options = {}) {
   const root = options.rootDir || path.join(__dirname, '../..');
   const io = options.io || { log: console.log, error: console.error };
@@ -27,30 +52,7 @@ function validateDocsConsistency(options = {}) {
     }
   }
 
-  const currentDocs = [
-    'README.md',
-    'README.POST-CLONE.md',
-    'AGENTS.md',
-    'CLAUDE.md',
-    'CURSOR.md',
-    'CODEX.md',
-    'docs/INSTALLATION.md',
-    'docs/MIGRATION.md',
-    'docs/package-manifest-schema.md',
-    'docs/supported-tools.md',
-    'docs/token-optimization.md',
-    'docs/tools/README.md',
-    'docs/tools/claude-code.md',
-    'docs/tools/codex.md',
-    'docs/tools/cursor.md',
-    'docs/tools/local-verification.md',
-    'docs/tools/capability-matrix.md',
-    'docs/tools/workflow-matrix.md',
-    'docs/testing/manual-verification/README.md',
-    'docs/testing/manual-verification/claude-code.md',
-    'docs/testing/manual-verification/codex.md',
-    'docs/testing/manual-verification/cursor.md'
-  ].filter(relPath => fs.existsSync(path.join(root, relPath)));
+  const currentDocs = CURRENT_DOC_PATHS.filter(relPath => fs.existsSync(path.join(root, relPath)));
 
   for (const relPath of currentDocs) {
     checkNoPattern(relPath, /(^|[^~])\bnode scripts\/mdt\.js\b/m, 'bare `node scripts/mdt.js` is not allowed in current-state docs');

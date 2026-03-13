@@ -67,6 +67,19 @@ function isObserverCommand(arg) {
   return arg === 'status' || arg === 'once' || arg === 'run' || arg === 'watch';
 }
 
+function applyNumericArg(state, argv, index, longFlag, fieldName, fallback) {
+  const arg = argv[index];
+  if (arg === longFlag && argv[index + 1]) {
+    state[fieldName] = parsePositiveInt(argv[index + 1], fallback);
+    return index + 1;
+  }
+  if (arg.startsWith(longFlag + '=')) {
+    state[fieldName] = parsePositiveInt(arg.slice(longFlag.length + 1), fallback);
+    return index;
+  }
+  return null;
+}
+
 function applyArg(state, argv, index) {
   const arg = argv[index];
   if (isObserverCommand(arg)) {
@@ -77,22 +90,10 @@ function applyArg(state, argv, index) {
     state.command = 'watch';
     return index;
   }
-  if (arg === '--interval-seconds' && argv[index + 1]) {
-    state.intervalSeconds = parsePositiveInt(argv[index + 1], 15);
-    return index + 1;
-  }
-  if (arg.startsWith('--interval-seconds=')) {
-    state.intervalSeconds = parsePositiveInt(arg.split('=')[1], 15);
-    return index;
-  }
-  if (arg === '--min-observations' && argv[index + 1]) {
-    state.minObservations = parsePositiveInt(argv[index + 1], null);
-    return index + 1;
-  }
-  if (arg.startsWith('--min-observations=')) {
-    state.minObservations = parsePositiveInt(arg.split('=')[1], null);
-    return index;
-  }
+  const intervalResult = applyNumericArg(state, argv, index, '--interval-seconds', 'intervalSeconds', 15);
+  if (intervalResult !== null) return intervalResult;
+  const minObsResult = applyNumericArg(state, argv, index, '--min-observations', 'minObservations', null);
+  if (minObsResult !== null) return minObsResult;
   if ((arg === '--project-dir' || arg === '--cwd') && argv[index + 1]) {
     state.cwd = path.resolve(argv[index + 1]);
     return index + 1;
