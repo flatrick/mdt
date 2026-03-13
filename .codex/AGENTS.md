@@ -31,9 +31,8 @@ Available skills:
 - verification-loop — Build, test, lint, typecheck, security
 
 MDT development installs (`--dev`) additionally materialize:
-- smoke — Run the installed MDT Codex smoke checks
-- tool-setup-verifier — Smoke-check MDT tool adapters and workflow contracts
-- tool-doc-maintainer — Keep MDT's cross-tool capability docs aligned with reality
+- mdt-dev-smoke — Run the installed MDT Codex dev smoke checks
+- mdt-dev-verify — Verify MDT tool adapters and workflow contracts from a dev install
 
 ## MCP Servers
 

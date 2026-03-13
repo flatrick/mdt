@@ -49,12 +49,12 @@ Local CLI evidence:
 - `codex features list`
 
 Runtime workflow check:
-- `mdt smoke tool-setups --tool codex`
-- `mdt smoke workflows --tool codex`
+- `mdt dev smoke tool-setups --tool codex`
+- `mdt dev smoke workflows --tool codex`
 
 Installed-home equivalent:
-- `node ~/.codex/mdt/scripts/mdt.js smoke tool-setups --tool codex`
-- `node ~/.codex/mdt/scripts/mdt.js smoke workflows --tool codex`
+- `node ~/.codex/mdt/scripts/mdt.js dev smoke tool-setups --tool codex`
+- `node ~/.codex/mdt/scripts/mdt.js dev smoke workflows --tool codex`
 
 ## What Not To Assume
 

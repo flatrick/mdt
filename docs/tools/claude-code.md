@@ -45,12 +45,12 @@ Local CLI evidence:
 - `claude mcp --help`
 
 Runtime workflow check:
-- `mdt smoke tool-setups --tool claude`
-- `mdt smoke workflows --tool claude`
+- `mdt dev smoke tool-setups --tool claude`
+- `mdt dev smoke workflows --tool claude`
 
 Installed-home equivalent:
-- `node ~/.claude/mdt/scripts/mdt.js smoke tool-setups --tool claude`
-- `node ~/.claude/mdt/scripts/mdt.js smoke workflows --tool claude`
+- `node ~/.claude/mdt/scripts/mdt.js dev smoke tool-setups --tool claude`
+- `node ~/.claude/mdt/scripts/mdt.js dev smoke workflows --tool claude`
 
 ## What Not To Assume
 

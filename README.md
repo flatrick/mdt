@@ -10,7 +10,6 @@ cd modeldev-toolkit
 npm install
 npx mdt install typescript
 npx mdt verify tool-setups
-npx mdt smoke tool-setups
 ```
 
 Tool-specific installs:
@@ -82,10 +81,15 @@ Tool setup checks:
 
 ```bash
 mdt verify tool-setups
-mdt smoke tool-setups
-mdt smoke workflows --tool claude
-mdt smoke workflows --tool cursor
-mdt smoke workflows --tool codex
+```
+
+Dev-install maintainer checks (`--dev` only):
+
+```bash
+mdt dev smoke tool-setups
+mdt dev smoke workflows --tool claude
+mdt dev smoke workflows --tool cursor
+mdt dev smoke workflows --tool codex
 ```
 
 ## License

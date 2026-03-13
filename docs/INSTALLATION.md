@@ -115,15 +115,15 @@ After install, prefer:
 
 ```bash
 mdt verify tool-setups
-mdt smoke tool-setups
 ```
 
-Tool-specific deeper smoke checks:
+With `--dev` installs, you can also run the maintainer smoke checks:
 
 ```bash
-mdt smoke workflows --tool claude
-mdt smoke workflows --tool cursor
-mdt smoke workflows --tool codex
+mdt dev smoke tool-setups
+mdt dev smoke workflows --tool claude
+mdt dev smoke workflows --tool cursor
+mdt dev smoke workflows --tool codex
 ```
 
 Tool-specific manual checks live under:
@@ -134,13 +134,14 @@ Tool-specific manual checks live under:
 
 Readiness rule:
 
-- `mdt verify tool-setups` and `mdt smoke ...` confirm the install surface and workflow contract
+- `mdt verify tool-setups` confirms the normal install surface and workflow contract
+- `mdt dev smoke ...` is an additional maintainer check for `--dev` installs
 - the matching page in `docs/testing/manual-verification/` is still required for runtime behaviors inside Claude, Cursor, or Codex before calling the setup fully verified
 
 Dev-only verification helpers:
 
-- `--dev` guarantees a smoke-verification surface for Claude, Cursor, and Codex. It also installs MDT-internal surfaces such as `tool-setup-verifier` and `tool-doc-maintainer` plus the backing smoke scripts under the global MDT root
-- normal end-user installs keep `documentation-steward` as the general documentation skill but do not ship MDT-maintainer-specific verifier/audit skills by default
+- `--dev` guarantees a smoke-verification surface for Claude, Cursor, and Codex. It also installs `mdt-dev-smoke`, `mdt-dev-verify`, and the backing smoke scripts under the global MDT root
+- normal end-user installs still include `docs-steward` as the general documentation skill
 
 ## Pre-v1 Policy
 

@@ -14,7 +14,7 @@ This is a multi-tool, Node-first AI coding repository with specialized agents, s
 
 - Treat `docs/supported-tools.md` and `docs/tools/` as the source of truth for Claude Code, Cursor, and Codex capability claims.
 - Do not assume a file under `cursor-template/` or `codex-template/` proves that the corresponding vendor supports that feature natively.
-- When updating cross-tool capability documentation, use `skills/tool-doc-maintainer/SKILL.md` and follow its verification workflow.
+- When updating cross-tool capability documentation, use `skills/docs-steward/SKILL.md` and follow its verification workflow.
 - Prefer the repo's Node-first runtime and adapters. Do not reintroduce Bash-, PowerShell-, or Python-specific runtime assumptions unless the repo already requires them.
 - Do not assume a specific OS or shell. Verify the environment before giving shell-specific instructions, and prefer shell-neutral guidance when possible.
 - When documenting tool home directories or emitting user-facing path strings, prefer shell-neutral forms such as `~/.codex/`, `~/.claude/`, and `~/.cursor/`. In PowerShell examples, prefer `Join-Path $HOME '.codex'`-style expressions. Do not spell out expanded Windows absolute home paths to dot-directories.
@@ -118,7 +118,7 @@ When working on cross-tool behavior for Claude Code, Cursor, or Codex:
 - Treat `docs/supported-tools.md` and `docs/tools/` as the repo's capability source of truth.
 - Read `docs/tools/capability-matrix.md` and the relevant per-tool page before making claims about hooks, skills, commands, agents, rules, memory, or MCP support.
 - Do not assume a Claude-native feature maps directly to another tool just because MDT has an adapter file for it.
-- If capability docs need to be updated, use `skills/tool-doc-maintainer/SKILL.md` and follow its verification workflow before changing support labels.
+- If capability docs need to be updated, use `skills/docs-steward/SKILL.md` and follow its verification workflow before changing support labels.
 - Files outside `docs/tools/` may be stale; verify tool capability claims against the docs pack, local CLI behavior, and official vendor docs before repeating them.
 
 ## Git Workflow

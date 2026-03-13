@@ -52,12 +52,12 @@ Local CLI evidence:
 - `cursor-agent --help`
 
 Runtime workflow check:
-- `mdt smoke tool-setups --tool cursor`
-- `mdt smoke workflows --tool cursor`
+- `mdt dev smoke tool-setups --tool cursor`
+- `mdt dev smoke workflows --tool cursor`
 
 Installed-home equivalent:
-- `node ~/.cursor/mdt/scripts/mdt.js smoke tool-setups --tool cursor`
-- `node ~/.cursor/mdt/scripts/mdt.js smoke workflows --tool cursor`
+- `node ~/.cursor/mdt/scripts/mdt.js dev smoke tool-setups --tool cursor`
+- `node ~/.cursor/mdt/scripts/mdt.js dev smoke workflows --tool cursor`
 
 Manual verification boundary:
 - Cursor IDE checks must be run by a human operator.

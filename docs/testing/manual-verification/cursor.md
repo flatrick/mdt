@@ -18,6 +18,7 @@ Use this page to confirm MDT behavior inside Cursor desktop after installing int
 1. Install MDT into Cursor with `mdt install --tool cursor typescript continuous-learning`.
 2. If the opened repository needs repo-local Cursor IDE rules, run `mdt bridge materialize --tool cursor --surface rules`.
 3. Confirm the install exists under `~/.cursor/`.
+4. If you want the maintainer-only smoke surface, reinstall with `mdt install --tool cursor --dev typescript continuous-learning`.
 
 ## CLI Checks
 
@@ -28,15 +29,16 @@ agent --version
 agent --help
 cursor-agent --version
 cursor-agent --help
-mdt smoke tool-setups --tool cursor
-mdt smoke workflows --tool cursor
+mdt verify tool-setups
+mdt dev smoke tool-setups --tool cursor
+mdt dev smoke workflows --tool cursor
 ```
 
 Installed-home equivalents:
 
 ```bash
-node ~/.cursor/mdt/scripts/mdt.js smoke tool-setups --tool cursor
-node ~/.cursor/mdt/scripts/mdt.js smoke workflows --tool cursor
+node ~/.cursor/mdt/scripts/mdt.js dev smoke tool-setups --tool cursor
+node ~/.cursor/mdt/scripts/mdt.js dev smoke workflows --tool cursor
 ```
 
 ## Human-Operated IDE Checks

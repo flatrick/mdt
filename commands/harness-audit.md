@@ -34,7 +34,7 @@ For `setup` scope, return:
 
 1. Per-workflow coverage across Claude, Cursor, and Codex
 2. Deterministic contract status from `mdt verify tool-setups`
-3. Optional local smoke status from `mdt smoke tool-setups`
+3. Optional local smoke status from `mdt dev smoke tool-setups`
 4. Top 3 setup fixes with exact file paths
 
 ## Checklist
@@ -43,7 +43,7 @@ For `setup` scope, return:
 - Inspect `skills/`, command coverage, and agent coverage.
 - Verify cross-harness parity for `cursor-template/` and `codex-template/`.
 - Flag broken or stale references.
-- For `setup` scope, use `skills/tool-setup-verifier/SKILL.md`, `docs/tools/workflow-matrix.md`, and `scripts/lib/tool-workflow-contract.js`.
+- For `setup` scope, use `skills/mdt-dev-verify/SKILL.md`, `docs/tools/workflow-matrix.md`, and `scripts/lib/tool-workflow-contract.js`.
 
 ## Example Result
 

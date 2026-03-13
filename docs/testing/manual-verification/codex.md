@@ -13,21 +13,23 @@ Manual boundary:
 
 Use this page for quick Codex sanity checks and deeper runtime verification in a real local Codex session.
 
+If you want the maintainer-only smoke surface, install with `mdt install --tool codex --dev ...`. Normal installs still support `mdt verify tool-setups`.
+
 ## Quick Smoke
 
 Run:
 
 ```bash
 mdt verify tool-setups
-mdt smoke tool-setups --tool codex
-mdt smoke workflows --tool codex
+mdt dev smoke tool-setups --tool codex
+mdt dev smoke workflows --tool codex
 ```
 
 Installed-home equivalents:
 
 ```bash
-node ~/.codex/mdt/scripts/mdt.js smoke tool-setups --tool codex
-node ~/.codex/mdt/scripts/mdt.js smoke workflows --tool codex
+node ~/.codex/mdt/scripts/mdt.js dev smoke tool-setups --tool codex
+node ~/.codex/mdt/scripts/mdt.js dev smoke workflows --tool codex
 ```
 
 ## Deeper Checks

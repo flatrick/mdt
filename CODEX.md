@@ -39,5 +39,5 @@ npm test
 If you need Codex-specific workflow verification, also use:
 
 ```bash
-mdt smoke workflows --tool codex
+mdt dev smoke workflows --tool codex
 ```
