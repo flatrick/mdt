@@ -1,10 +1,14 @@
 const assert = require('assert');
+const fs = require('fs');
+const os = require('os');
+const path = require('path');
 const { test } = require('../helpers/test-runner');
 const {
   buildCiCommand,
   main,
   normalizeJsonResult,
-  parseCommonOptions
+  parseCommonOptions,
+  resolveLearningScriptsRoot
 } = require('../../scripts/mdt');
 
 function createIo() {
@@ -120,6 +124,53 @@ function runTests() {
     assert.strictEqual(payload.command, 'install');
     assert.strictEqual(payload.data.exitCode, 1);
     assert.ok(payload.errors[0].message.includes('stderr line'));
+  })) passed++; else failed++;
+
+  if (test('resolveLearningScriptsRoot uses installed Codex skill path when config root is provided', () => {
+    const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'mdt-cli-learning-'));
+    const codexRoot = path.join(tempDir, '.codex');
+    const skillScriptsDir = path.join(codexRoot, 'skills', 'continuous-learning-manual', 'scripts');
+
+    try {
+      fs.mkdirSync(skillScriptsDir, { recursive: true });
+      fs.writeFileSync(path.join(codexRoot, 'skills', 'continuous-learning-manual', 'SKILL.md'), '# skill\n', 'utf8');
+
+      const result = resolveLearningScriptsRoot({ configRoot: codexRoot });
+      assert.strictEqual(result, skillScriptsDir);
+    } finally {
+      fs.rmSync(tempDir, { recursive: true, force: true });
+    }
+  })) passed++; else failed++;
+
+  if (test('learning status defaults to the current workspace instead of the MDT install root', () => {
+    const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'mdt-cli-learning-cwd-'));
+    const workspaceDir = path.join(tempDir, 'workspace');
+    const codexRoot = path.join(tempDir, '.codex');
+    const skillScriptsDir = path.join(codexRoot, 'skills', 'continuous-learning-manual', 'scripts');
+    const originalCwd = process.cwd();
+
+    try {
+      fs.mkdirSync(workspaceDir, { recursive: true });
+      fs.mkdirSync(skillScriptsDir, { recursive: true });
+      fs.writeFileSync(
+        path.join(codexRoot, 'skills', 'continuous-learning-manual', 'SKILL.md'),
+        '# skill\n',
+        'utf8'
+      );
+      fs.writeFileSync(
+        path.join(skillScriptsDir, 'codex-learn.js'),
+        'console.log(process.cwd());\n',
+        'utf8'
+      );
+
+      process.chdir(workspaceDir);
+      const result = runMain(['learning', 'status', '--config-root', codexRoot]);
+      assert.strictEqual(result.exitCode, 0, result.stderr || result.stdout);
+      assert.strictEqual(result.stdout.trim(), workspaceDir);
+    } finally {
+      process.chdir(originalCwd);
+      fs.rmSync(tempDir, { recursive: true, force: true });
+    }
   })) passed++; else failed++;
 
   if (test('ci validate all runs validators through the shared dispatcher', () => {

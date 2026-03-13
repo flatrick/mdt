@@ -127,6 +127,7 @@ const testFiles = [
   'compatibility-testing/cursor-ide-compatibility.test.js',
   'scripts/check-dependencies.test.js',
   'scripts/mdt-cli.test.js',
+  'scripts/continuous-learning-wrapper.test.js',
   'scripts/hook-platforms.test.js',
   'scripts/codex-observer.test.js',
   'scripts/continuous-learning-observer.test.js',

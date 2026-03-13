@@ -77,6 +77,7 @@ function runTests() {
     assert.ok(plan.some((line) => line.includes('Packages: typescript, continuous-learning')));
     assert.ok(plan.some((line) => line.includes(path.join(os.homedir(), '.codex'))));
     assert.ok(plan.some((line) => line.includes(path.join(os.homedir(), '.codex', 'mdt'))));
+    assert.ok(plan.some((line) => line.includes(path.join(os.homedir(), '.codex', 'mdt', 'hardening'))));
   })) passed++; else failed++;
 
   if (test('buildInstallPlan returns codex global-only plan', () => {
@@ -307,12 +308,14 @@ function runTests() {
     assert.ok(plan.some((line) => line.includes('Target: cursor (global)')));
     assert.ok(plan.some((line) => line.includes('Packages: typescript')));
     assert.ok(plan.some((line) => line.includes('Would install Cursor rules')));
+    assert.ok(plan.some((line) => line.includes(path.join(os.homedir(), '.cursor', 'mdt', 'hardening'))));
   })) passed++; else failed++;
 
   if (test('buildInstallPlan includes claude runtime scripts detail', () => {
     const plan = buildInstallPlan({ target: 'claude', devMode: false, packageNames: ['typescript'] });
     assert.ok(plan.some((line) => line.includes('runtime scripts')));
     assert.ok(plan.some((line) => line.includes(path.join(os.homedir(), '.claude', 'mdt'))));
+    assert.ok(plan.some((line) => line.includes(path.join(os.homedir(), '.claude', 'mdt', 'hardening'))));
     assert.ok(plan.some((line) => line.includes('Packages: typescript')));
   })) passed++; else failed++;
 
