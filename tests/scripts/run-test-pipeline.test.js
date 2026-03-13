@@ -67,7 +67,7 @@ function runTests() {
       assert.ok(parsed.data.entries.some((entry) => entry.kind === 'step' && entry.step === SCRIPT_STEPS[2].name && entry.status === 'fail'));
       assert.ok(parsed.data.entries.some((entry) => entry.kind === 'summary' && entry.step === 'pipeline' && entry.status === 'fail'));
       assert.ok(
-        parsed.data.entries.some((entry) => entry.data && entry.data.log_file === 'validate-rules.jsonl'),
+        parsed.data.entries.some((entry) => entry.log_file === 'validate-rules.jsonl'),
         'Expected rollup log_file references to be relative to the rollup artifact'
       );
       assert.ok(
@@ -75,7 +75,7 @@ function runTests() {
         'Expected test summary duration in the rollup'
       );
       assert.ok(
-        parsed.data.entries.some((entry) => entry.kind === 'summary' && entry.step === 'tests' && Array.isArray(entry.data.slowest_suites)),
+        parsed.data.entries.some((entry) => entry.kind === 'summary' && entry.step === 'tests' && Array.isArray(entry.slowest_suites)),
         'Expected slowest_suites in the test summary'
       );
     } finally {

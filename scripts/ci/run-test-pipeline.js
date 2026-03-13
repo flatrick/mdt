@@ -6,7 +6,7 @@ const path = require('path');
 const { checkDependencies } = require('./check-dependencies');
 const {
   buildArtifactPath,
-  createJsonlLogger,
+  createPipelineLogger,
   ensureArtifactRoot,
   formatRunId,
   toRelativeArtifactPath
@@ -87,7 +87,7 @@ function runScriptStep(step, context) {
     runId: context.runId,
     name: step.name
   });
-  const logger = createJsonlLogger({ filePath: logFile, runId: context.runId });
+  const logger = createPipelineLogger({ filePath: logFile, runId: context.runId });
   const startMs = Date.now();
 
   const result = spawnSync('node', [path.join(REPO_ROOT, step.script)], {
@@ -145,7 +145,7 @@ function runDependencyStep(context) {
     runId: context.runId,
     name: step.name
   });
-  const logger = createJsonlLogger({ filePath: logFile, runId: context.runId });
+  const logger = createPipelineLogger({ filePath: logFile, runId: context.runId });
   const startMs = Date.now();
 
   const result = checkDependencies(['eslint', 'markdownlint-cli'], REPO_ROOT);
@@ -229,7 +229,7 @@ function runTestPipeline(options = {}) {
     runId,
     name: parsed.testsOnly ? `tests-${parsed.profile || 'neutral'}` : 'npm-test'
   });
-  const rollupLogger = createJsonlLogger({ filePath: rollupLog, runId });
+  const rollupLogger = createPipelineLogger({ filePath: rollupLog, runId });
 
   const summary = {
     artifactRoot,

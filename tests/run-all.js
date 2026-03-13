@@ -15,7 +15,7 @@ const { probeNodeSubprocess } = require('./helpers/subprocess-capability');
 const { buildTestEnv } = require('./helpers/test-env-profiles');
 const {
   buildArtifactPath,
-  createJsonlLogger,
+  createPipelineLogger,
   ensureArtifactRoot,
   formatRunId,
   toRelativeArtifactPath
@@ -400,7 +400,7 @@ function runAllTests(options = {}) {
     profile: parsed.profile,
     rollupName: options.rollupName || `run-all-${parsed.profile}`
   });
-  const rollupLogger = createJsonlLogger({
+  const rollupLogger = createPipelineLogger({
     filePath: artifactContext.rollupLog,
     runId: artifactContext.runId
   });
