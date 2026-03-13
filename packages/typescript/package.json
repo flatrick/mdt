@@ -29,6 +29,7 @@
     "plan.md",
     "tdd.md",
     "verify.md",
+    "commit.md",
     "code-review.md",
     "e2e.md"
   ],
@@ -66,6 +67,7 @@
         "plan.md",
         "tdd.md",
         "verify.md",
+        "commit.md",
         "code-review.md",
         "e2e.md",
         "security.md",

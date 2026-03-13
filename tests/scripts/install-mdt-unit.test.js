@@ -242,7 +242,7 @@ function runTests() {
     assert.ok(Array.isArray(manifest.tools.cursor.rules));
     assert.ok(manifest.tools.cursor.rules.includes('typescript-coding-style.md'));
     assert.deepStrictEqual(manifest.tools.cursor.skills, ['frontend-slides']);
-    assert.deepStrictEqual(manifest.tools.cursor.commands, ['plan.md', 'tdd.md', 'verify.md', 'code-review.md', 'e2e.md', 'security.md', 'build-fix.md', 'refactor-clean.md']);
+    assert.deepStrictEqual(manifest.tools.cursor.commands, ['plan.md', 'tdd.md', 'verify.md', 'commit.md', 'code-review.md', 'e2e.md', 'security.md', 'build-fix.md', 'refactor-clean.md']);
     assert.deepStrictEqual(manifest.tools.codex.rules, ['common-coding-style.md', 'common-testing.md', 'common-security.md', 'common-git-workflow.md']);
     assert.deepStrictEqual(manifest.tools.codex.skills, ['coding-standards', 'tdd-workflow', 'verification-loop', 'security-review', 'backend-patterns', 'frontend-patterns', 'e2e-testing']);
     assert.deepStrictEqual(manifest.requires, {});

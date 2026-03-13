@@ -27,6 +27,7 @@
   "commands": [
     "plan.md",
     "verify.md",
+    "commit.md",
     "code-review.md"
   ],
   "skills": [
