@@ -228,13 +228,13 @@ mkdir -p <data>/homunculus/{instincts/{personal,inherited},evolved/{agents,skill
 
 ## Configuration
 
-Edit `config.json` to control the background observer:
+The skill ships with a `config.json` that enables the observer by default for Claude and Cursor installs. Edit it to tune or disable:
 
 ```json
 {
   "version": "2.1",
   "observer": {
-    "enabled": false,
+    "enabled": true,
     "run_interval_minutes": 5,
     "min_observations_to_analyze": 20,
     "tool": null,
@@ -252,7 +252,7 @@ Edit `config.json` to control the background observer:
 
 | Key | Default | Description |
 |-----|---------|-------------|
-| `observer.enabled` | `false` | Enable the background observer agent |
+| `observer.enabled` | `true` | Enable the background observer agent |
 | `observer.run_interval_minutes` | `5` | How often the observer analyzes observations |
 | `observer.min_observations_to_analyze` | `20` | Minimum observations before analysis runs |
 | `observer.tool` | `null` | Force a specific native observer runner (`claude` or `cursor`); otherwise infer from environment/config |
