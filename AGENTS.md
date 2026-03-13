@@ -17,6 +17,7 @@ This is a multi-tool, Node-first AI coding repository with specialized agents, s
 - When updating cross-tool capability documentation, use `skills/tool-doc-maintainer/SKILL.md` and follow its verification workflow.
 - Prefer the repo's Node-first runtime and adapters. Do not reintroduce Bash-, PowerShell-, or Python-specific runtime assumptions unless the repo already requires them.
 - Do not assume a specific OS or shell. Verify the environment before giving shell-specific instructions, and prefer shell-neutral guidance when possible.
+- When documenting tool home directories or emitting user-facing path strings, prefer shell-neutral forms such as `~/.codex/`, `~/.claude/`, and `~/.cursor/`. In PowerShell examples, prefer `Join-Path $HOME '.codex'`-style expressions. Do not spell out expanded Windows absolute home paths to dot-directories.
 - Installer scope rule: normal `scripts/install-mdt.js` installs target the tool's user/global config root. Treat `--global` as a compatibility alias/no-op. `--project-dir` is retired. If a tool still needs a repo-local surface, use an explicit bridge flow and document that exception in `docs/INSTALLATION.md` and the relevant tool page.
 
 ## Available Agents

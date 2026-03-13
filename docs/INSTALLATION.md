@@ -51,6 +51,14 @@ Current bridge support:
 | `cursor` | `~/.cursor/` | `~/.cursor/mdt/` | always installs MDT into the shared global Cursor directory, even for IDE-only users; includes `.mdc` rules, skills, commands, optional experimental hooks, and runtime state |
 | `codex` | `~/.codex/` | `~/.codex/mdt/` | installs Codex config, AGENTS, skills, rules, and helper scripts globally |
 
+## Path Notation
+
+Use path forms that stay unambiguous across Markdown renderers, terminals, and agents:
+
+- prefer shell-neutral prose such as `~/.codex/`, `~/.claude/`, `~/.cursor/`, and `~/.{tool}/mdt/`
+- in PowerShell examples, prefer `Join-Path $HOME '.codex'`, `Join-Path $HOME '.claude'`, and `Join-Path $HOME '.cursor'`
+- avoid spelling out expanded Windows absolute home paths to tool dot-directories in docs or user-facing output
+
 ## Examples
 
 Claude Code:
