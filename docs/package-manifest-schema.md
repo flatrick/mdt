@@ -34,8 +34,7 @@ per-tool template directories.
     },
     "cursor": {
       "rules": ["common-testing.mdc"],
-      "skills": ["ai-learning"],
-      "commands": ["learn.md"]
+      "skills": ["ai-learning"]
     },
     "codex": {
       "rules": ["common-testing.md"],
@@ -113,13 +112,16 @@ Supported subfields today:
 - `tools.claude.skills`
 - `tools.cursor.rules`
 - `tools.cursor.skills`
-- `tools.cursor.commands`
 - `tools.codex.rules`
 - `tools.codex.skills`
 - `tools.codex.scripts`
 
 Validation is intentionally asymmetric by tool because MDT does not ship the
 same native surface everywhere.
+
+Shared commands are selected from the package `commands` list for all tools.
+Per-command install targeting now lives beside each shared command in
+`commands/<name>.meta.json`.
 
 ### `requires`
 

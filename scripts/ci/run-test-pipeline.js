@@ -18,6 +18,7 @@ const REPO_ROOT = path.join(__dirname, '..', '..');
 const SCRIPT_STEPS = [
   { name: 'validate-agents', script: 'scripts/ci/validate-agents.js' },
   { name: 'validate-commands', script: 'scripts/ci/validate-commands.js' },
+  { name: 'validate-command-metadata', script: 'scripts/ci/validate-command-metadata.js' },
   { name: 'validate-rules', script: 'scripts/ci/validate-rules.js' },
   { name: 'validate-skills', script: 'scripts/ci/validate-skills.js' },
   { name: 'validate-hooks', script: 'scripts/ci/validate-hooks.js' },

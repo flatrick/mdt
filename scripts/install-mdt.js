@@ -22,13 +22,14 @@ const CODEX_SKILLS_SRC = path.join(CODEX_SRC, 'skills');
 const CODEX_RULES_SRC = path.join(CODEX_SRC, 'rules');
 const SHARED_SKILLS_SRC = path.join(REPO_ROOT, 'skills');
 const SHARED_COMMANDS_SRC = path.join(REPO_ROOT, 'commands');
+const CURSOR_COMMANDS_SRC = path.join(CURSOR_SRC, 'commands');
 const SHARED_HARDENING_SRC = path.join(REPO_ROOT, 'hardening');
 const RUNTIME_CI_FILES = [
   'markdown-utils.js',
   'validate-markdown-links.js',
   'validate-markdown-path-refs.js'
 ];
-const BASELINE_SHARED_COMMAND_FILES = ['docs-audit.md'];
+const BASELINE_SHARED_COMMAND_FILES = ['docs-audit.md', 'install-rules.md'];
 const CLAUDE_DEV_SMOKE_WORKFLOW_SCRIPTS = ['mdt-dev-smoke-claude-workflows.js'];
 const DEV_SMOKE_SCRIPT_FILES = ['mdt-dev-smoke-tool-setups.js'];
 const CURSOR_RUNTIME_SCRIPT_FILES = ['materialize-mdt-local.js'];
@@ -811,6 +812,65 @@ function copySelectedMarkdownFiles(srcDir, destDir, fileNames, missingContext = 
   return copied;
 }
 
+const SUPPORTED_COMMAND_TOOLS = new Set(['claude', 'cursor']);
+
+function loadCommandMeta(metaPath) {
+  if (!fs.existsSync(metaPath)) {
+    return { tools: ['claude'] };
+  }
+
+  const raw = JSON.parse(fs.readFileSync(metaPath, 'utf8'));
+  const tools = Array.isArray(raw.tools)
+    ? raw.tools.filter((toolName) => SUPPORTED_COMMAND_TOOLS.has(toolName))
+    : ['claude'];
+
+  return {
+    tools: tools.length > 0 ? mergeUniqueOrdered(tools) : ['claude']
+  };
+}
+
+function resolveCommandSource(tool, commandFile) {
+  if (tool === 'cursor') {
+    const cursorOverrideSrc = path.join(CURSOR_COMMANDS_SRC, commandFile);
+    if (fs.existsSync(cursorOverrideSrc)) {
+      return cursorOverrideSrc;
+    }
+  }
+
+  return path.join(SHARED_COMMANDS_SRC, commandFile);
+}
+
+function installCommandsForTool(tool, commandsDest, commandFiles, missingContext = '') {
+  if (!fs.existsSync(SHARED_COMMANDS_SRC)) {
+    return 0;
+  }
+
+  fs.mkdirSync(commandsDest, { recursive: true });
+  let copied = 0;
+
+  for (const commandFile of mergeUniqueOrdered(commandFiles)) {
+    const metaPath = path.join(SHARED_COMMANDS_SRC, commandFile.replace(/\.md$/, '.meta.json'));
+    const meta = loadCommandMeta(metaPath);
+    if (!meta.tools.includes(tool)) {
+      continue;
+    }
+
+    const srcPath = resolveCommandSource(tool, commandFile);
+    if (!fs.existsSync(srcPath)) {
+      if (missingContext) {
+        console.error(`Warning: ${missingContext} '${commandFile}' does not exist, skipping.`);
+      }
+      continue;
+    }
+
+    const destPath = path.join(commandsDest, commandFile);
+    copyFileAtomicSync(srcPath, destPath);
+    copied += 1;
+  }
+
+  return copied;
+}
+
 function copySelectedDirectories(srcDir, destDir, dirNames, missingContext = '') {
   if (!fs.existsSync(srcDir) || dirNames.length === 0) return 0;
   let copied = 0;
@@ -943,14 +1003,14 @@ function installBaselineSharedSkills(destDir) {
   return copySelectedDirectories(SHARED_SKILLS_SRC, skillsDest, BASELINE_SHARED_SKILL_NAMES, 'Baseline shared skill');
 }
 
-function installBaselineSharedCommands(destDir) {
+function installBaselineSharedCommands(destDir, tool) {
   if (!fs.existsSync(SHARED_COMMANDS_SRC)) {
     return 0;
   }
 
   const commandsDest = path.join(destDir, 'commands');
-  return copySelectedMarkdownFiles(
-    SHARED_COMMANDS_SRC,
+  return installCommandsForTool(
+    tool,
     commandsDest,
     BASELINE_SHARED_COMMAND_FILES,
     'Baseline shared command'
@@ -977,14 +1037,14 @@ function installClaudeAgents(claudeBase, selectedPackages) {
 function installClaudeCommands(claudeBase, selectedPackages, devMode) {
   const commandsDest = path.join(claudeBase, 'commands');
   if (fs.existsSync(SHARED_COMMANDS_SRC) && path.resolve(SHARED_COMMANDS_SRC) !== path.resolve(commandsDest)) {
-    if (installBaselineSharedCommands(claudeBase) > 0) {
+    if (installBaselineSharedCommands(claudeBase, 'claude') > 0) {
       console.log('Installing baseline shared commands -> ' + commandsDest + '/');
     }
     const commandFiles = mergeUniqueOrdered(
       getManifestSelections(selectedPackages, 'commands'),
       devMode ? ['mdt-dev-smoke.md'] : []
     );
-    if (copySelectedMarkdownFiles(SHARED_COMMANDS_SRC, commandsDest, commandFiles, 'Package-selected command') > 0) {
+    if (installCommandsForTool('claude', commandsDest, commandFiles, 'Package-selected command') > 0) {
       console.log('Installing package-selected commands -> ' + commandsDest + '/');
     }
   }
@@ -1226,59 +1286,18 @@ function installCursorAgents(destDir, selectedPackages) {
   }
 }
 
-function installCursorSharedCommands(commandsDest, selectedPackages, devMode) {
-  if (!fs.existsSync(SHARED_COMMANDS_SRC)) {
-    return;
-  }
-  if (installBaselineSharedCommands(path.dirname(commandsDest)) > 0) {
+function installCursorCommands(destDir, selectedPackages, devMode) {
+  const commandsDest = path.join(destDir, 'commands');
+  if (installBaselineSharedCommands(destDir, 'cursor') > 0) {
     console.log('Installing baseline shared commands -> ' + commandsDest + '/');
   }
-  const sharedCommandFiles = mergeUniqueOrdered(
+  const commandFiles = mergeUniqueOrdered(
     getManifestSelections(selectedPackages, 'commands'),
     devMode ? ['mdt-dev-smoke.md'] : []
   );
-  if (copySelectedMarkdownFiles(SHARED_COMMANDS_SRC, commandsDest, sharedCommandFiles, 'Package-selected command') > 0) {
+  if (installCommandsForTool('cursor', commandsDest, commandFiles, 'Package-selected command') > 0) {
     console.log('Installing package-selected commands -> ' + commandsDest + '/');
   }
-}
-
-function installCursorToolCommands(commandsDest, selectedPackages) {
-  const commandsSrc = path.join(CURSOR_SRC, 'commands');
-  if (!fs.existsSync(commandsSrc)) {
-    return;
-  }
-  if (copySelectedMarkdownFiles(commandsSrc, commandsDest, ['install-rules.md'], 'Cursor utility command') > 0) {
-    console.log('Installing Cursor utility commands -> ' + commandsDest + '/');
-  }
-
-  let copiedCursorCommands = 0;
-  for (const selectedPackage of selectedPackages) {
-    const cursorCommands = Array.isArray(selectedPackage.tools.cursor?.commands)
-      ? selectedPackage.tools.cursor.commands
-      : [];
-    for (const commandFile of cursorCommands) {
-      const cursorCommandSrc = path.join(commandsSrc, commandFile);
-      const sharedCommandSrc = path.join(SHARED_COMMANDS_SRC, commandFile);
-      const commandSrc = fs.existsSync(cursorCommandSrc) ? cursorCommandSrc : sharedCommandSrc;
-      const commandDest = path.join(commandsDest, commandFile);
-      if (!fs.existsSync(commandSrc)) {
-        console.error(`Warning: Cursor command '${commandFile}' for package '${selectedPackage.name}' does not exist, skipping.`);
-        continue;
-      }
-      fs.mkdirSync(path.dirname(commandDest), { recursive: true });
-      fs.copyFileSync(commandSrc, commandDest);
-      copiedCursorCommands++;
-    }
-  }
-  if (copiedCursorCommands > 0) {
-    console.log('Installing Cursor package commands -> ' + commandsDest + '/');
-  }
-}
-
-function installCursorCommands(destDir, selectedPackages, devMode) {
-  const commandsDest = path.join(destDir, 'commands');
-  installCursorSharedCommands(commandsDest, selectedPackages, devMode);
-  installCursorToolCommands(commandsDest, selectedPackages);
 }
 
 function installCursorHooksConfig(destDir) {
@@ -1536,6 +1555,7 @@ if (require.main === module) {
 module.exports = {
   getAvailablePackages,
   loadPackageManifest,
+  loadCommandMeta,
   parseArgsFrom,
   resolveSelectedPackages,
   buildInstallPlan,
@@ -1546,5 +1566,6 @@ module.exports = {
   installClaudePermissions,
   installClaudeContentDirs,
   installCursorCoreDirs,
+  installCommandsForTool,
   installCodexSkills
 };

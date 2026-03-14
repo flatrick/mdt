@@ -1,72 +1,21 @@
 # /learn - Extract Reusable Patterns
 
-Analyze the current session and extract any patterns worth saving as skills.
+Run the supported ai-learning workflow to analyze the current session and extract reusable patterns.
 
 ## Trigger
 
 Run `/learn` at any point during a session when you've solved a non-trivial problem.
 
-## What to Extract
-
-Look for:
-
-1. **Error Resolution Patterns**
-   - What error occurred?
-   - What was the root cause?
-   - What fixed it?
-   - Is this reusable for similar errors?
-
-2. **Debugging Techniques**
-   - Non-obvious debugging steps
-   - Tool combinations that worked
-   - Diagnostic patterns
-
-3. **Workarounds**
-   - Library quirks
-   - API limitations
-   - Version-specific fixes
-
-4. **Project-Specific Patterns**
-   - Codebase conventions discovered
-   - Architecture decisions made
-   - Integration patterns
-
-## Output Format
-
-Create a candidate skill file at `<data>/generated/skills/learned/[pattern-name].md`:
-
-```markdown
-# [Descriptive Pattern Name]
-
-**Extracted:** [Date]
-**Context:** [Brief description of when this applies]
-
-## Problem
-[What problem this solves - be specific]
-
-## Solution
-[The pattern/technique/workaround]
-
-## Example
-[Code example if applicable]
-
-## When to Use
-[Trigger conditions - what should activate this skill]
-```
-
 ## Process
 
-1. Review the session for extractable patterns
-2. Identify the most valuable/reusable insight
-3. Draft the skill file
-4. Ask user to confirm before saving
-5. Save to `<data>/generated/skills/learned/` as an MDT-managed candidate
-6. Promote/materialize into the live tool skill surface only after explicit approval
+1. Treat `/learn` as the user-facing entrypoint to the same learning pipeline used by `mdt learning`.
+2. In hook-enabled environments, analyze the accumulated observations through the supported learning runtime.
+3. In hook-free environments, capture a concise session summary first when needed, then run the supported analysis flow.
+4. Review the resulting instincts, candidates, or analysis output and summarize the reusable patterns that were extracted.
+5. Ask before promoting, materializing, or doing any manual recovery work outside the supported runtime.
 
 ## Notes
 
-- Don't extract trivial fixes (typos, simple syntax errors)
-- Don't extract one-time issues (specific API outages, etc.)
-- Focus on patterns that will save time in future sessions
-- Keep skills focused - one pattern per skill
-- Treat this location as staging, not the live tool skill directory
+- `/learn` should not bypass the runtime by drafting instinct markdown or learned skill files directly.
+- `/learn-eval` remains the quality-gated, save-location-aware follow-up when the user explicitly wants evaluation before saving.
+- Focus on patterns that will save time in future sessions.

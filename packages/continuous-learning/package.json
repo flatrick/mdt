@@ -14,6 +14,7 @@
   ],
   "agents": [],
   "commands": [
+    "ai-learning.md",
     "evolve.md",
     "instinct-export.md",
     "instinct-import.md",
@@ -44,15 +45,6 @@
       ],
       "skills": [
         "ai-learning"
-      ],
-      "commands": [
-        "instinct-export.md",
-        "instinct-import.md",
-        "instinct-status.md",
-        "learn.md",
-        "projects.md",
-        "promote.md",
-        "skill-create.md"
       ]
     },
     "codex": {

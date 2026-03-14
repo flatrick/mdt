@@ -31,7 +31,10 @@
     "verify.md",
     "commit.md",
     "code-review.md",
-    "e2e.md"
+    "e2e.md",
+    "security.md",
+    "build-fix.md",
+    "refactor-clean.md"
   ],
   "skills": [
     "coding-standards",
@@ -62,17 +65,6 @@
       ],
       "skills": [
         "frontend-slides"
-      ],
-      "commands": [
-        "plan.md",
-        "tdd.md",
-        "verify.md",
-        "commit.md",
-        "code-review.md",
-        "e2e.md",
-        "security.md",
-        "build-fix.md",
-        "refactor-clean.md"
       ]
     },
     "codex": {

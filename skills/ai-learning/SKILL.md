@@ -30,6 +30,8 @@ The instinct model and storage are shared across all tools. Capture and analysis
 - Running `/learn` or `mdt learning analyze` triggers immediate analysis on demand
 - Observer is **ON by default** (`observer.enabled: true` in `config.json`)
 - Set `observer.enabled: false` to opt out
+- For Claude/Cursor, do **not** use `instinct-cli.js` for `capture` or `analyze` because that CLI only supports instinct management actions such as `status`, `projects`, `evolve`, `export`, `import`, and `promote`
+- For a normal analysis pass, do **not** write instinct markdown files directly; run the learning workflow so observations are analyzed through the supported runtime
 
 ### Codex / hook-free tools
 
@@ -43,7 +45,21 @@ The instinct model and storage are shared across all tools. Capture and analysis
 
 These commands work identically regardless of tool:
 
-`/learn`, `/learn-eval`, `/instinct-status`, `/evolve`, `/instinct-export`, `/instinct-import`, `/promote`, `/projects`
+`/ai-learning`, `/learn`, `/learn-eval`, `/instinct-status`, `/evolve`, `/instinct-export`, `/instinct-import`, `/promote`, `/projects`
+
+## Command Routing Rules
+
+Use the correct entrypoint for the requested action:
+
+- `status`, `projects`, `evolve`, `export`, `import`, `promote` → `skills/ai-learning/scripts/instinct-cli.js`
+- `learning status`, `learning capture`, `learning analyze`, `learning retrospective weekly`, `learning observer ...` → `mdt/scripts/mdt.js`
+
+If the user asks to "review instincts and run an analysis pass" in Claude/Cursor:
+
+1. Run `instinct-cli.js status`
+2. Optionally run `instinct-cli.js projects` if project context is relevant
+3. Run `mdt.js learning analyze`
+4. Summarize the results instead of synthesizing instincts by hand
 
 ## The Instinct Model
 
@@ -209,6 +225,7 @@ node ~/.codex/mdt/scripts/mdt.js learning retrospective weekly --week 2026-W11
 
 | Command | Description |
 |---------|-------------|
+| `/ai-learning` | Review instinct status and run the supported ai-learning workflow |
 | `/instinct-status` | Show all instincts (project-scoped + global) with confidence |
 | `/evolve` | Cluster related instincts into skills/commands, suggest promotions |
 | `/instinct-export` | Export instincts (filterable by scope/domain) |

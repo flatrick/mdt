@@ -8,6 +8,7 @@ function getValidatorFunction(validatorName) {
     'validate-agents': mod.validateAgents,
     'validate-hooks': mod.validateHooks,
     'validate-commands': mod.validateCommands,
+    'validate-command-metadata': mod.validateCommandMetadata,
     'validate-skills': mod.validateSkills,
     'validate-rules': mod.validateRules,
     'validate-hook-mirrors': mod.runCli,

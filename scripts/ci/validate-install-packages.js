@@ -16,7 +16,6 @@ const DEFAULT_COMMANDS_DIR = path.join(REPO_ROOT, 'commands');
 const DEFAULT_SKILLS_DIR = path.join(REPO_ROOT, 'skills');
 const DEFAULT_CURSOR_RULES_DIR = path.join(REPO_ROOT, 'cursor-template', 'rules');
 const DEFAULT_CURSOR_SKILLS_DIR = path.join(REPO_ROOT, 'cursor-template', 'skills');
-const DEFAULT_CURSOR_COMMANDS_DIR = path.join(REPO_ROOT, 'cursor-template', 'commands');
 const DEFAULT_CODEX_RULES_DIR = path.join(REPO_ROOT, 'codex-template', 'rules');
 const DEFAULT_CODEX_SKILLS_DIR = path.join(REPO_ROOT, 'codex-template', 'skills');
 const REQUIRED_PACKAGES = new Set(['typescript', 'sql', 'dotnet', 'rust', 'python', 'bash', 'powershell']);
@@ -161,7 +160,6 @@ function getValidationDefaults() {
     skillsDir: DEFAULT_SKILLS_DIR,
     cursorRulesDir: DEFAULT_CURSOR_RULES_DIR,
     cursorSkillsDir: DEFAULT_CURSOR_SKILLS_DIR,
-    cursorCommandsDir: DEFAULT_CURSOR_COMMANDS_DIR,
     codexRulesDir: DEFAULT_CODEX_RULES_DIR,
     codexSkillsDir: DEFAULT_CODEX_SKILLS_DIR
   };
@@ -342,7 +340,6 @@ function validateToolSkillSet(packageName, skillNames, primaryDir, fallbackDir, 
 function normalizeReferenceLabel(label) {
   const explicitLabels = {
     'tools.cursor.rules': 'Cursor rule',
-    'tools.cursor.commands': 'Cursor command',
     'tools.codex.rules': 'Codex rule',
     'tools.codex.scripts': 'Codex script'
   };
@@ -378,7 +375,7 @@ function validateOptionalStringArray(packageName, values, label, baseDir, io) {
 }
 
 function validateCursorTools(packageName, cursor, context) {
-  const { io, cursorRulesDir, cursorSkillsDir, cursorCommandsDir, skillsDir } = context;
+  const { io, cursorRulesDir, cursorSkillsDir, skillsDir } = context;
   let hasErrors = false;
   if (cursor === undefined) {
     return false;
@@ -390,7 +387,6 @@ function validateCursorTools(packageName, cursor, context) {
 
   hasErrors = validateOptionalStringArray(packageName, cursor.rules, 'tools.cursor.rules', cursorRulesDir, io) || hasErrors;
   hasErrors = validateToolSkillSet(packageName, cursor.skills, cursorSkillsDir, skillsDir, 'Cursor skill', io) || hasErrors;
-  hasErrors = validateOptionalStringArray(packageName, cursor.commands, 'tools.cursor.commands', cursorCommandsDir, io) || hasErrors;
   return hasErrors;
 }
 

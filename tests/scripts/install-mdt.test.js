@@ -254,6 +254,7 @@ function runTests() {
           assert.ok(fs.existsSync(path.join(cursorRoot, 'skills', 'frontend-slides', 'SKILL.md')));
           assert.ok(fs.existsSync(path.join(cursorRoot, 'skills', 'ai-learning', 'SKILL.md')));
           assert.ok(fs.existsSync(path.join(cursorRoot, 'commands', 'plan.md')));
+          assert.ok(fs.existsSync(path.join(cursorRoot, 'commands', 'ai-learning.md')));
           assert.ok(fs.existsSync(path.join(cursorRoot, 'commands', 'install-rules.md')));
           assert.ok(fs.existsSync(path.join(cursorRoot, 'commands', 'instinct-status.md')));
           assert.ok(fs.existsSync(path.join(cursorRoot, 'mdt', 'scripts', 'materialize-mdt-local.js')));
@@ -518,6 +519,7 @@ function runTests() {
           for (const skillName of REPRESENTATIVE_BASELINE_SKILLS) {
             assert.ok(fs.existsSync(path.join(claudeBase, 'skills', skillName, 'SKILL.md')));
           }
+          assert.ok(fs.existsSync(path.join(claudeBase, 'commands', 'ai-learning.md')));
         } finally {
           cleanupTestDir(tmpHome);
         }

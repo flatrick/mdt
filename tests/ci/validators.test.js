@@ -615,7 +615,7 @@ function runTests() {
     cleanupTestDir(cursorCommandsDir);
   })) passed++; else failed++;
 
-  if (test('fails when tools.cursor.commands references a missing Cursor command file', () => {
+  if (test('fails when package commands references a missing shared command file', () => {
     const packagesDir = createTestDir();
     const rulesDir = createTestDir();
     const agentsDir = createTestDir();
@@ -623,7 +623,6 @@ function runTests() {
     const skillsDir = createTestDir();
     const cursorRulesDir = createTestDir();
     const cursorSkillsDir = createTestDir();
-    const cursorCommandsDir = createTestDir();
 
     for (const packageName of ['typescript', 'sql', 'dotnet', 'rust', 'python', 'bash', 'powershell']) {
       fs.mkdirSync(path.join(packagesDir, packageName), { recursive: true });
@@ -631,15 +630,9 @@ function runTests() {
       fs.writeFileSync(path.join(rulesDir, packageName, 'coding-style.md'), `# ${packageName}\nBody`);
       fs.writeFileSync(
         path.join(packagesDir, packageName, 'package.json'),
-        JSON.stringify(buildValidPackageManifest(packageName, {
-          tools: {
-            cursor: {
-              rules: [],
-              skills: [],
-              commands: packageName === 'typescript' ? ['missing-command.md'] : []
-            }
-          }
-        })),
+        JSON.stringify(buildValidPackageManifest(packageName, packageName === 'typescript'
+          ? { commands: ['plan.md', 'missing-command.md'] }
+          : {})),
         'utf8'
       );
     }
@@ -658,12 +651,11 @@ function runTests() {
       COMMANDS_DIR: commandsDir,
       SKILLS_DIR: skillsDir,
       CURSOR_RULES_DIR: cursorRulesDir,
-      CURSOR_SKILLS_DIR: cursorSkillsDir,
-      CURSOR_COMMANDS_DIR: cursorCommandsDir
+      CURSOR_SKILLS_DIR: cursorSkillsDir
     });
 
-    assert.strictEqual(result.code, 1, 'Should fail when Cursor command reference is missing');
-    assert.ok(result.stderr.includes('missing Cursor command reference: missing-command.md'));
+    assert.strictEqual(result.code, 1, 'Should fail when shared command reference is missing');
+    assert.ok(result.stderr.includes('missing command reference: missing-command.md'));
 
     cleanupTestDir(packagesDir);
     cleanupTestDir(rulesDir);
@@ -672,7 +664,6 @@ function runTests() {
     cleanupTestDir(skillsDir);
     cleanupTestDir(cursorRulesDir);
     cleanupTestDir(cursorSkillsDir);
-    cleanupTestDir(cursorCommandsDir);
   })) passed++; else failed++;
 
   if (test('fails when referenced Cursor assets do not exist', () => {
@@ -1506,6 +1497,68 @@ function runTests() {
     });
     assert.strictEqual(result.code, 0, 'Should pass on valid workflow');
     cleanupTestDir(testDir); cleanupTestDir(agentsDir); cleanupTestDir(skillsDir);
+  })) passed++; else failed++;
+
+  // ==========================================
+  // validate-command-metadata.js
+  // ==========================================
+  console.log('\nvalidate-command-metadata.js:');
+
+  if (test('passes on real project command metadata', () => {
+    const result = runValidator('validate-command-metadata');
+    assert.strictEqual(result.code, 0, `Should pass, got stderr: ${result.stderr}`);
+    assert.ok(result.stdout.includes('Validated'), 'Should output validation count');
+  })) passed++; else failed++;
+
+  if (test('fails when shared command metadata file is missing', () => {
+    const commandsDir = createTestDir();
+    const cursorCommandsDir = createTestDir();
+    fs.writeFileSync(path.join(commandsDir, 'plan.md'), '# Plan\nBody');
+
+    const result = runValidatorWithDirs('validate-command-metadata', {
+      COMMANDS_DIR: commandsDir,
+      CURSOR_COMMANDS_DIR: cursorCommandsDir
+    });
+
+    assert.strictEqual(result.code, 1, 'Should fail when .meta.json is missing');
+    assert.ok(result.stderr.includes('missing plan.meta.json'));
+    cleanupTestDir(commandsDir);
+    cleanupTestDir(cursorCommandsDir);
+  })) passed++; else failed++;
+
+  if (test('fails when metadata tools array is invalid', () => {
+    const commandsDir = createTestDir();
+    const cursorCommandsDir = createTestDir();
+    fs.writeFileSync(path.join(commandsDir, 'plan.md'), '# Plan\nBody');
+    fs.writeFileSync(path.join(commandsDir, 'plan.meta.json'), JSON.stringify({ tools: ['codex'] }), 'utf8');
+
+    const result = runValidatorWithDirs('validate-command-metadata', {
+      COMMANDS_DIR: commandsDir,
+      CURSOR_COMMANDS_DIR: cursorCommandsDir
+    });
+
+    assert.strictEqual(result.code, 1, 'Should fail on unsupported tool');
+    assert.ok(result.stderr.includes("unsupported tool 'codex'"));
+    cleanupTestDir(commandsDir);
+    cleanupTestDir(cursorCommandsDir);
+  })) passed++; else failed++;
+
+  if (test('fails when cursor override is missing shared cursor metadata', () => {
+    const commandsDir = createTestDir();
+    const cursorCommandsDir = createTestDir();
+    fs.writeFileSync(path.join(commandsDir, 'plan.md'), '# Plan\nBody');
+    fs.writeFileSync(path.join(commandsDir, 'plan.meta.json'), JSON.stringify({ tools: ['claude'] }), 'utf8');
+    fs.writeFileSync(path.join(cursorCommandsDir, 'plan.md'), '# Cursor Plan\nBody');
+
+    const result = runValidatorWithDirs('validate-command-metadata', {
+      COMMANDS_DIR: commandsDir,
+      CURSOR_COMMANDS_DIR: cursorCommandsDir
+    });
+
+    assert.strictEqual(result.code, 1, 'Should fail when cursor override lacks cursor metadata');
+    assert.ok(result.stderr.includes('shared metadata must include "cursor"'));
+    cleanupTestDir(commandsDir);
+    cleanupTestDir(cursorCommandsDir);
   })) passed++; else failed++;
 
   // ==========================================

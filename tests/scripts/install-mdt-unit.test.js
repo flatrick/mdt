@@ -13,6 +13,7 @@ const {
   parseArgsFrom,
   getAvailablePackages,
   loadPackageManifest,
+  loadCommandMeta,
   buildInstallPlan,
   resolveSelectedPackages,
   assertPackageRequirements,
@@ -20,6 +21,7 @@ const {
   getSkillRequirementWarnings,
   installClaudeContentDirs,
   installCursorCoreDirs,
+  installCommandsForTool,
   installCodexSkills
 } = require('../../scripts/install-mdt');
 
@@ -242,7 +244,10 @@ function runTests() {
     assert.ok(Array.isArray(manifest.tools.cursor.rules));
     assert.ok(manifest.tools.cursor.rules.includes('typescript-coding-style.md'));
     assert.deepStrictEqual(manifest.tools.cursor.skills, ['frontend-slides']);
-    assert.deepStrictEqual(manifest.tools.cursor.commands, ['plan.md', 'tdd.md', 'verify.md', 'commit.md', 'code-review.md', 'e2e.md', 'security.md', 'build-fix.md', 'refactor-clean.md']);
+    assert.ok(manifest.commands.includes('security.md'));
+    assert.ok(manifest.commands.includes('build-fix.md'));
+    assert.ok(manifest.commands.includes('refactor-clean.md'));
+    assert.strictEqual(manifest.tools.cursor.commands, undefined);
     assert.deepStrictEqual(manifest.tools.codex.rules, ['common-coding-style.md', 'common-testing.md', 'common-security.md', 'common-git-workflow.md']);
     assert.deepStrictEqual(manifest.tools.codex.skills, ['coding-standards', 'tdd-workflow', 'verification-loop', 'security-review', 'backend-patterns', 'frontend-patterns', 'e2e-testing']);
     assert.deepStrictEqual(manifest.requires, {});
@@ -260,7 +265,7 @@ function runTests() {
     assert.ok(manifest.skills.includes('python-patterns'));
     assert.ok(Array.isArray(manifest.tools.cursor.rules));
     assert.ok(manifest.tools.cursor.rules.includes('python-coding-style.md'));
-    assert.deepStrictEqual(manifest.tools.cursor.commands, []);
+    assert.strictEqual(manifest.tools.cursor.commands, undefined);
     assert.deepStrictEqual(manifest.requires, {});
   })) passed++; else failed++;
 
@@ -272,18 +277,59 @@ function runTests() {
       sessionData: true,
       tools: ['claude', 'cursor', 'codex']
     });
+    assert.ok(manifest.commands.includes('ai-learning.md'));
     assert.deepStrictEqual(manifest.tools.claude.skills, ['ai-learning']);
     assert.deepStrictEqual(manifest.tools.cursor.skills, ['ai-learning']);
     assert.deepStrictEqual(manifest.tools.codex.skills, ['ai-learning']);
-    assert.deepStrictEqual(manifest.tools.cursor.commands, [
-      'instinct-export.md',
-      'instinct-import.md',
-      'instinct-status.md',
-      'learn.md',
-      'projects.md',
-      'promote.md',
-      'skill-create.md'
-    ]);
+    assert.strictEqual(manifest.tools.cursor.commands, undefined);
+  })) passed++; else failed++;
+
+  if (test('loadCommandMeta defaults to claude when file is missing', () => {
+    withTempDir('mdt-command-meta-missing-', (tempDir) => {
+      const result = loadCommandMeta(path.join(tempDir, 'missing.meta.json'));
+      assert.deepStrictEqual(result, { tools: ['claude'] });
+    });
+  })) passed++; else failed++;
+
+  if (test('loadCommandMeta reads supported tools from metadata file', () => {
+    withTempDir('mdt-command-meta-valid-', (tempDir) => {
+      const metaPath = path.join(tempDir, 'plan.meta.json');
+      fs.writeFileSync(metaPath, JSON.stringify({ tools: ['claude', 'cursor'] }), 'utf8');
+      const result = loadCommandMeta(metaPath);
+      assert.deepStrictEqual(result, { tools: ['claude', 'cursor'] });
+    });
+  })) passed++; else failed++;
+
+  if (test('loadCommandMeta falls back to claude when tools array is invalid', () => {
+    withTempDir('mdt-command-meta-invalid-', (tempDir) => {
+      const metaPath = path.join(tempDir, 'plan.meta.json');
+      fs.writeFileSync(metaPath, JSON.stringify({ tools: ['codex'] }), 'utf8');
+      const result = loadCommandMeta(metaPath);
+      assert.deepStrictEqual(result, { tools: ['claude'] });
+    });
+  })) passed++; else failed++;
+
+  if (test('installCommandsForTool filters commands by metadata and uses cursor overrides', () => {
+    withTempDir('mdt-command-install-', (tempDir) => {
+      const cursorDest = path.join(tempDir, 'cursor');
+      const claudeDest = path.join(tempDir, 'claude');
+
+      installCommandsForTool('cursor', cursorDest, ['plan.md', 'security.md', 'python-review.md']);
+      installCommandsForTool('claude', claudeDest, ['plan.md', 'security.md', 'python-review.md']);
+
+      assert.ok(fs.existsSync(path.join(cursorDest, 'plan.md')));
+      assert.ok(fs.existsSync(path.join(cursorDest, 'security.md')));
+      assert.ok(!fs.existsSync(path.join(cursorDest, 'python-review.md')));
+
+      assert.ok(fs.existsSync(path.join(claudeDest, 'plan.md')));
+      assert.ok(!fs.existsSync(path.join(claudeDest, 'security.md')));
+      assert.ok(fs.existsSync(path.join(claudeDest, 'python-review.md')));
+
+      const cursorPlan = fs.readFileSync(path.join(cursorDest, 'plan.md'), 'utf8');
+      const sharedPlan = fs.readFileSync(path.join(process.cwd(), 'commands', 'plan.md'), 'utf8');
+      assert.notStrictEqual(cursorPlan, sharedPlan);
+      assert.ok(cursorPlan.includes('Wait for explicit user confirmation before making code changes.'));
+    });
   })) passed++; else failed++;
 
   if (test('loadPackageManifest loads codex observer package as separate opt-in layer', () => {
@@ -366,6 +412,7 @@ function runTests() {
       assert.ok(fs.existsSync(path.join(tempDir, 'agents', 'planner.md')));
       assert.ok(!fs.existsSync(path.join(tempDir, 'agents', 'python-reviewer.md')));
       assert.ok(fs.existsSync(path.join(tempDir, 'commands', 'plan.md')));
+      assert.ok(fs.existsSync(path.join(tempDir, 'commands', 'ai-learning.md')));
       assert.ok(!fs.existsSync(path.join(tempDir, 'commands', 'python-review.md')));
       assert.ok(fs.existsSync(path.join(tempDir, 'skills', 'coding-standards', 'SKILL.md')));
       assert.ok(fs.existsSync(path.join(tempDir, 'skills', 'coding-standards', 'skill.meta.json')));
@@ -395,6 +442,7 @@ function runTests() {
       assert.ok(fs.existsSync(path.join(tempDir, 'skills', 'ai-learning', 'SKILL.md')));
       assert.ok(!fs.existsSync(path.join(tempDir, 'skills', 'rust-patterns', 'SKILL.md')));
       assert.ok(fs.existsSync(path.join(tempDir, 'commands', 'docs-audit.md')));
+      assert.ok(fs.existsSync(path.join(tempDir, 'commands', 'ai-learning.md')));
       assert.ok(fs.existsSync(path.join(tempDir, 'commands', 'instinct-status.md')));
       assert.ok(fs.existsSync(path.join(tempDir, 'commands', 'instinct-export.md')));
       assert.ok(fs.existsSync(path.join(tempDir, 'commands', 'instinct-import.md')));
@@ -412,7 +460,7 @@ function runTests() {
       assert.ok(planCommand.includes('Wait for explicit user confirmation before making code changes.'));
       assert.ok(!planCommand.includes('Use Cursor’s custom command UI'));
       assert.ok(docsAuditCommand.includes('# Docs Audit'));
-      assert.ok(docsAuditCommand.includes('docs-steward'));
+      assert.ok(docsAuditCommand.includes('current-state docs under `docs/`'));
       assert.ok(installRulesCommand.includes('mdt.js bridge materialize --tool cursor --surface rules'));
     });
   })) passed++; else failed++;
