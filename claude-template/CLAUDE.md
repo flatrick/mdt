@@ -4,10 +4,7 @@ This file is the Claude Code entrypoint for projects using MDT.
 
 ## MDT Install
 
-MDT is installed via the Claude Code plugin (`modeldev-toolkit`) or manually
-from the MDT repo. If you installed via plugin, agents, commands, skills, and
-rules are already available globally.
-
+MDT is installed manually from the MDT repo.
 For manual install verification, see `docs/tools/claude-code.md` in the MDT repo.
 
 ## MDT Guidance
