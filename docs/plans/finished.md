@@ -8,6 +8,8 @@ Current finished plans:
   Archive reason: completed implementation shipped; archived on `2026-03-14`.
 - [x] [Command Tool Metadata](archive/20260314.command-tool-metadata.md)
   Archive reason: completed implementation shipped; archived on `2026-03-14`.
+- [x] [Fix Claude Plugin Manifest and Template Gap](archive/20260313.01.50.fix-claude-plugin-and-template.md)
+  Archive reason: all workstreams completed; `claude plugin validate` moved to follow-ups (blocked on CLI availability); archived on `2026-03-14`.
 
 Rules:
 
