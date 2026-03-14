@@ -10,7 +10,7 @@ Status legend:
 
 Current plans:
 
-- Priority 1: [Install Dependency and Tool Support Manifests](details/20260314.install-dependency-and-tool-support-manifests.md)
+- Priority 1: [Install Dependency and Tool Support Manifests](details/20260314.02.03.install-dependency-and-tool-support-manifests.md)
 
 - [ ] `in-progress` — [Reach v1.0.0](details/20260312.20.24.reach-v1-0-0.md)
 - [ ] `in-progress` — [Fix Claude Plugin Manifest and Template Gap](details/20260313.01.50.fix-claude-plugin-and-template.md)
