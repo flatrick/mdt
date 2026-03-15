@@ -1,0 +1,6 @@
+{
+  "version": "0.0.1",
+  "capabilities": [
+    { "type": "tools", "params": { "tools": ["cursor", "codex"] } }
+  ]
+}
