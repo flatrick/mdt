@@ -278,7 +278,7 @@ function trackCursorCost(input, utilsOverride) {
 const UTF8_BOM = '\uFEFF';
 
 function parseSessionPayload(raw) {
-  if (raw == null || (typeof raw === 'string' && raw.trim() === '')) {
+  if ((raw === null || raw === undefined) || (typeof raw === 'string' && raw.trim() === '')) {
     return {};
   }
   const str = typeof raw === 'string' ? raw : String(raw);

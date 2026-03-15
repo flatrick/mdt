@@ -84,9 +84,9 @@ function compareStatus(actual, expected) {
 function validateMapFeatureStatus(fileName, toolId, featureStatus, expectedByFeature, errors) {
   for (const [featureKey, expectedPerTool] of Object.entries(expectedByFeature)) {
     const expected = expectedPerTool[toolId];
-    if (expected == null) continue;
+    if (expected === null || expected === undefined) continue;
     const entry = featureStatus[featureKey];
-    const actual = entry && typeof entry === 'object' && entry.status != null ? String(entry.status) : null;
+    const actual = entry && typeof entry === 'object' && entry.status !== null && entry.status !== undefined ? String(entry.status) : null;
     if (actual !== null && !VALID_STATUSES.has(actual)) {
       errors.push(
         `metadata/tools/${fileName}: featureStatus.${featureKey}.status "${actual}" is not a valid status value.`

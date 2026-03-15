@@ -12,12 +12,19 @@ const path = require('path');
 
 const REPO_ROOT = path.join(__dirname, '..', '..');
 const ALLOWED_TOP_LEVEL = new Set(['version', 'requires', 'capabilities', 'tools']);
+
+function isNil(v) {
+  return v === null || v === undefined;
+}
+function isPresent(v) {
+  return !isNil(v);
+}
 const TOOL_IDS = new Set(['claude', 'cursor', 'codex']);
 const DEPENDENCY_TYPES = new Set(['rule', 'skill', 'command', 'agent']);
 const CAPABILITY_TYPES = new Set(['hooks', 'runtimeScripts', 'sessionData', 'tools', 'mcp', 'memory']);
 
 function validateEntryType(type, arrayName, index, errors) {
-  if (type != null && typeof type !== 'string') {
+  if (isPresent(type) && typeof type !== 'string') {
     errors.push(`${arrayName}[${index}]: "type" must be a string`);
     return;
   }
@@ -30,13 +37,13 @@ function validateEntryType(type, arrayName, index, errors) {
 }
 
 function validateEntryFields(entry, arrayName, index, errors) {
-  if (entry.optional != null && typeof entry.optional !== 'boolean') {
+  if (isPresent(entry.optional) && typeof entry.optional !== 'boolean') {
     errors.push(`${arrayName}[${index}]: "optional" must be a boolean`);
   }
-  if (entry.id != null && typeof entry.id !== 'string') {
+  if (isPresent(entry.id) && typeof entry.id !== 'string') {
     errors.push(`${arrayName}[${index}]: "id" must be a string`);
   }
-  if (entry.params != null && (typeof entry.params !== 'object' || Array.isArray(entry.params))) {
+  if (isPresent(entry.params) && (typeof entry.params !== 'object' || Array.isArray(entry.params))) {
     errors.push(`${arrayName}[${index}]: "params" must be an object`);
   }
   const allowedKeys = new Set(['type', 'optional', 'id', 'params']);
@@ -74,10 +81,10 @@ function validateToolOverride(toolId, override, filePath, errors) {
       errors.push(`${filePath}: tools.${toolId}.${k} is not allowed`);
     }
   }
-  if (override.requires != null && !Array.isArray(override.requires)) {
+  if (isPresent(override.requires) && !Array.isArray(override.requires)) {
     errors.push(`${filePath}: tools.${toolId}.requires must be an array`);
   }
-  if (override.capabilities != null && !Array.isArray(override.capabilities)) {
+  if (isPresent(override.capabilities) && !Array.isArray(override.capabilities)) {
     errors.push(`${filePath}: tools.${toolId}.capabilities must be an array`);
   }
   if (Array.isArray(override.requires)) {
@@ -94,7 +101,7 @@ function validateSidecarTools(tools, filePath, errors) {
       errors.push(`${filePath}: tools."${toolId}" is not a valid tool id (claude, cursor, codex)`);
       continue;
     }
-    if (override != null && (typeof override !== 'object' || Array.isArray(override))) {
+    if (isPresent(override) && (typeof override !== 'object' || Array.isArray(override))) {
       errors.push(`${filePath}: tools.${toolId} must be an object with requires and/or capabilities`);
     } else if (override) {
       validateToolOverride(toolId, override, filePath, errors);
@@ -103,7 +110,7 @@ function validateSidecarTools(tools, filePath, errors) {
 }
 
 function validateSidecarVersion(obj, filePath, errors) {
-  if (obj.version == null) {
+  if (isNil(obj.version)) {
     errors.push(`${filePath}: missing "version"`);
   } else if (typeof obj.version !== 'string') {
     errors.push(`${filePath}: "version" must be a string`);
@@ -121,13 +128,13 @@ function validateSidecar(obj, filePath, errors) {
     }
   }
   validateSidecarVersion(obj, filePath, errors);
-  if (obj.requires != null) {
+  if (isPresent(obj.requires)) {
     validateEntryArray(obj.requires, 'requires', filePath, errors);
   }
-  if (obj.capabilities != null) {
+  if (isPresent(obj.capabilities)) {
     validateEntryArray(obj.capabilities, 'capabilities', filePath, errors);
   }
-  if (obj.tools != null) {
+  if (isPresent(obj.tools)) {
     if (typeof obj.tools !== 'object' || Array.isArray(obj.tools)) {
       errors.push(`${filePath}: "tools" must be an object`);
     } else {

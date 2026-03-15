@@ -34,7 +34,7 @@ module.exports = [
                 caughtErrorsIgnorePattern: '^_'
             }],
             'no-undef': 'error',
-            'eqeqeq': 'warn'
+            'eqeqeq': 'error'
         }
     },
     {
