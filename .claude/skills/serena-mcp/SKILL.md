@@ -200,7 +200,7 @@ Prefer over `search_for_pattern` when:
 - You need multiple patterns or file-type filters in one pass
 
 ```shell
-rg "resolveInstallPlan" scripts/        # fast literal search
+rg "resolveInstallClosure" scripts/      # fast literal search
 rg -t md "context-mode" docs/           # Markdown files only
 rg -l "TODO" --glob "*.js"              # list files with TODOs
 rg "class\s+\w+\s+extends" -t ts       # regex across TypeScript
