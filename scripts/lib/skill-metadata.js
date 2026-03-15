@@ -88,7 +88,12 @@ function loadSkillMetadata(skillDir) {
   const frontmatter = extractFrontmatter(skillContent) || {};
   let rawMeta = {};
   if (fs.existsSync(metaPath)) {
-    rawMeta = JSON.parse(fs.readFileSync(metaPath, 'utf8'));
+    try {
+      rawMeta = JSON.parse(fs.readFileSync(metaPath, 'utf8'));
+    } catch (err) {
+      console.error(`Warning: failed to parse ${metaPath}: ${err.message}`);
+      rawMeta = {};
+    }
   }
 
   return {

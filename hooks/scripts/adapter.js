@@ -67,8 +67,6 @@ function getPluginRoot() {
   const candidates = [
     // Repo source layout: <repo>/hooks/scripts
     path.resolve(__dirname, '..', '..'),
-    // Installed Cursor layout: <project>/.cursor/hooks
-    path.resolve(__dirname, '..', '..'),
     process.cwd(),
   ];
 

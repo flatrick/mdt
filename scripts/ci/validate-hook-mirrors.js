@@ -6,7 +6,11 @@ const { HOOK_PLATFORMS } = require('../lib/hook-platforms');
 
 function readIfExists(filePath) {
   if (!fs.existsSync(filePath)) return null;
-  return fs.readFileSync(filePath);
+  try {
+    return fs.readFileSync(filePath);
+  } catch {
+    return null;
+  }
 }
 
 function validatePlatformMirror(platform) {

@@ -74,6 +74,12 @@ function validateToolOverride(toolId, override, filePath, errors) {
       errors.push(`${filePath}: tools.${toolId}.${k} is not allowed`);
     }
   }
+  if (override.requires != null && !Array.isArray(override.requires)) {
+    errors.push(`${filePath}: tools.${toolId}.requires must be an array`);
+  }
+  if (override.capabilities != null && !Array.isArray(override.capabilities)) {
+    errors.push(`${filePath}: tools.${toolId}.capabilities must be an array`);
+  }
   if (Array.isArray(override.requires)) {
     override.requires.forEach((entry, i) => validateEntry(entry, `tools.${toolId}.requires`, i, errors));
   }
@@ -86,6 +92,7 @@ function validateSidecarTools(tools, filePath, errors) {
   for (const [toolId, override] of Object.entries(tools)) {
     if (!TOOL_IDS.has(toolId)) {
       errors.push(`${filePath}: tools."${toolId}" is not a valid tool id (claude, cursor, codex)`);
+      continue;
     }
     if (override != null && (typeof override !== 'object' || Array.isArray(override))) {
       errors.push(`${filePath}: tools.${toolId} must be an object with requires and/or capabilities`);

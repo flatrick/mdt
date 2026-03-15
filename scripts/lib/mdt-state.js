@@ -21,8 +21,12 @@ function readJson(filePath, fallback) {
 }
 
 function writeJson(filePath, value) {
-  ensureDir(path.dirname(filePath));
-  fs.writeFileSync(filePath, JSON.stringify(value, null, 2), 'utf8');
+  try {
+    ensureDir(path.dirname(filePath));
+    fs.writeFileSync(filePath, JSON.stringify(value, null, 2), 'utf8');
+  } catch (err) {
+    throw new Error(`Failed to write ${filePath}: ${err.message}`);
+  }
 }
 
 function getBridgeDecisionsPath() {

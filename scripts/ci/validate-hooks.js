@@ -38,7 +38,7 @@ function invalidCommandField(command) {
   if (isString) return !command.trim();
   if (command.length === 0) return true;
 
-  return !command.every(item => typeof item === 'string' && item.length > 0);
+  return !command.every(item => typeof item === 'string' && item.trim().length > 0);
 }
 
 function parseInlineNodeEval(command) {
