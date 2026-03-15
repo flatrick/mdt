@@ -29,3 +29,6 @@ Rules:
 - move finished plans to [finished.md](finished.md)
 - move rejected plans to [rejected.md](rejected.md)
 - archive closed plans with a visible archive reason at the top of the archived document
+- when all parts of a plan are marked implemented, ask the operator:
+  > A) Archive — move to `archive/`, update `finished.md`
+  > B) Extend — add remaining tasks before archiving

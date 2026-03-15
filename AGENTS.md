@@ -132,6 +132,12 @@ Implementation plans live under `docs/plans/` and follow a strict lifecycle.
 4. Complete → move doc to `docs/plans/archive/`, remove from `active.md`, add to `finished.md`
 5. Reject → move doc to `docs/plans/archive/`, remove from `active.md`, add to `rejected.md`
 
+**When all parts of a plan are marked implemented**, stop and ask the operator:
+
+> All workstreams in this plan are complete. What next?
+> A) Archive — move to `docs/plans/archive/`, update `finished.md`
+> B) Extend — add remaining tasks to the plan before it can be archived
+
 ---
 
 ## Development Workflow
