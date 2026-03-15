@@ -153,6 +153,7 @@ rules/           — Always-follow guidelines (common + per-language)
 scripts/         — Cross-platform Node.js utilities
 mcp-configs/     — MCP server registry configuration
 tests/           — Test suite
+.claude/         — Project-local Claude Code config (dev only, not installed by MDT)
 ```
 
 ## Success Metrics

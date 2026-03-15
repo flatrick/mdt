@@ -61,11 +61,9 @@ marketing/
 smoke-tool-setups.js.txt
 verify-tool-setups.js.txt
 
-# Local Claude settings
+# Local Claude settings (not committed — machine-specific)
 .claude/settings.local.json
-
-# Local Claude config installation
-.claude/
+.claude/worktrees/
 
 # Local Cursor config installation
 .cursor/
