@@ -62,8 +62,10 @@ smoke-tool-setups.js.txt
 verify-tool-setups.js.txt
 
 # Local Claude settings (not committed — machine-specific)
-.claude/settings.local.json
-.claude/worktrees/
+# .claude/* ignores machine-specific files; negations restore tracked dev-config dirs
+.claude/*
+!.claude/rules/
+!.claude/skills/
 
 # Local Cursor config installation
 .cursor/

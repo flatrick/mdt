@@ -11,6 +11,7 @@ const REQUIRED_RUNTIME_IGNORES = Object.freeze([
   '.codex/*'
 ]);
 const REQUIRED_RUNTIME_ALLOW_ENTRIES = Object.freeze({
+  '.claude/': ['!.claude/rules/', '!.claude/skills/'],
   '.codex/': ['!.codex/AGENTS.md']
 });
 
