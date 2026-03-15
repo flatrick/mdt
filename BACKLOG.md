@@ -57,6 +57,12 @@ Replicate the optional Codex home hardening bundle for the other supported tools
 
 Document or harden the command-scope precedence once Cursor behavior is stable enough to rely on.
 
+### Rename `codex-observer.js` to a tool-agnostic name
+
+**Status:** Open.
+
+`scripts/codex-observer.js` is the observer runtime for any non-hook-enabled LLM-agentic tool, not Codex specifically. Rename it (e.g. `agent-observer.js`) and update all references: `packages/continuous-learning-observer/`, install-mdt.js, the `.deps.json` sidecar, and any docs that cite the filename.
+
 ### Migrate Node runtime scripts to `.mjs` after v1.0.0 stabilization
 
 **Status:** Deferred until after the repo reaches a stable v1 baseline.

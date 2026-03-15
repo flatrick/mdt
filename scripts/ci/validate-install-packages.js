@@ -1,6 +1,16 @@
 #!/usr/bin/env node
 /**
  * Validate install package manifests and their referenced assets.
+ *
+ * Scope: structural integrity of packages/<name>/package.json files —
+ * required fields, asset references, extends graph, and requires schema.
+ *
+ * Related validators (complementary, not overlapping):
+ *   validate-dependency-sidecars.js — validates deps.json sidecar format
+ *   validate-resolver-closure.js    — validates install-resolver closure stability
+ *
+ * The resolver (scripts/lib/install-resolver.js) still reads package.json
+ * requires at install time. Both layers must pass for a clean install.
  */
 
 'use strict';
