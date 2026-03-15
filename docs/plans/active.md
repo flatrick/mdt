@@ -16,7 +16,6 @@ Current priorities:
 
 Current plans:
 
-- [x] `completed` — [Install Dependency and Tool Support Manifests](details/20260314.02.03.install-dependency-and-tool-support-manifests.md) ← pending archive
 - [ ] `not-started` — [AI-Learning: Self-Contained Skill](details/20260314.12.04.ai-learning-self-contained.md) ← unblocked; next priority
 - [ ] `in-progress` — [Reach v1.0.0](details/20260312.20.24.reach-v1-0-0.md)
 - [ ] `not-started` — [Composable MDT Redesign](details/20260314.12.04.composable-mdt-redesign.md) ← future, on hold until the dependency model exists and a second shared-runtime consumer is real
