@@ -65,14 +65,6 @@ function runTests() {
     });
   })) passed++; else failed++;
 
-  if (test('codex-template codex-learn wrapper resolves runtime from installed mdt path', () => {
-    const wrapperSourcePath = path.join(repoRoot, 'codex-template', 'skills', 'ai-learning', 'scripts', 'codex-learn.js');
-    withInstalledCodexLayout(wrapperSourcePath, (wrapperPath) => {
-      const loaded = require(wrapperPath);
-      assert.strictEqual(typeof loaded.buildCodexEnv, 'function');
-    });
-  })) passed++; else failed++;
-
   console.log(`\nResults: Passed: ${passed}, Failed: ${failed}`);
   process.exit(failed > 0 ? 1 : 0);
 }

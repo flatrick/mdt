@@ -1,0 +1,27 @@
+{
+  "version": "0.0.1",
+  "requires": [
+    { "type": "rule", "id": "common/testing.md" },
+    { "type": "skill", "id": "docs-steward" },
+    { "type": "skill", "id": "optional-skill", "optional": true }
+  ],
+  "capabilities": [
+    { "type": "runtimeScripts" },
+    { "type": "sessionData" },
+    { "type": "hooks", "optional": true, "params": { "mode": "optional", "tools": ["claude", "cursor"] } },
+    { "type": "tools", "params": { "tools": ["claude", "cursor", "codex"] } }
+  ],
+  "tools": {
+    "codex": {
+      "requires": [
+        { "type": "rule", "id": "common/testing.md" },
+        { "type": "skill", "id": "docs-steward" }
+      ],
+      "capabilities": [
+        { "type": "runtimeScripts" },
+        { "type": "sessionData" },
+        { "type": "tools", "params": { "tools": ["codex"] } }
+      ]
+    }
+  }
+}

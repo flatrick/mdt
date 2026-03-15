@@ -6,6 +6,7 @@
  */
 
 const fs = require('fs');
+const os = require('os');
 const { spawnSync } = require('child_process');
 const path = require('path');
 
@@ -17,10 +18,19 @@ const MAX_STDIN = 1024 * 1024;
  * Use this in hooks that may receive large payloads; when Cursor (or a wrapper)
  * passes payload via a temp file to avoid ENAMETOOLONG, we are ready.
  */
+function isPayloadPathSafe(resolvedPath) {
+  const tmpDir = os.tmpdir();
+  const relative = path.relative(tmpDir, resolvedPath);
+  return !relative.startsWith('..') && !path.isAbsolute(relative);
+}
+
 function readHookPayload() {
   const payloadPath = process.env.MDT_HOOK_PAYLOAD_FILE;
   if (payloadPath && typeof payloadPath === 'string') {
     const p = path.resolve(payloadPath);
+    if (!isPayloadPathSafe(p)) {
+      return readStdin();
+    }
     try {
       if (fs.existsSync(p)) {
         const data = fs.readFileSync(p, 'utf8');
@@ -55,8 +65,8 @@ function getCursorRoot() {
 
 function getPluginRoot() {
   const candidates = [
-    // Repo source layout: <repo>/hooks/cursor/scripts
-    path.resolve(__dirname, '..', '..', '..'),
+    // Repo source layout: <repo>/hooks/scripts
+    path.resolve(__dirname, '..', '..'),
     // Installed Cursor layout: <project>/.cursor/hooks
     path.resolve(__dirname, '..', '..'),
     process.cwd(),

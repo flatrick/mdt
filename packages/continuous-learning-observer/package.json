@@ -4,7 +4,7 @@
   "kind": "capability",
   "ruleDirectory": "common",
   "extends": [
-    "continuous-learning"
+    "ai-learning"
   ],
   "rules": [],
   "agents": [],

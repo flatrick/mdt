@@ -1,5 +1,5 @@
 {
-  "name": "continuous-learning",
+  "name": "ai-learning",
   "description": "MDT capability package for instinct-based session learning, export/import, and evolution workflows",
   "kind": "capability",
   "ruleDirectory": "common",

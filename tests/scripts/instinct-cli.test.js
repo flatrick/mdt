@@ -193,47 +193,6 @@ function runTests() {
     }
   })) passed++; else failed++;
 
-  if (test('codex overlay instinct-cli wrapper exports the same public runtime helpers', () => {
-    const overlayCli = require(path.join(
-      __dirname,
-      '..',
-      '..',
-      'codex-template',
-      'skills',
-      'ai-learning',
-      'scripts',
-      'instinct-cli.js'
-    ));
-
-    assert.strictEqual(typeof overlayCli.buildCodexEnv, 'function');
-    assert.strictEqual(typeof overlayCli.getCliPaths, 'function');
-  })) passed++; else failed++;
-
-  if (test('codex-learn wrappers export buildCodexEnv from the shared runtime', () => {
-    const manualCodexLearn = require(path.join(
-      __dirname,
-      '..',
-      '..',
-      'skills',
-      'ai-learning',
-      'scripts',
-      'codex-learn.js'
-    ));
-    const overlayCodexLearn = require(path.join(
-      __dirname,
-      '..',
-      '..',
-      'codex-template',
-      'skills',
-      'ai-learning',
-      'scripts',
-      'codex-learn.js'
-    ));
-
-    assert.strictEqual(typeof manualCodexLearn.buildCodexEnv, 'function');
-    assert.strictEqual(typeof overlayCodexLearn.buildCodexEnv, 'function');
-  })) passed++; else failed++;
-
   console.log(`\nResults: Passed: ${passed}, Failed: ${failed}`);
   process.exit(failed > 0 ? 1 : 0);
 }

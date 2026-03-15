@@ -29,7 +29,7 @@ function runTests() {
   let failed = 0;
 
   if (test('installed Claude dev surface runs isolated smoke through the installed wrapper', () => {
-    const fixture = installTarget('claude', ['--dev', 'typescript', 'continuous-learning']);
+    const fixture = installTarget('claude', ['--dev', 'typescript', 'ai-learning']);
     const shimBin = createCliShimBin({
       claude: {
         '--version': 'Claude Code 2.1.73',
@@ -74,7 +74,7 @@ function runTests() {
   })) passed++; else failed++;
 
   if (test('installed Claude hook surface retains continuous-learning automatic hook path', () => {
-    const fixture = installTarget('claude', ['continuous-learning']);
+    const fixture = installTarget('claude', ['ai-learning']);
 
     try {
       ensureFile(path.join(fixture.overrideRoot, 'skills', 'ai-learning', 'hooks', 'observe.js'));

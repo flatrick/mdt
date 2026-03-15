@@ -1,0 +1,39 @@
+{
+  "baseline": {
+    "skills": [
+      "api-design",
+      "autonomous-loops",
+      "backend-patterns",
+      "coding-standards",
+      "content-hash-cache-pattern",
+      "database-migrations",
+      "docs-steward",
+      "deployment-patterns",
+      "eval-harness",
+      "frontend-patterns",
+      "iterative-retrieval",
+      "project-guidelines-example",
+      "regex-vs-llm-structured-text",
+      "search-first",
+      "security-review",
+      "security-scan",
+      "skill-stocktake",
+      "strategic-compact",
+      "tdd-workflow",
+      "verification-loop"
+    ],
+    "commands": ["docs-audit.md", "install-rules.md"]
+  },
+  "featureStatus": {
+    "rule": { "status": "official", "toolRealization": ".cursor/rules/" },
+    "skill": { "status": "official", "toolRealization": "~/.cursor/skills/" },
+    "command": { "status": "official" },
+    "agent": { "status": "official" },
+    "hooks": { "status": "experimental" },
+    "memory": { "status": "official" },
+    "mcp": { "status": "official" },
+    "runtimeScripts": { "status": "official" },
+    "sessionData": { "status": "official" },
+    "tools": { "status": "official" }
+  }
+}

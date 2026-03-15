@@ -1,0 +1,15 @@
+{
+  "version": "0.0.1",
+  "requires": [
+    { "type": "rule", "id": "common/hooks.md" },
+    { "type": "rule", "id": "common/development-workflow.md" },
+    { "type": "rule", "id": "common/security.md" },
+    { "type": "rule", "id": "common/testing.md" },
+    { "type": "skill", "id": "docs-steward" }
+  ],
+  "capabilities": [
+    { "type": "runtimeScripts" },
+    { "type": "sessionData" },
+    { "type": "hooks", "optional": true, "params": { "mode": "optional", "tools": ["claude", "cursor"] } }
+  ]
+}

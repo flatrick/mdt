@@ -15,10 +15,10 @@ Use this page to confirm MDT behavior inside Cursor desktop after installing int
 
 ## Preconditions
 
-1. Install MDT into Cursor with `mdt install --tool cursor typescript continuous-learning`.
+1. Install MDT into Cursor with `mdt install --tool cursor typescript ai-learning`.
 2. If the opened repository needs repo-local Cursor IDE rules, run `mdt bridge materialize --tool cursor --surface rules`.
 3. Confirm the install exists under `~/.cursor/`.
-4. If you want the maintainer-only smoke surface, reinstall with `mdt install --tool cursor --dev typescript continuous-learning`.
+4. If you want the maintainer-only smoke surface, reinstall with `mdt install --tool cursor --dev typescript ai-learning`.
 
 ## CLI Checks
 

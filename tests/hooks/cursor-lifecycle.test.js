@@ -8,11 +8,11 @@ const path = require('path');
 const { asyncTest, createTestDir, cleanupTestDir, test } = require('../helpers/test-runner');
 const { withEnv } = require('../helpers/env-test-utils');
 const { getDateString } = require('../../scripts/lib/utils');
-const { buildHookEnv, getPluginRoot, runExistingHook } = require('../../hooks/cursor/scripts/adapter');
-const { processCursorAfterFileEdit } = require('../../hooks/cursor/scripts/after-file-edit');
-const { processCursorAfterShellExecution } = require('../../hooks/cursor/scripts/after-shell-execution');
-const { processCursorSessionEnd } = require('../../hooks/cursor/scripts/session-end');
-const { processCursorStop } = require('../../hooks/cursor/scripts/stop');
+const { buildHookEnv, getPluginRoot, runExistingHook } = require('../../hooks/scripts/adapter');
+const { processCursorAfterFileEdit } = require('../../hooks/scripts/after-file-edit');
+const { processCursorAfterShellExecution } = require('../../hooks/scripts/after-shell-execution');
+const { processCursorSessionEnd } = require('../../hooks/scripts/session-end');
+const { processCursorStop } = require('../../hooks/scripts/stop');
 const { detectProject } = require('../../skills/ai-learning/scripts/detect-project.js');
 
 function createCursorHookRunner() {
@@ -153,10 +153,10 @@ async function runTests() {
       const input = buildCursorInput({
         messages: [
           { role: 'user', content: 'Investigate the failing Cursor session summary hook' },
-          { role: 'assistant', content: [{ type: 'tool_use', name: 'Edit', input: { file_path: 'hooks/cursor/scripts/session-end.js' } }] },
+          { role: 'assistant', content: [{ type: 'tool_use', name: 'Edit', input: { file_path: 'hooks/scripts/session-end.js' } }] },
           { role: 'user', content: 'Also make cost tracking visible when usage is missing' }
         ],
-        modifiedFiles: ['hooks/cursor/scripts/session-end.js', 'hooks/cursor/scripts/stop.js'],
+        modifiedFiles: ['hooks/scripts/session-end.js', 'hooks/scripts/stop.js'],
         usage: { input_tokens: 111, output_tokens: 22, total_tokens: 133 }
       });
 
@@ -183,7 +183,7 @@ async function runTests() {
         assert.ok(fs.existsSync(sessionFile), 'Should create a Cursor session file');
         const content = fs.readFileSync(sessionFile, 'utf8');
         assert.ok(content.includes('Investigate the failing Cursor session summary hook'), 'Should include user task summary');
-        assert.ok(content.includes('hooks/cursor/scripts/stop.js'), 'Should include modified files from Cursor payload');
+        assert.ok(content.includes('hooks/scripts/stop.js'), 'Should include modified files from Cursor payload');
         assert.ok(content.includes('Total user messages: 2'), 'Should count user messages from Cursor payload');
 
         const metricsFile = path.join(configDir, 'mdt', 'metrics', 'costs.jsonl');

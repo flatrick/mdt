@@ -1,0 +1,10 @@
+{
+  "version": "0.0.1",
+  "requires": [
+    { "type": "rule", "id": "common/testing.md" }
+  ],
+  "capabilities": [
+    { "type": "runtimeScripts" },
+    { "type": "sessionData" }
+  ]
+}

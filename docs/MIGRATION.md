@@ -31,7 +31,7 @@ After the ModelDev Toolkit Node-only migration, skills and hooks run only via No
    ```
    For Codex only:
    ```bash
-   mdt install --tool codex typescript continuous-learning
+   mdt install --tool codex typescript ai-learning
    ```
 
    Scope rule reminder:

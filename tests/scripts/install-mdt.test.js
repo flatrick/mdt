@@ -104,7 +104,7 @@ function runTests() {
         const claudeBase = path.join(tmpHome, '.claude');
 
         try {
-          const result = runInstaller(['--dev', 'continuous-learning'], {
+          const result = runInstaller(['--dev', 'ai-learning'], {
             overrideDir: claudeBase,
             env: {
               HOME: tmpHome,
@@ -236,7 +236,7 @@ function runTests() {
         const cursorRoot = path.join(tmpHome, '.cursor');
 
         try {
-          const result = runInstaller(['--target', 'cursor', 'typescript', 'continuous-learning'], {
+          const result = runInstaller(['--target', 'cursor', 'typescript', 'ai-learning'], {
             overrideDir: cursorRoot,
             env: {
               HOME: tmpHome,
@@ -274,7 +274,7 @@ function runTests() {
         const cursorRoot = path.join(tmpHome, '.cursor');
 
         try {
-          const result = runInstaller(['--target', 'cursor', '--dev', 'continuous-learning'], {
+          const result = runInstaller(['--target', 'cursor', '--dev', 'ai-learning'], {
             overrideDir: cursorRoot,
             env: {
               HOME: tmpHome,
@@ -298,7 +298,7 @@ function runTests() {
         const codexRoot = path.join(tmpHome, '.codex');
 
         try {
-          const result = runInstaller(['--target', 'codex', 'typescript', 'continuous-learning'], {
+          const result = runInstaller(['--target', 'codex', 'typescript', 'ai-learning'], {
             overrideDir: codexRoot,
             env: {
               HOME: tmpHome,
@@ -336,7 +336,7 @@ function runTests() {
         const codexRoot = path.join(tmpHome, '.codex');
 
         try {
-          const result = runInstaller(['--target', 'codex', '--dev', 'continuous-learning'], {
+          const result = runInstaller(['--target', 'codex', '--dev', 'ai-learning'], {
             overrideDir: codexRoot,
             env: {
               HOME: tmpHome,
@@ -363,7 +363,7 @@ function runTests() {
         const codexRoot = path.join(tmpHome, '.codex');
 
         try {
-          const result = runInstaller(['--target', 'codex', 'continuous-learning'], {
+          const result = runInstaller(['--target', 'codex', 'ai-learning'], {
             overrideDir: codexRoot,
             env: {
               HOME: tmpHome,
@@ -387,7 +387,7 @@ function runTests() {
         const codexRoot = path.join(tmpHome, '.codex');
 
         try {
-          const first = runInstaller(['--target', 'codex', '--dev', 'typescript', 'continuous-learning'], {
+          const first = runInstaller(['--target', 'codex', '--dev', 'typescript', 'ai-learning'], {
             overrideDir: codexRoot,
             env: {
               HOME: tmpHome,
@@ -396,7 +396,7 @@ function runTests() {
           });
           assertSuccess(first, 'codex first install');
 
-          const second = runInstaller(['--target', 'codex', '--dev', 'typescript', 'continuous-learning'], {
+          const second = runInstaller(['--target', 'codex', '--dev', 'typescript', 'ai-learning'], {
             overrideDir: codexRoot,
             env: {
               HOME: tmpHome,
@@ -506,7 +506,7 @@ function runTests() {
         const claudeBase = path.join(tmpHome, '.claude');
 
         try {
-          const result = runInstaller(['continuous-learning'], {
+          const result = runInstaller(['ai-learning'], {
             overrideDir: claudeBase,
             env: {
               HOME: tmpHome,

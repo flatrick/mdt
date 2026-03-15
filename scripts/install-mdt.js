@@ -96,6 +96,9 @@ function createDefaultCliArgs() {
     listMode: false,
     dryRun: false,
     devMode: false,
+    newResolver: false,
+    experimental: false,
+    format: null,
     projectDir: null,
     overrideDir: null,
     packageNames: []
@@ -106,8 +109,15 @@ const SIMPLE_CLI_FLAGS = {
   '--global': 'globalScope',
   '--list': 'listMode',
   '--dry-run': 'dryRun',
-  '--dev': 'devMode'
+  '--dev': 'devMode',
+  '--new-resolver': 'newResolver',
+  '--experimental': 'experimental'
 };
+
+function trimmedOrNull(value) {
+  const s = String(value).trim();
+  return s.length > 0 ? s : null;
+}
 
 function applyCliPairArg(state, arg, nextArg) {
   if ((arg === '--target' || arg === '--tool') && nextArg) {
@@ -120,6 +130,14 @@ function applyCliPairArg(state, arg, nextArg) {
   }
   if ((arg === '--override' || arg === '--config-root') && nextArg) {
     state.overrideDir = path.resolve(nextArg);
+    return true;
+  }
+  if (arg === '--format' && nextArg) {
+    state.format = trimmedOrNull(nextArg);
+    return true;
+  }
+  if (arg.startsWith('--format=')) {
+    state.format = trimmedOrNull(arg.slice('--format='.length));
     return true;
   }
   return false;
@@ -1532,11 +1550,45 @@ function runInstallForTarget(target, packageNames, overrideDir, devMode) {
 }
 
 function main() {
-  const { target, globalScope, listMode, dryRun, devMode, projectDir, overrideDir, packageNames } = parseArgs();
+  const { target, globalScope, listMode, dryRun, devMode, newResolver, experimental, format, projectDir, overrideDir, packageNames } = parseArgs();
   handleRetiredProjectDir(projectDir);
   assertSupportedTarget(target);
   handleListMode(target, listMode);
-  handleDryRun(target, dryRun, devMode, overrideDir, packageNames);
+
+  if (newResolver) {
+    const { resolveInstallClosure } = require('./lib/install-resolver');
+    const result = resolveInstallClosure(packageNames, target, { experimental });
+    if (!result.success) {
+      for (const e of result.errors) {
+        console.error('ERROR: ' + e);
+      }
+      process.exit(1);
+    }
+    for (const w of result.warnings) {
+      console.warn('Warning: ' + w);
+    }
+    if (dryRun) {
+      if (format === 'json') {
+        console.log(JSON.stringify(result.closure, null, 2));
+      } else {
+        const lines = [
+          `[dry-run] New resolver: target=${target}`,
+          `[dry-run] Packages: ${result.closure.packages.join(', ') || '(none)'}`
+        ];
+        if (result.closure.warnings && result.closure.warnings.length > 0) {
+          lines.push(...result.closure.warnings.map((w) => `[dry-run] Warning: ${w}`));
+        }
+        lines.push('[dry-run] Would proceed with install (closure valid).');
+        console.log(lines.join('\n'));
+      }
+      return;
+    }
+    console.error('ERROR: --new-resolver without --dry-run is not yet supported for actual install');
+    process.exit(1);
+  } else {
+    handleDryRun(target, dryRun, devMode, overrideDir, packageNames);
+  }
+
   try {
     if (globalScope) {
       console.log('Note: --global is now optional; MDT installs globally by default.');

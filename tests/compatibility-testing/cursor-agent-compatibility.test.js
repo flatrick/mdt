@@ -31,7 +31,7 @@ function runTests() {
   let failed = 0;
 
   if (test('installed Cursor dev surface includes mdt-dev-smoke and install-rules commands', () => {
-    const fixture = installTarget('cursor', ['--dev', 'typescript', 'continuous-learning']);
+    const fixture = installTarget('cursor', ['--dev', 'typescript', 'ai-learning']);
 
     try {
       ensureFile(path.join(fixture.overrideRoot, 'commands', 'mdt-dev-smoke.md'));
@@ -44,7 +44,7 @@ function runTests() {
   })) passed++; else failed++;
 
   if (test('installed Cursor surface runs isolated smoke through the installed wrapper', () => {
-    const fixture = installTarget('cursor', ['--dev', 'typescript', 'continuous-learning']);
+    const fixture = installTarget('cursor', ['--dev', 'typescript', 'ai-learning']);
     const shimBin = createCliShimBin({
       agent: {
         '--help': 'agent help'
@@ -89,7 +89,7 @@ function runTests() {
   })) passed++; else failed++;
 
   if (test('installed /install-rules bridge copies global rules into a repo-local .cursor/rules surface', () => {
-    const fixture = installTarget('cursor', ['continuous-learning']);
+    const fixture = installTarget('cursor', ['ai-learning']);
     const repoDir = createTestDir('cursor-agent-compat-repo-');
 
     try {

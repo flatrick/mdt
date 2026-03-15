@@ -13,15 +13,15 @@ const {
 const LIVE_TOOL_FIXTURES = {
   claude: {
     target: 'claude',
-    packages: ['--dev', 'typescript', 'continuous-learning']
+    packages: ['--dev', 'typescript', 'ai-learning']
   },
   cursor: {
     target: 'cursor',
-    packages: ['--dev', 'typescript', 'continuous-learning']
+    packages: ['--dev', 'typescript', 'ai-learning']
   },
   codex: {
     target: 'codex',
-    packages: ['--dev', 'typescript', 'continuous-learning']
+    packages: ['--dev', 'typescript', 'ai-learning']
   }
 };
 

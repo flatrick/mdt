@@ -1,0 +1,12 @@
+{
+  "version": "0.0.1",
+  "requires": [
+    { "type": "rule", "id": "common/testing.md" },
+    { "type": "skill", "id": "ai-learning" }
+  ],
+  "capabilities": [
+    { "type": "runtimeScripts" },
+    { "type": "sessionData" },
+    { "type": "tools", "params": { "tools": ["claude", "cursor", "codex"] } }
+  ]
+}

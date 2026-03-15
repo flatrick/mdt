@@ -1,0 +1,7 @@
+{
+  "version": "0.0.1",
+  "requires": [
+    { "id": "common/testing.md" }
+  ],
+  "capabilities": []
+}

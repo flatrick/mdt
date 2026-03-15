@@ -26,7 +26,7 @@ function runTests() {
   let failed = 0;
 
   if (test('Cursor IDE compatibility keeps the repo-local rules bridge separate from global install', () => {
-    const fixture = installTarget('cursor', ['continuous-learning', 'typescript']);
+    const fixture = installTarget('cursor', ['ai-learning', 'typescript']);
     const repoDir = createTestDir('cursor-ide-compat-repo-');
 
     try {

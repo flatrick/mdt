@@ -30,10 +30,10 @@ function runTests() {
     assert.strictEqual(claude.mirrorScriptsDir, null);
   })) passed++; else failed++;
 
-  if (test('Cursor platform points at hooks/cursor sources with no mirror (installer reads source directly)', () => {
+  if (test('Cursor platform points at cursor-template/hooks.json and hooks/scripts (installer reads source directly)', () => {
     const cursor = getHookPlatform('cursor');
-    assert.ok(cursor.sourceConfig.endsWith(path.join('hooks', 'cursor', 'hooks.json')));
-    assert.ok(cursor.sourceScriptsDir.endsWith(path.join('hooks', 'cursor', 'scripts')));
+    assert.ok(cursor.sourceConfig.endsWith(path.join('cursor-template', 'hooks.json')));
+    assert.ok(cursor.sourceScriptsDir.endsWith(path.join('hooks', 'scripts')));
     assert.strictEqual(cursor.mirrorConfig, null);
     assert.strictEqual(cursor.mirrorScriptsDir, null);
   })) passed++; else failed++;

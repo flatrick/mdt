@@ -65,7 +65,7 @@ Claude Code:
 
 ```bash
 mdt install typescript
-mdt install --dry-run typescript continuous-learning
+mdt install --dry-run typescript ai-learning
 ```
 
 Cursor:
@@ -73,7 +73,7 @@ Cursor:
 ```bash
 # Global Cursor install surface (always install to ~/.cursor/)
 mdt install --tool cursor typescript
-mdt install --tool cursor typescript continuous-learning
+mdt install --tool cursor typescript ai-learning
 
 # Repo-local Cursor IDE rules bridge (additional step when needed)
 # Preferred inside Cursor after install: /install-rules
@@ -90,8 +90,8 @@ Cursor mode split, last locally true `2026-03-12`:
 Codex:
 
 ```bash
-mdt install --tool codex typescript continuous-learning
-mdt install --tool codex --dev typescript continuous-learning
+mdt install --tool codex typescript ai-learning
+mdt install --tool codex --dev typescript ai-learning
 ```
 
 Codex notes:
@@ -99,7 +99,7 @@ Codex notes:
 - `~/.codex/config.toml` is treated as user-owned
 - if `config.toml` already exists, MDT preserves it and writes `~/.codex/config.mdt.toml` as a reference file instead of overwriting local Codex settings
 - Codex-specific MDT guidance lives primarily in `~/.codex/AGENTS.md`
-- continuous-learning state is project-scoped inside `~/.codex/mdt/homunculus/<project-id>/`
+- ai-learning state is project-scoped inside `~/.codex/mdt/homunculus/<project-id>/`
 - MDT does not enable any Codex MCP servers by default; add them manually only when a concrete workflow needs them
 
 Discovery:

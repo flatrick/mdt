@@ -16,7 +16,7 @@ Tool-specific installs:
 
 ```bash
 npx mdt install --tool cursor typescript
-npx mdt install --tool codex typescript continuous-learning
+npx mdt install --tool codex typescript ai-learning
 npx mdt install list
 ```
 

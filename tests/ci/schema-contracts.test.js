@@ -43,7 +43,7 @@ function runTests() {
 
   if (test('cursor hooks schema enumerates all shipped Cursor hook event names', () => {
     const schema = readJson('schemas', 'cursor-hooks.schema.json');
-    const hooksConfig = readJson('hooks', 'cursor', 'hooks.json');
+    const hooksConfig = readJson('cursor-template', 'hooks.json');
 
     const declaredEvents = schema.$defs.eventName.enum;
     for (const eventName of Object.keys(hooksConfig.hooks)) {

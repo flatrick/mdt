@@ -30,7 +30,7 @@ function runTests() {
   let failed = 0;
 
   if (test('installed Codex dev surface runs isolated smoke through the installed wrapper', () => {
-    const fixture = installTarget('codex', ['--dev', 'typescript', 'continuous-learning']);
+    const fixture = installTarget('codex', ['--dev', 'typescript', 'ai-learning']);
     const shimBin = createCliShimBin({
       codex: {
         '--version': 'codex-cli 1.0.0',
@@ -78,7 +78,7 @@ function runTests() {
   })) passed++; else failed++;
 
   if (test('installed Codex wrapper fails clearly when the selected workflow smoke script is missing', () => {
-    const fixture = installTarget('codex', ['--dev', 'typescript', 'continuous-learning']);
+    const fixture = installTarget('codex', ['--dev', 'typescript', 'ai-learning']);
 
     try {
       const missingScript = path.join(fixture.overrideRoot, 'mdt', 'scripts', 'mdt-dev-smoke-codex-workflows.js');
@@ -100,7 +100,7 @@ function runTests() {
   })) passed++; else failed++;
 
   if (test('installed Codex observer surface keeps the extracted runtime reachable', () => {
-    const fixture = installTarget('codex', ['continuous-learning', 'continuous-learning-observer']);
+    const fixture = installTarget('codex', ['ai-learning', 'continuous-learning-observer']);
 
     try {
       ensureFile(path.join(fixture.overrideRoot, 'mdt', 'scripts', 'codex-observer.js'));

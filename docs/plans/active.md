@@ -17,8 +17,8 @@ Current priorities:
 
 Current plans:
 
-- [ ] `in-progress` — [Install Dependency and Tool Support Manifests](details/20260314.02.03.install-dependency-and-tool-support-manifests.md)
-- [ ] `halted` — [AI-Learning: Self-Contained Skill](details/20260314.12.04.ai-learning-self-contained.md) ← blocked on the dependency/support manifests plan
+- [ ] `in-progress` — [Install Dependency and Tool Support Manifests](details/20260314.02.03.install-dependency-and-tool-support-manifests.md) (core implementation complete; migration/docs remain)
+- [ ] `not-started` — [AI-Learning: Self-Contained Skill](details/20260314.12.04.ai-learning-self-contained.md) ← unblocked; ready to begin shared runtime core workstream
 - [ ] `in-progress` — [Reach v1.0.0](details/20260312.20.24.reach-v1-0-0.md)
 - [ ] `not-started` — [Composable MDT Redesign](details/20260314.12.04.composable-mdt-redesign.md) ← future, on hold until the dependency model exists and a second shared-runtime consumer is real
 - [ ] `not-started` — [Skill Stocktake Consolidation](details/20260314.02.57.skill-stocktake-consolidation.md)

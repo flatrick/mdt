@@ -19,7 +19,7 @@ per-tool template directories.
 
 ```json
 {
-  "name": "continuous-learning",
+  "name": "ai-learning",
   "description": "MDT capability package for instinct-based session learning",
   "kind": "capability",
   "ruleDirectory": "common",
@@ -168,6 +168,12 @@ Run:
 ```bash
 node scripts/ci/validate-install-packages.js
 ```
+
+## Dependency sidecars and new resolver
+
+Packages, skills, and load-bearing scripts may declare dependency and capability requirements in co-located **sidecar** files (`deps.json`) using the schema described in [Install dependency model](install-dependency-model.md). Machine-readable **tool support maps** under `metadata/tools/` describe per-tool baselines and capability status; see [Install add-on and config contracts](install-add-on-config-contracts.md) for template add-on rules.
+
+The installer supports a **new resolver** behind the `--new-resolver` flag. When used, it computes install closure from selected packages, validates capabilities against the tool support map, and detects dependency cycles. Use `--new-resolver --dry-run` to see the resolved closure without installing; `--format=json` emits structured output. The default install path remains the existing logic until migration is complete.
 
 ## Current Operating Notes
 

@@ -74,9 +74,9 @@ function runTests() {
   })) passed++; else failed++;
 
   if (test('buildInstallPlan returns codex global plan by default', () => {
-    const plan = buildInstallPlan({ target: 'codex', devMode: false, packageNames: ['typescript', 'continuous-learning'] });
+    const plan = buildInstallPlan({ target: 'codex', devMode: false, packageNames: ['typescript', 'ai-learning'] });
     assert.ok(plan.some((line) => line.includes('[dry-run] Target: codex (global)')));
-    assert.ok(plan.some((line) => line.includes('Packages: typescript, continuous-learning')));
+    assert.ok(plan.some((line) => line.includes('Packages: typescript, ai-learning')));
     assert.ok(plan.some((line) => line.includes(path.join(os.homedir(), '.codex'))));
     assert.ok(plan.some((line) => line.includes(path.join(os.homedir(), '.codex', 'mdt'))));
     assert.ok(plan.some((line) => line.includes(path.join(os.homedir(), '.codex', 'mdt', 'hardening'))));
@@ -270,8 +270,8 @@ function runTests() {
   })) passed++; else failed++;
 
   if (test('loadPackageManifest loads capability package requires metadata', () => {
-    const manifest = loadPackageManifest('continuous-learning');
-    assert.strictEqual(manifest.name, 'continuous-learning');
+    const manifest = loadPackageManifest('ai-learning');
+    assert.strictEqual(manifest.name, 'ai-learning');
     assert.deepStrictEqual(manifest.requires, {
       runtimeScripts: true,
       sessionData: true,
@@ -335,7 +335,7 @@ function runTests() {
   if (test('loadPackageManifest loads codex observer package as separate opt-in layer', () => {
     const manifest = loadPackageManifest('continuous-learning-observer');
     assert.strictEqual(manifest.name, 'continuous-learning-observer');
-    assert.deepStrictEqual(manifest.extends, ['continuous-learning']);
+    assert.deepStrictEqual(manifest.extends, ['ai-learning']);
     assert.deepStrictEqual(manifest.tools.codex.scripts, ['codex-observer.js']);
     assert.deepStrictEqual(manifest.requires, {
       runtimeScripts: true,
@@ -361,15 +361,15 @@ function runTests() {
   })) passed++; else failed++;
 
   if (test('buildInstallPlan does not warn about optional hooks for cursor continuous learning', () => {
-    const plan = buildInstallPlan({ target: 'cursor', devMode: false, packageNames: ['continuous-learning'] });
+    const plan = buildInstallPlan({ target: 'cursor', devMode: false, packageNames: ['ai-learning'] });
     // ai-learning has optional hooks — no hook warning expected for cursor
     assert.ok(!plan.some((line) => line.includes("skill 'ai-learning' depends on hooks")));
   })) passed++; else failed++;
 
   if (test('buildInstallPlan advertises dev smoke surfaces for audited tools', () => {
-    const claudePlan = buildInstallPlan({ target: 'claude', devMode: true, packageNames: ['continuous-learning'] });
-    const cursorPlan = buildInstallPlan({ target: 'cursor', devMode: true, packageNames: ['continuous-learning'] });
-    const codexPlan = buildInstallPlan({ target: 'codex', devMode: true, packageNames: ['continuous-learning'] });
+    const claudePlan = buildInstallPlan({ target: 'claude', devMode: true, packageNames: ['ai-learning'] });
+    const cursorPlan = buildInstallPlan({ target: 'cursor', devMode: true, packageNames: ['ai-learning'] });
+    const codexPlan = buildInstallPlan({ target: 'codex', devMode: true, packageNames: ['ai-learning'] });
 
     assert.ok(claudePlan.some((line) => line.includes('Claude dev smoke scripts')));
     assert.ok(cursorPlan.some((line) => line.includes('Cursor dev smoke command')));
@@ -407,7 +407,7 @@ function runTests() {
 
   if (test('installClaudeContentDirs copies only selected shared assets', () => {
     withTempDir('mdt-install-claude-', (tempDir) => {
-      installClaudeContentDirs(tempDir, resolveSelectedPackages(['typescript', 'continuous-learning']));
+      installClaudeContentDirs(tempDir, resolveSelectedPackages(['typescript', 'ai-learning']));
 
       assert.ok(fs.existsSync(path.join(tempDir, 'agents', 'planner.md')));
       assert.ok(!fs.existsSync(path.join(tempDir, 'agents', 'python-reviewer.md')));
@@ -433,7 +433,7 @@ function runTests() {
 
   if (test('installCursorCoreDirs copies selected shared skills and cursor skills only', () => {
     withTempDir('mdt-install-cursor-', (tempDir) => {
-      installCursorCoreDirs(tempDir, resolveSelectedPackages(['typescript', 'continuous-learning']));
+      installCursorCoreDirs(tempDir, resolveSelectedPackages(['typescript', 'ai-learning']));
 
       assert.ok(fs.existsSync(path.join(tempDir, 'agents', 'planner.md')));
       assert.ok(!fs.existsSync(path.join(tempDir, 'agents', 'python-reviewer.md')));
@@ -475,7 +475,7 @@ function runTests() {
 
   if (test('installCodexSkills copies selected package skills from codex-template sources only', () => {
     withTempDir('mdt-install-codex-', (tempDir) => {
-      installCodexSkills(resolveSelectedPackages(['typescript', 'continuous-learning']), tempDir);
+      installCodexSkills(resolveSelectedPackages(['typescript', 'ai-learning']), tempDir);
 
       assert.ok(fs.existsSync(path.join(tempDir, 'skills', 'coding-standards', 'SKILL.md')));
       assert.ok(fs.existsSync(path.join(tempDir, 'skills', 'coding-standards', 'skill.meta.json')));
@@ -491,7 +491,7 @@ function runTests() {
 
   if (test('installCodexSkills adds only dev verifier and dev smoke skills in dev mode', () => {
     withTempDir('mdt-install-codex-dev-', (tempDir) => {
-      installCodexSkills(resolveSelectedPackages(['typescript', 'continuous-learning']), tempDir, true);
+      installCodexSkills(resolveSelectedPackages(['typescript', 'ai-learning']), tempDir, true);
       assert.ok(fs.existsSync(path.join(tempDir, 'skills', 'mdt-dev-verify', 'SKILL.md')));
       assert.ok(fs.existsSync(path.join(tempDir, 'skills', 'mdt-dev-smoke', 'SKILL.md')));
       assert.ok(fs.existsSync(path.join(tempDir, 'skills', 'docs-steward', 'SKILL.md')));
@@ -547,18 +547,18 @@ function runTests() {
   })) passed++; else failed++;
 
   if (test('assertPackageRequirements warns for experimental Cursor hooks', () => {
-    const warnings = assertPackageRequirements('cursor', resolveSelectedPackages(['continuous-learning']));
+    const warnings = assertPackageRequirements('cursor', resolveSelectedPackages(['ai-learning']));
     assert.deepStrictEqual(warnings, []);
-    assert.deepStrictEqual(assertPackageRequirements('codex', resolveSelectedPackages(['continuous-learning'])), []);
+    assert.deepStrictEqual(assertPackageRequirements('codex', resolveSelectedPackages(['ai-learning'])), []);
   })) passed++; else failed++;
 
   if (test('getSkillRequirementWarnings does not warn about hooks for codex manual continuous learning', () => {
-    const warnings = getSkillRequirementWarnings('codex', resolveSelectedPackages(['continuous-learning']));
+    const warnings = getSkillRequirementWarnings('codex', resolveSelectedPackages(['ai-learning']));
     assert.ok(!warnings.some((line) => line.includes('hooks')), `Unexpected hook warning: ${warnings.join('\n')}`);
   })) passed++; else failed++;
 
   if (test('getSkillRequirementWarnings does not warn about optional hooks for cursor', () => {
-    const warnings = getSkillRequirementWarnings('cursor', resolveSelectedPackages(['continuous-learning']));
+    const warnings = getSkillRequirementWarnings('cursor', resolveSelectedPackages(['ai-learning']));
     // ai-learning has optional hooks — no hook warning expected for cursor
     assert.ok(
       !warnings.some((line) => line.includes("skill 'ai-learning'")),
@@ -567,7 +567,7 @@ function runTests() {
   })) passed++; else failed++;
 
   if (test('getSkillRequirementWarnings does not warn about automatic hooks for claude', () => {
-    const warnings = getSkillRequirementWarnings('claude', resolveSelectedPackages(['continuous-learning']));
+    const warnings = getSkillRequirementWarnings('claude', resolveSelectedPackages(['ai-learning']));
     assert.ok(
       !warnings.some((line) => line.includes("skill 'ai-learning'")),
       `Unexpected Claude warning: ${warnings.join('\n')}`
