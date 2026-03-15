@@ -128,10 +128,12 @@ Before touching any non-trivial symbol:
 ### 5. Search when you don't know the symbol name
 
 ```
-1. search_for_pattern(pattern="functionNameFragment|conceptKeyword")
-                      → find candidate files and line ranges
-2. find_file(name_pattern="*feature*.ts")
-                      → narrow by filename when you know the domain
+1. rg "functionNameFragment" --type js
+                      → fastest first pass for raw text matches
+   fd "*feature*.ts"
+                      → fastest first pass for filename matches
+2. search_for_pattern(pattern="functionNameFragment|conceptKeyword")
+                      → use when you need LSP-aware results or non-code files
 3. get_symbols_overview / find_symbol on the candidates found above
 ```
 
@@ -178,10 +180,54 @@ Do **not** use memory for things derivable from the code or git history. Memory 
 |-----------|-------------|
 | File is <50 lines | `Read` — overhead not worth it |
 | You already have the full file in context | You already have it — no extra call needed |
-| The file is JSON, YAML, TOML, Markdown | `Read` or `Grep` |
+| The file is JSON, YAML, TOML, Markdown | `Read` or `rg` |
 | You need a specific line range | `Read` with `offset` + `limit` |
-| Fuzzy text search (regex, multi-file grep) | `Grep` (ripgrep) |
+| Fuzzy text search (regex, multi-file grep) | `rg` — faster than `search_for_pattern` for pure text matches |
+| Finding files by name or extension | `fd` — faster than `find_file` for name-only queries |
 | Binary or image files | Not applicable |
+
+## Shell Fallbacks: `rg` and `fd`
+
+Both tools are available on this machine and outperform their equivalents for
+text-only searches where LSP symbol understanding isn't needed.
+
+### `rg` (ripgrep) — content search
+
+Prefer over `search_for_pattern` when:
+- You're matching a raw string or regex with no symbol context needed
+- You want to search across non-code files (Markdown, YAML, JSON)
+- You need multiple patterns or file-type filters in one pass
+
+```shell
+rg "resolveInstallPlan" scripts/        # fast literal search
+rg -t md "context-mode" docs/           # Markdown files only
+rg -l "TODO" --glob "*.js"              # list files with TODOs
+rg "class\s+\w+\s+extends" -t ts       # regex across TypeScript
+```
+
+### `fd` (fd-find) — file name search
+
+Prefer over `find_file` when:
+- You only care about the file name or path, not its contents
+- You need glob/extension filters or directory scoping
+
+```shell
+fd SKILL.md                             # find all SKILL.md files
+fd -e js scripts/                       # all .js files under scripts/
+fd -t f "validator" scripts/ci/         # files named *validator* in ci/
+fd -e md docs/plans/                    # all plan markdown files
+```
+
+### Decision: Serena vs rg/fd
+
+| Need | Use |
+|------|-----|
+| Find a function definition | `find_symbol` |
+| Find all callers of a function | `find_referencing_symbols` |
+| Understand a file's structure | `get_symbols_overview` |
+| Search for a string in code files | `rg` |
+| Find a file by name pattern | `fd` |
+| Search non-code files | `rg` |
 
 ---
 

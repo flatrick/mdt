@@ -13,6 +13,7 @@ Use this pack when you need current truth about:
 - [capability-matrix.md](./capability-matrix.md) - side-by-side capability view
 - [workflow-matrix.md](./workflow-matrix.md) - workflow realization by tool
 - [claude-code.md](./claude-code.md) - Claude Code reference page
+- [claude-code.dev.md](./claude-code.dev.md) - Claude Code developer setup for working on MDT itself (Serena shared instance, rg/fd, .claude/ config)
 - [cursor.md](./cursor.md) - Cursor Agent and Cursor IDE notes
 - [codex.md](./codex.md) - Codex CLI reference page
 - [local-verification.md](./local-verification.md) - local verification playbook
