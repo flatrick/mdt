@@ -10,15 +10,14 @@ Status legend:
 
 Current priorities:
 
-- Priority 1: [Install Dependency and Tool Support Manifests](details/20260314.02.03.install-dependency-and-tool-support-manifests.md)
-  Prerequisite for target-aware installs, generated plugin/template surfaces, and the `ai-learning` self-contained work.
-- Priority 2: [AI-Learning: Self-Contained Skill](details/20260314.12.04.ai-learning-self-contained.md)
-  Halted until Priority 1 defines the dependency/support contract that `ai-learning` will consume as its first vertical slice.
+- Priority 1: [AI-Learning: Self-Contained Skill](details/20260314.12.04.ai-learning-self-contained.md)
+  Unblocked — Install Dependency and Tool Support Manifests (P1) is complete.
+  Ready to begin the shared runtime core workstream.
 
 Current plans:
 
-- [ ] `in-progress` — [Install Dependency and Tool Support Manifests](details/20260314.02.03.install-dependency-and-tool-support-manifests.md) (core implementation complete; migration/docs remain)
-- [ ] `not-started` — [AI-Learning: Self-Contained Skill](details/20260314.12.04.ai-learning-self-contained.md) ← unblocked; ready to begin shared runtime core workstream
+- [x] `completed` — [Install Dependency and Tool Support Manifests](details/20260314.02.03.install-dependency-and-tool-support-manifests.md) ← pending archive
+- [ ] `not-started` — [AI-Learning: Self-Contained Skill](details/20260314.12.04.ai-learning-self-contained.md) ← unblocked; next priority
 - [ ] `in-progress` — [Reach v1.0.0](details/20260312.20.24.reach-v1-0-0.md)
 - [ ] `not-started` — [Composable MDT Redesign](details/20260314.12.04.composable-mdt-redesign.md) ← future, on hold until the dependency model exists and a second shared-runtime consumer is real
 - [ ] `not-started` — [Skill Stocktake Consolidation](details/20260314.02.57.skill-stocktake-consolidation.md)

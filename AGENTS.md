@@ -104,6 +104,36 @@ Test types (all required):
 
 Troubleshoot failures: check test isolation → verify mocks → fix implementation (not tests, unless tests are wrong).
 
+## Plans
+
+Implementation plans live under `docs/plans/` and follow a strict lifecycle.
+
+**File locations:**
+
+| Path | Purpose |
+|------|---------|
+| `docs/plans/details/<YYYYMMDD.HH.MM.kebab-name>.md` | Active plan detail docs |
+| `docs/plans/archive/` | Archived docs (finished or rejected) |
+| `docs/plans/TEMPLATE.md` | Template for new plan docs |
+
+**Index files — always update when status changes:**
+
+| File | Contents |
+|------|---------|
+| `docs/plans/active.md` | All `in-progress`, `not-started`, and `halted` plans |
+| `docs/plans/finished.md` | Completed plans (after archiving) |
+| `docs/plans/rejected.md` | Rejected plans (after archiving) |
+
+**Status lifecycle:**
+
+1. Create detail doc in `docs/plans/details/` — add to `active.md` as `not-started`
+2. Begin work → set `in-progress` in `active.md`
+3. Pause → set `halted` in `active.md`
+4. Complete → move doc to `docs/plans/archive/`, remove from `active.md`, add to `finished.md`
+5. Reject → move doc to `docs/plans/archive/`, remove from `active.md`, add to `rejected.md`
+
+---
+
 ## Development Workflow
 
 1. **Plan** — Use planner agent, identify dependencies and risks, break into phases
