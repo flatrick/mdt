@@ -1,0 +1,35 @@
+schema: spec-driven
+
+context: |
+  Project: ModelDev Toolkit (MDT)
+  Tech stack: Node.js, markdown-driven docs, cross-tool workflow adapters for Claude Code, Cursor, and Codex.
+  This repo is tool-agnostic by default and documents real capability differences between tools.
+
+  Authoritative sources for capability claims:
+  - docs/supported-tools.md
+  - docs/tools/capability-matrix.md
+  - docs/tools/workflow-matrix.md
+  - relevant per-tool pages under docs/tools/
+
+  Important repo rules:
+  - Prefer Node-first runtime and adapters.
+  - Do not assume Bash-, PowerShell-, or Python-specific runtime behavior unless already required by the repo.
+  - Do not infer vendor-native capability from files under cursor-template/ or codex-template/ alone.
+  - Treat layered AGENTS.md files as maintainer guidance for this repo.
+  - Use shell-neutral user-facing paths like ~/.codex/, ~/.claude/, ~/.cursor/.
+
+rules:
+  proposal:
+    - Keep proposals focused on user-visible or maintainer-visible behavior changes.
+    - When describing cross-tool behavior, distinguish vendor-native features from MDT repo adapters.
+  specs:
+    - Capture current observable behavior and constraints, not aspirational future behavior.
+    - Define capabilities using authoritative docs in docs/supported-tools.md and docs/tools/.
+    - Explicitly document tool-specific divergences where they are real.
+    - Do not claim support based only on template or scaffold files.
+  design:
+    - Explain why a behavior is tool-agnostic vs tool-specific.
+    - Reference the source-of-truth docs when capability boundaries matter.
+  tasks:
+    - Break work into small verifiable steps.
+    - Include verification against docs/tools/* when capability claims or workflow behavior change.
