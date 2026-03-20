@@ -65,6 +65,35 @@ function runTests() {
     }
   })) passed++; else failed++;
 
+  if (test('findProjectRootFromFilesystem prefers strong markers over nested AGENTS.md files', () => {
+    const tempDir = createTestDir('detect-project-layered-agents-');
+    try {
+      const repoRoot = path.join(tempDir, 'repo');
+      const nested = path.join(repoRoot, 'docs', 'tools');
+      fs.mkdirSync(nested, { recursive: true });
+      fs.writeFileSync(path.join(repoRoot, 'package.json'), '{}');
+      fs.writeFileSync(path.join(repoRoot, 'docs', 'AGENTS.md'), '# Docs layer\n');
+
+      assert.strictEqual(findProjectRootFromFilesystem(nested), repoRoot);
+    } finally {
+      cleanupTestDir(tempDir);
+    }
+  })) passed++; else failed++;
+
+  if (test('findProjectRootFromFilesystem falls back to AGENTS-only roots when needed', () => {
+    const tempDir = createTestDir('detect-project-agents-only-');
+    try {
+      const repoRoot = path.join(tempDir, 'standalone');
+      const nested = path.join(repoRoot, 'docs', 'tools');
+      fs.mkdirSync(nested, { recursive: true });
+      fs.writeFileSync(path.join(repoRoot, 'AGENTS.md'), '# Standalone project\n');
+
+      assert.strictEqual(findProjectRootFromFilesystem(nested), repoRoot);
+    } finally {
+      cleanupTestDir(tempDir);
+    }
+  })) passed++; else failed++;
+
   if (test('detectProject uses MDT_PROJECT_ROOT fallback when git subprocesses are blocked', () => {
     const tempDir = createTestDir('detect-project-mdt-root-');
     try {

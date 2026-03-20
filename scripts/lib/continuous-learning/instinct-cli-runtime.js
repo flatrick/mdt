@@ -4,6 +4,7 @@ const fs = require('fs');
 const path = require('path');
 const https = require('https');
 const http = require('http');
+const { detectProjectRoot } = require('../project-root');
 
 const TOOL_ENV_MAP = {
   '.cursor': { envKey: 'CURSOR_AGENT', observerTool: 'cursor' },
@@ -23,11 +24,7 @@ function resolveProjectRootFromSkillDir(skillDir) {
     if (baseName === '.codex' || baseName === '.cursor' || baseName === '.claude' || baseName === '.agents') {
       continue;
     }
-    if (
-      fs.existsSync(path.join(candidate, '.git')) ||
-      fs.existsSync(path.join(candidate, 'package.json')) ||
-      fs.existsSync(path.join(candidate, 'AGENTS.md'))
-    ) {
+    if (detectProjectRoot(candidate) === candidate) {
       return candidate;
     }
   }

@@ -6,9 +6,9 @@ const crypto = require('crypto');
 const { execFileSync } = require('child_process');
 const {
   createContinuousLearningContext,
-  hasRepoMarker,
   inferInstalledConfigDir
 } = require('./runtime-context');
+const { detectProjectRoot } = require('../project-root');
 
 function md5_8(input) {
   return crypto.createHash('md5').update(input, 'utf8').digest('hex').slice(0, 8);
@@ -67,22 +67,6 @@ function getPathSet(entrypointDir, options = {}) {
     projectsDir: homunculusDir,
     registryFile: path.join(homunculusDir, 'projects.json')
   };
-}
-
-function findAncestor(startDir, predicate) {
-  let current = path.resolve(startDir || process.cwd());
-
-  while (true) {
-    if (predicate(current)) {
-      return current;
-    }
-
-    const parent = path.dirname(current);
-    if (parent === current) {
-      return null;
-    }
-    current = parent;
-  }
 }
 
 function updateRegistry(registryFile, projectId, projectName, projectRoot, remoteUrl) {
@@ -171,7 +155,7 @@ function createProjectDetection(options = {}) {
   const entrypointDir = path.resolve(options.entrypointDir || process.cwd());
 
   function findProjectRootFromFilesystem(startDir) {
-    return findAncestor(startDir, hasRepoMarker);
+    return detectProjectRoot(startDir);
   }
 
   function detectProject(cwd) {

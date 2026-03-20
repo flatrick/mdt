@@ -3,6 +3,7 @@
 const fs = require('fs');
 const path = require('path');
 const { createDetectEnv } = require('../detect-env');
+const { detectProjectRoot, hasAnyProjectMarker } = require('../project-root');
 
 const TOOL_ENV_KEY_BY_TOOL = {
   cursor: 'CURSOR_AGENT',
@@ -11,11 +12,7 @@ const TOOL_ENV_KEY_BY_TOOL = {
 };
 
 function hasRepoMarker(dirPath) {
-  return (
-    fs.existsSync(path.join(dirPath, '.git')) ||
-    fs.existsSync(path.join(dirPath, 'package.json')) ||
-    fs.existsSync(path.join(dirPath, 'AGENTS.md'))
-  );
+  return hasAnyProjectMarker(dirPath);
 }
 
 function inferToolFromConfigDir(configDir) {
@@ -47,22 +44,9 @@ function inferInstalledConfigDir(entrypointDir = process.cwd()) {
 }
 
 function resolveRepoRootFromEntrypoint(entrypointDir = process.cwd()) {
-  let current = path.resolve(entrypointDir);
-
-  while (true) {
-    if (
-      hasRepoMarker(current) &&
-      fs.existsSync(path.join(current, 'scripts', 'lib', 'detect-env.js'))
-    ) {
-      return current;
-    }
-
-    const parent = path.dirname(current);
-    if (parent === current) {
-      return null;
-    }
-    current = parent;
-  }
+  return detectProjectRoot(entrypointDir, {
+    requiredRelativePath: path.join('scripts', 'lib', 'detect-env.js')
+  });
 }
 
 function applyInstalledToolEnv(env, configDir) {

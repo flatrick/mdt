@@ -2,6 +2,7 @@ const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
 const { getDataDir } = require('./utils');
+const { detectProjectRoot } = require('./project-root');
 
 function getMdtDir() {
   return getDataDir();
@@ -45,23 +46,7 @@ function saveBridgeDecisions(state) {
 }
 
 function detectRepoRoot(startDir = process.cwd()) {
-  let current = path.resolve(startDir);
-
-  while (true) {
-    if (
-      fs.existsSync(path.join(current, '.git')) ||
-      fs.existsSync(path.join(current, 'package.json')) ||
-      fs.existsSync(path.join(current, 'AGENTS.md'))
-    ) {
-      return current;
-    }
-
-    const parent = path.dirname(current);
-    if (parent === current) {
-      return path.resolve(startDir);
-    }
-    current = parent;
-  }
+  return detectProjectRoot(startDir, { defaultToStartDir: true });
 }
 
 function getProjectId(repoRoot) {
