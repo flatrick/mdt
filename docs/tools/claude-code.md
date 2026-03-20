@@ -32,9 +32,19 @@ Tested with version:
 
 ## MDT Mapping Notes
 
-- Claude is still the clearest native reference implementation for MDT hook-capable workflows.
 - Claude-specific docs should stay vendor-specific and must not be projected onto Cursor or Codex.
 - Current-state docs should use `mdt ...` as the public operational surface; installed-home raw script paths are verification equivalents only.
+- MDT is intended to stay tool-agnostic by default; Claude-specific affordances are only first-class when the Claude surface is genuinely different.
+
+## Authoring MDT Surfaces
+
+Use [authoring.md](./authoring.md) as the contributor entrypoint.
+Use [surfaces/README.md](./surfaces/README.md) when you need to compare Claude's native surfaces against Cursor or Codex.
+
+For Claude specifically:
+
+- `agents/*.md`, `commands/*.md`, `skills/*/SKILL.md`, and `claude-template/hooks.json` are real Claude-facing authoring surfaces.
+- If a surface is Claude-native only, document that explicitly instead of implying Cursor or Codex consume it the same way.
 
 ## Verification Method
 

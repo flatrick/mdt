@@ -11,10 +11,10 @@ Current state:
 
 MDT keeps tool-specific hook sources under explicit directories:
 
-- **`scripts/hooks/`** — **Shared hook logic** (tool-agnostic). Expects Claude-style JSON (tool_input, tool_output, etc.). Used by:
+- **`scripts/hooks/`** — **Shared hook logic** (tool-agnostic). The current shared runtime shape is normalized around the existing hook payload contract used by MDT's hook-capable integrations. Used by:
   - **Claude Code**: invoked directly from `claude-template/hooks.json` and `hooks/hooks.json` via paths like `scripts/hooks/session-start.js`, `scripts/hooks/session-end.js`, etc.
   - **Cursor**: not invoked directly by Cursor; the Cursor wrappers in `hooks/scripts/` call into these via the adapter’s `runExistingHook()`.
-- **`hooks/scripts/`** — **Shared hook script entry points**. Scripts that Cursor runs (session-start.js, session-end.js, etc.). They receive Cursor’s event payload, normalize it with `transformToClaude()`, and delegate to `scripts/hooks/*.js`. Config lives in `cursor-template/hooks.json`.
+- **`hooks/scripts/`** — **Shared hook script entry points**. Scripts that Cursor runs (session-start.js, session-end.js, etc.). They receive Cursor’s event payload, normalize it into MDT's shared hook payload shape, and delegate to `scripts/hooks/*.js`. Config lives in `cursor-template/hooks.json`.
 
 Config sources:
 

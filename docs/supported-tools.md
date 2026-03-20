@@ -20,6 +20,7 @@ Use this when you need to answer:
 ## Start Here
 
 - [Docs Pack Index](./tools/README.md)
+- [Authoring Guide](./tools/authoring.md)
 - [Capability Matrix](./tools/capability-matrix.md)
 - [Workflow Matrix](./tools/workflow-matrix.md)
 - [Claude Code](./tools/claude-code.md)
@@ -30,7 +31,9 @@ Use this when you need to answer:
 ## Current Audit Summary
 
 - Audit date: `2026-03-12`
-- Claude Code remains the closest native match to MDT's current structure.
+- MDT is intended to stay tool-agnostic by default across Claude Code, Cursor, and Codex.
+- Tool-specific differences should only be treated as first-class where a tool's native surface actually requires them.
+- Repo-local layered `AGENTS.md` files are maintainer guidance for developing MDT itself; installed tool surfaces should only ship an `AGENTS.md` where the target tool actually uses one.
 - Cursor remains a first-class MDT target, but Cursor IDE verification is manual and human-operated.
 - Codex remains a first-class MDT target for layered guidance, rules, skills, and explicit verification flows.
 

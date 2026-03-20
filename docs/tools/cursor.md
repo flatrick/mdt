@@ -39,8 +39,20 @@ Tested with version:
 
 - **Rules:** Cursor and cursor-agent **only** read rules from the **currently opened project/folder** (`.cursor/rules/`). The path `~/.cursor/rules/` is **ignored** (verified 2026-03-14). MDT must expect that Cursor rules only work when added to the current project. A command that installs rules into the opened project is required (e.g. `/mdt-install` or equivalent).
 - Do not describe `~/.cursor/rules/` as a surface that Cursor reads; it is not.
-- Treat `cursor-template/hooks.json` and `cursor-template/hooks/*.js` as MDT's experimental adapter, not as vendor-native truth.
+- Treat `cursor-template/hooks.json` and `hooks/scripts/` as MDT's experimental adapter, not as vendor-native truth.
 - Cursor IDE verification is manual and human-operated.
+
+## Authoring MDT Surfaces
+
+Use [authoring.md](./authoring.md) as the contributor entrypoint.
+Use [surfaces/README.md](./surfaces/README.md) when you need a cross-tool comparison by surface type.
+
+For Cursor specifically:
+
+- author rules against the audited project-only rule model and keep Cursor-specific rule files in `cursor-template/rules/`
+- author commands in `commands/*.md` with `commands/*.meta.json`; add `cursor-template/commands/*.md` only when Cursor needs a wording override
+- treat `cursor-template/hooks.json` plus `hooks/scripts/` as an experimental MDT adapter, not a vendor-native contract
+- do not document shared `agents/*.md` as if Cursor consumes Claude-style subagent files directly; describe Cursor delegation in terms of modes, background agents, terminal agent, and `AGENTS.md`
 
 ## Verification Method
 

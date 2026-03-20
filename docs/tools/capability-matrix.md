@@ -34,6 +34,6 @@ Status legend:
 
 ## Immediate MDT Planning Implications
 
-- Treat Claude Code as the reference implementation for current MDT hook/command/subagent structure.
+- Keep MDT tool-agnostic by default and choose the native surface per tool rather than treating any one tool as the base model.
 - Treat Cursor as a strong official target for rules, skills, commands, memories, modes, and background agents.
 - Treat Codex as a first-class target for layered instructions, rules, skills, and built-in session control, but not as a hook-compatible clone of Claude.

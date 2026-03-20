@@ -20,6 +20,18 @@ This is a multi-tool, Node-first AI coding repository with specialized agents, s
 - When documenting tool home directories or emitting user-facing path strings, prefer shell-neutral forms such as `~/.codex/`, `~/.claude/`, and `~/.cursor/`. In PowerShell examples, prefer `Join-Path $HOME '.codex'`-style expressions. Do not spell out expanded Windows absolute home paths to dot-directories.
 - Installer scope rule: normal `scripts/install-mdt.js` installs target the tool's user/global config root. Treat `--global` as a compatibility alias/no-op. `--project-dir` is retired. If a tool still needs a repo-local surface, use an explicit bridge flow and document that exception in `docs/INSTALLATION.md` and the relevant tool page.
 
+## Layered AGENTS
+
+The root `AGENTS.md` is the repo-wide contract for developing MDT in this repository. Local `AGENTS.md` files in subdirectories add subtree-specific guidance but do not replace this file.
+
+These layered repo `AGENTS.md` files are development-time guidance for MDT maintainers. They are not part of the generic end-user install surface unless a tool's own shipped setup explicitly requires an `AGENTS.md` file, such as Codex's installed `~/.codex/AGENTS.md`.
+
+Rules:
+- read the nearest local `AGENTS.md` together with this root file when working inside that subtree
+- local `AGENTS.md` files may add constraints or checklist items for that area
+- local `AGENTS.md` files must not relax repo-wide security, testing, or documentation rules
+- keep local `AGENTS.md` files short; deeper explanation belongs in nearby `README.md` files or under `docs/`
+
 ## Available Agents
 
 | Agent | Purpose | When to Use |

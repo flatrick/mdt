@@ -37,7 +37,7 @@ node ~/.claude/mdt/scripts/mdt.js dev smoke workflows --tool claude
 - hook execution and hook side effects
 - session summary persistence
 - continuous-learning observation capture
-- Claude-native commands, agents, and memory behavior
+- Claude-specific command, agent, and memory behavior
 
 ## Required Real-Session Check
 

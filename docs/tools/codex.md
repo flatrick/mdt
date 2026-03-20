@@ -39,6 +39,19 @@ Tested with version:
 - Codex is a first-class MDT target, but not a Claude-style hook target.
 - Current-state docs should describe Codex in terms of `AGENTS.md`, rules, skills, built-in slash commands, and explicit `mdt` workflows.
 - Use `mdt ...` as the public operational surface. Installed-home raw script paths are verification equivalents only.
+- Distinguish Codex's shipped `~/.codex/AGENTS.md` from this repository's layered maintainer `AGENTS.md` files; the latter are dev-only authoring aids for MDT itself.
+
+## Authoring MDT Surfaces
+
+Use [authoring.md](./authoring.md) as the contributor entrypoint.
+Use [surfaces/README.md](./surfaces/README.md) when you need a cross-tool comparison by surface type.
+
+For Codex specifically:
+
+- use layered `AGENTS.md`, Codex rules, and Codex skills as the primary authoring surfaces
+- do not describe shared markdown commands as a native Codex command system
+- do not create or document Claude-style hook behavior for Codex
+- when a skill needs Codex-specific metadata or config, place that in the relevant `codex-template/skills/<name>/` add-on rather than inventing a top-level Codex agent/command story not supported by the audited docs
 
 ## Verification Method
 

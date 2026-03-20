@@ -13,6 +13,7 @@ This repository is the MDT fork (`flatrick/modeldev-toolkit`). Submit issues and
 ## Before You Start
 
 - read [AGENTS.md](AGENTS.md)
+- read the nearest local `AGENTS.md` for the subtree you are changing
 - check [BACKLOG.md](BACKLOG.md)
 - check [docs/plans/active.md](docs/plans/active.md)
 - if the work is substantial, add or update a plan under `docs/plans/details/`
@@ -20,9 +21,12 @@ This repository is the MDT fork (`flatrick/modeldev-toolkit`). Submit issues and
 ## Working On Docs
 
 - current install and capability truth belongs in `docs/`
+- local `AGENTS.md` files are short agent-facing overlays for MDT development in this repo; `README.md` files and `docs/` remain the human-facing reference
 - active planning work belongs in `docs/plans/`
 - ECC comparison belongs in [docs/upstream-rename-map.md](docs/upstream-rename-map.md)
 - do not add new root docs unless they are true fast-find entrypoints
+- when documenting how to create MDT rules, commands, hooks, skills, agents, or workflows, use [docs/tools/authoring.md](docs/tools/authoring.md) as the contributor entrypoint
+- when documenting how one surface differs across tools, use the comparison pages under [docs/tools/surfaces/](docs/tools/surfaces/README.md)
 
 ## Working On Skills, Agents, Commands, And Hooks
 

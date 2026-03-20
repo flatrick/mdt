@@ -33,6 +33,16 @@ For each workflow/tool mapping:
 4. If the scripted smoke passes, run the corresponding checklist under `docs/testing/manual-verification/` before calling the tool fully verified.
 5. If a tool is not installed locally, record the smoke result as `SKIP` instead of guessing.
 
+## Maintainer Note
+
+When you add or materially change an MDT workflow:
+
+1. update the machine-readable contract in `workflow-contracts/workflows/`
+2. update this matrix so the human-readable mapping matches the contract
+3. update any affected per-tool page in `docs/tools/`
+4. update smoke or compatibility coverage if required files or realizations changed
+5. update the matching manual-verification page when runtime behavior changes
+
 ## Scope Notes
 
 - This page is intentionally limited to MDT's core workflows.

@@ -10,6 +10,8 @@ Use this pack when you need current truth about:
 
 ## Files
 
+- [authoring.md](./authoring.md) - contributor guide for creating MDT rules, commands, hooks, skills, agents, and workflows across tools
+- [surfaces/README.md](./surfaces/README.md) - surface-by-surface comparisons for hooks, agents, commands, and skills
 - [capability-matrix.md](./capability-matrix.md) - side-by-side capability view
 - [workflow-matrix.md](./workflow-matrix.md) - workflow realization by tool
 - [claude-code.md](./claude-code.md) - Claude Code reference page
@@ -32,9 +34,11 @@ Tested with version:
 ## Read Order
 
 1. Read the matrix to identify the feature family.
-2. Read the workflow matrix for intended MDT behavior.
-3. Read the per-tool page for exact paths and limits.
-4. Use the local verification playbook when you need to refresh a claim.
+2. Read [authoring.md](./authoring.md) if you are creating or changing MDT surfaces.
+3. Read [surfaces/README.md](./surfaces/README.md) if you need a surface-by-surface comparison across tools.
+4. Read the workflow matrix for intended MDT behavior.
+5. Read the per-tool page for exact paths and limits.
+6. Use the local verification playbook when you need to refresh a claim.
 
 ## Important Rule
 

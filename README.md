@@ -34,6 +34,7 @@ Cursor IDE note:
 Root entrypoints:
 
 - [AGENTS.md](AGENTS.md) for repo rules and shared working policy
+- local `AGENTS.md` files inside major subdirectories for subtree-specific MDT-development rules
 - [CLAUDE.md](CLAUDE.md) for the Claude Code entry shim
 - [CURSOR.md](CURSOR.md) for the Cursor entry shim
 - [CODEX.md](CODEX.md) for the Codex entry shim
@@ -45,6 +46,8 @@ Current-state docs:
 - [docs/INSTALLATION.md](docs/INSTALLATION.md) for install behavior
 - [docs/supported-tools.md](docs/supported-tools.md) for the audited tool snapshot
 - [docs/tools/README.md](docs/tools/README.md) for the tool docs pack
+- [docs/tools/authoring.md](docs/tools/authoring.md) for contributor authoring rules across Claude, Cursor, and Codex
+- [docs/tools/surfaces/README.md](docs/tools/surfaces/README.md) for surface-by-surface comparisons across tools
 - [docs/testing/manual-verification/README.md](docs/testing/manual-verification/README.md) for manual checks
 - [docs/plans/active.md](docs/plans/active.md) for current implementation plans
 
@@ -56,9 +59,10 @@ ECC comparison:
 
 - Use `mdt ...` as the official public entrypoint.
 - Treat `docs/` as the source of truth for current install and capability behavior.
+- Treat layered repo `AGENTS.md` files as maintainer-only guidance for working in this repository, not as generic installed product content.
 - Treat Cursor IDE verification as manual-only.
 - Stamp verification claims with exact tested versions.
-- Do not treat Claude-native features as the base MDT contract unless the docs say they are vendor-specific.
+- Do not let Claude-native features redefine MDT's tool-agnostic contract; only use them where the docs mark them as vendor-specific.
 
 ## Repo Layout
 
