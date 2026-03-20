@@ -230,7 +230,7 @@ function createSuiteArtifactContext(options = {}) {
 }
 
 function printDebugPreflight(io, profile, profileOverrideSource, env) {
-  const detectionKeys = ['CURSOR_AGENT', 'CLAUDE_SESSION_ID', 'CLAUDE_CODE', 'CURSOR_TRACE_ID'];
+  const detectionKeys = ['CURSOR_AGENT', 'CLAUDE_SESSION_ID', 'CLAUDE_CODE', 'CODEX_AGENT', 'CURSOR_TRACE_ID', 'CODEX_SESSION_ID'];
   const debugLine = (label, value) => `${label.padEnd(24)}: ${value}`;
 
   io.log('[MDT test preflight]');

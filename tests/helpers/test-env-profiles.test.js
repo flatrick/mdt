@@ -45,6 +45,7 @@ function runTests() {
   if (test('builds codex profile signals', () => {
     const codexEnv = buildTestEnv('codex');
 
+    assert.strictEqual(codexEnv.CODEX_AGENT, '1');
     assert.strictEqual(codexEnv.CODEX_SESSION_ID, 'test-codex-session');
     assert.ok(!('CLAUDE_SESSION_ID' in codexEnv));
     assert.ok(!('CURSOR_AGENT' in codexEnv));
@@ -56,6 +57,8 @@ function runTests() {
     assert.ok(!('CLAUDE_CODE' in env));
     assert.ok(!('CURSOR_AGENT' in env));
     assert.ok(!('CURSOR_TRACE_ID' in env));
+    assert.ok(!('CODEX_AGENT' in env));
+    assert.ok(!('CODEX_SESSION_ID' in env));
   })) passed++; else failed++;
 
   if (test('neutral profile removes known tool detection vars', () => {
@@ -64,6 +67,8 @@ function runTests() {
     assert.ok(!('CLAUDE_CODE' in env));
     assert.ok(!('CURSOR_AGENT' in env));
     assert.ok(!('CURSOR_TRACE_ID' in env));
+    assert.ok(!('CODEX_AGENT' in env));
+    assert.ok(!('CODEX_SESSION_ID' in env));
   })) passed++; else failed++;
 
   if (test('overrides can explicitly unset keys via undefined and null', () => {

@@ -42,7 +42,7 @@ function getDataDir() {
  * Get the active MDT config directory.
  *
  * Deprecated: use getConfigDir()/getDataDir() instead. This now delegates
- * to detect-env so callers automatically respect Cursor/Claude/unknown
+ * to detect-env so callers automatically respect Cursor/Claude/Codex/unknown
  * tool detection.
  */
 function getClaudeDir() {
@@ -140,7 +140,7 @@ function getProjectName() {
 }
 
 /**
- * Get short session ID from CLAUDE_SESSION_ID environment variable
+ * Get short session ID from the shared detect-env session signal precedence.
  * Returns last 8 characters, falls back to project name then 'default'
  */
 function getSessionIdShort(fallback = 'default') {

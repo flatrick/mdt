@@ -15,7 +15,7 @@ export const isLinux: boolean;
 /** Get the user's home directory (cross-platform) */
 export function getHomeDir(): string;
 
-/** Get the active MDT config directory (for example ~/.claude or ~/.cursor) */
+/** Get the active MDT config directory (for example ~/.claude, ~/.cursor, or ~/.codex) */
 export function getClaudeDir(): string;
 
 /** Get the sessions directory under the active config dir */
@@ -48,7 +48,7 @@ export function getDateTimeString(): string;
 // --- Session/Project ---
 
 /**
- * Get short session ID from CLAUDE_SESSION_ID environment variable.
+ * Get short session ID from the shared detect-env session signal precedence.
  * Returns last 8 characters, falls back to project name then the provided fallback.
  */
 export function getSessionIdShort(fallback?: string): string;

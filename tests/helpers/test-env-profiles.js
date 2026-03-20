@@ -8,6 +8,7 @@ const TOOL_DETECTION_KEYS = Object.freeze([
   'CLAUDE_CODE',
   'CURSOR_AGENT',
   'CURSOR_TRACE_ID',
+  'CODEX_AGENT',
   'CODEX_SESSION_ID',
   'CODEX_TRACE_ID'
 ]);
@@ -29,6 +30,7 @@ const TEST_ENV_PROFILES = Object.freeze({
   }),
   codex: Object.freeze({
     ...NEUTRAL_TOOL_ENV,
+    CODEX_AGENT: '1',
     CODEX_SESSION_ID: 'test-codex-session'
   }),
   neutral: Object.freeze({
